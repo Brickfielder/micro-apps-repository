@@ -1,0 +1,30 @@
+Word Scavenger: Validity and Design
+
+❇️ Purpose and scope
+Word Scavenger is a browser-based rehabilitation exercise developed for individuals with left visuo-spatial neglect after brain injury. 
+It requires participants to identify matching word pairs across two columns, always starting from the left, thereby reinforcing systematic 
+leftward visual exploration. While primarily designed for neglect, the task also supports lexical retrieval, sustained attention, and working memory.
+
+❇️ Content validity
+The design reflects key neuropsychological principles of neglect rehabilitation. The requirement to engage a left-sided anchor before making 
+a choice promotes compensatory scanning strategies, consistent with cueing methods used in therapy. Matching tasks further involve semantic 
+association, attention to detail, and monitoring of completed items, linking the exercise to broader cognitive domains beyond visuospatial exploration.
+
+❇️ Face validity
+The task appears straightforward and relevant to both patients and clinicians. Matching words is a familiar and meaningful activity, while 
+the left-starting rule makes its therapeutic intention transparent. Its simplicity supports immediate understanding and acceptance as a 
+valid cognitive exercise.
+
+❇️ Ecological validity
+Although structured, the task simulates real-world challenges where neglect can affect reading, searching, or identifying objects on the left. 
+The requirement to scan and compare across space reflects demands found in everyday tasks such as navigating a page of text, locating items, 
+or following written instructions.
+
+❇️ Usability and accessibility
+Word Scavenger runs in any standard browser with minimal setup. Visual anchors and progress highlighting help users keep track of their responses, 
+while adjustable word sets allow tailoring to patient needs. Clinicians can download logs to monitor performance, making it suitable for 
+integration into therapy sessions.
+
+❇️ Safety and burden
+The app involves no physical risk. Tasks are brief, repeatable, and adjustable in difficulty to match cognitive tolerance. This helps maintain 
+motivation, minimises frustration, and reduces fatigue, especially for individuals with attentional or language deficits.
