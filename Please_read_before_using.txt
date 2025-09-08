@@ -32,14 +32,14 @@ Validity Checklist
 
 Each app in this repository should be accompanied by a Validity Checklist, covering:
 
-Purpose and scope
-Content validity
-Face validity
-Ecological validity
-Usability and accessibility
-Safety and burden
-Data and privacy
-Claims discipline
+❇️Purpose and scope
+❇️Content validity
+❇️Face validity
+❇️Ecological validity
+❇️Usability and accessibility
+❇️Safety and burden
+❇️Data and privacy
+❇️Claims discipline
 
 The checklist ensures transparency about what has (and has not) been reviewed or tested.
 
