@@ -4,9 +4,9 @@ Purpose
 This repository hosts simple practice tools (“micro-apps”) designed for people living with acquired brain injury. Each app is focused on a single skill or everyday activity (for example, visual scanning, memory cues, or planning steps).
 
 The goals of this repository are to:
-Encourage open development of practical tools.
-Share templates and examples that others can adapt or improve.
-Provide a space for community feedback from survivors, carers, and clinicians.
+➡️Encourage open development of practical tools.
+➡️Share templates and examples that others can adapt or improve.
+➡️Provide a space for community feedback from survivors, carers, and clinicians.
 
 What these apps are (and are not)
 
@@ -21,12 +21,12 @@ Not diagnostic or assessment tools.
 Not a substitute for therapy, rehabilitation, or professional care.
 Not validated for clinical decision-making.
 
-Disclaimers
+❗❗Disclaimers
 
-These apps are research and practice prototypes only.
-They do not diagnose, treat, cure, or prevent any medical condition.
-Use is at your own discretion and risk.
-If you have concerns about your health or recovery, please seek advice from a qualified healthcare professional.
+➡️These apps are research and practice prototypes only.
+➡️They do not diagnose, treat, cure, or prevent any medical condition.
+➡️Use is at your own discretion and risk.
+➡️If you have concerns about your health or recovery, please seek advice from a qualified healthcare professional.
 
 Validity Checklist
 
