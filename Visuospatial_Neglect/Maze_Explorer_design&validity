@@ -1,0 +1,19 @@
+Maze Explorer: Validity and Design
+
+❇️ Purpose and scope
+Maze Explorer is a web-based rehabilitation exercise created primarily for individuals with left visuo-spatial neglect following brain injury. It offers structured practice in visual exploration, sustained attention, working memory, and planning. While designed with neglect in mind, it can also be used more broadly to target executive functions and spatial problem-solving. It is not a diagnostic or validated therapeutic device.
+
+❇️ Content validity
+The task draws on neuropsychological principles central to neglect rehabilitation. By requiring repeated orientation to the left anchor before movement, the app promotes leftward scanning and sustained allocation of attention, consistent with cueing and anchoring strategies used in clinical practice. Beyond neglect, maze navigation engages visuospatial processing, sequencing, error monitoring, and cognitive flexibility when rerouting is necessary — all key functions commonly addressed in acquired brain injury rehabilitation.
+
+❇️ Face validity
+For both patients and clinicians, the maze format has intuitive appeal. It is familiar, straightforward to understand, and clearly linked to the everyday challenge of finding one’s way in space. This recognisability strengthens its perceived relevance as a therapeutic task.
+
+❇️ Ecological validity
+Though simplified, the task parallels real-world demands on orientation and problem-solving. The need to scan, select routes, correct errors, and adapt to obstacles mirrors functional situations such as navigating crowded spaces or planning a journey. Time, error counts, and path length provide usable analogues for everyday efficiency and strategy use.
+
+❇️ Usability and accessibility
+The app runs in a standard browser with no specialist installation. Visual anchors and prompts reinforce engagement for users with neglect or attentional deficits. Adjustable difficulty levels, clear task instructions, and downloadable logs support both patient usability and clinician monitoring.
+
+❇️ Safety and burden
+Maze Explorer poses no physical risk. Cognitive demands can be scaled to individual tolerance, and tasks are designed to be short and repeatable. This limits fatigue and frustration while fostering motivation and gradual skill development.
