@@ -1,0 +1,25 @@
+name: Prevent modification of released apps
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-released-folders:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Ensure no modifications to released folders
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }}
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}...${{ github.sha }})
+          echo "Changed files: $CHANGED_FILES"
+          for file in $CHANGED_FILES; do
+            if echo "$file" | grep -qE '^apps/[^/]+/[0-9]+\.[0-9]+\.[0-9]+/'; then
+              echo "Error: Attempted to modify released file $file"
+              exit 1
+            fi
+          done
+          echo "No released files modified."
