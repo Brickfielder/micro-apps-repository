@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Errands Memory — Rehab Game</title>
+  <style>
+    :root{
+      --bg:#f8fafc;--card:#ffffff;--text:#0f172a;--muted:#64748b;--accent:#2563eb;--good:#10b981;--bad:#ef4444;--shadow:0 10px 30px rgba(2,6,23,.08);--radius:18px
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;color:var(--text);background:var(--bg)}
+    header{max-width:1100px;margin:22px auto 0;padding:0 16px}
+    h1{margin:0 0 6px;font-weight:800;letter-spacing:-.02em}
+    p.lead{margin:0;color:var(--muted)}
+    .app{max-width:1100px;margin:16px auto 48px;padding:0 16px;display:grid;grid-template-columns:360px 1fr;gap:16px}
+    @media (max-width:900px){.app{grid-template-columns:1fr}}
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+    .status{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .badge{display:inline-flex;align-items:center;gap:6px;background:#eef2ff;color:#1e3a8a;padding:6px 10px;border-radius:999px;font-weight:700;font-size:13px}
+    .badge.success{background:#ecfdf5;color:#065f46}
+    .controls .row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+    .controls label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
+    .controls input[type=number],.controls select{width:100%;padding:10px 12px;border:1px solid #e5e7eb;border-radius:10px;font-size:14px}
+    .buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    button{appearance:none;border:none;padding:10px 14px;border-radius:12px;background:var(--text);color:#fff;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(15,23,42,.15)}
+    button.secondary{background:#334155}
+    button.ghost{background:#eef2ff;color:#1e3a8a}
+    button:disabled{opacity:.5;cursor:not-allowed}
+
+    .street-wrap{position:relative;display:flex;align-items:center;justify-content:center;min-height:360px}
+    .street{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+    .shop{width:clamp(96px,18vw,128px);aspect-ratio:1/1.05;border-radius:16px;background:#f1f5f9;border:2px solid #e2e8f0;box-shadow:inset 0 -6px 10px rgba(0,0,0,.04);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;transition:transform .08s ease, box-shadow .2s ease, border-color .2s ease}
+    .shop .emoji{font-size:42px;line-height:1;margin-bottom:8px}
+    .shop .label{font-weight:800;letter-spacing:.2px;color:#000}
+    .shop:active{transform:scale(.98)}
+    .shop.disabled{pointer-events:none;opacity:.6}
+    .shop.highlight{border-color:var(--accent);box-shadow:0 0 0 6px rgba(37,99,235,.15), inset 0 -6px 10px rgba(0,0,0,.04)}
+    .shop.correct{border-color:var(--good);box-shadow:0 0 0 6px rgba(16,185,129,.18)}
+    .shop.wrong{border-color:var(--bad);box-shadow:0 0 0 6px rgba(239,68,68,.18)}
+
+    .log{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;font-size:12px;background:#0b1220;color:#d1e5ff;border-radius:12px;padding:12px;max-height:220px;overflow:auto;white-space:pre-wrap}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+    /* Countdown overlay (non-breaking) */
+    .countdown-overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;pointer-events:none}
+    .countdown-overlay.active{display:flex}
+    .countdown-bubble{background:rgba(17,24,39,.85);color:#fff;padding:26px 34px;border-radius:18px;box-shadow:var(--shadow);text-align:center}
+    .countdown-label{font-size:14px;color:#d1d5db;margin-bottom:6px;letter-spacing:.02em}
+    .countdown-number{font-size:clamp(38px,6vmin,72px);font-weight:900;letter-spacing:.02em}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Errands Memory — Rehab Game</h1>
+    <p class="lead">Watch a sequence of shops light up, then click them in the same order (or in reverse). Simple, playful, and closer to real life than abstract blocks.</p>
+  </header>
+
+  <main class="app">
+    <section class="card controls">
+      <h2 style="margin:0 0 12px">Settings</h2>
+      <div class="row">
+        <div>
+          <label>Mode</label>
+          <select id="mode">
+            <option value="forward">Forward (standard)</option>
+            <option value="backward">Backward (reverse order)</option>
+          </select>
+        </div>
+        <div>
+          <label>Start sequence length</label>
+          <input id="startLen" type="number" min="2" max="8" value="3" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Max sequence length</label>
+          <input id="maxLen" type="number" min="3" max="12" value="8" />
+        </div>
+        <div>
+          <label>Shops shown</label>
+          <select id="shopCount">
+            <option value="8" selected>8</option>
+            <option value="12">12</option>
+            <option value="16">16</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Stimulus ON (ms)</label>
+          <input id="onMs" type="number" min="200" max="2000" step="50" value="700" />
+        </div>
+        <div>
+          <label>Gap (ms)</label>
+          <input id="gapMs" type="number" min="50" max="1500" step="50" value="350" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Trials per length</label>
+          <input id="trialsPerLen" type="number" min="1" max="5" value="1" />
+        </div>
+        <div>
+          <label>Fail rule</label>
+          <select id="failRule">
+            <option value="2">Stop after 2 fails at same length</option>
+            <option value="1">Stop after 1 fail at same length</option>
+            <option value="3">Stop after 3 fails at same length</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button id="startBtn">Start session</button>
+        <button id="pauseBtn" class="secondary" disabled>Pause</button>
+        <button id="resetBtn" class="ghost">Reset</button>
+        <button id="downloadBtn" class="secondary" disabled>Download CSV</button>
+        <button id="demoBtn" class="ghost">Quick demo</button>
+      </div>
+
+      <div class="status" id="status">
+        <span class="badge">Length: <strong id="lenBadge" style="margin-left:6px">—</strong></span>
+        <span class="badge" id="trialBadge">Trial: —</span>
+        <span class="badge success" id="bestSpan">Best span: —</span>
+      </div>
+
+      <h3 style="margin:16px 0 8px">Session log</h3>
+      <div class="log" id="log" aria-live="polite"></div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin:0 0 8px">Task area</h2>
+      <p style="margin-top:0;color:var(--muted)">Focus on the shops. They will light up in order. Watch carefully, then click them in the same order (or in reverse if Backward mode is selected).</p>
+
+      <div class="street-wrap">
+        <div id="street" class="street" role="application" aria-label="Street of shops"></div>
+        <!-- Non-blocking countdown overlay inside the task area -->
+        <div id="countdown" class="countdown-overlay" aria-live="assertive" aria-atomic="true">
+          <div class="countdown-bubble" role="status">
+            <div class="countdown-label">Get ready…</div>
+            <div class="countdown-number" id="countdownNum">2</div>
+          </div>
+        </div>
+        <span class="sr-only" id="ariaStatus"></span>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Master list (up to 16 shops) — we slice from this based on the setting
+    const ALL_SHOPS = [
+      { key:'bakery', label:'Bakery', emoji:'🥖' },
+      { key:'pharmacy', label:'Pharmacy', emoji:'💊' },
+      { key:'supermarket', label:'Supermarket', emoji:'🛒' },
+      { key:'post', label:'Post Office', emoji:'📮' },
+      { key:'cafe', label:'Café', emoji:'☕' },
+      { key:'shoes', label:'Shoe Shop', emoji:'👟' },
+      { key:'books', label:'Bookshop', emoji:'📚' },
+      { key:'florist', label:'Florist', emoji:'🌸' },
+      { key:'butcher', label:'Butcher', emoji:'🥩' },
+      { key:'greengrocer', label:'Greengrocer', emoji:'🥦' },
+      { key:'fish', label:'Fishmonger', emoji:'🐟' },
+      { key:'hardware', label:'Hardware', emoji:'🛠️' },
+      { key:'electronics', label:'Electronics', emoji:'📱' },
+      { key:'bank', label:'Bank', emoji:'🏦' },
+      { key:'cinema', label:'Cinema', emoji:'🎬' },
+      { key:'toys', label:'Toy Shop', emoji:'🧸' },
+    ];
+
+    // Active subset used in the current session
+    let shops = [];
+
+    const $ = s=>document.querySelector(s);
+    const $$ = s=>Array.from(document.querySelectorAll(s));
+
+    const streetEl = $('#street');
+    const logEl = $('#log');
+    const ariaStatus = $('#ariaStatus');
+    const countdownEl = $('#countdown');
+    const countdownNumEl = $('#countdownNum');
+
+    const controls = {
+      mode: $('#mode'), startLen: $('#startLen'), maxLen: $('#maxLen'), onMs: $('#onMs'), gapMs: $('#gapMs'), trialsPerLen: $('#trialsPerLen'), failRule: $('#failRule'), shopCount: $('#shopCount'),
+      startBtn: $('#startBtn'), pauseBtn: $('#pauseBtn'), resetBtn: $('#resetBtn'), downloadBtn: $('#downloadBtn'), demoBtn: $('#demoBtn')
+    };
+
+    const status = { lenBadge: $('#lenBadge'), trialBadge: $('#trialBadge'), bestSpan: $('#bestSpan') };
+
+    let state = {
+      running:false, paused:false, awaiting:false,
+      seqLen:3, trialAtLen:0, failsAtLen:0, bestSpan:0,
+      sequence:[], input:[], responseTimes:[], timestamps:[],
+      sessionRows:[], sessionId:'E'+Math.random().toString(36).slice(2,8), mode:'forward'
+    };
+
+    function initStreet(){
+      const count = parseInt(controls.shopCount?.value || '8', 10);
+      shops = ALL_SHOPS.slice(0, Math.max(4, Math.min(count, ALL_SHOPS.length)));
+      streetEl.innerHTML = '';
+      shops.forEach((s,idx)=>{
+        const btn = document.createElement('button');
+        btn.className = 'shop';
+        btn.setAttribute('data-idx', idx);
+        btn.setAttribute('aria-label', `${s.label}`);
+        btn.innerHTML = `<div class="emoji">${s.emoji}</div><div class="label">${s.label}</div>`;
+        btn.addEventListener('click', onShopClick);
+        streetEl.appendChild(btn);
+      });
+    }
+
+    function sampleSequence(len, max){
+      const arr = [...Array(max).keys()];
+      for (let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+      return arr.slice(0,len);
+    }
+
+    function setShopsDisabled(v){ $$('.shop').forEach(b=>b.classList.toggle('disabled', v)); }
+
+    function log(line){ const ts = new Date().toLocaleTimeString(); logEl.textContent += `[${ts}] ${line}\n`; logEl.scrollTop = logEl.scrollHeight; }
+    function updateBadges(){ status.lenBadge.textContent = state.seqLen; status.trialBadge.textContent = `Trial: ${state.trialAtLen+1}`; status.bestSpan.textContent = `Best span: ${state.bestSpan}`; }
+
+    async function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+
+    async function showCountdown(seconds=2){
+      countdownEl.classList.add('active');
+      for(let s=seconds;s>=1;s--){
+        countdownNumEl.textContent = s;
+        await sleep(1000);
+        if(!state.running) break;
+        while(state.paused){ await sleep(100); }
+      }
+      countdownEl.classList.remove('active');
+    }
+
+    async function playSequence(){
+      setShopsDisabled(true);
+      state.awaiting=false; state.input=[]; state.responseTimes=[]; state.timestamps=[];
+      const onMs = parseInt(controls.onMs.value,10); const gapMs = parseInt(controls.gapMs.value,10);
+      const nodes = $$('.shop');
+      ariaStatus.textContent = `Watch the sequence of ${state.sequence.length} shops`;
+      for (let i=0;i<state.sequence.length;i++){
+        while(state.paused){ await sleep(100); }
+        const idx = state.sequence[i];
+        nodes[idx].classList.add('highlight');
+        state.timestamps.push(performance.now());
+        await sleep(onMs);
+        nodes[idx].classList.remove('highlight');
+        await sleep(gapMs);
+      }
+      setShopsDisabled(false);
+      state.awaiting=true; state.inputStart = performance.now();
+      log('Your turn… Click the shops in order.');
+      ariaStatus.textContent = 'Your turn. Click shops in order.';
+    }
+
+    async function runTrial(){
+      $$('.shop').forEach(n=>n.classList.remove('highlight','correct','wrong'));
+      updateBadges();
+      state.sequence = sampleSequence(state.seqLen, shops.length);
+      log(`Presenting length ${state.seqLen} (trial ${state.trialAtLen+1})`);
+      await showCountdown(2);
+      await playSequence();
+    }
+
+    function onShopClick(e){
+      if (!state.running || !state.awaiting) return;
+      const idx = parseInt(e.currentTarget.getAttribute('data-idx'),10);
+      const now = performance.now();
+      const prev = state.input.length ? state.lastClickTs : state.inputStart;
+      state.responseTimes.push(now - prev); state.lastClickTs = now;
+      state.input.push(idx);
+      e.currentTarget.classList.add('highlight');
+      if (state.input.length >= state.sequence.length){ state.awaiting=false; evaluateResponse(); }
+    }
+
+    function evaluateResponse(){
+      const presented = [...state.sequence];
+      const expected = (state.mode==='forward')?presented:[...presented].reverse();
+      const isCorrect = expected.length === state.input.length && expected.every((v,i)=>v===state.input[i]);
+
+      const nodes = $$('.shop');
+      if (isCorrect){
+        expected.forEach(i=>nodes[i].classList.add('correct'));
+        state.bestSpan = Math.max(state.bestSpan, state.seqLen);
+        log(`✅ Correct at length ${state.seqLen}`);
+      } else {
+        expected.forEach(i=>nodes[i].classList.add('highlight'));
+        state.input.forEach((i,ix)=>{ if (expected[ix]!==i) nodes[i].classList.add('wrong'); });
+        log(`❌ Wrong at length ${state.seqLen}`);
+      }
+      updateBadges();
+
+      const row = {
+        sessionId: state.sessionId,
+        timestamp: new Date().toISOString(),
+        mode: state.mode,
+        seqLen: state.seqLen,
+        trial: state.trialAtLen+1,
+        presented: presented.join('-'),
+        expected: expected.join('-'),
+        response: state.input.join('-'),
+        correct: isCorrect?1:0,
+        rt_first_ms: state.responseTimes[0] ?? '',
+        rt_mean_ms: state.responseTimes.length ? Math.round(state.responseTimes.reduce((a,b)=>a+b,0)/state.responseTimes.length) : '',
+        rt_total_ms: state.responseTimes.length ? Math.round(state.responseTimes.reduce((a,b)=>a+b,0)) : ''
+      };
+      state.sessionRows.push(row);
+
+      const failCap = parseInt(controls.failRule.value,10);
+      if (isCorrect){
+        state.trialAtLen += 1; state.failsAtLen = 0;
+        if (state.trialAtLen >= parseInt(controls.trialsPerLen.value,10)){
+          state.seqLen += 1; state.trialAtLen = 0;
+        }
+      } else {
+        state.failsAtLen += 1; state.trialAtLen += 1;
+        if (state.failsAtLen >= failCap){ endSession(`Stopped after ${failCap} fail(s) at length ${state.seqLen}.`); return; }
+      }
+
+      if (state.seqLen > parseInt(controls.maxLen.value,10)) { endSession(`Reached max length ${controls.maxLen.value}.`); return; }
+
+      setTimeout(()=>{ if (state.running) runTrial(); }, 850);
+    }
+
+    function startSession(demo=false){
+      state.mode = controls.mode.value;
+      state.seqLen = parseInt(controls.startLen.value,10);
+      state.trialAtLen = 0; state.failsAtLen = 0; state.bestSpan = 0; state.sessionRows = [];
+      state.running = true; state.paused=false; controls.pauseBtn.disabled=false; controls.downloadBtn.disabled=true; controls.startBtn.disabled=true; logEl.textContent='';
+      log(`Session ${state.sessionId} started (${state.mode}).`);
+      if (demo){ controls.mode.value='forward'; state.mode='forward'; controls.startLen.value=3; controls.maxLen.value=4; controls.trialsPerLen.value=1; controls.onMs.value=600; controls.gapMs.value=250; state.seqLen=3; }
+      runTrial();
+    }
+
+    function endSession(reason='Session ended.'){
+      state.running=false; state.awaiting=false; controls.pauseBtn.disabled=true; controls.downloadBtn.disabled=false; controls.startBtn.disabled=false; setShopsDisabled(false);
+      log(`— ${reason} Best span: ${state.bestSpan}.`);
+    }
+
+    function resetAll(){
+      state.running=false; state.awaiting=false; state.sessionRows=[]; logEl.textContent='';
+      controls.pauseBtn.disabled=true; controls.downloadBtn.disabled=true; controls.startBtn.disabled=false;
+      state.bestSpan=0; state.seqLen=parseInt(controls.startLen.value,10); state.trialAtLen=0; state.failsAtLen=0;
+      $$('.shop').forEach(n=>n.classList.remove('highlight','correct','wrong','disabled'));
+      updateBadges(); log('Reset. Configure settings and press Start session.');
+    }
+
+    function togglePause(){ if(!state.running) return; state.paused=!state.paused; controls.pauseBtn.textContent = state.paused? 'Resume':'Pause'; log(state.paused? 'Paused.':'Resumed.'); }
+
+    function toCSV(rows){
+      const headers=['sessionId','timestamp','mode','seqLen','trial','presented','expected','response','correct','rt_first_ms','rt_mean_ms','rt_total_ms'];
+      const lines=[headers.join(',')];
+      for(const r of rows){ const vals=headers.map(h=>String(r[h]??'').replace(/,/g,';')); lines.push(vals.join(',')); }
+      return lines.join('\n');
+    }
+    function downloadCSV(){ if(!state.sessionRows.length){ alert('No data to download yet.'); return; } const csv=toCSV(state.sessionRows); const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); const fn=`errands_memory_${state.sessionId}.csv`; a.href=URL.createObjectURL(blob); a.download=fn; a.click(); URL.revokeObjectURL(a.href); }
+
+    // wire
+    controls.startBtn.addEventListener('click',()=>startSession(false));
+    controls.demoBtn.addEventListener('click',()=>startSession(true));
+    controls.resetBtn.addEventListener('click',resetAll);
+    controls.pauseBtn.addEventListener('click',togglePause);
+    controls.downloadBtn.addEventListener('click',downloadCSV);
+
+    // Rebuild street when shop count changes (only when idle)
+    if (controls.shopCount){
+      controls.shopCount.addEventListener('change', ()=>{
+        if (!state.running){ initStreet(); }
+      });
+    }
+
+    initStreet(); updateBadges(); log('Ready. Choose settings and press Start session.');
+  </script>
+</body>
+</html>
