@@ -1,90 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Micro Rehab Apps</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    :root {
+      --bg: #f7f7f9;
+      --card: #ffffff;
+      --text: #222;
+      --muted: #666;
+      --brand: #0a66c2;   /* pill color */
+      --brand-hover: #084f96;
+      --shadow: 0 8px 20px rgba(0,0,0,0.08);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
-      color: #333;
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+      padding: 28px;
+    }
+    .container {
+      width: min(760px, 100%);
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: clamp(20px, 4vw, 36px);
       text-align: center;
-      padding: 40px;
     }
-    header {
-      margin-bottom: 30px;
-    }
+    header { margin-bottom: 22px; }
     header img {
-      max-width: 300px;
+      width: min(360px, 90%);
       height: auto;
-      margin-bottom: 15px;
+      display: block;
+      margin: 0 auto 14px;
+      border-radius: 10px;
     }
     header h1 {
-      margin: 0;
-      font-size: 2em;
-      color: #222;
+      margin: 0 0 6px 0;
+      font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+      font-weight: 800;
     }
     .disclaimer {
-      font-size: 0.95em;
-      color: #666;
-      max-width: 600px;
-      margin: 10px auto 0;
-      line-height: 1.4em;
+      margin: 0 auto;
+      max-width: 680px;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 0.98rem;
     }
+    .lead { margin: 18px 0 6px 0; color: #444; }
+
+    /* Pills list */
     ul {
       list-style: none;
       padding: 0;
+      margin: 18px 0 0 0;
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 15px;
-      margin-top: 25px;
+      gap: 12px;
     }
-    li {
-      margin: 0;
-    }
-    a {
+    li { margin: 0; }
+    a.app-pill {
       display: inline-block;
-      padding: 12px 25px;
-      border-radius: 999px; /* pill shape */
-      background-color: #0073e6;
+      padding: 12px 22px;
+      border-radius: 999px;
+      background: var(--brand);
       color: #fff;
-      font-size: 1.1em;
       text-decoration: none;
-      transition: background-color 0.2s ease;
+      font-size: 1.06rem;
+      transition: background .15s ease, transform .05s ease;
+      box-shadow: 0 4px 10px rgba(10,102,194,0.18);
     }
-    a:hover {
-      background-color: #005bb5;
-    }
-    .container {
-      max-width: 700px;
-      margin: 0 auto;
-      background: #fff;
-      padding: 25px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
+    a.app-pill:hover { background: var(--brand-hover); }
+    a.app-pill:active { transform: translateY(1px); }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <img src="Micro_Apps_Banner.png" alt="Micro Apps Banner">
+      <!-- Place the image at: docs/assets/Micro_Apps_Banner.png -->
+      <img src="assets/Micro_Apps_Banner.png" alt="Micro Apps Banner"
+           onerror="this.style.display='none'">
       <h1>Micro Rehab Apps</h1>
       <p class="disclaimer">
-        These are experimental prototypes for research and demonstration only.<br>
-        They are <strong>not validated tools</strong> and <strong>not medical devices</strong>.<br>
+        These are experimental prototypes for research and demonstration only.
+        They are <strong>not validated tools</strong> and <strong>not medical devices</strong>.
         Use at your own risk.
       </p>
     </header>
 
-    <p>Select an exercise below:</p>
+    <p class="lead">Select an exercise below:</p>
     <ul>
-      <li><a href="Errands-visual-memory/index.html">Errands – Visual Memory</a></li>
-      <li><a href="Star_Hunt/index.html">Star Hunt</a></li>
-      <li><a href="Visuospatial_Blocks/index.html">Visuospatial Blocks</a></li>
-      <li><a href="maze-explorer/index.html">Maze Explorer</a></li>
-      <li><a href="word-scavenger/index.html">Word Scavenger</a></li>
+      <li><a class="app-pill" href="Errands-visual-memory/index.html">Errands – Visual Memory</a></li>
+      <li><a class="app-pill" href="Star_Hunt/index.html">Star Hunt</a></li>
+      <li><a class="app-pill" href="Visuospatial_Blocks/index.html">Visuospatial Blocks</a></li>
+      <li><a class="app-pill" href="maze-explorer/index.html">Maze Explorer</a></li>
+      <li><a class="app-pill" href="word-scavenger/index.html">Word Scavenger</a></li>
     </ul>
   </div>
 </body>
