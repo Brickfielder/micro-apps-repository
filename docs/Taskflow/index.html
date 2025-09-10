@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>TaskFlow — Plan · Check · Feedback</title>
+<title>TaskFlow — Plan · Check · Feedback (Tap & Drag)</title>
 <style>
 :root{
   --bg:#f7f9fc; 
@@ -100,12 +100,17 @@ button:disabled{opacity:.6; cursor:not-allowed}
 .soft{ color:var(--muted); font-size:13px }
 footer{ color:#666; font-size:12px; margin:12px 0 30px }
 
+/* Tap helpers */
+.pill.tapable{ cursor:pointer; }
+.toolbar{ display:flex; gap:6px; margin-left:auto }
+.toolbtn{ border:1px solid #c2cce7; background:#fff; border-radius:8px; padding:2px 8px; font-size:13px; }
+.modeChip{ font-size:12px; padding:4px 8px; border-radius:999px; background:#eef2fa; border:1px solid #c2cce7 }
 </style>
 </head>
 <body>
 <header>
   <h1>TaskFlow — Plan · Check · Feedback</h1>
-  <div class="sub">Drag steps from the left (Plan) into the middle (Check) in the order you think is best. When the left is empty, it locks—review and adjust in the middle, then Confirm for feedback.</div>
+  <div class="sub">Mobile = tap to move & reorder; Desktop = drag-and-drop. The left list locks when empty; review in the middle, then Confirm for feedback.</div>
 </header>
 <main>
   <div class="controls">
@@ -125,6 +130,7 @@ footer{ color:#666; font-size:12px; margin:12px 0 30px }
     <button id="resetBtn">Reset</button>
     <button id="downloadBtn" class="ghost">Download CSV</button>
     <span id="status" class="sub"></span>
+    <span id="modeChip" class="modeChip" aria-live="polite"></span>
   </div>
 
   <!-- Briefing panel -->
@@ -138,15 +144,15 @@ footer{ color:#666; font-size:12px; margin:12px 0 30px }
     <!-- 1) PLAN (source-only) -->
     <section class="panel" id="planPanel" aria-label="Planning board">
       <h2>1) Plan (choose your steps & order) 🧠</h2>
-      <div class="hint">Drag each item into the middle list in the order you think is correct. The left list is a source — it will lock when empty.</div>
+      <div class="hint">Move each item into the middle list in the order you think is correct. On mobile, tap items. On desktop, drag using the ⋮ handle.</div>
       <div id="planList" class="list" aria-live="polite"></div>
-      <div class="soft" style="margin-top:6px">Tip: use the ⋮ handle to drag</div>
+      <div class="soft" style="margin-top:6px">Tip: you can reorder later in the middle list before confirming</div>
     </section>
 
     <!-- 2) CHECK (review & adjust) -->
     <section class="panel" id="checkPanel" aria-label="Check board">
       <h2>2) Check & adjust 🔍</h2>
-      <div class="hint">When the left list empties, it will grey out. You can then reorder here until you’re happy, and press Confirm.</div>
+      <div class="hint">When the left list empties, it will grey out. Reorder here until you’re happy, then Confirm.</div>
       <div id="checkList" class="list" aria-live="polite"></div>
       <div style="display:flex; gap:10px; margin-top:10px">
         <button id="confirmBtn" class="primary" disabled>Confirm Plan ✓</button>
@@ -212,17 +218,17 @@ const SCENARIOS = {
         {id:"bus_home", txt:"Bus back home", icon:"🏠"},
       ],
       medium: [
-        {id:"prepare_docs", txt:"Bring NHS number & appointment letter", icon:"📄"},   // 1
-        {id:"ready_travel", txt:"Charge phone / prepare travel card", icon:"🔋🎫"},    // 2
-        {id:"leave_home", txt:"Leave home in good time", icon:"🚪"},                    // 3
-        {id:"bus_to_hospital", txt:"Take the bus to hospital", icon:"🚌"},             // 4
-        {id:"check_in", txt:"Check in at reception", icon:"🧾"},                        // 5
-        {id:"wait_call", txt:"Wait to be called", icon:"🪑"},                           // 6
-        {id:"see_doctor", txt:"See the doctor", icon:"👩‍⚕️"},                          // 7
-        {id:"validate_pay", txt:"Validate ticket / pay as needed", icon:"🅿️"},        // 8
-        {id:"collect_rx", txt:"Collect prescription", icon:"💊"},                       // 9
-        {id:"groceries", txt:"Buy quick groceries (optional)", icon:"🛒"},              // 10
-        {id:"bus_home", txt:"Bus back home", icon:"🏠"},                                // 11
+        {id:"prepare_docs", txt:"Bring NHS number & appointment letter", icon:"📄"},
+        {id:"ready_travel", txt:"Charge phone / prepare travel card", icon:"🔋🎫"},
+        {id:"leave_home", txt:"Leave home in good time", icon:"🚪"},
+        {id:"bus_to_hospital", txt:"Take the bus to hospital", icon:"🚌"},
+        {id:"check_in", txt:"Check in at reception", icon:"🧾"},
+        {id:"wait_call", txt:"Wait to be called", icon:"🪑"},
+        {id:"see_doctor", txt:"See the doctor", icon:"👩‍⚕️"},
+        {id:"validate_pay", txt:"Validate ticket / pay as needed", icon:"🅿️"},
+        {id:"collect_rx", txt:"Collect prescription", icon:"💊"},
+        {id:"groceries", txt:"Buy quick groceries (optional)", icon:"🛒"},
+        {id:"bus_home", txt:"Bus back home", icon:"🏠"},
       ]
     },
     ideal: {
@@ -244,17 +250,17 @@ const SCENARIOS = {
         {id:"enjoy_meal", txt:"Enjoy the meal at home", icon:"🏡🍽️"},
       ],
       medium: [
-        {id:"wash_hands", txt:"Wash hands", icon:"🧼"},                                      // 1
-        {id:"gather_items", txt:"Gather ingredients & equipment", icon:"🥕🍅🔪"},            // 2
-        {id:"boil_water", txt:"Boil water in a pot", icon:"💧🔥"},                           // 3 (flex with 4)
-        {id:"prep_sauce", txt:"Prepare the simple sauce", icon:"🍅🧄"},                      // 4 (flex with 3)
-        {id:"boil_pasta", txt:"Put pasta in boiling water", icon:"🍝"},                      // 5 (flex with 6)
-        {id:"set_timer", txt:"Set a timer for the pasta", icon:"⏲️"},                        // 6 (flex with 5)
-        {id:"lay_table", txt:"Lay the table", icon:"🍽️🧺"},                                  // 7
-        {id:"switch_off", txt:"Switch off the hob/stove", icon:"🔥✖️"},                      // 8
-        {id:"pasta_to_table", txt:"Put the pasta on the table", icon:"🍲"},                  // 9
-        {id:"pickup_child", txt:"Pick up child (nursery 2 min away)", icon:"👶"},           //10
-        {id:"enjoy_meal", txt:"Enjoy the meal at home", icon:"🏡🍽️"},                       //11
+        {id:"wash_hands", txt:"Wash hands", icon:"🧼"},
+        {id:"gather_items", txt:"Gather ingredients & equipment", icon:"🥕🍅🔪"},
+        {id:"boil_water", txt:"Boil water in a pot", icon:"💧🔥"},
+        {id:"prep_sauce", txt:"Prepare the simple sauce", icon:"🍅🧄"},
+        {id:"boil_pasta", txt:"Put pasta in boiling water", icon:"🍝"},
+        {id:"set_timer", txt:"Set a timer for the pasta", icon:"⏲️"},
+        {id:"lay_table", txt:"Lay the table", icon:"🍽️🧺"},
+        {id:"switch_off", txt:"Switch off the hob/stove", icon:"🔥✖️"},
+        {id:"pasta_to_table", txt:"Put the pasta on the table", icon:"🍲"},
+        {id:"pickup_child", txt:"Pick up child (nursery 2 min away)", icon:"👶"},
+        {id:"enjoy_meal", txt:"Enjoy the meal at home", icon:"🏡🍽️"},
       ]
     },
     ideal: {
@@ -264,8 +270,8 @@ const SCENARIOS = {
     flexGroups: {
       easy: [],
       medium: [
-        ["boil_water","prep_sauce"],    // 3 & 4 can swap
-        ["boil_pasta","set_timer"]      // 5 & 6 can swap
+        ["boil_water","prep_sauce"],
+        ["boil_pasta","set_timer"]
       ]
     }
   }
@@ -289,14 +295,14 @@ function makePill(step){
   div.className = "pill";
   div.draggable = true;
   div.dataset.id = step.id;
-  div.innerHTML = `<span class="handle">⋮⋮</span> <span>${step.icon}</span> <span>${step.txt}</span>`;
+  div.innerHTML = `<span class="handle" aria-hidden="true">⋮⋮</span> <span>${step.icon}</span> <span>${step.txt}</span>`;
   return div;
 }
 function shuffleArray(a){ const arr=a.slice(); for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
 function readOrder(container){ return [...container.querySelectorAll('.pill')].map(p=>p.dataset.id); }
 function tag(text){ const b=document.createElement('span'); b.className='badge'; b.textContent=text; return b; }
 
-/* ------------------ Drag & Drop ------------------ */
+/* ------------------ Drag & Drop (desktop) ------------------ */
 function makeSourceToTarget(sourceEl, targetEl, onAdd, onReorder){
   let dragEl = null;
   targetEl.addEventListener('dragstart', e=>{
@@ -340,6 +346,48 @@ function makeSourceToTarget(sourceEl, targetEl, onAdd, onReorder){
   }
 }
 
+/* ------------------ Tap Mode (mobile) ------------------ */
+let tapMode = false;
+function setModeTap(){ tapMode = true; el('modeChip').textContent = 'Mode: Tap'; }
+function setModeDrag(){ tapMode = false; el('modeChip').textContent = 'Mode: Drag'; }
+
+function enableTapAffordances(){
+  // Disable native drag
+  document.querySelectorAll('.pill').forEach(p=>{ p.draggable=false; p.classList.add('tapable'); });
+  // Plan: tap to append to check
+  el('planList').addEventListener('click', planTapHandler);
+  // Check: tap to open mini toolbar
+  el('checkList').addEventListener('click', checkTapHandler);
+}
+function disableTapAffordances(){
+  el('planList').removeEventListener('click', planTapHandler);
+  el('checkList').removeEventListener('click', checkTapHandler);
+  document.querySelectorAll('.pill').forEach(p=>{ p.draggable=true; p.classList.remove('tapable'); removeToolbar(p); });
+}
+function planTapHandler(e){
+  const pill = e.target.closest('.pill'); if(!pill) return;
+  const id = pill.dataset.id;
+  el('checkList').appendChild(pill);
+  addedOrder.push(id);
+  updateSourceLockState();
+}
+function checkTapHandler(e){
+  const pill = e.target.closest('.pill'); if(!pill) return;
+  toggleToolbar(pill);
+}
+function toggleToolbar(pill){
+  if(pill.querySelector('.toolbar')){ removeToolbar(pill); return; }
+  const tb = document.createElement('div'); tb.className='toolbar';
+  const up = document.createElement('button'); up.className='toolbtn'; up.textContent='↑'; up.title='Move up';
+  const down = document.createElement('button'); down.className='toolbtn'; down.textContent='↓'; down.title='Move down';
+  const back = document.createElement('button'); back.className='toolbtn'; back.textContent='↩'; back.title='Send back to Plan';
+  tb.append(up,down,back); pill.appendChild(tb);
+  up.addEventListener('click', (ev)=>{ ev.stopPropagation(); const prev = pill.previousElementSibling; if(prev) prev.before(pill); });
+  down.addEventListener('click', (ev)=>{ ev.stopPropagation(); const next = pill.nextElementSibling; if(next) next.after(pill); });
+  back.addEventListener('click', (ev)=>{ ev.stopPropagation(); el('planList').appendChild(pill); updateSourceLockState(); });
+}
+function removeToolbar(pill){ const t = pill.querySelector('.toolbar'); if(t) t.remove(); }
+
 /* ------------------ App Flow ------------------ */
 function updateBriefing(){
   const key = currentScenarioKey;
@@ -357,16 +405,16 @@ function loadScenario(){
   el('confirmBtn').disabled = true;
   el('planList').classList.remove('inactive');
   el('status').textContent = `Scenario: ${s.emoji} ${s.name} · ${currentDifficulty}`;
-  wireDnD();
+  wireInteractions();
   updateBriefing();
 }
-function wireDnD(){
-  makeSourceToTarget(
-    el('planList'),
-    el('checkList'),
-    (id)=> { addedOrder.push(id); updateSourceLockState(); },
-    (order)=> { /* reorder ok */ }
-  );
+function wireInteractions(){
+  // Reset listeners
+  disableTapAffordances();
+  // Decide mode
+  const coarse = window.matchMedia('(pointer: coarse)').matches || ('ontouchstart' in window);
+  if(coarse){ setModeTap(); enableTapAffordances(); }
+  else { setModeDrag(); makeSourceToTarget(el('planList'), el('checkList'), (id)=>{addedOrder.push(id); updateSourceLockState();}, ()=>{}); }
 }
 function updateSourceLockState(){
   const src = el('planList');
@@ -394,7 +442,7 @@ function computeFeedback(){
   const alignedIndices = evaluateAlignmentWithFlex(suggested, checkOrder, flex);
   checkOrder.forEach((id, idx)=>{
     const p = makePill(stepsById[id]); p.appendChild(tag(`#${idx+1}`));
-    if(alignedIndices.has(idx)) p.classList.add('aligned'); // ✅ only positive marking
+    if(alignedIndices.has(idx)) p.classList.add('aligned');
     userList.appendChild(p);
   });
 
@@ -423,13 +471,13 @@ function evaluateAlignmentWithFlex(suggested, user, flexGroups){
   const aligned = new Set();
   const indexOf = Object.fromEntries(suggested.map((id,i)=>[id,i]));
 
-  // Flex groups: if the two suggested slots contain the two items in any order, mark both aligned
+  // Flex groups
   const flexIndexPairs = flexGroups.map(([a,b])=>{
     const ia = indexOf[a], ib = indexOf[b];
     return ia<ib ? [ia,ib,a,b] : [ib,ia,b,a];
   });
   flexIndexPairs.forEach(([i1,i2,a,b])=>{
-    const setIdeal = new Set([a,b]), userSet = new Set([user[i1], user[i2]]);
+    const setIdeal = new Set([a,b]);
     const ok = setIdeal.has(user[i1]) && setIdeal.has(user[i2]) && user[i1]!==user[i2];
     if(ok){ aligned.add(i1); aligned.add(i2); }
   });
@@ -442,7 +490,7 @@ function evaluateAlignmentWithFlex(suggested, user, flexGroups){
   return aligned;
 }
 
-/* Build reflection points from soft rules (no “wrong”, only prompts) */
+/* Build reflection points */
 function buildReflections(sKey, diff, suggested, user){
   const pos = Object.fromEntries(user.map((id,i)=>[id,i]));
   const pts = [];
@@ -451,15 +499,12 @@ function buildReflections(sKey, diff, suggested, user){
     const before = (a,b)=> pos[a]!=null && pos[b]!=null && pos[a] < pos[b];
     const exists = id => pos[id]!=null;
 
-    // Safety & timing
     if(exists('pickup_child') && exists('switch_off') && !before('switch_off','pickup_child')){
       pts.push({cat:'Safety', msg:'Before leaving, consider switching the hob off first.'});
     }
     if(exists('pickup_child') && exists('pasta_to_table') && !before('pasta_to_table','pickup_child')){
       pts.push({cat:'Safety', msg:'Placing hot pasta safely on the table before leaving can help avoid leaving food unattended.'});
     }
-
-    // Dependencies
     if(exists('boil_pasta') && exists('boil_water') && pos['boil_pasta'] < pos['boil_water']){
       pts.push({cat:'Dependencies', msg:'Pasta usually goes in after the water is boiling — does your order account for that?'});
     }
@@ -469,8 +514,6 @@ function buildReflections(sKey, diff, suggested, user){
     if(exists('set_timer') && exists('pickup_child') && !before('set_timer','pickup_child')){
       pts.push({cat:'Timing', msg:'Setting a timer before leaving can help prevent overcooking.'});
     }
-
-    // Efficiency / flow
     if(exists('lay_table') && exists('pickup_child') && !before('lay_table','pickup_child')){
       pts.push({cat:'Efficiency', msg:'Laying the table before pickup can make serving easier when you return.'});
     }
@@ -486,29 +529,23 @@ function buildReflections(sKey, diff, suggested, user){
     const before = (a,b)=> pos[a]!=null && pos[b]!=null && pos[a] < pos[b];
     const exists = id => pos[id]!=null;
 
-    // Prep & travel
     if(exists('prepare_docs') && exists('leave_home') && !before('prepare_docs','leave_home')){
       pts.push({cat:'Preparation', msg:'Having documents ready before leaving can reduce stress at check-in.'});
     }
     if(exists('ready_travel') && exists('leave_home') && !before('ready_travel','leave_home')){
       pts.push({cat:'Preparation', msg:'Charging phone / getting the travel card ready before leaving may help avoid delays.'});
     }
-
-    // Clinical flow
     if(exists('check_in') && exists('see_doctor') && !before('check_in','see_doctor')){
       pts.push({cat:'Clinic flow', msg:'Check-in usually happens before seeing the doctor.'});
     }
     if(exists('validate_pay') && exists('bus_home') && !before('validate_pay','bus_home')){
       pts.push({cat:'Logistics', msg:'Validating tickets / payments before heading home can be helpful.'});
     }
-
-    // Optional errands
     if(exists('groceries') && exists('collect_rx') && pos['groceries'] < pos['collect_rx']){
       pts.push({cat:'Efficiency', msg:'Would collecting the prescription before groceries make the route simpler? (Either can be sensible.)'});
     }
   }
 
-  // Deduplicate messages
   const seen = new Set(); 
   return pts.filter(p=>{ const key=p.cat+'|'+p.msg; if(seen.has(key)) return false; seen.add(key); return true; });
 }
@@ -519,16 +556,14 @@ function groupReflections(points){
     if(!map.has(p.cat)) map.set(p.cat, []);
     map.get(p.cat).push('💡 ' + p.msg);
   }
-  // Keep a stable order of categories
   const order = ['Safety','Hygiene','Timing','Dependencies','Preparation','Clinic flow','Logistics','Efficiency','Flow'];
   const out = [];
   order.forEach(cat=>{ if(map.has(cat)) out.push([cat, map.get(cat)]); });
-  // Add any others
   for(const [k,v] of map){ if(!order.includes(k)) out.push([k,v]); }
   return out;
 }
 
-/* ------------------ CSV Logging (no “wrong” scoring) ------------------ */
+/* ------------------ CSV Logging ------------------ */
 const LOG = [];
 function appendLog(){
   const now = new Date();
