@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -26,38 +27,39 @@
     .btn[disabled]{opacity:.5; cursor:not-allowed}
     .btn.primary{background:var(--accent); color:white; border-color: transparent}
     .btn.success{background:var(--success); color:white; border-color: transparent}
-    .btn.warn{background:var(--warning); color:black; border-color: transparent}.seg{display:flex; background:var(--pill); border-radius:999px; padding:4px; gap:4px; box-shadow: var(--shadow)}
-.seg button{border:none;background:transparent;padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:600;color:var(--muted)}
-.seg button.active{background:white; color:var(--ink); box-shadow: var(--shadow)}
+    .btn.warn{background:var(--warning); color:black; border-color: transparent}
 
-main{max-width:1100px; margin:18px auto; padding:0 16px}
-.layout{display:grid; grid-template-columns: 1fr; gap:16px}
-@media(min-width:900px){.layout{grid-template-columns: 1.1fr .9fr}}
-.card{background:var(--card); border-radius:var(--radius); box-shadow: var(--shadow); padding:16px}
-.statusbar{display:grid; grid-template-columns: 1fr auto; gap:16px; align-items:center}
-.timer{font-weight:700; font-variant-numeric: tabular-nums}
-.sign{justify-self:end; padding:8px 14px; border-radius:999px; font-weight:700; color:white; box-shadow:0 8px 24px rgba(0,0,0,.2); display:flex; align-items:center; gap:8px}
-.sign.none{background:linear-gradient(120deg,#10b981,#34d399)}
-.sign.plant{background:linear-gradient(120deg,#3b82f6,#06b6d4)}
-.sign.sugar{background:linear-gradient(120deg,#f97316,#f59e0b)}
+    .seg{display:flex; background:var(--pill); border-radius:999px; padding:4px; gap:4px; box-shadow: var(--shadow)}
+    .seg button{border:none;background:transparent;padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:600;color:var(--muted)}
+    .seg button.active{background:white; color:var(--ink); box-shadow: var(--shadow)}
 
-.order .ticket{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
-.chip{display:inline-flex; align-items:center; gap:6px; background:var(--pill); border-radius:999px; padding:8px 12px; border:1px solid #e5e7eb; font-weight:600}
+    main{max-width:1100px; margin:18px auto; padding:0 16px}
+    .layout{display:grid; grid-template-columns: 1fr; gap:16px}
+    @media(min-width:900px){.layout{grid-template-columns: 1.1fr .9fr}}
+    .card{background:var(--card); border-radius:var(--radius); box-shadow: var(--shadow); padding:16px}
+    .statusbar{display:grid; grid-template-columns: 1fr auto; gap:16px; align-items:center}
+    .timer{font-weight:700; font-variant-numeric: tabular-nums}
+    .sign{justify-self:end; padding:8px 14px; border-radius:999px; font-weight:700; color:white; box-shadow:0 8px 24px rgba(0,0,0,.2); display:flex; align-items:center; gap:8px}
+    .sign.none{background:linear-gradient(120deg,#10b981,#34d399)}
+    .sign.plant{background:linear-gradient(120deg,#3b82f6,#06b6d4)}
+    .sign.sugar{background:linear-gradient(120deg,#f97316,#f59e0b)}
 
-.tray{min-height:90px; border:2px dashed #d1d5db; border-radius:var(--radius); padding:12px; display:flex; flex-wrap:wrap; gap:8px; align-items:center}
-.pill{user-select:none; background:white; border-radius:999px; padding:10px 14px; border:1px solid #e5e7eb; display:inline-flex; align-items:center; gap:8px; box-shadow: var(--shadow); cursor:pointer}
-.pill .emoji{font-size:18px}
+    .order .ticket{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+    .chip{display:inline-flex; align-items:center; gap:6px; background:var(--pill); border-radius:999px; padding:8px 12px; border:1px solid #e5e7eb; font-weight:600}
 
-.grid{display:grid; grid-template-columns: repeat(2, 1fr); gap:10px}
-@media(min-width:700px){.grid{grid-template-columns: repeat(3, 1fr)}}
+    .tray{min-height:90px; border:2px dashed #d1d5db; border-radius:var(--radius); padding:12px; display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+    .pill{user-select:none; background:white; border-radius:999px; padding:10px 14px; border:1px solid #e5e7eb; display:inline-flex; align-items:center; gap:8px; box-shadow: var(--shadow); cursor:pointer}
+    .pill .emoji{font-size:18px}
 
-dialog{border:none; border-radius:16px; padding:0; box-shadow:0 30px 70px rgba(0,0,0,.3)}
-.modal{padding:18px; max-width:520px}
-.modal h3{margin:0 0 8px}
-.modal p{margin:0 0 12px; color:var(--muted)}
-.modal .actions{display:flex; gap:8px; justify-content:flex-end}
-.kudos{color:var(--success); font-weight:700}
+    .grid{display:grid; grid-template-columns: repeat(2, 1fr); gap:10px}
+    @media(min-width:700px){.grid{grid-template-columns: repeat(3, 1fr)}}
 
+    dialog{border:none; border-radius:16px; padding:0; box-shadow:0 30px 70px rgba(0,0,0,.3)}
+    .modal{padding:18px; max-width:520px}
+    .modal h3{margin:0 0 8px}
+    .modal p{margin:0 0 12px; color:var(--muted)}
+    .modal .actions{display:flex; gap:8px; justify-content:flex-end}
+    .kudos{color:var(--success); font-weight:700}
   </style>
 </head>
 <body>
@@ -68,8 +70,9 @@ dialog{border:none; border-radius:16px; padding:0; box-shadow:0 30px 70px rgba(0
       Build each order by adding items from the <em>Options</em> on the right into your <em>Preparation Tray</em>, then press <strong>Serve</strong>.
       <ul style="margin:8px 0 0 18px; padding:0">
         <li>Match the ticket chips (e.g., size, coffee, milk, sweetener, temp).</li>
-        <li><strong>Rule 1 — Decaf bell:</strong> if the ticket shows <em>Decaf</em>, you must click <strong>🔔 Ring Bell</strong> before serving. If you ring the bell when there is no decaf, it counts as an error.</li>
+        <li><strong>Rule 1 — Decaf bell:</strong> if the ticket shows <em>Decaf</em>, you must click <strong>🔔 Ring Bell</strong> before serving. <em>Ringing the bell when there is no decaf is neutral (not an error).</em></li>
         <li><strong>Rule 2 — Extra-hot sleeve:</strong> if the ticket shows <em>Extra hot</em>, you must click <strong>🧻 Add Sleeve</strong> before serving.</li>
+        <li><strong>Any-of requirement:</strong> when the ticket says <em>add honey or soy</em>, either one satisfies the ticket; choosing both is allowed and not penalized.</li>
         <li>Incidents happen often: sometimes sugar becomes <em>Honey</em>, or milk must be <em>Soy</em>. The ticket will update accordingly.</li>
       </ul>
     </div>
@@ -87,7 +90,9 @@ dialog{border:none; border-radius:16px; padding:0; box-shadow:0 30px 70px rgba(0
       <button class="btn" id="sleeveBtn" title="Add sleeve for extra-hot">🧻 Add Sleeve</button>
       <button class="btn" id="downloadBtn" title="Download CSV log">⬇️ Download CSV</button>
     </div>
-  </header>  <main>
+  </header>
+
+  <main>
     <div class="layout">
       <section class="card order">
         <div class="statusbar">
@@ -99,13 +104,16 @@ dialog{border:none; border-radius:16px; padding:0; box-shadow:0 30px 70px rgba(0
         <h3 style="margin:16px 0 8px;font-size:16px">Preparation tray</h3>
         <div class="tray" id="tray"></div>
         <p id="feedback" style="margin:10px 0 0; color:var(--muted)">Add items to match the ticket, then press <strong>Serve</strong>.</p>
-      </section><aside class="card">
-    <h2 style="margin:0 0 8px;font-size:18px">Options</h2>
-    <div class="grid" id="options"></div>
-  </aside>
-</div>
+      </section>
 
-  </main>  <dialog id="incidentDlg">
+      <aside class="card">
+        <h2 style="margin:0 0 8px;font-size:18px">Options</h2>
+        <div class="grid" id="options"></div>
+      </aside>
+    </div>
+  </main>
+
+  <dialog id="incidentDlg">
     <div class="modal">
       <h3 id="incidentTitle">Incident</h3>
       <p id="incidentMsg">—</p>
@@ -118,7 +126,9 @@ dialog{border:none; border-radius:16px; padding:0; box-shadow:0 30px 70px rgba(0
       <p id="resultMsg">—</p>
       <div class="actions"><button class="btn success" id="nextOrderBtn">OK</button></div>
     </div>
-  </dialog>  <script>
+  </dialog>
+
+  <script>
     // ===== State: timer + logging =====
     const logs = []; // per-order records
     let timerDurationSec = 90; // default, set by seg buttons
@@ -156,8 +166,8 @@ dialog{border:none; border-radius:16px; padding:0; box-shadow:0 30px 70px rgba(0
     let allOptions = [...BASE_OPTIONS];
     let tray = [];          // chosen keys
     let ticket = [];        // target keys
-    let needsBell = false;  // rule 1 present
-    let needsSleeve = false;// rule 2 present
+    let needsBell = false;  // rule 1 (decaf ticket)
+    let needsSleeve = false;// rule 2 (extra hot ticket)
     let bellRang = false;
     let sleeveAdded = false;
     let orderCount = 0;
@@ -174,6 +184,8 @@ dialog{border:none; border-radius:16px; padding:0; box-shadow:0 30px 70px rgba(0
     const sign = el('sign');
     const signText = el('signText');
     const countdownEl = el('countdown');
+
+    const isFlag = key => key.startsWith('flag_');
 
     // ===== UI helpers =====
     function chip(obj){
@@ -220,8 +232,8 @@ dialog{border:none; border-radius:16px; padding:0; box-shadow:0 30px 70px rgba(0
       const temp = pick('temp');
 
       // probabilities
-      needsBell = Math.random() < 0.35; // decaf about 35%
-      needsSleeve = (temp.key==='temp_hot') && (Math.random() < 0.6); // extra-hot common for hot
+      needsBell = Math.random() < 0.35; // ~35% need decaf
+      needsSleeve = (temp.key==='temp_hot') && (Math.random() < 0.6); // sleeve often for hot
 
       const arr = [size.key, coffee.key, milk.key, sweet.key, temp.key];
       if(needsBell) arr.push('flag_decaf');
@@ -306,7 +318,6 @@ dialog{border:none; border-radius:16px; padding:0; box-shadow:0 30px 70px rgba(0
     }
 
     newOrderBtn.addEventListener('click', ()=>{
-      // Start new order and start countdown now
       resetForNewOrder();
       beginOrder();
     });
@@ -316,7 +327,6 @@ dialog{border:none; border-radius:16px; padding:0; box-shadow:0 30px 70px rgba(0
         document.querySelectorAll('.seg button').forEach(b=> b.classList.remove('active'));
         btn.classList.add('active');
         timerDurationSec = parseInt(btn.dataset.timer,10);
-        // Do not affect an already running order; the new duration applies next order
       });
     });
 
@@ -332,36 +342,69 @@ dialog{border:none; border-radius:16px; padding:0; box-shadow:0 30px 70px rgba(0
     });
 
     // ===== Evaluation & results =====
-    function arraysEqualAsSets(a,b){
-      if(a.length!==b.length) return false;
-      const sa = new Set(a), sb = new Set(b);
-      for(const x of sa){ if(!sb.has(x)) return false; }
-      return true;
-    }
-
     function finalizeOrder({timedOut=false}){
       stopTimer();
       const endTs = performance.now();
       const secs = orderStartTs? (endTs - orderStartTs)/1000 : 0;
 
-      // expected essentials (exclude flags)
-      const want = ticket.filter(k=> !k.startsWith('flag_'));
-      const got = tray.slice();
-      const correct = arraysEqualAsSets(want, got);
+      // Split expected vs flags
+      let wantCore = ticket.filter(k=> !isFlag(k));
+      const gotAll  = tray.slice();
+      const gotFlags = gotAll.filter(k=> isFlag(k));
+      const gotCore  = gotAll.filter(k=> !isFlag(k));
 
-      // rule checks
-      let errors = [];
-      if(needsBell && !bellRang) errors.push('Did not ring bell for decaf');
-      if(!needsBell && bellRang) errors.push('Rang bell without decaf');
-      if(needsSleeve && !sleeveAdded) errors.push('No sleeve for extra-hot');
+      const errors = [];
+      const notes  = [];
 
-      // content errors
-      const extras = got.filter(k=> !want.includes(k));
-      const missing = want.filter(k=> !got.includes(k));
-      if(extras.length) errors.push('Extra items: ' + extras.map(k=> BASE_OPTIONS.find(o=>o.key===k)?.label).join(', '));
+      // --- Any-of "honey OR soy" requirement -------------------------
+      const ANY_OF = ['sweet_honey','milk_soy'];
+      const anyOfOnTicket = wantCore.some(k => ANY_OF.includes(k));
+      if(anyOfOnTicket){
+        // Remove any-of tokens from the strict set and require at least one present
+        wantCore = wantCore.filter(k => !ANY_OF.includes(k));
+        const satisfied = gotCore.some(k => ANY_OF.includes(k));
+        if(!satisfied){
+          errors.push('Need at least one of: Honey OR Soy');
+        } else {
+          const both = ANY_OF.every(k => gotCore.includes(k));
+          if(both) notes.push('Both “honey” and “soy” selected — allowed, not penalized.');
+        }
+      }
+
+      // --- Decaf + bell logic ----------------------------------------
+      if(ticket.includes('flag_decaf')){ // ticket truly requires decaf
+        const decafChosen = gotFlags.includes('flag_decaf');
+        if(!decafChosen){
+          errors.push('Decaf required but not selected.');
+        }
+        if(decafChosen && !bellRang){
+          errors.push('Bell must be rung for decaf orders.');
+        }
+        if(!decafChosen && bellRang){
+          notes.push('Bell rung without decaf — neutral (not an error).');
+        }
+      } else {
+        if(bellRang){
+          notes.push('Bell rung — neutral (no decaf required).');
+        }
+      }
+
+      // --- Extra-hot sleeve rule -------------------------------------
+      if(ticket.includes('flag_extrahot') && !sleeveAdded){
+        errors.push('No sleeve for extra-hot.');
+      }
+
+      // --- Content errors (compare ONLY core items) -------------------
+      const extras  = gotCore.filter(k=>{
+        // If any-of is on the ticket, both honey/soy are allowed (not extras)
+        if(anyOfOnTicket && ANY_OF.includes(k)) return false;
+        return !wantCore.includes(k);
+      });
+      const missing = wantCore.filter(k=> !gotCore.includes(k));
+      if(extras.length)  errors.push('Extra items: ' + extras.map(k=> BASE_OPTIONS.find(o=>o.key===k)?.label).join(', '));
       if(missing.length) errors.push('Missing items: ' + missing.map(k=> BASE_OPTIONS.find(o=>o.key===k)?.label).join(', '));
 
-      const passed = !timedOut && correct && errors.length===0;
+      const passed = !timedOut && errors.length===0;
 
       logs.push({
         order: orderCount,
@@ -373,7 +416,9 @@ dialog{border:none; border-radius:16px; padding:0; box-shadow:0 30px 70px rgba(0
 
       const dlg = el('resultDlg');
       el('resultTitle').textContent = passed ? '✅ Served!' : (timedOut ? '⏰ Time up' : '⚠️ Check again');
-      el('resultMsg').textContent = passed ? 'Perfect match within time.' : (errors.length? errors.join(' | ') : 'Order not correct.');
+      el('resultMsg').textContent = passed
+        ? 'Perfect match within time.'
+        : (errors.length ? errors.join(' | ') : (notes.length ? notes.join(' | ') : 'Order not correct.'));
       dlg.showModal();
     }
 
@@ -397,10 +442,10 @@ dialog{border:none; border-radius:16px; padding:0; box-shadow:0 30px 70px rgba(0
     // ===== Init =====
     function init(){
       renderOptions();
-      // Do not auto-start any order or timer. User controls via Start new order.
       countdownEl.textContent = '--:--';
       orderNum.textContent = '—';
     }
     init();
-  </script></body>
+  </script>
+</body>
 </html>
