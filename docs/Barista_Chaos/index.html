@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -27,39 +26,38 @@
     .btn[disabled]{opacity:.5; cursor:not-allowed}
     .btn.primary{background:var(--accent); color:white; border-color: transparent}
     .btn.success{background:var(--success); color:white; border-color: transparent}
-    .btn.warn{background:var(--warning); color:black; border-color: transparent}
+    .btn.warn{background:var(--warning); color:black; border-color: transparent}.seg{display:flex; background:var(--pill); border-radius:999px; padding:4px; gap:4px; box-shadow: var(--shadow)}
+.seg button{border:none;background:transparent;padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:600;color:var(--muted)}
+.seg button.active{background:white; color:var(--ink); box-shadow: var(--shadow)}
 
-    .seg{display:flex; background:var(--pill); border-radius:999px; padding:4px; gap:4px; box-shadow: var(--shadow)}
-    .seg button{border:none;background:transparent;padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:600;color:var(--muted)}
-    .seg button.active{background:white; color:var(--ink); box-shadow: var(--shadow)}
+main{max-width:1100px; margin:18px auto; padding:0 16px}
+.layout{display:grid; grid-template-columns: 1fr; gap:16px}
+@media(min-width:900px){.layout{grid-template-columns: 1.1fr .9fr}}
+.card{background:var(--card); border-radius:var(--radius); box-shadow: var(--shadow); padding:16px}
+.statusbar{display:grid; grid-template-columns: 1fr auto; gap:16px; align-items:center}
+.timer{font-weight:700; font-variant-numeric: tabular-nums}
+.sign{justify-self:end; padding:8px 14px; border-radius:999px; font-weight:700; color:white; box-shadow:0 8px 24px rgba(0,0,0,.2); display:flex; align-items:center; gap:8px}
+.sign.none{background:linear-gradient(120deg,#10b981,#34d399)}
+.sign.plant{background:linear-gradient(120deg,#3b82f6,#06b6d4)}
+.sign.sugar{background:linear-gradient(120deg,#f97316,#f59e0b)}
 
-    main{max-width:1100px; margin:18px auto; padding:0 16px}
-    .layout{display:grid; grid-template-columns: 1fr; gap:16px}
-    @media(min-width:900px){.layout{grid-template-columns: 1.1fr .9fr}}
-    .card{background:var(--card); border-radius:var(--radius); box-shadow: var(--shadow); padding:16px}
-    .statusbar{display:grid; grid-template-columns: 1fr auto; gap:16px; align-items:center}
-    .timer{font-weight:700; font-variant-numeric: tabular-nums}
-    .sign{justify-self:end; padding:8px 14px; border-radius:999px; font-weight:700; color:white; box-shadow:0 8px 24px rgba(0,0,0,.2); display:flex; align-items:center; gap:8px}
-    .sign.none{background:linear-gradient(120deg,#10b981,#34d399)}
-    .sign.plant{background:linear-gradient(120deg,#3b82f6,#06b6d4)}
-    .sign.sugar{background:linear-gradient(120deg,#f97316,#f59e0b)}
+.order .ticket{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.chip{display:inline-flex; align-items:center; gap:6px; background:var(--pill); border-radius:999px; padding:8px 12px; border:1px solid #e5e7eb; font-weight:600}
 
-    .order .ticket{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
-    .chip{display:inline-flex; align-items:center; gap:6px; background:var(--pill); border-radius:999px; padding:8px 12px; border:1px solid #e5e7eb; font-weight:600}
+.tray{min-height:90px; border:2px dashed #d1d5db; border-radius:var(--radius); padding:12px; display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.pill{user-select:none; background:white; border-radius:999px; padding:10px 14px; border:1px solid #e5e7eb; display:inline-flex; align-items:center; gap:8px; box-shadow: var(--shadow); cursor:pointer}
+.pill .emoji{font-size:18px}
 
-    .tray{min-height:90px; border:2px dashed #d1d5db; border-radius:var(--radius); padding:12px; display:flex; flex-wrap:wrap; gap:8px; align-items:center}
-    .pill{user-select:none; background:white; border-radius:999px; padding:10px 14px; border:1px solid #e5e7eb; display:inline-flex; align-items:center; gap:8px; box-shadow: var(--shadow); cursor:pointer}
-    .pill .emoji{font-size:18px}
+.grid{display:grid; grid-template-columns: repeat(2, 1fr); gap:10px}
+@media(min-width:700px){.grid{grid-template-columns: repeat(3, 1fr)}}
 
-    .grid{display:grid; grid-template-columns: repeat(2, 1fr); gap:10px}
-    @media(min-width:700px){.grid{grid-template-columns: repeat(3, 1fr)}}
+dialog{border:none; border-radius:16px; padding:0; box-shadow:0 30px 70px rgba(0,0,0,.3)}
+.modal{padding:18px; max-width:520px}
+.modal h3{margin:0 0 8px}
+.modal p{margin:0 0 12px; color:var(--muted)}
+.modal .actions{display:flex; gap:8px; justify-content:flex-end}
+.kudos{color:var(--success); font-weight:700}
 
-    dialog{border:none; border-radius:16px; padding:0; box-shadow:0 30px 70px rgba(0,0,0,.3)}
-    .modal{padding:18px; max-width:520px}
-    .modal h3{margin:0 0 8px}
-    .modal p{margin:0 0 12px; color:var(--muted)}
-    .modal .actions{display:flex; gap:8px; justify-content:flex-end}
-    .kudos{color:var(--success); font-weight:700}
   </style>
 </head>
 <body>
@@ -89,9 +87,7 @@
       <button class="btn" id="sleeveBtn" title="Add sleeve for extra-hot">🧻 Add Sleeve</button>
       <button class="btn" id="downloadBtn" title="Download CSV log">⬇️ Download CSV</button>
     </div>
-  </header>
-
-  <main>
+  </header>  <main>
     <div class="layout">
       <section class="card order">
         <div class="statusbar">
@@ -103,16 +99,13 @@
         <h3 style="margin:16px 0 8px;font-size:16px">Preparation tray</h3>
         <div class="tray" id="tray"></div>
         <p id="feedback" style="margin:10px 0 0; color:var(--muted)">Add items to match the ticket, then press <strong>Serve</strong>.</p>
-      </section>
+      </section><aside class="card">
+    <h2 style="margin:0 0 8px;font-size:18px">Options</h2>
+    <div class="grid" id="options"></div>
+  </aside>
+</div>
 
-      <aside class="card">
-        <h2 style="margin:0 0 8px;font-size:18px">Options</h2>
-        <div class="grid" id="options"></div>
-      </aside>
-    </div>
-  </main>
-
-  <dialog id="incidentDlg">
+  </main>  <dialog id="incidentDlg">
     <div class="modal">
       <h3 id="incidentTitle">Incident</h3>
       <p id="incidentMsg">—</p>
@@ -125,9 +118,7 @@
       <p id="resultMsg">—</p>
       <div class="actions"><button class="btn success" id="nextOrderBtn">OK</button></div>
     </div>
-  </dialog>
-
-  <script>
+  </dialog>  <script>
     // ===== State: timer + logging =====
     const logs = []; // per-order records
     let timerDurationSec = 90; // default, set by seg buttons
@@ -411,7 +402,5 @@
       orderNum.textContent = '—';
     }
     init();
-  </script>
-</body>
+  </script></body>
 </html>
-
