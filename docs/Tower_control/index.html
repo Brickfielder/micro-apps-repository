@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tower Control — Executive Function Trainer</title>
+  <style>
+    :root{
+      --bg: #0f172a;
+      --card: #1e293b;
+      --surface: #334155;
+      --border: #475569;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #3b82f6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --accent: #06b6d4;
+      --shadow: 0 4px 20px rgba(0,0,0,0.3);
+      --radar-green: #22c55e;
+    }
+    
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; font-family: 'Courier New', monospace; background: var(--bg); color: var(--text); overflow: hidden; }
+    
+    .container { height: 100vh; display: grid; grid-template-rows: auto 1fr auto; }
+    
+    header { 
+      background: var(--card); 
+      border-bottom: 2px solid var(--border); 
+      padding: 12px 20px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    
+    h1 { margin: 0; font-size: 20px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+    
+    .status { 
+      display: flex; 
+      gap: 16px; 
+      font-size: 14px; 
+      font-weight: bold;
+    }
+    
+    .btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+    
+    .btn:hover:not(:disabled) { background: var(--border); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn.primary { background: var(--primary); border-color: var(--primary); }
+    .btn.success { background: var(--success); border-color: var(--success); }
+    .btn.danger { background: var(--danger); border-color: var(--danger); }
+    .btn.warning { background: var(--warning); border-color: var(--warning); color: black; }
+    
+    main { 
+      display: grid; 
+      grid-template-columns: 300px 1fr 280px; 
+      height: 100%; 
+      gap: 2px;
+      background: var(--border);
+    }
+    
+    .panel { 
+      background: var(--card); 
+      padding: 16px; 
+      overflow-y: auto;
+    }
+    
+    .radar-zone { 
+      background: radial-gradient(circle at center, #0a4d3a 0%, #083344 70%, var(--bg) 100%); 
+      position: relative; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      overflow: hidden;
+    }
+    
+    .radar-screen {
+      width: 400px;
+      height: 400px;
+      border: 2px solid var(--radar-green);
+      border-radius: 50%;
+      position: relative;
+      background: radial-gradient(circle, rgba(34,197,94,0.1) 0%, rgba(34,197,94,0.05) 50%, transparent 70%);
+    }
+    
+    .radar-grid {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      height: 100%;
+    }
+    
+    .radar-grid::before,
+    .radar-grid::after {
+      content: '';
+      position: absolute;
+      background: var(--radar-green);
+      opacity: 0.3;
+    }
+    
+    .radar-grid::before {
+      top: 50%;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      transform: translateY(-50%);
+    }
+    
+    .radar-grid::after {
+      top: 0;
+      left: 50%;
+      width: 1px;
+      height: 100%;
+      transform: translateX(-50%);
+    }
+    
+    .aircraft {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid;
+      font-size: 10px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      transform: translate(-50%, -50%);
+    }
+    
+    .aircraft.civilian { background: var(--primary); border-color: var(--primary); color: white; }
+    .aircraft.military { background: var(--warning); border-color: var(--warning); color: black; }
+    .aircraft.emergency { background: var(--danger); border-color: var(--danger); color: white; animation: pulse 1s infinite; }
+    .aircraft.selected { box-shadow: 0 0 20px currentColor; scale: 1.2; }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    
+    .protocol-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .protocol-card.active {
+      border-color: var(--warning);
+      background: rgba(245, 158, 11, 0.1);
+    }
+    
+    .aircraft-info {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+    
+    .aircraft-info.selected {
+      border-color: var(--accent);
+      background: rgba(6, 182, 212, 0.1);
+    }
+    
+    .queue-item {
+      background: var(--surface);
+      border-left: 4px solid var(--primary);
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      border-radius: 0 4px 4px 0;
+    }
+    
+    .queue-item.priority { border-left-color: var(--danger); }
+    .queue-item.completed { opacity: 0.6; background: var(--bg); }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      font-size: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .stat {
+      text-align: center;
+      padding: 8px;
+      background: var(--surface);
+      border-radius: 4px;
+    }
+    
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    
+    .timer {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--warning);
+      font-variant-numeric: tabular-nums;
+    }
+    
+    .instructions {
+      background: var(--surface);
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    
+    footer {
+      background: var(--card);
+      border-top: 2px solid var(--border);
+      padding: 8px 20px;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .modal-content {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+    }
+    
+    .modal-content h3 {
+      margin: 0 0 12px 0;
+      color: var(--accent);
+    }
+    
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-left">
+        <h1>🎯 TOWER CONTROL</h1>
+        <div class="status">
+          <span>Level: <span id="level">1</span></span>
+          <span>Score: <span id="score">0</span></span>
+          <span class="timer">Time: <span id="timer">--:--</span></span>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="btn primary" id="startBtn">Start Mission</button>
+        <button class="btn" id="pauseBtn" disabled>Pause</button>
+        <button class="btn danger" id="emergencyBtn" disabled>🚨 Emergency</button>
+        <button class="btn" id="downloadBtn">📊 Export Data</button>
+      </div>
+    </header>
+    
+    <main>
+      <!-- Left Panel: Instructions & Protocols -->
+      <div class="panel">
+        <div class="instructions">
+          <strong>Mission Briefing</strong><br>
+          Manage air traffic by selecting aircraft and issuing commands. Follow current protocols and handle emergencies.
+          <br><br>
+          <strong>Controls:</strong><br>
+          • Click aircraft to select<br>
+          • Use action buttons to direct<br>
+          • Watch for protocol changes<br>
+          • Prioritize emergency aircraft
+        </div>
+        
+        <h3>Active Protocols</h3>
+        <div id="protocols"></div>
+        
+        <h3>Task Queue</h3>
+        <div id="taskQueue"></div>
+      </div>
+      
+      <!-- Center: Radar Screen -->
+      <div class="radar-zone">
+        <div class="radar-screen">
+          <div class="radar-grid"></div>
+          <div id="aircraftContainer"></div>
+        </div>
+      </div>
+      
+      <!-- Right Panel: Aircraft Info & Controls -->
+      <div class="panel">
+        <div class="stats">
+          <div class="stat">
+            <div>Success Rate</div>
+            <div id="successRate">---%</div>
+          </div>
+          <div class="stat">
+            <div>Completed</div>
+            <div id="completed">0</div>
+          </div>
+          <div class="stat">
+            <div>Working Mem</div>
+            <div id="memoryLoad">0/4</div>
+          </div>
+        </div>
+        
+        <h3>Aircraft Status</h3>
+        <div id="aircraftList"></div>
+        
+        <div class="actions">
+          <button class="btn" id="clearBtn" disabled>Clear Route</button>
+          <button class="btn" id="landBtn" disabled>Land</button>
+          <button class="btn" id="holdBtn" disabled>Hold Pattern</button>
+          <button class="btn" id="redirectBtn" disabled>Redirect</button>
+        </div>
+        
+        <div style="margin-top: 16px;">
+          <h4>Selected: <span id="selectedInfo">None</span></h4>
+          <div id="selectedDetails"></div>
+        </div>
+      </div>
+    </main>
+    
+    <footer>
+      <span>Executive Function Training</span>
+      <span>•</span>
+      <span>Working Memory • Cognitive Flexibility • Inhibitory Control</span>
+    </footer>
+  </div>
+  
+  <!-- Modals -->
+  <div class="modal" id="resultModal">
+    <div class="modal-content">
+      <h3 id="resultTitle">Mission Complete</h3>
+      <p id="resultMessage"></p>
+      <button class="btn primary" id="nextLevelBtn">Continue</button>
+    </div>
+  </div>
+
+  <script>
+    // Game state
+    let gameState = {
+      running: false,
+      paused: false,
+      level: 1,
+      score: 0,
+      timer: 120,
+      aircraft: [],
+      protocols: [],
+      tasks: [],
+      selectedAircraft: null,
+      completedTasks: 0,
+      failedTasks: 0,
+      memoryItems: []
+    };
+
+    // Session tracking for data export
+    let sessionData = {
+      sessions: [],
+      currentSession: null
+    };
+
+    let gameLoop = null;
+    let protocolChangeInterval = null;
+
+    // Aircraft types and behaviors
+    const AIRCRAFT_TYPES = [
+      { type: 'civilian', emoji: 'C', priority: 1, color: '#3b82f6' },
+      { type: 'military', emoji: 'M', priority: 2, color: '#f59e0b' },
+      { type: 'emergency', emoji: 'E', priority: 3, color: '#ef4444' }
+    ];
+
+    // Protocols that change during gameplay
+    const PROTOCOLS = [
+      { id: 'standard', name: 'Standard Operations', rule: 'Process aircraft in order of arrival' },
+      { id: 'priority', name: 'Priority Override', rule: 'Military aircraft have landing priority' },
+      { id: 'emergency', name: 'Emergency Protocol', rule: 'Emergency aircraft must be cleared immediately' },
+      { id: 'weather', name: 'Weather Hold', rule: 'All civilian aircraft must hold pattern' },
+      { id: 'restricted', name: 'Airspace Restriction', rule: 'No military aircraft in north quadrant' }
+    ];
+
+    // DOM elements
+    const elements = {
+      level: document.getElementById('level'),
+      score: document.getElementById('score'),
+      timer: document.getElementById('timer'),
+      startBtn: document.getElementById('startBtn'),
+      pauseBtn: document.getElementById('pauseBtn'),
+      emergencyBtn: document.getElementById('emergencyBtn'),
+      downloadBtn: document.getElementById('downloadBtn'),
+      protocols: document.getElementById('protocols'),
+      taskQueue: document.getElementById('taskQueue'),
+      aircraftContainer: document.getElementById('aircraftContainer'),
+      aircraftList: document.getElementById('aircraftList'),
+      selectedInfo: document.getElementById('selectedInfo'),
+      selectedDetails: document.getElementById('selectedDetails'),
+      successRate: document.getElementById('successRate'),
+      completed: document.getElementById('completed'),
+      memoryLoad: document.getElementById('memoryLoad'),
+      clearBtn: document.getElementById('clearBtn'),
+      landBtn: document.getElementById('landBtn'),
+      holdBtn: document.getElementById('holdBtn'),
+      redirectBtn: document.getElementById('redirectBtn'),
+      resultModal: document.getElementById('resultModal'),
+      resultTitle: document.getElementById('resultTitle'),
+      resultMessage: document.getElementById('resultMessage'),
+      nextLevelBtn: document.getElementById('nextLevelBtn')
+    };
+
+    // Initialize game
+    function initGame() {
+      updateDisplay();
+      setActiveProtocol('standard');
+    }
+
+    // Start/stop game
+    function startGame() {
+      // Initialize session tracking
+      sessionData.currentSession = {
+        sessionId: Date.now(),
+        startTime: new Date().toISOString(),
+        startLevel: gameState.level,
+        actions: [],
+        protocolChanges: [],
+        aircraftHandled: []
+      };
+      
+      gameState.running = true;
+      gameState.paused = false;
+      gameState.timer = 90 + (gameState.level * 30); // More time for higher levels
+      
+      elements.startBtn.disabled = true;
+      elements.pauseBtn.disabled = false;
+      elements.emergencyBtn.disabled = false;
+      
+      // Clear previous state
+      gameState.aircraft = [];
+      gameState.tasks = [];
+      gameState.selectedAircraft = null;
+      
+      // Start spawning aircraft
+      spawnAircraft();
+      
+      // Start game loop
+      gameLoop = setInterval(updateGame, 1000);
+      
+      // Change protocols periodically
+      protocolChangeInterval = setInterval(changeProtocol, 15000 + Math.random() * 10000);
+      
+      updateDisplay();
+    }
+
+    function pauseGame() {
+      gameState.paused = !gameState.paused;
+      elements.pauseBtn.textContent = gameState.paused ? 'Resume' : 'Pause';
+    }
+
+    function stopGame() {
+      // Finalize session data
+      if (sessionData.currentSession) {
+        sessionData.currentSession.endTime = new Date().toISOString();
+        sessionData.currentSession.finalLevel = gameState.level;
+        sessionData.currentSession.finalScore = gameState.score;
+        sessionData.currentSession.completedTasks = gameState.completedTasks;
+        sessionData.currentSession.failedTasks = gameState.failedTasks;
+        sessionData.currentSession.successRate = gameState.completedTasks + gameState.failedTasks > 0 
+          ? Math.round((gameState.completedTasks / (gameState.completedTasks + gameState.failedTasks)) * 100)
+          : 100;
+        sessionData.currentSession.duration = Math.floor((Date.now() - sessionData.currentSession.sessionId) / 1000);
+        
+        sessionData.sessions.push(sessionData.currentSession);
+        sessionData.currentSession = null;
+      }
+      
+      gameState.running = false;
+      clearInterval(gameLoop);
+      clearInterval(protocolChangeInterval);
+      
+      elements.startBtn.disabled = false;
+      elements.pauseBtn.disabled = true;
+      elements.emergencyBtn.disabled = true;
+      
+      showResults();
+    }
+
+    // Aircraft management
+    function spawnAircraft() {
+      const maxAircraft = Math.min(3 + gameState.level, 8);
+      
+      if (gameState.aircraft.length < maxAircraft && Math.random() < 0.7) {
+        const type = chooseAircraftType();
+        const aircraft = createAircraft(type);
+        gameState.aircraft.push(aircraft);
+        createAircraftElement(aircraft);
+        addTask(aircraft);
+      }
+      
+      // Schedule next spawn
+      setTimeout(spawnAircraft, 2000 + Math.random() * 4000);
+    }
+
+    function chooseAircraftType() {
+      const rand = Math.random();
+      if (rand < 0.1 + gameState.level * 0.05) return AIRCRAFT_TYPES[2]; // emergency
+      if (rand < 0.3) return AIRCRAFT_TYPES[1]; // military
+      return AIRCRAFT_TYPES[0]; // civilian
+    }
+
+    function createAircraft(type) {
+      return {
+        id: 'aircraft_' + Date.now() + Math.random(),
+        type: type.type,
+        emoji: type.emoji,
+        priority: type.priority,
+        x: Math.random() * 360 + 20, // Keep within radar bounds
+        y: Math.random() * 360 + 20,
+        status: 'approaching',
+        timeRemaining: 20 + Math.random() * 15,
+        selected: false
+      };
+    }
+
+    function createAircraftElement(aircraft) {
+      const element = document.createElement('div');
+      element.className = `aircraft ${aircraft.type}`;
+      element.id = aircraft.id;
+      element.style.left = aircraft.x + 'px';
+      element.style.top = aircraft.y + 'px';
+      element.textContent = aircraft.emoji;
+      element.onclick = () => selectAircraft(aircraft.id);
+      
+      elements.aircraftContainer.appendChild(element);
+    }
+
+    function selectAircraft(aircraftId) {
+      // Deselect previous
+      if (gameState.selectedAircraft) {
+        const prevElement = document.getElementById(gameState.selectedAircraft);
+        if (prevElement) prevElement.classList.remove('selected');
+      }
+      
+      gameState.selectedAircraft = aircraftId;
+      const element = document.getElementById(aircraftId);
+      if (element) element.classList.add('selected');
+      
+      updateControlButtons();
+      updateDisplay();
+    }
+
+    // Protocol management
+    function setActiveProtocol(protocolId) {
+      gameState.protocols = [protocolId];
+      updateDisplay();
+    }
+
+    function changeProtocol() {
+      if (!gameState.running || gameState.paused) return;
+      
+      const availableProtocols = PROTOCOLS.filter(p => !gameState.protocols.includes(p.id));
+      if (availableProtocols.length > 0) {
+        const newProtocol = availableProtocols[Math.floor(Math.random() * availableProtocols.length)];
+        gameState.protocols = [newProtocol.id];
+        
+        // Track protocol change
+        if (sessionData.currentSession) {
+          sessionData.currentSession.protocolChanges.push({
+            timestamp: new Date().toISOString(),
+            protocolId: newProtocol.id,
+            protocolName: newProtocol.name,
+            gameTime: 90 + (gameState.level * 30) - gameState.timer
+          });
+        }
+        
+        addMemoryItem(`Protocol: ${newProtocol.name}`);
+        updateDisplay();
+      }
+    }
+
+    // Task management
+    function addTask(aircraft) {
+      const task = {
+        id: 'task_' + Date.now(),
+        aircraftId: aircraft.id,
+        description: `Handle ${aircraft.type} ${aircraft.emoji}`,
+        priority: aircraft.type === 'emergency',
+        completed: false,
+        timeAdded: Date.now()
+      };
+      
+      gameState.tasks.push(task);
+      addMemoryItem(`New ${aircraft.type}: ${aircraft.emoji}`);
+      updateDisplay();
+    }
+
+    function completeTask(aircraftId) {
+      const task = gameState.tasks.find(t => t.aircraftId === aircraftId && !t.completed);
+      if (task) {
+        task.completed = true;
+        gameState.completedTasks++;
+        gameState.score += task.priority ? 50 : 25;
+        removeMemoryItem(`New ${task.aircraftId}`);
+      }
+    }
+
+    // Memory management (working memory simulation)
+    function addMemoryItem(item) {
+      gameState.memoryItems.push(item);
+      if (gameState.memoryItems.length > 4 + gameState.level) {
+        gameState.memoryItems.shift(); // Remove oldest if overloaded
+      }
+      updateDisplay();
+    }
+
+    function removeMemoryItem(partial) {
+      gameState.memoryItems = gameState.memoryItems.filter(item => !item.includes(partial));
+      updateDisplay();
+    }
+
+    // Control actions
+    function handleLand() {
+      const aircraft = gameState.aircraft.find(a => a.id === gameState.selectedAircraft);
+      if (aircraft) {
+        recordAction('land', aircraft);
+        completeTask(aircraft.id);
+        removeAircraft(aircraft.id);
+        gameState.score += 25;
+      }
+    }
+
+    function handleHold() {
+      const aircraft = gameState.aircraft.find(a => a.id === gameState.selectedAircraft);
+      if (aircraft) {
+        recordAction('hold', aircraft);
+        aircraft.status = 'holding';
+        aircraft.timeRemaining += 10;
+        gameState.score += 5;
+        updateDisplay();
+      }
+    }
+
+    function handleRedirect() {
+      const aircraft = gameState.aircraft.find(a => a.id === gameState.selectedAircraft);
+      if (aircraft) {
+        recordAction('redirect', aircraft);
+        completeTask(aircraft.id);
+        removeAircraft(aircraft.id);
+        gameState.score += 15;
+      }
+    }
+
+    function handleClear() {
+      const aircraft = gameState.aircraft.find(a => a.id === gameState.selectedAircraft);
+      if (aircraft) {
+        recordAction('clear', aircraft);
+        aircraft.status = 'cleared';
+        gameState.score += 10;
+        updateDisplay();
+      }
+    }
+
+    function recordAction(action, aircraft) {
+      if (sessionData.currentSession) {
+        const actionData = {
+          timestamp: new Date().toISOString(),
+          action: action,
+          aircraftType: aircraft.type,
+          aircraftId: aircraft.id,
+          gameTime: 90 + (gameState.level * 30) - gameState.timer,
+          level: gameState.level,
+          currentProtocol: gameState.protocols[0] || 'standard',
+          scoreAtTime: gameState.score,
+          memoryLoad: gameState.memoryItems.length
+        };
+        
+        sessionData.currentSession.actions.push(actionData);
+        
+        // Track aircraft handling
+        if (!sessionData.currentSession.aircraftHandled.find(a => a.aircraftId === aircraft.id)) {
+          sessionData.currentSession.aircraftHandled.push({
+            aircraftId: aircraft.id,
+            type: aircraft.type,
+            spawnTime: new Date().toISOString(),
+            handledTime: new Date().toISOString(),
+            action: action,
+            timeToHandle: 20 - aircraft.timeRemaining // rough estimate
+          });
+        }
+      }
+    }
+
+    function removeAircraft(aircraftId) {
+      gameState.aircraft = gameState.aircraft.filter(a => a.id !== aircraftId);
+      const element = document.getElementById(aircraftId);
+      if (element) element.remove();
+      
+      if (gameState.selectedAircraft === aircraftId) {
+        gameState.selectedAircraft = null;
+        updateControlButtons();
+      }
+      
+      updateDisplay();
+    }
+
+    // Game loop
+    function updateGame() {
+      if (gameState.paused) return;
+      
+      gameState.timer--;
+      
+      // Update aircraft time remaining
+      gameState.aircraft.forEach(aircraft => {
+        aircraft.timeRemaining -= 1;
+        if (aircraft.timeRemaining <= 0) {
+          gameState.failedTasks++;
+          removeAircraft(aircraft.id);
+        }
+      });
+      
+      // Check win/lose conditions
+      if (gameState.timer <= 0) {
+        stopGame();
+      } else if (gameState.completedTasks >= 5 + gameState.level * 2) {
+        gameState.level++;
+        if (gameState.level > 5) {
+          stopGame();
+        } else {
+          // Continue to next level
+          gameState.timer += 30;
+          spawnAircraft();
+        }
+      }
+      
+      updateDisplay();
+    }
+
+    // UI Updates
+    function updateDisplay() {
+      elements.level.textContent = gameState.level;
+      elements.score.textContent = gameState.score;
+      elements.timer.textContent = formatTime(gameState.timer);
+      elements.completed.textContent = gameState.completedTasks;
+      elements.memoryLoad.textContent = `${gameState.memoryItems.length}/${4 + gameState.level}`;
+      
+      const successRate = gameState.completedTasks + gameState.failedTasks > 0 
+        ? Math.round((gameState.completedTasks / (gameState.completedTasks + gameState.failedTasks)) * 100)
+        : 100;
+      elements.successRate.textContent = successRate + '%';
+      
+      updateProtocolsDisplay();
+      updateTaskQueueDisplay();
+      updateAircraftListDisplay();
+      updateSelectedAircraftDisplay();
+    }
+
+    function updateProtocolsDisplay() {
+      elements.protocols.innerHTML = '';
+      gameState.protocols.forEach(protocolId => {
+        const protocol = PROTOCOLS.find(p => p.id === protocolId);
+        if (protocol) {
+          const div = document.createElement('div');
+          div.className = 'protocol-card active';
+          div.innerHTML = `<strong>${protocol.name}</strong><br><small>${protocol.rule}</small>`;
+          elements.protocols.appendChild(div);
+        }
+      });
+    }
+
+    function updateTaskQueueDisplay() {
+      elements.taskQueue.innerHTML = '';
+      const sortedTasks = gameState.tasks
+        .filter(t => !t.completed)
+        .sort((a, b) => (b.priority ? 1 : 0) - (a.priority ? 1 : 0));
+        
+      sortedTasks.forEach(task => {
+        const div = document.createElement('div');
+        div.className = `queue-item ${task.priority ? 'priority' : ''}`;
+        div.textContent = task.description;
+        elements.taskQueue.appendChild(div);
+      });
+    }
+
+    function updateAircraftListDisplay() {
+      elements.aircraftList.innerHTML = '';
+      gameState.aircraft.forEach(aircraft => {
+        const div = document.createElement('div');
+        div.className = `aircraft-info ${aircraft.id === gameState.selectedAircraft ? 'selected' : ''}`;
+        div.innerHTML = `
+          <strong>${aircraft.emoji} ${aircraft.type.toUpperCase()}</strong><br>
+          <small>Status: ${aircraft.status} | Time: ${Math.round(aircraft.timeRemaining)}s</small>
+        `;
+        div.onclick = () => selectAircraft(aircraft.id);
+        elements.aircraftList.appendChild(div);
+      });
+    }
+
+    function updateSelectedAircraftDisplay() {
+      const selected = gameState.aircraft.find(a => a.id === gameState.selectedAircraft);
+      if (selected) {
+        elements.selectedInfo.textContent = `${selected.emoji} ${selected.type}`;
+        elements.selectedDetails.innerHTML = `
+          <small>Status: ${selected.status}<br>
+          Time Remaining: ${Math.round(selected.timeRemaining)}s<br>
+          Priority: ${selected.priority}</small>
+        `;
+      } else {
+        elements.selectedInfo.textContent = 'None';
+        elements.selectedDetails.innerHTML = '<small>Click an aircraft to select</small>';
+      }
+    }
+
+    function updateControlButtons() {
+      const hasSelection = gameState.selectedAircraft !== null;
+      elements.clearBtn.disabled = !hasSelection;
+      elements.landBtn.disabled = !hasSelection;
+      elements.holdBtn.disabled = !hasSelection;
+      elements.redirectBtn.disabled = !hasSelection;
+    }
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function showResults() {
+      const successRate = gameState.completedTasks + gameState.failedTasks > 0 
+        ? Math.round((gameState.completedTasks / (gameState.completedTasks + gameState.failedTasks)) * 100)
+        : 100;
+      
+      elements.resultTitle.textContent = gameState.level > 5 ? '🎉 Mission Complete!' : '⏰ Mission Ended';
+      elements.resultMessage.innerHTML = `
+        <strong>🎯 Final Results:</strong><br><br>
+        <div style="text-align: left; display: inline-block;">
+        📊 <strong>Level Reached:</strong> ${gameState.level}<br>
+        🏆 <strong>Total Score:</strong> ${gameState.score} points<br>
+        ✅ <strong>Success Rate:</strong> ${successRate}%<br>
+        📋 <strong>Tasks Completed:</strong> ${gameState.completedTasks}<br><br>
+        </div>
+        <div style="background: #1e293b; padding: 12px; border-radius: 6px; margin-top: 12px;">
+        <strong>🧠 Executive Skills Trained:</strong><br>
+        <small>• <strong>Working Memory:</strong> Tracking multiple aircraft & changing rules<br>
+        • <strong>Cognitive Flexibility:</strong> Adapting to protocol changes<br>
+        • <strong>Inhibitory Control:</strong> Following rules under pressure</small>
+        </div>
+      `;
+      elements.resultModal.style.display = 'flex';
+    }
+
+    // Data export functionality
+    function exportToCSV() {
+      if (sessionData.sessions.length === 0) {
+        alert('No training data available to export. Complete at least one training session first.');
+        return;
+      }
+
+      const csvData = generateCSVData();
+      const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `tower_control_training_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    }
+
+    function generateCSVData() {
+      let csv = 'Session_ID,Start_Time,End_Time,Duration_Seconds,Start_Level,Final_Level,Final_Score,Completed_Tasks,Failed_Tasks,Success_Rate,Total_Actions,Protocol_Changes,Avg_Response_Time,Working_Memory_Peak\n';
+      
+      sessionData.sessions.forEach(session => {
+        const avgResponseTime = session.aircraftHandled.length > 0 
+          ? session.aircraftHandled.reduce((sum, a) => sum + (a.timeToHandle || 0), 0) / session.aircraftHandled.length
+          : 0;
+        
+        const memoryPeak = session.actions.length > 0
+          ? Math.max(...session.actions.map(a => a.memoryLoad))
+          : 0;
+        
+        csv += `${session.sessionId},${session.startTime},${session.endTime},${session.duration},${session.startLevel},${session.finalLevel},${session.finalScore},${session.completedTasks},${session.failedTasks},${session.successRate},${session.actions.length},${session.protocolChanges.length},${avgResponseTime.toFixed(2)},${memoryPeak}\n`;
+      });
+
+      // Add detailed actions data
+      csv += '\n\nDetailed Actions:\n';
+      csv += 'Session_ID,Timestamp,Action,Aircraft_Type,Game_Time,Level,Protocol,Score_At_Time,Memory_Load\n';
+      
+      sessionData.sessions.forEach(session => {
+        session.actions.forEach(action => {
+          csv += `${session.sessionId},${action.timestamp},${action.action},${action.aircraftType},${action.gameTime},${action.level},${action.currentProtocol},${action.scoreAtTime},${action.memoryLoad}\n`;
+        });
+      });
+
+      // Add protocol changes data
+      csv += '\n\nProtocol Changes:\n';
+      csv += 'Session_ID,Timestamp,Protocol_ID,Protocol_Name,Game_Time\n';
+      
+      sessionData.sessions.forEach(session => {
+        session.protocolChanges.forEach(change => {
+          csv += `${session.sessionId},${change.timestamp},${change.protocolId},${change.protocolName},${change.gameTime}\n`;
+        });
+      });
+
+      return csv;
+    }
+
+    // Event listeners
+    elements.startBtn.addEventListener('click', startGame);
+    elements.pauseBtn.addEventListener('click', pauseGame);
+    elements.downloadBtn.addEventListener('click', exportToCSV);
+    elements.clearBtn.addEventListener('click', handleClear);
+    elements.landBtn.addEventListener('click', handleLand);
+    elements.holdBtn.addEventListener('click', handleHold);
+    elements.redirectBtn.addEventListener('click', handleRedirect);
+    elements.nextLevelBtn.addEventListener('click', () => {
+      elements.resultModal.style.display = 'none';
+      gameState = {
+        running: false, paused: false, level: 1, score: 0, timer: 120,
+        aircraft: [], protocols: [], tasks: [], selectedAircraft: null,
+        completedTasks: 0, failedTasks: 0, memoryItems: []
+      };
+      updateDisplay();
+    });
+
+    // Initialize
+    initGame();
+  </script>
+</body>
+</html>
