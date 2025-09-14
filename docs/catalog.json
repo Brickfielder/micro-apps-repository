@@ -1,11 +1,15 @@
 [
-  { "name": "Star Hunt",          "path": "docs/Star_Hunt/",          "tags": ["Visuospatial"] },
-  { "name": "Visuo-Spatial Blocks","path": "docs/Visuospatial_Blocks/","tags": ["Visuospatial"] },
-  { "name": "Maze Explorer",      "path": "docs/maze-explorer/",      "tags": ["Visuospatial","Executive Functioning"] },
-  { "name": "Word Scavenger",     "path": "docs/word-scavenger/",     "tags": ["Language"] },
-  { "name": "TaskFlow Planner",   "path": "docs/Taskflow/",           "tags": ["Executive Functioning"] },
-  { "name": "Emergency Dispatch", "path": "docs/Emergency_despatch/", "tags": ["Executive Functioning"] },
-  { "name": "Barista Logic",      "path": "docs/Barista_Chaos/",      "tags": ["Executive Functioning","Attention"] },
-  { "name": "Fluency Coach",      "path": "docs/Fluency_Coach/",      "tags": ["Language","Executive Functioning","Strategy Training"] },
-  { "name": "Plan with Coco",     "path": "docs/Plan_with_Coco/",     "tags": ["Executive Functioning"] }
+  { "name": "Star Hunt",                 "path": "docs/Star_Hunt/",              "tags": ["Visuospatial"] },
+  { "name": "Visuo-Spatial Blocks",      "path": "docs/Visuospatial_Blocks/",    "tags": ["Visuospatial"] },
+  { "name": "Maze Explorer",             "path": "docs/maze-explorer/",          "tags": ["Visuospatial", "Executive Functioning"] },
+  { "name": "Word Scavenger",            "path": "docs/word-scavenger/",         "tags": ["Language"] },
+  { "name": "TaskFlow Planner",          "path": "docs/Taskflow/",               "tags": ["Executive Functioning"] },
+  { "name": "Emergency Despatch",        "path": "docs/Emergency_despatch/",     "tags": ["Executive Functioning"] },
+  { "name": "Barista Logic",             "path": "docs/Barista_Chaos/",          "tags": ["Executive Functioning", "Attention"] },
+  { "name": "Fluency Coach",             "path": "docs/Fluency_Coach/",          "tags": ["Language", "Executive Functioning", "Strategy Training"] },
+  { "name": "Plan with Coco",            "path": "docs/Plan_with_Coco/",         "tags": ["Executive Functioning"] },
+  { "name": "Office Day",                "path": "docs/Office_Day/",             "tags": ["Executive Functioning"] },
+  { "name": "Audio Errands",             "path": "docs/Audio_Errands/",          "tags": ["Memory", "Executive Functioning"] },
+  { "name": "Errands – Visual Memory",   "path": "docs/Errands-visual-memory/",  "tags": ["Visuospatial", "Memory", "Executive Functioning"] },
+  { "name": "Tower Control",             "path": "docs/Tower_control/",          "tags": ["Attention", "Executive Functioning", "Visuospatial"] }
 ]
