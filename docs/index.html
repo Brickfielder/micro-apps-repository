@@ -5,89 +5,82 @@
   <title>Micro Rehab Apps</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root {
-      --bg: #f7f7f9;
-      --card: #ffffff;
-      --text: #222;
-      --muted: #666;
-      --brand: #0a66c2;   /* pill color */
-      --brand-hover: #084f96;
-      --shadow: 0 8px 20px rgba(0,0,0,0.08);
-      --radius: 14px;
+    :root{
+      --bg:#f7f7f9; --card:#fff; --text:#222; --muted:#666;
+      --brand:#0a66c2; --brand-hover:#084f96;
+      --shadow:0 8px 20px rgba(0,0,0,.08); --radius:14px; --divider:#eceff3;
+      --chip:#eef4fb; --chip-text:#0a66c2; --chip-border:#d8e6f7;
+      --pill-shadow:0 4px 10px rgba(10,102,194,.18);
     }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display: grid;
-      place-items: center;
-      min-height: 100vh;
-      padding: 28px;
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      background:var(--bg); color:var(--text);
+      display:grid; place-items:center; min-height:100vh; padding:28px;
     }
-    .container {
-      width: min(760px, 100%);
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: clamp(20px, 4vw, 36px);
-      text-align: center;
+    .container{
+      width:min(760px,100%); background:var(--card); border-radius:var(--radius);
+      box-shadow:var(--shadow); padding:clamp(20px,4vw,36px); text-align:center;
     }
-    header { margin-bottom: 22px; }
-    header img {
-      width: min(360px, 90%);
-      height: auto;
-      display: block;
-      margin: 0 auto 14px;
-      border-radius: 10px;
-    }
-    header h1 {
-      margin: 0 0 6px 0;
-      font-size: clamp(1.6rem, 3.5vw, 2.2rem);
-      font-weight: 800;
-    }
-    .disclaimer {
-      margin: 0 auto;
-      max-width: 680px;
-      color: var(--muted);
-      line-height: 1.45;
-      font-size: 0.98rem;
-    }
-    .lead { margin: 18px 0 6px 0; color: #444; }
+    header{margin-bottom:22px}
+    header img{width:min(360px,90%); height:auto; display:block; margin:0 auto 14px; border-radius:10px}
+    header h1{margin:0 0 6px 0; font-size:clamp(1.6rem,3.5vw,2.2rem); font-weight:800}
+    .disclaimer{margin:0 auto; max-width:680px; color:var(--muted); line-height:1.45; font-size:.98rem}
+    .lead{margin:18px 0 6px 0; color:#444}
 
-    /* Pills list */
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 18px 0 0 0;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 12px;
+    /* Filter toolbar */
+    .toolbar{
+      display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
+      margin:14px 0 6px 0;
     }
-    li { margin: 0; }
-    a.app-pill {
-      display: inline-block;
-      padding: 12px 22px;
-      border-radius: 999px;
-      background: var(--brand);
-      color: #fff;
-      text-decoration: none;
-      font-size: 1.06rem;
-      transition: background .15s ease, transform .05s ease;
-      box-shadow: 0 4px 10px rgba(10,102,194,0.18);
+    .tag-btn{
+      border:1px solid var(--chip-border);
+      background:var(--chip); color:var(--chip-text);
+      padding:8px 12px; border-radius:999px; font-size:.95rem;
+      cursor:pointer; transition:transform .05s ease, background .15s ease;
     }
-    a.app-pill:hover { background: var(--brand-hover); }
-    a.app-pill:active { transform: translateY(1px); }
+    .tag-btn:hover{background:#e6f0fb}
+    .tag-btn.active{background:var(--brand); color:#fff; border-color:var(--brand)}
+    .tag-btn small{opacity:.85; margin-left:6px}
+
+    /* Sections */
+    .section{text-align:left; margin-top:18px; padding-top:14px; border-top:1px solid var(--divider)}
+    .section:first-of-type{margin-top:10px}
+    .section h2{margin:8px 0 6px 0; font-size:clamp(1.1rem,2.8vw,1.3rem); font-weight:800; letter-spacing:.2px}
+    .section p.sub{margin:0 0 6px 0; color:var(--muted); font-size:.96rem}
+    .section[data-empty="true"]{opacity:.55}
+
+    /* App list + pills */
+    ul{list-style:none; padding:0; margin:12px 0 0 0; display:flex; flex-wrap:wrap; justify-content:center; gap:12px}
+    li{margin:0; display:flex; flex-direction:column; align-items:center}
+    a.app-pill{
+      display:inline-block; padding:12px 22px; border-radius:999px;
+      background:var(--brand); color:#fff; text-decoration:none; font-size:1.06rem;
+      transition:background .15s ease, transform .05s ease; box-shadow:var(--pill-shadow);
+      white-space:nowrap;
+    }
+    a.app-pill:hover{background:var(--brand-hover)}
+    a.app-pill:active{transform:translateY(1px)}
+
+    /* Tag chips shown under each pill */
+    .chips{display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-top:6px}
+    .chip{
+      background:var(--chip); color:var(--chip-text); border:1px solid var(--chip-border);
+      padding:4px 8px; border-radius:999px; font-size:.78rem;
+    }
+
+    /* Hidden helper when filtered out */
+    .hidden{display:none !important}
+
+    /* Helper row under toolbar */
+    .hint{color:var(--muted); font-size:.9rem; margin:6px 0 10px 0}
   </style>
 </head>
 <body>
   <div class="container">
     <header>
       <!-- Place the image at: docs/assets/Micro_Apps_Banner.png -->
-      <img src="assets/Micro_Apps_Banner.png" alt="Micro Apps Banner"
-           onerror="this.style.display='none'">
+      <img src="assets/Micro_Apps_Banner.png" alt="Micro Apps Banner" onerror="this.style.display='none'">
       <h1>Micro Rehab Apps</h1>
       <p class="disclaimer">
         These are experimental prototypes for research and demonstration only.
@@ -97,18 +90,160 @@
     </header>
 
     <p class="lead">Select an exercise below:</p>
-    <ul>
-      <li><a class="app-pill" href="Errands-visual-memory/index.html">Errands – Visual Memory</a></li>
-      <li><a class="app-pill" href="Star_Hunt/index.html">Star Hunt</a></li>
-      <li><a class="app-pill" href="Visuospatial_Blocks/index.html">Visuospatial Blocks</a></li>
-      <li><a class="app-pill" href="maze-explorer/index.html">Maze Explorer</a></li>
-      <li><a class="app-pill" href="word-scavenger/index.html">Word Scavenger</a></li>
-      <li><a class="app-pill" href="Taskflow/index.html">Taskflow: Plan-Check-Feedback</a></li>
-      <li><a class="app-pill" href="Barista_Chaos/index.html">Barista Chaos!</a></li>
-      <li><a class="app-pill" href="Tower_control/index.html">Tower Control - desktop only</a></li>
-      <li><a class="app-pill" href="Emergency_despatch/index.html">Emergency Despatch - desktop only</a></li>
-    <li><a class="app-pill" href="Office_Day/index.html">Office Day</a></li></ul>
-    <li><a class="app-pill" href="Audio_Errands/index.html">Audio Errands</a></li></ul>
+
+    <!-- Filter toolbar (multi-select, OR logic) -->
+    <div class="toolbar" role="group" aria-label="Filter by tag">
+      <button class="tag-btn" data-tag="visuospatial">Visuospatial <small></small></button>
+      <button class="tag-btn" data-tag="executive">Executive <small></small></button>
+      <button class="tag-btn" data-tag="auditory">Auditory <small></small></button>
+      <button class="tag-btn" data-tag="desktop">Desktop-only <small></small></button>
+      <button class="tag-btn" data-tag="all">Clear filters</button>
+    </div>
+    <div class="hint">Tip: select multiple tags to show apps that match <em>any</em> of them.</div>
+
+    <!-- Visuospatial section -->
+    <section class="section" aria-labelledby="visuospatial-title" id="sec-visuospatial">
+      <h2 id="visuospatial-title">📐 Visuospatial apps</h2>
+      <p class="sub">Visual search, spatial planning, and exploration.</p>
+      <ul>
+        <li data-tags="visuospatial">
+          <a class="app-pill" href="Star_Hunt/index.html">Star Hunt</a>
+          <div class="chips"><span class="chip">Visuospatial</span></div>
+        </li>
+        <li data-tags="visuospatial">
+          <a class="app-pill" href="Visuospatial_Blocks/index.html">Visuospatial Blocks</a>
+          <div class="chips"><span class="chip">Visuospatial</span></div>
+        </li>
+        <li data-tags="visuospatial executive">
+          <a class="app-pill" href="maze-explorer/index.html">Maze Explorer</a>
+          <div class="chips"><span class="chip">Visuospatial</span><span class="chip">Executive</span></div>
+        </li>
+        <li data-tags="visuospatial executive">
+          <a class="app-pill" href="word-scavenger/index.html">Word Scavenger</a>
+          <div class="chips"><span class="chip">Visuospatial</span><span class="chip">Executive</span></div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Executive section -->
+    <section class="section" aria-labelledby="exec-title" id="sec-executive">
+      <h2 id="exec-title">🧠 Executive functioning apps</h2>
+      <p class="sub">Planning, sequencing, monitoring, inhibition, and strategy.</p>
+      <ul>
+        <li data-tags="executive">
+          <a class="app-pill" href="Errands-visual-memory/index.html">Errands – Visual Memory</a>
+          <div class="chips"><span class="chip">Executive</span></div>
+        </li>
+        <li data-tags="executive auditory">
+          <a class="app-pill" href="Audio_Errands/index.html">Audio Errands</a>
+          <div class="chips"><span class="chip">Executive</span><span class="chip">Auditory</span></div>
+        </li>
+        <li data-tags="executive">
+          <a class="app-pill" href="Taskflow/index.html">Taskflow: Plan-Check-Feedback</a>
+          <div class="chips"><span class="chip">Executive</span></div>
+        </li>
+        <li data-tags="executive">
+          <a class="app-pill" href="Barista_Chaos/index.html">Barista Chaos!</a>
+          <div class="chips"><span class="chip">Executive</span></div>
+        </li>
+        <li data-tags="executive desktop">
+          <a class="app-pill" href="Tower_control/index.html">Tower Control – desktop only</a>
+          <div class="chips"><span class="chip">Executive</span><span class="chip">Desktop-only</span></div>
+        </li>
+        <li data-tags="executive desktop">
+          <a class="app-pill" href="Emergency_despatch/index.html">Emergency Despatch – desktop only</a>
+          <div class="chips"><span class="chip">Executive</span><span class="chip">Desktop-only</span></div>
+        </li>
+        <li data-tags="executive">
+          <a class="app-pill" href="Office_Day/index.html">Office Day</a>
+          <div class="chips"><span class="chip">Executive</span></div>
+        </li>
+      </ul>
+    </section>
   </div>
+
+  <script>
+    (function(){
+      const buttons = Array.from(document.querySelectorAll('.tag-btn'));
+      const appItems = Array.from(document.querySelectorAll('li[data-tags]'));
+      const sections = Array.from(document.querySelectorAll('.section'));
+
+      // Selected tag set (multi-select). OR logic.
+      const selected = new Set();
+
+      // Map tag -> count of visible items (for badge)
+      function updateCounts(){
+        const tags = ['visuospatial','executive','auditory','desktop'];
+        const visible = appItems.filter(el => !el.classList.contains('hidden'));
+        const byTag = Object.fromEntries(tags.map(t => [t, 0]));
+        visible.forEach(el=>{
+          el.dataset.tags.split(' ').forEach(t=>{
+            if(byTag[t] !== undefined) byTag[t]++;
+          });
+        });
+        buttons.forEach(btn=>{
+          const t = btn.dataset.tag;
+          const small = btn.querySelector('small');
+          if(!small) return;
+          if(t === 'all'){ small.textContent = ''; return; }
+          small.textContent = byTag[t] ? `(${byTag[t]})` : '(0)';
+        });
+      }
+
+      function applyFilter(){
+        // Show all if nothing selected
+        if(selected.size === 0){
+          appItems.forEach(el=>el.classList.remove('hidden'));
+        } else {
+          appItems.forEach(el=>{
+            const tags = el.dataset.tags.split(' ');
+            const match = [...selected].some(t => tags.includes(t));
+            el.classList.toggle('hidden', !match);
+          });
+        }
+        // Mark sections empty if all their children are hidden
+        sections.forEach(sec=>{
+          const items = Array.from(sec.querySelectorAll('li[data-tags]'));
+          const anyVisible = items.some(i => !i.classList.contains('hidden'));
+          sec.dataset.empty = anyVisible ? 'false' : 'true';
+        });
+        updateCounts();
+        // Persist state in URL hash for shareability
+        const hash = [...selected].join(',');
+        history.replaceState(null,'', hash ? `#tags=${encodeURIComponent(hash)}` : location.pathname);
+      }
+
+      function toggleTag(tag){
+        if(tag === 'all'){ // clear filters
+          selected.clear();
+          buttons.forEach(b=>b.classList.remove('active'));
+          applyFilter();
+          return;
+        }
+        if(selected.has(tag)){ selected.delete(tag); }
+        else { selected.add(tag); }
+        // Toggle button UI
+        const btn = buttons.find(b=>b.dataset.tag === tag);
+        if(btn) btn.classList.toggle('active');
+        applyFilter();
+      }
+
+      // Wire up buttons
+      buttons.forEach(btn=>{
+        btn.addEventListener('click', ()=> toggleTag(btn.dataset.tag));
+      });
+
+      // Load from URL hash (e.g., #tags=visuospatial,executive)
+      const hash = new URLSearchParams(location.hash.slice(1)).get('tags');
+      if(hash){
+        hash.split(',').forEach(t=>{
+          const tag = decodeURIComponent(t.trim());
+          if(tag) toggleTag(tag);
+        });
+      } else {
+        applyFilter(); // initialize counts
+      }
+    })();
+  </script>
 </body>
 </html>
