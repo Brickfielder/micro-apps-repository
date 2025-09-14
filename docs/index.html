@@ -5,130 +5,86 @@
   <title>Micro Rehab Apps</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root {
-      --bg: #f7f7f9;
-      --card: #ffffff;
-      --text: #222;
-      --muted: #666;
-      --brand: #0a66c2;   /* pill color */
-      --brand-hover: #084f96;
-      --shadow: 0 8px 20px rgba(0,0,0,0.08);
-      --radius: 14px;
-      --divider: #eceff3;
+    :root{
+      --bg:#f6f7fb; --card:#ffffff; --text:#1f2937; --muted:#6b7280;
+      --brand:#0a66c2; --brand-2:#2563eb; --brand-hover:#0a58a6;
+      --accent:#10b981; --warning:#f59e0b;
+      --radius:16px; --shadow:0 10px 30px rgba(0,0,0,.08);
+      --divider:#e5e7eb;
     }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display: grid;
-      place-items: center;
-      min-height: 100vh;
-      padding: 28px;
+    *{box-sizing:border-box}
+    body{
+      margin:0; background:linear-gradient(180deg,#f8fafc 0%, #eef2ff 100%) fixed;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text);
     }
-    .container {
-      width: min(760px, 100%);
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: clamp(20px, 4vw, 36px);
-      text-align: center;
+    .wrap{max-width:980px;margin:0 auto;padding:clamp(16px,3vw,28px)}
+    header{
+      background:var(--card); border:1px solid var(--divider); border-radius:var(--radius);
+      box-shadow:var(--shadow); padding:clamp(16px,3vw,28px); text-align:center;
     }
-    header { margin-bottom: 22px; }
-    header img {
-      width: min(360px, 90%);
-      height: auto;
-      display: block;
-      margin: 0 auto 14px;
-      border-radius: 10px;
-    }
-    header h1 {
-      margin: 0 0 6px 0;
-      font-size: clamp(1.6rem, 3.5vw, 2.2rem);
-      font-weight: 800;
-    }
-    .disclaimer {
-      margin: 0 auto;
-      max-width: 680px;
-      color: var(--muted);
-      line-height: 1.45;
-      font-size: 0.98rem;
-    }
-    .lead { margin: 18px 0 6px 0; color: #444; }
+    header img{width:min(360px,95%);height:auto;border-radius:12px;display:block;margin:0 auto 12px}
+    header h1{margin:.25rem 0 .35rem;font-size:clamp(1.6rem,3.4vw,2.3rem);font-weight:800;letter-spacing:.2px}
+    .disclaimer{margin:0 auto;max-width:720px;color:var(--muted);line-height:1.45;font-size:0.98rem}
+    .lead{margin:14px 0 0;color:#374151;text-align:center}
 
-    /* Minimal filter row (kept subtle) */
-    .filters {
-      margin: 8px 0 6px 0;
-      display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
-      color: var(--muted);
-      font-size: 0.92rem;
+    /* Featured CTA card */
+    .featured{
+      margin:18px 0 10px;
+      display:grid; grid-template-columns:1fr; gap:14px;
+      background:linear-gradient(135deg,#0a66c2 0%, #2563eb 60%, #4f46e5 100%);
+      color:#fff; border-radius:18px; padding:18px; box-shadow:var(--shadow);
     }
-    .filters button {
-      border: none; background: transparent; color: var(--muted);
-      padding: 4px 8px; border-radius: 8px; cursor: pointer;
+    .featured h2{margin:0 0 4px;font-size:clamp(1.1rem,2.6vw,1.4rem)}
+    .featured p{margin:0 0 10px;color:#e5e7eb}
+    .cta{
+      display:inline-flex; align-items:center; gap:10px;
+      background:#fff; color:#0b3a7a; text-decoration:none; font-weight:700;
+      border-radius:999px; padding:12px 18px; box-shadow:0 6px 18px rgba(255,255,255,.18);
+      transition:transform .06s ease;
     }
-    .filters button:hover { color: var(--brand); text-decoration: underline; }
-    .filters button.active {
-      color: #fff; background: var(--brand);
+    .cta:hover{transform:translateY(1px)}
+
+    /* Filter bar */
+    .filters{
+      margin:12px 0 0; display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
+      font-size:.96rem;
     }
+    .filters .tag{
+      border:1px solid var(--divider); background:#fff; color:var(--muted);
+      padding:8px 12px; border-radius:999px; cursor:pointer;
+      transition:background .15s,color .15s,border-color .15s;
+    }
+    .filters .tag:hover{color:var(--brand); border-color:#cbd5e1}
+    .filters .tag.active{background:var(--brand); color:#fff; border-color:transparent}
 
     /* Sections */
-    .section {
-      text-align: left;
-      margin-top: 18px;
-      padding-top: 14px;
-      border-top: 1px solid var(--divider);
+    .section{
+      background:var(--card); border:1px solid var(--divider);
+      border-radius:var(--radius); box-shadow:var(--shadow);
+      margin-top:16px; padding:18px;
     }
-    .section:first-of-type { margin-top: 10px; }
-    .section h2 {
-      margin: 8px 0 6px 0;
-      font-size: clamp(1.1rem, 2.8vw, 1.3rem);
-      font-weight: 800;
-      letter-spacing: .2px;
-    }
-    .section p.sub {
-      margin: 0 0 6px 0;
-      color: var(--muted);
-      font-size: 0.96rem;
-    }
+    .section h2{margin:0 0 4px;font-size:clamp(1.1rem,2.6vw,1.35rem);font-weight:800}
+    .section p.sub{margin:0 0 10px;color:var(--muted);font-size:.98rem}
 
-    /* Pills list */
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 12px 0 0 0;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 12px;
+    /* App pills (responsive) */
+    ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+    li{margin:0}
+    a.app-pill{
+      display:inline-block; padding:12px 18px; border-radius:999px;
+      background:var(--brand); color:#fff; text-decoration:none; font-weight:600; letter-spacing:.2px;
+      box-shadow:0 6px 18px rgba(37,99,235,.22); white-space:nowrap; transition:transform .06s ease, background .15s ease;
     }
-    li { margin: 0; }
-    a.app-pill {
-      display: inline-block;
-      padding: 12px 22px;
-      border-radius: 999px;
-      background: var(--brand);
-      color: #fff;
-      text-decoration: none;
-      font-size: 1.06rem;
-      transition: background .15s ease, transform .05s ease;
-      box-shadow: 0 4px 10px rgba(10,102,194,0.18);
-      white-space: nowrap;
-    }
-    a.app-pill:hover { background: var(--brand-hover); }
-    a.app-pill:active { transform: translateY(1px); }
-
-    /* Hide elements when filtered out */
-    .hidden { display: none !important; }
+    a.app-pill:hover{background:var(--brand-hover)}
+    a.app-pill:active{transform:translateY(1px)}
+    .hidden{display:none!important}
+    .center{text-align:center}
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="wrap">
     <header>
-      <!-- Place the image at: docs/assets/Micro_Apps_Banner.png -->
-      <img src="assets/Micro_Apps_Banner.png" alt="Micro Apps Banner"
-           onerror="this.style.display='none'">
+      <img src="assets/Micro_Apps_Banner.png" alt="Micro Apps Banner" onerror="this.style.display='none'">
       <h1>Micro Rehab Apps</h1>
       <p class="disclaimer">
         These are experimental prototypes for research and demonstration only.
@@ -137,11 +93,21 @@
       </p>
     </header>
 
+    <!-- Featured CTA for the new builder -->
+    <section class="featured" aria-labelledby="builder-title">
+      <div>
+        <h2 id="builder-title">Build your own package</h2>
+        <p>Choose which apps you want, and download a ready-to-host bundle with offline support.</p>
+        <a class="cta" href="Build_your_package/index.html" aria-label="Open package builder">
+          <span>🚀 Build your package</span>
+        </a>
+      </div>
+    </section>
+
     <p class="lead">Select an exercise below:</p>
 
-    <!-- Minimal, unobtrusive filter toolbar (multi-select, OR logic) -->
+    <!-- Filter toolbar -->
     <div class="filters" aria-label="Filter by tag">
-      <span>Filter:</span>
       <button type="button" class="tag" data-tag="visuospatial">Visuospatial</button>
       <button type="button" class="tag" data-tag="executive">Executive</button>
       <button type="button" class="tag" data-tag="auditory">Auditory</button>
@@ -197,9 +163,8 @@
         <li data-tags="executive">
           <a class="app-pill" href="Office_Day/index.html">Office Day</a>
         </li>
-        <!-- Fluency Coach (new) -->
         <li data-tags="executive language strategy desktop">
-          <a class="app-pill" href="Fluency_Coach/index.html">Fluency Coach - desktop only</a>
+          <a class="app-pill" href="Fluency_Coach/index.html">Fluency Coach – desktop only</a>
         </li>
         <li data-tags="executive">
           <a class="app-pill" href="Plan_with_Coco/index.html">Plan with Coco</a>
@@ -215,35 +180,28 @@
       const selected = new Set();
 
       function apply(){
-        if (selected.size === 0) {
-          appItems.forEach(el => el.classList.remove('hidden'));
-        } else {
-          appItems.forEach(el => {
+        if(selected.size===0){
+          appItems.forEach(el=>el.classList.remove('hidden'));
+        }else{
+          appItems.forEach(el=>{
             const tags = el.dataset.tags.split(' ');
-            const match = [...selected].some(t => tags.includes(t));
+            const match = [...selected].some(t=>tags.includes(t));
             el.classList.toggle('hidden', !match);
           });
         }
       }
-
       function toggle(tag){
-        if (tag === 'all') {
+        if(tag==='all'){
           selected.clear();
-          buttons.forEach(b => b.classList.remove('active'));
-          apply();
-          return;
+          buttons.forEach(b=>b.classList.remove('active'));
+          apply(); return;
         }
-        if (selected.has(tag)) selected.delete(tag);
-        else selected.add(tag);
-        const btn = buttons.find(b => b.dataset.tag === tag);
-        if (btn) btn.classList.toggle('active');
+        if(selected.has(tag)) selected.delete(tag); else selected.add(tag);
+        const btn = buttons.find(b=>b.dataset.tag===tag);
+        if(btn) btn.classList.toggle('active');
         apply();
       }
-
-      buttons.forEach(btn => {
-        btn.addEventListener('click', () => toggle(btn.dataset.tag));
-      });
-
+      buttons.forEach(btn=>btn.addEventListener('click',()=>toggle(btn.dataset.tag)));
       apply();
     })();
   </script>
