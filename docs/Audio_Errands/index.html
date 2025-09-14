@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Audio Errand Planner — v0.3</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#ffffff; --ink:#1a1a1a; --muted:#555;
+    --accent:#3366cc; --ok:#2e7d32; --warn:#ed6c02; --err:#d32f2f;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,sans-serif;
+    background:linear-gradient(160deg,#f4f6fb,#ffffff 40%,#f4f6fb);color:var(--ink);
+    min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .app{width:min(1200px,100%);display:grid;gap:16px}
+  header{display:flex;gap:16px;align-items:center;justify-content:space-between}
+  header h1{font-size:clamp(20px,3vw,28px);margin:0}
+  .badge{padding:4px 10px;border-radius:999px;border:1px solid #2a345c;color:var(--muted);font-size:12px}
+  .grid{display:grid;grid-template-columns:1fr 320px;gap:16px}
+  @media (max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:color-mix(in oklab,var(--card),#fff 2%);border:1px solid #273157;
+    box-shadow:0 8px 24px #0006;border-radius:16px;padding:16px}
+  .card h2{margin:0 0 8px;font-size:18px;color:#dbe5ff}
+  .controls{display:grid;gap:12px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  label{font-size:14px;color:var(--muted)}
+  select, input[type="range"], button, .pill{display:inline-flex;gap:8px;align-items:center;user-select:none;background:#ffffff;color:#1a1a1a;border:1px solid #ccc;border-radius:12px;padding:8px 10px;font-size:14px;}
+  button{cursor:pointer}
+  button.primary{background:linear-gradient(160deg,#f4f6fb,#ffffff 40%,#f4f6fb);border-color:#3c54a1}
+  button.ghost{background:transparent}
+  button.ok{background:#4caf50;color:#fff;border:1px solid #388e3c;}
+  button.warn{background:#ff9800;color:#fff;border:1px solid #f57c00;}
+  button.err{background:#f44336;color:#fff;border:1px solid #d32f2f;}
+  .pill{display:inline-flex;gap:8px;align-items:center;user-select:none;background:#ffffff;color:#1a1a1a;border:1px solid #ccc;border-radius:12px;padding:8px 10px;font-size:14px;}
+  .pill[data-draggable="true"]{cursor:grab}
+  .pill.dragging{opacity:.6}
+  .boards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:700px){.boards{grid-template-columns:1fr}}
+  .board{min-height:120px;padding:12px;border-radius:12px;border:1px dashed #ccc;background:#f0f2f8}
+  .board h3{margin:0 0 8px;font-size:14px;color:var(--muted)}
+  .board .drop{min-height:52px;display:flex;gap:8px;flex-wrap:wrap}
+  .hint{font-size:13px;color:var(--muted)}
+  .status{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .status .dot{width:10px;height:10px;border-radius:50%}
+  .log{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;white-space:pre-wrap;
+    background:#fafafa;border:1px solid #ddd;border-radius:12px;padding:10px;max-height:200px;overflow:auto}
+  .overlay{position:fixed;inset:0;display:none;place-items:center;background:#0009;backdrop-filter:blur(2px);z-index:20}
+  .overlay.show{display:grid}
+  .count{font-size:clamp(48px,8vw,96px);font-weight:700;color:#e5edff}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+    clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .disabled{opacity:.4;pointer-events:none}
+</style>
+</head>
+<body>
+<main class="app" role="application" aria-label="Audio Errand Planner">
+  <header>
+    <h1>Audio Errand Planner <span class="badge">v0.3</span></h1>
+    <div class="status" aria-live="polite">
+      <span class="dot" id="audioDot" style="background:var(--err)"></span>
+      <span id="audioStatus">Speech: not ready</span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Briefing</h2>
+      <p class="hint">Listen carefully. You'll hear a list of errands in order. When playback ends, drag the items into the correct sequence and submit.</p>
+      <div class="controls">
+        <div class="row">
+          <label for="difficulty">Difficulty (items):</label>
+          <select id="difficulty" aria-label="Difficulty">
+            <option value="3">3</option>
+            <option value="4" selected>4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+          <label for="interrupts">Auditory interruptions:</label>
+          <select id="interrupts" aria-label="Interruptions">
+            <option value="none" selected>None</option>
+            <option value="one">One</option>
+            <option value="random">Random</option>
+          </select>
+          <label for="distractors">Distractor items shown:</label>
+          <select id="distractors" aria-label="Distractors">
+            <option value="0" selected>0</option>
+            <option value="2">2</option>
+            <option value="4">4</option>
+          </select>
+        </div>
+        <div class="row">
+          <label for="voiceSel">Voice:</label>
+          <select id="voiceSel" aria-label="Voice"></select>
+          <label for="rate">Rate:</label>
+          <input id="rate" type="range" min="0.7" max="1.4" step="0.05" value="1"/>
+          <button id="hearingTest" class="ghost" title="Play a short sample">Hearing check 🔊</button>
+        </div>
+        <div class="row">
+          <button id="start" class="primary">Start Trial ▶️</button>
+          <button id="stopSpeak" class="warn">Stop Audio ⏹️</button>
+          <button id="reset" class="ghost">Reset</button>
+        </div>
+      </div>
+      <div class="boards" style="margin-top:12px">
+        <div class="board">
+          <h3>Available items</h3>
+          <div id="pool" class="drop" aria-label="Item pool"></div>
+        </div>
+        <div class="board">
+          <h3>Your sequence</h3>
+          <div id="sequence" class="drop" aria-label="Your sequence"></div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button id="submit" class="ok">Submit ✅</button>
+        <button id="clearSeq" class="ghost">Clear sequence</button>
+        <div id="feedback" class="hint" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <aside class="card">
+      <h2>Session</h2>
+      <div class="row">
+        <div>Trials: <strong id="trialNum">0</strong></div>
+        <div>Score: <strong id="score">0</strong></div>
+        <div>Time: <strong id="timer">00:00</strong></div>
+      </div>
+      <div style="margin:12px 0">
+        <button id="downloadCsv" class="ghost">Download CSV ⬇️</button>
+      </div>
+      <div class="log" id="log" aria-label="Log"></div>
+    </aside>
+  </div>
+</main>
+
+<div class="overlay" id="overlay" aria-hidden="true">
+  <div class="count" id="count">3</div>
+  <span class="sr-only" id="overlaySr">Trial starts soon</span>
+</div>
+
+<script>
+(function(){
+  // ====== Data ======
+  const MASTER= [
+    'Bakery','Post office','Pharmacy','Supermarket','Library','Bank','Hardware store',
+    'Butcher','Greengrocer','Stationery shop','Dry cleaner','Pet shop','Newsagent',
+    'Clinic','School','Gym','Cafe','Florist','Electronics store','Bookshop'
+  ];
+
+  let currentList=[], groundTruth=[], distractorPool=[],
+      trial=0, score=0, t0=null, tick=null, logs=[];
+
+  const els = {
+    audioDot: document.getElementById('audioDot'),
+    audioStatus: document.getElementById('audioStatus'),
+    voiceSel: document.getElementById('voiceSel'), rate: document.getElementById('rate'),
+    hearing: document.getElementById('hearingTest'),
+    diff: document.getElementById('difficulty'), intr: document.getElementById('interrupts'), dist: document.getElementById('distractors'),
+    start: document.getElementById('start'), stopSpeak: document.getElementById('stopSpeak'), reset: document.getElementById('reset'),
+    pool: document.getElementById('pool'), seq: document.getElementById('sequence'),
+    submit: document.getElementById('submit'), clearSeq: document.getElementById('clearSeq'),
+    feedback: document.getElementById('feedback'),
+    trialNum: document.getElementById('trialNum'), score: document.getElementById('score'), timer: document.getElementById('timer'),
+    log: document.getElementById('log'),
+    overlay: document.getElementById('overlay'), count: document.getElementById('count')
+  };
+
+  // ====== Speech ======
+  const synth = 'speechSynthesis' in window ? window.speechSynthesis : null;
+  function updateSpeechStatus(){
+    if(!synth){els.audioStatus.textContent='Speech: unavailable'; els.audioDot.style.background='var(--err)'; return}
+    const vs = synth.getVoices();
+    if(vs && vs.length){els.audioStatus.textContent='Speech: ready'; els.audioDot.style.background='var(--ok)';}
+    else {els.audioStatus.textContent='Speech: loading voices…'; els.audioDot.style.background='var(--warn)';}
+  }
+  function populateVoices(){ if(!synth) return; const vs=synth.getVoices(); els.voiceSel.innerHTML='';
+    vs.forEach((v,i)=>{
+      const o=document.createElement('option');
+      o.value=i; o.textContent=`${v.name} — ${v.lang}${v.default?' (default)':''}`; els.voiceSel.appendChild(o);
+    });
+  }
+  if(synth){
+    populateVoices(); updateSpeechStatus();
+    // Safari/Chrome fire this async
+    window.speechSynthesis.onvoiceschanged = ()=>{populateVoices(); updateSpeechStatus();};
+  } else { updateSpeechStatus(); }
+
+  function speak(text, {queue=false}={}){
+    if(!synth) return Promise.resolve();
+    return new Promise(res=>{
+      if(!queue) synth.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      const vs=synth.getVoices();
+      const idx=parseInt(els.voiceSel.value||0,10);
+      if(vs[idx]) u.voice = vs[idx];
+      u.rate = parseFloat(els.rate.value||1);
+      u.onend=()=>res();
+      synth.speak(u);
+    });
+  }
+
+  // ====== UI helpers ======
+  function h(tag, attrs={}, children=[]) {
+    const el = document.createElement(tag);
+    for (const [k,v] of Object.entries(attrs)) {
+      if(k==='_text') el.textContent=v;
+      else if(k.startsWith('on')) el.addEventListener(k.slice(2), v);
+      else el.setAttribute(k, v);
+    }
+    children.forEach(c=> el.appendChild(c));
+    return el;
+  }
+  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a}
+  function sample(arr,n){return shuffle(arr.slice()).slice(0,n)}
+  function timeNow(){return new Date().toISOString()}
+  function fmt(ms){const s=Math.floor(ms/1000), m=Math.floor(s/60), r=s%60;return `${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}`}
+
+  function startTimer(){t0=performance.now(); tick = setInterval(()=>{els.timer.textContent=fmt(performance.now()-t0)}, 200)}
+  function stopTimer(){if(tick){clearInterval(tick); tick=null}}
+
+  function clearBoards(){els.pool.innerHTML=''; els.seq.innerHTML='';}
+
+  function mkPill(label){
+    return h('div',{class:'pill', draggable:'true', 'data-draggable':'true', 'data-item':label, _text:label});
+  }
+
+  function disableBoards(disabled){
+    [els.pool,els.seq].forEach(z=>{
+      if(disabled) z.classList.add('disabled'); else z.classList.remove('disabled');
+    });
+  }
+
+  function makeDnD(container){
+    let dragging=null;
+    container.addEventListener('dragstart', e=>{
+      if(els.pool.classList.contains('disabled')){ e.preventDefault(); return; }
+      const t=e.target.closest('.pill'); if(!t) return; dragging=t; t.classList.add('dragging'); e.dataTransfer.effectAllowed='move';
+    });
+    container.addEventListener('dragend', ()=>{ if(dragging){ dragging.classList.remove('dragging'); dragging=null; }});
+    [els.pool, els.seq].forEach(zone=>{
+      zone.addEventListener('dragover', e=>{
+        if(zone.classList.contains('disabled')) return;
+        e.preventDefault(); const after = getAfter(zone,e.clientX,e.clientY); const d = document.querySelector('.pill.dragging'); if(!d) return;
+        after ? zone.insertBefore(d, after) : zone.appendChild(d);
+      });
+    });
+  }
+  function getAfter(container,x,y){
+    const els2=[...container.querySelectorAll('.pill:not(.dragging)')];
+    return els2.reduce((closest,child)=>{
+      const box=child.getBoundingClientRect();
+      const offset = y - box.top - box.height/2;
+      if(offset<0 && offset>closest.offset) return {offset, element:child};
+      else return closest;
+    }, {offset:Number.NEGATIVE_INFINITY}).element;
+  }
+
+  makeDnD(document);
+
+  // ====== Trial flow ======
+  async function runCountdown(n=3){
+    els.overlay.classList.add('show'); els.overlay.setAttribute('aria-hidden','false');
+    for(let i=n;i>0;i--){els.count.textContent=i; await new Promise(r=>setTimeout(r,750));}
+    els.overlay.classList.remove('show'); els.overlay.setAttribute('aria-hidden','true');
+  }
+
+  function buildTrial(){
+    const n = parseInt(els.diff.value,10);
+    groundTruth = sample(MASTER, n);
+    const dnum = parseInt(els.dist.value,10);
+    const leftovers = MASTER.filter(x=>!groundTruth.includes(x));
+    distractorPool = sample(leftovers, dnum);
+
+    currentList = shuffle([...groundTruth, ...distractorPool]);
+
+    // UI
+    clearBoards();
+    currentList.forEach(item=> els.pool.appendChild(mkPill(item)));
+  }
+
+  async function playSequence(){
+    if(synth){ await speak('Listen carefully to the list of errands in order.'); }
+    for(let i=0;i<groundTruth.length;i++){
+      if(synth){ await speak(`${i+1}. ${groundTruth[i]}`,{queue:true}); }
+      if(els.intr.value!=='none' && Math.random()< (els.intr.value==='one'? (i===Math.floor(groundTruth.length/2)?1:0): 0.35)){
+        await speak('Attention: change of plan. This is a reminder to keep your focus.',{queue:true});
+      }
+    }
+    if(synth){ await speak('Now arrange the items in the same order, then press submit.',{queue:true}); }
+    // Unlock arranging only after entire sequence is delivered
+    disableBoards(false);
+  }
+
+  function startTrial(){
+    trial++; els.trialNum.textContent=trial; els.feedback.textContent='';
+    buildTrial();
+    // lock boards until playback completes
+    disableBoards(true);
+    runCountdown(3).then(async()=>{
+      startTimer();
+      await playSequence();
+    });
+  }
+
+  function readSeq(container){
+    return [...container.querySelectorAll('.pill')].map(p=>p.getAttribute('data-item'));
+  }
+
+  function grade(){
+    const attempt = readSeq(els.seq);
+    if(attempt.length!==groundTruth.length){
+      els.feedback.textContent = 'Sequence incomplete: drag all required items, then submit.'; return;
+    }
+    const correctPositions = attempt.map((x,i)=> x===groundTruth[i]);
+    const correctCount = correctPositions.filter(Boolean).length;
+    const perfect = correctCount===groundTruth.length;
+    const elapsed = t0? Math.round(performance.now()-t0): null;
+
+    if(perfect){ score+=1; els.score.textContent=score; }
+    stopTimer();
+
+    const row = {
+      ts: timeNow(), trial, n: groundTruth.length, distractors: distractorPool.length,
+      perfect, correctCount, elapsedMs: elapsed, groundTruth: groundTruth.join('|'), attempt: attempt.join('|')
+    };
+    logs.push(row);
+    els.log.textContent = [
+      `#${row.trial} — ${perfect? 'PERFECT ✅' : 'Partial'}; ${correctCount}/${groundTruth.length} in ${fmt(elapsed)}`,
+      `Truth: ${row.groundTruth}`,
+      `You:   ${row.attempt}`,
+      '',
+      ...els.log.textContent.split('\n')
+    ].join('\n');
+
+    els.feedback.textContent = perfect ? 'Great! Exact match. Start another trial when ready.' : 'Not quite. You can adjust and resubmit or start a new trial.';
+  }
+
+  function resetAll(){
+    if(synth) synth.cancel(); // stop any ongoing speech
+    stopTimer(); t0=null; els.timer.textContent='00:00';
+    groundTruth=[]; currentList=[]; distractorPool=[]; clearBoards();
+    els.feedback.textContent=''; disableBoards(false);
+  }
+
+  function toCsv(rows){
+    const cols = ['ts','trial','n','distractors','perfect','correctCount','elapsedMs','groundTruth','attempt'];
+    const head = cols.join(',');
+    const body = rows.map(r=> cols.map(k=>`"${String(r[k]).replaceAll('"','""')}"`).join(',')).join('\n');
+    return head+'\n'+body;
+  }
+
+  // ====== Wiring ======
+  els.start.addEventListener('click', ()=>{ resetAll(); startTrial(); });
+  els.stopSpeak.addEventListener('click', ()=>{ if(synth) synth.cancel(); /* keep boards locked until playSequence completes */ });
+  els.reset.addEventListener('click', ()=>{ resetAll(); });
+  els.submit.addEventListener('click', grade);
+  els.clearSeq.addEventListener('click', ()=>{ if(els.seq.classList.contains('disabled')) return; els.seq.innerHTML=''; });
+  els.pool.addEventListener('click', e=>{ if(els.pool.classList.contains('disabled')) return; const p=e.target.closest('.pill'); if(!p) return; els.seq.appendChild(p); });
+  els.seq.addEventListener('click', e=>{ if(els.seq.classList.contains('disabled')) return; const p=e.target.closest('.pill'); if(!p) return; els.pool.appendChild(p); });
+  els.hearing.addEventListener('click', ()=>{ if(synth) speak('This is a short audio check. One, two, three.'); });
+  document.addEventListener('visibilitychange', ()=>{ if(document.hidden && synth) synth.cancel(); });
+
+  document.getElementById('downloadCsv').addEventListener('click', ()=>{
+    if(!logs.length){ alert('No data yet. Run at least one trial.'); return; }
+    const blob = new Blob([toCsv(logs)], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download=`audio-errand-planner_logs_${Date.now()}.csv`; a.click(); URL.revokeObjectURL(url);
+  });
+
+  // Keyboard support for moving focus pills between boards
+  document.addEventListener('keydown', (e)=>{
+    if(e.key==='Enter' && e.target.classList?.contains('pill')){
+      if(els.seq.classList.contains('disabled') || els.pool.classList.contains('disabled')) return;
+      const p=e.target;
+      const inSeq = p.parentElement===els.seq; (inSeq?els.pool:els.seq).appendChild(p);
+    }
+  });
+})();
+</script>
+</body>
+</html>
