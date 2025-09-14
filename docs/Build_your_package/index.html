@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Micro Apps Packager</title>
+  <style>
+    :root{
+      --bg:#f7f7f9; --card:#fff; --text:#222; --muted:#667085; --accent:#ef4444; --ok:#16a34a; --warn:#b45309;
+      --pill:#f0f2f5; --border:#e5e7eb;
+    }
+    body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,"Helvetica Neue",Arial,sans-serif;color:var(--text)}
+    header{padding:20px 16px;border-bottom:1px solid var(--border);background:#fff;position:sticky;top:0;z-index:10}
+    header h1{margin:0 0 6px;font-size:20px}
+    header p{margin:0;color:var(--muted);font-size:14px}
+    .wrap{max-width:1000px;margin:0 auto;padding:16px}
+    .row{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
+    @media (max-width:900px){.row{grid-template-columns:1fr}}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.04);}
+    .card h2{margin:0;padding:14px 16px;border-bottom:1px solid var(--border);font-size:16px}
+    .card .content{padding:12px 16px}
+    .apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+    .app{border:1px solid var(--border);border-radius:12px;padding:12px;background:var(--pill)}
+    .app h3{margin:0 0 6px;font-size:15px}
+    .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+    .tag{font-size:12px;background:#fff;border:1px solid var(--border);padding:3px 8px;border-radius:999px;color:#374151}
+    .muted{color:var(--muted)}
+    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    button{appearance:none;border:none;background:var(--accent);color:white;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
+    button[disabled]{opacity:.5;cursor:not-allowed}
+    .ghost{background:#fff;border:1px solid var(--border);color:#111}
+    .log{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;font-size:12px;white-space:pre-wrap;background:#0b1020;color:#d7e1ff;border-radius:10px;padding:10px;min-height:120px}
+    .ok{color:var(--ok)} .warn{color:var(--warn)} .err{color:#b91c1c}
+    .hint{font-size:12px;color:var(--muted)}
+    .inline{display:flex;gap:8px;align-items:center}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>📦 Micro Apps On-Page Packager</h1>
+    <p>Create a custom ZIP that visitors can download and host as a self-contained static site (with manifest + offline support). All client-side — no server required.</p>
+  </header>
+
+  <div class="wrap">
+    <div class="row">
+      <section class="card">
+        <h2>1) Pick apps to include</h2>
+        <div class="content">
+          <p class="hint">Apps are loaded dynamically from <code>/docs/catalog.json</code>. Keep that file updated with your app list.</p>
+
+          <div class="controls" style="margin-bottom:10px">
+            <button class="ghost" id="checkAll">Select all</button>
+            <button class="ghost" id="uncheckAll">Clear</button>
+            <label class="inline"><input type="checkbox" id="includeLauncher" checked /> <span>Create a simple launcher home</span></label>
+            <label class="inline"><input type="checkbox" id="includePWA" checked /> <span>Add PWA manifest + offline cache</span></label>
+          </div>
+
+          <div id="appsList" class="apps"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>2) Build your package</h2>
+        <div class="content">
+          <div class="controls">
+            <input id="pkgName" value="micro-apps-package" style="flex:1;min-width:160px;padding:10px;border:1px solid var(--border);border-radius:10px" />
+            <button id="buildBtn">Build ZIP</button>
+          </div>
+          <p class="hint">ZIP will include the selected apps under <code>/apps/&lt;slug&gt;/</code>. If an app file is missing (or blocked by CORS), it will be skipped and noted in the log.</p>
+          <div id="log" class="log" aria-live="polite"></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:16px">
+      <h2>About</h2>
+      <div class="content">
+        <ul>
+          <li><strong>Catalog:</strong> Maintain <code>/docs/catalog.json</code> with app entries. Each entry: { name, slug, path, tags }.</li>
+          <li><strong>Same-origin only:</strong> The builder can fetch files only from the same domain. Host this page in the same repo as your apps.</li>
+          <li><strong>Service worker scope:</strong> The generated <code>sw.js</code> covers the packaged folder. If you host under <code>/docs/packaged/</code>, the SW scope is that folder only.</li>
+          <li><strong>iOS caveat:</strong> PWA/Service Worker support varies on iOS. Offline caching should work, but install prompts differ.</li>
+        </ul>
+      </div>
+    </section>
+  </div>
+
+<script>
+// ---- Self-discovering catalog (via /docs/catalog.json) ----
+// Expected JSON array entries: { name, path, slug?, tags?, files? }
+// Defaults: slug from last folder in path; files => ["index.html"]; tags => []
+let CATALOG = [];
+const appsList = document.getElementById('appsList');
+const state = { selected: new Set(), loaded:false };
+
+async function loadCatalog(){
+  try{
+    const res = await fetch('/docs/catalog.json', {cache:'no-store'});
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const raw = await res.json();
+    // normalize
+    CATALOG = (raw||[]).map(item=>{
+      const norm = {...item};
+      // derive slug if absent
+      if(!norm.slug){
+        const p = (norm.path||'').replace(/\/+$/,'');
+        norm.slug = p.split('/').filter(Boolean).pop() || (norm.name||'app').toLowerCase().replace(/[^a-z0-9]+/g,'-');
+      }
+      if(!norm.files||!Array.isArray(norm.files)||norm.files.length===0){ norm.files=["index.html"]; }
+      if(!norm.tags) norm.tags=[];
+      return norm;
+    });
+    state.loaded=true;
+    renderApps();
+  }catch(err){
+    appsList.innerHTML = `<p class="hint" style="color:#b91c1c">Could not load <code>/docs/catalog.json</code> (${err.message}). Create it and reload.</p>`;
+  }
+}
+
+function renderApps(){
+  appsList.innerHTML = '';
+  CATALOG.forEach((app,i)=>{
+    const id = `app_${i}`;
+    const el = document.createElement('label');
+    el.className = 'app';
+    el.innerHTML = `
+      <div class="inline">
+        <input type="checkbox" id="${id}" data-slug="${app.slug}" />
+        <h3>${app.name||app.slug}</h3>
+      </div>
+      <div class="muted">${app.path}</div>
+      <div class="tags">${(app.tags||[]).map(t=>`<span class=\"tag\">${t}</span>`).join('')}</div>
+    `;
+    const cb = el.querySelector('input');
+    cb.addEventListener('change', (e)=>{
+      if(e.target.checked){ state.selected.add(app.slug); } else { state.selected.delete(app.slug); }
+    });
+    appsList.appendChild(el);
+  });
+}
+
+// bulk select
+const checkAllBtn = document.getElementById('checkAll');
+const uncheckAllBtn = document.getElementById('uncheckAll');
+if(checkAllBtn) checkAllBtn.onclick = ()=>{
+  appsList.querySelectorAll('input[type="checkbox"]').forEach(cb=>{cb.checked=true; state.selected.add(cb.dataset.slug)});
+};
+if(uncheckAllBtn) uncheckAllBtn.onclick = ()=>{
+  appsList.querySelectorAll('input[type="checkbox"]').forEach(cb=>{cb.checked=false; state.selected.delete(cb.dataset.slug)});
+};
+
+const logEl = document.getElementById('log');
+function log(msg, cls=''){
+  const line = document.createElement('div'); line.textContent = msg; if(cls) line.className = cls; logEl.appendChild(line); logEl.scrollTop = logEl.scrollHeight;
+}
+function clearLog(){ logEl.textContent=''; }
+
+async function fetchFile(url){
+  const res = await fetch(url);
+  if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  const ct = res.headers.get('content-type')||'';
+  if(ct.includes('text')||ct.includes('json')||ct.includes('javascript')||ct.includes('xml')||ct.includes('css')||ct.includes('html')){
+    return await res.text();
+  } else {
+    return new Uint8Array(await res.arrayBuffer());
+  }
+}
+
+document.getElementById('buildBtn').addEventListener('click', async ()=>{
+  clearLog();
+  if(!state.loaded){ log('Catalog not loaded yet. Please wait a second and try again.', 'warn'); return; }
+  const pkgName = (document.getElementById('pkgName').value||'micro-apps-package').replace(/[^a-z0-9-_\.]/gi,'-');
+  const includeLauncher = document.getElementById('includeLauncher').checked;
+  const includePWA = document.getElementById('includePWA').checked;
+
+  const chosen = CATALOG.filter(a=>state.selected.has(a.slug));
+  if(chosen.length===0){ log('Select at least one app.', 'warn'); return; }
+
+  const zip = new JSZip();
+  const root = zip.folder(pkgName);
+  const appsFolder = root.folder('apps');
+
+  log(`Packaging ${chosen.length} app(s)...`);
+
+  const precacheList = [];
+  for(const app of chosen){
+    const appFolder = appsFolder.folder(app.slug);
+    for(const file of app.files){
+      const src = (app.path||'') + file;
+      const dest = `apps/${app.slug}/${file}`;
+      try{
+        const data = await fetchFile(src);
+        appFolder.file(file, data);
+        precacheList.push(dest);
+        log(`✓ Added ${dest}`, 'ok');
+      }catch(err){
+        log(`• Skipped ${dest} (missing or CORS blocked: ${err.message})`, 'warn');
+      }
+    }
+  }
+
+  if(includeLauncher){
+    const links = chosen.map(a=>`<li><a href=\"./apps/${a.slug}/index.html\">${a.name||a.slug}</a></li>`).join('');
+    const indexHtml = `<!DOCTYPE html>
+<html lang=\"en\"><head><meta charset=\"UTF-8\"/><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"/>
+<title>My Micro Apps</title>
+<link rel=\"manifest\" href=\"./manifest.webmanifest\"> 
+<style>body{font-family:system-ui;background:#f7f7f9;margin:0} .wrap{max-width:800px;margin:0 auto;padding:24px} h1{margin:0 0 8px} ul{line-height:1.9} a{color:#2563eb;text-decoration:none}</style>
+</head>
+<body>
+  <div class=\"wrap\">
+    <h1>My Micro Apps</h1>
+    <p>Packaged selection. Works offline after first load.</p>
+    <ul>${links}</ul>
+    <div id=\"installArea\"></div>
+  </div>
+<script>
+  let deferredPrompt; window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt=e; const b=document.createElement('button'); b.textContent='Install as App'; b.onclick=async()=>{ if(!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; b.remove(); }; document.getElementById('installArea').appendChild(b); });
+  if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
+<\/script>
+</body></html>`;
+    root.file('index.html', indexHtml);
+    precacheList.push('index.html');
+  }
+
+  if(includePWA){
+    const manifest = {
+      name: "My Micro Apps",
+      short_name: "MicroApps",
+      start_url: ".",
+      display: "standalone",
+      background_color: "#ffffff",
+      theme_color: "#ef4444",
+      icons: [
+        { src:"icons/icon-192.png", sizes:"192x192", type:"image/png" },
+        { src:"icons/icon-512.png", sizes:"512x512", type:"image/png" }
+      ]
+    };
+    root.file('manifest.webmanifest', JSON.stringify(manifest, null, 2));
+
+    const emptyPngB64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAH5QKFxtg1xwAAAABJRU5ErkJggg==";
+    function b64ToUint8(b64){ const bin=atob(b64); const len=bin.length; const bytes=new Uint8Array(len); for(let i=0;i<len;i++) bytes[i]=bin.charCodeAt(i); return bytes; }
+    const icons = root.folder('icons');
+    icons.file('icon-192.png', b64ToUint8(emptyPngB64));
+    icons.file('icon-512.png', b64ToUint8(emptyPngB64));
+
+    const sw = `self.addEventListener('install', e=>{
+  e.waitUntil(caches.open('micro-apps-v1').then(c=>c.addAll([${precacheList.map(p=>`'./${p.replace(/'/g,"\\'")}'`).join(',')}])))
+});
+self.addEventListener('fetch', e=>{ e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))); });`;
+    root.file('sw.js', sw);
+  }
+
+  log('Zipping...');
+  const blob = await zip.generateAsync({type:'blob'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = pkgName + '.zip'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 30000);
+  log('Done. Your download should start now ✅', 'ok');
+});
+
+// kick off
+loadCatalog();
+</script>
+</body>
+</html>
