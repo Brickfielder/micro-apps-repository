@@ -1,0 +1,11 @@
+[
+  { "name": "Star Hunt",          "path": "docs/Star_Hunt/",          "tags": ["Visuospatial"] },
+  { "name": "Visuo-Spatial Blocks","path": "docs/Visuospatial_Blocks/","tags": ["Visuospatial"] },
+  { "name": "Maze Explorer",      "path": "docs/maze-explorer/",      "tags": ["Visuospatial","Executive Functioning"] },
+  { "name": "Word Scavenger",     "path": "docs/word-scavenger/",     "tags": ["Language"] },
+  { "name": "TaskFlow Planner",   "path": "docs/Taskflow/",           "tags": ["Executive Functioning"] },
+  { "name": "Emergency Dispatch", "path": "docs/Emergency_despatch/", "tags": ["Executive Functioning"] },
+  { "name": "Barista Logic",      "path": "docs/Barista_Chaos/",      "tags": ["Executive Functioning","Attention"] },
+  { "name": "Fluency Coach",      "path": "docs/Fluency_Coach/",      "tags": ["Language","Executive Functioning","Strategy Training"] },
+  { "name": "Plan with Coco",     "path": "docs/Plan_with_Coco/",     "tags": ["Executive Functioning"] }
+]
