@@ -47,13 +47,14 @@
       <section class="card">
         <h2>1) Pick apps to include</h2>
         <div class="content">
-          <p class="hint">Apps are loaded dynamically from <code>/docs/catalog.json</code>. Keep that file updated with your app list.</p>
+          <p class="hint">Apps are loaded dynamically from <code>catalog.json</code> (this folder or <code>/docs/</code>). Keep that file updated with your app list.</p>
 
           <div class="controls" style="margin-bottom:10px">
             <button class="ghost" id="checkAll">Select all</button>
             <button class="ghost" id="uncheckAll">Clear</button>
             <label class="inline"><input type="checkbox" id="includeLauncher" checked /> <span>Create a simple launcher home</span></label>
             <label class="inline"><input type="checkbox" id="includePWA" checked /> <span>Add PWA manifest + offline cache</span></label>
+            <button class="ghost" id="reloadCatalog" title="Reload catalog.json">Reload catalog</button>
           </div>
 
           <div id="appsList" class="apps"></div>
@@ -77,44 +78,55 @@
       <h2>About</h2>
       <div class="content">
         <ul>
-          <li><strong>Catalog:</strong> Maintain <code>/docs/catalog.json</code> with app entries. Each entry: { name, slug, path, tags }.</li>
-          <li><strong>Same-origin only:</strong> The builder can fetch files only from the same domain. Host this page in the same repo as your apps.</li>
-          <li><strong>Service worker scope:</strong> The generated <code>sw.js</code> covers the packaged folder. If you host under <code>/docs/packaged/</code>, the SW scope is that folder only.</li>
-          <li><strong>iOS caveat:</strong> PWA/Service Worker support varies on iOS. Offline caching should work, but install prompts differ.</li>
+          <li><strong>Catalog:</strong> Put <code>catalog.json</code> either in <code>/docs/</code> or in this folder (<code>/docs/Build_your_package/</code>). Each entry: { name, path, slug?, tags?, files? }.</li>
+          <li><strong>Defaults:</strong> If <code>files</code> is omitted, only <code>index.html</code> is included. <code>slug</code> is derived from the folder name.</li>
+          <li><strong>Same-origin only:</strong> Host this page in the same repo as your apps.</li>
+          <li><strong>Service worker scope:</strong> The generated <code>sw.js</code> covers the packaged folder.</li>
         </ul>
       </div>
     </section>
   </div>
 
 <script>
-// ---- Self-discovering catalog (via /docs/catalog.json) ----
-// Expected JSON array entries: { name, path, slug?, tags?, files? }
-// Defaults: slug from last folder in path; files => ["index.html"]; tags => []
+// ========== Catalog loading with robust paths ==========
 let CATALOG = [];
 const appsList = document.getElementById('appsList');
 const state = { selected: new Set(), loaded:false };
 
+async function fetchAny(paths){
+  let lastErr;
+  for(const p of paths){
+    try{
+      const r = await fetch(p, {cache:'no-store'});
+      if(r.ok) return r;
+      lastErr = new Error(`HTTP ${r.status}`);
+    }catch(e){ lastErr = e; }
+  }
+  throw lastErr || new Error('catalog.json not found');
+}
+
 async function loadCatalog(){
   try{
-    const res = await fetch('/docs/catalog.json', {cache:'no-store'});
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const res = await fetchAny([
+      new URL('./catalog.json',  location.href).toString(),  // same folder (/docs/Build_your_package/)
+      new URL('../catalog.json', location.href).toString(),  // parent (/docs/)
+      new URL('/docs/catalog.json', location.origin).toString() // user-site root (for user pages)
+    ]);
     const raw = await res.json();
-    // normalize
     CATALOG = (raw||[]).map(item=>{
       const norm = {...item};
-      // derive slug if absent
       if(!norm.slug){
         const p = (norm.path||'').replace(/\/+$/,'');
         norm.slug = p.split('/').filter(Boolean).pop() || (norm.name||'app').toLowerCase().replace(/[^a-z0-9]+/g,'-');
       }
-      if(!norm.files||!Array.isArray(norm.files)||norm.files.length===0){ norm.files=["index.html"]; }
-      if(!norm.tags) norm.tags=[];
+      if(!norm.files || !Array.isArray(norm.files) || norm.files.length===0){ norm.files = ["index.html"]; }
+      if(!norm.tags) norm.tags = [];
       return norm;
     });
-    state.loaded=true;
+    state.loaded = true;
     renderApps();
   }catch(err){
-    appsList.innerHTML = `<p class="hint" style="color:#b91c1c">Could not load <code>/docs/catalog.json</code> (${err.message}). Create it and reload.</p>`;
+    appsList.innerHTML = `<p class="hint" style="color:#b91c1c">Could not load <code>catalog.json</code> (${err.message}). Place it in this folder or in <code>/docs/</code> and click “Reload catalog”.</p>`;
   }
 }
 
@@ -130,46 +142,41 @@ function renderApps(){
         <h3>${app.name||app.slug}</h3>
       </div>
       <div class="muted">${app.path}</div>
-      <div class="tags">${(app.tags||[]).map(t=>`<span class=\"tag\">${t}</span>`).join('')}</div>
+      <div class="tags">${(app.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('')}</div>
     `;
-    const cb = el.querySelector('input');
-    cb.addEventListener('change', (e)=>{
-      if(e.target.checked){ state.selected.add(app.slug); } else { state.selected.delete(app.slug); }
+    el.querySelector('input').addEventListener('change', (e)=>{
+      if(e.target.checked) state.selected.add(app.slug); else state.selected.delete(app.slug);
     });
     appsList.appendChild(el);
   });
 }
 
+document.getElementById('reloadCatalog').addEventListener('click', loadCatalog);
+
 // bulk select
-const checkAllBtn = document.getElementById('checkAll');
-const uncheckAllBtn = document.getElementById('uncheckAll');
-if(checkAllBtn) checkAllBtn.onclick = ()=>{
+document.getElementById('checkAll').onclick = ()=>{
   appsList.querySelectorAll('input[type="checkbox"]').forEach(cb=>{cb.checked=true; state.selected.add(cb.dataset.slug)});
 };
-if(uncheckAllBtn) uncheckAllBtn.onclick = ()=>{
+document.getElementById('uncheckAll').onclick = ()=>{
   appsList.querySelectorAll('input[type="checkbox"]').forEach(cb=>{cb.checked=false; state.selected.delete(cb.dataset.slug)});
 };
 
 const logEl = document.getElementById('log');
-function log(msg, cls=''){
-  const line = document.createElement('div'); line.textContent = msg; if(cls) line.className = cls; logEl.appendChild(line); logEl.scrollTop = logEl.scrollHeight;
-}
+function log(msg, cls=''){ const d=document.createElement('div'); d.textContent=msg; if(cls) d.className=cls; logEl.appendChild(d); logEl.scrollTop=logEl.scrollHeight; }
 function clearLog(){ logEl.textContent=''; }
 
 async function fetchFile(url){
   const res = await fetch(url);
   if(!res.ok) throw new Error(`HTTP ${res.status}`);
   const ct = res.headers.get('content-type')||'';
-  if(ct.includes('text')||ct.includes('json')||ct.includes('javascript')||ct.includes('xml')||ct.includes('css')||ct.includes('html')){
-    return await res.text();
-  } else {
-    return new Uint8Array(await res.arrayBuffer());
-  }
+  if(/text|json|javascript|xml|css|html/.test(ct)) return await res.text();
+  return new Uint8Array(await res.arrayBuffer());
 }
 
+// ========== Build ==========
 document.getElementById('buildBtn').addEventListener('click', async ()=>{
   clearLog();
-  if(!state.loaded){ log('Catalog not loaded yet. Please wait a second and try again.', 'warn'); return; }
+  if(!state.loaded){ log('Catalog not loaded yet. Please try again in a moment.', 'warn'); return; }
   const pkgName = (document.getElementById('pkgName').value||'micro-apps-package').replace(/[^a-z0-9-_\.]/gi,'-');
   const includeLauncher = document.getElementById('includeLauncher').checked;
   const includePWA = document.getElementById('includePWA').checked;
@@ -201,19 +208,19 @@ document.getElementById('buildBtn').addEventListener('click', async ()=>{
   }
 
   if(includeLauncher){
-    const links = chosen.map(a=>`<li><a href=\"./apps/${a.slug}/index.html\">${a.name||a.slug}</a></li>`).join('');
+    const links = chosen.map(a=>`<li><a href="./apps/${a.slug}/index.html">${a.name||a.slug}</a></li>`).join('');
     const indexHtml = `<!DOCTYPE html>
-<html lang=\"en\"><head><meta charset=\"UTF-8\"/><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"/>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>My Micro Apps</title>
-<link rel=\"manifest\" href=\"./manifest.webmanifest\"> 
+<link rel="manifest" href="./manifest.webmanifest">
 <style>body{font-family:system-ui;background:#f7f7f9;margin:0} .wrap{max-width:800px;margin:0 auto;padding:24px} h1{margin:0 0 8px} ul{line-height:1.9} a{color:#2563eb;text-decoration:none}</style>
 </head>
 <body>
-  <div class=\"wrap\">
+  <div class="wrap">
     <h1>My Micro Apps</h1>
     <p>Packaged selection. Works offline after first load.</p>
     <ul>${links}</ul>
-    <div id=\"installArea\"></div>
+    <div id="installArea"></div>
   </div>
 <script>
   let deferredPrompt; window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt=e; const b=document.createElement('button'); b.textContent='Install as App'; b.onclick=async()=>{ if(!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; b.remove(); }; document.getElementById('installArea').appendChild(b); });
