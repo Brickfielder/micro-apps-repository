@@ -284,7 +284,7 @@
     for(let i=0;i<groundTruth.length;i++){
       if(synth){ await speak(`${i+1}. ${groundTruth[i]}`,{queue:true}); }
       if(els.intr.value!=='none' && Math.random()< (els.intr.value==='one'? (i===Math.floor(groundTruth.length/2)?1:0): 0.35)){
-        await speak('Attention: change of plan. This is a reminder to keep your focus.',{queue:true});
+        await speak('Attention: remember to focus.',{queue:true});
       }
     }
     if(synth){ await speak('Now arrange the items in the same order, then press submit.',{queue:true}); }
