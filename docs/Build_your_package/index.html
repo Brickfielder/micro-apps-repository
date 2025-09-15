@@ -3,272 +3,243 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Micro Apps Packager</title>
+  <title>Build your package</title>
+  <meta name="description" content="Select micro-apps and download them as a single ZIP." />
   <style>
-    :root{
-      --bg:#f7f7f9; --card:#fff; --text:#222; --muted:#667085; --accent:#ef4444; --ok:#16a34a; --warn:#b45309;
-      --pill:#f0f2f5; --border:#e5e7eb;
-    }
-    body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,"Helvetica Neue",Arial,sans-serif;color:var(--text)}
-    header{padding:20px 16px;border-bottom:1px solid var(--border);background:#fff;position:sticky;top:0;z-index:10}
-    header h1{margin:0 0 6px;font-size:20px}
-    header p{margin:0;color:var(--muted);font-size:14px}
-    .wrap{max-width:1000px;margin:0 auto;padding:16px}
-    .row{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
-    @media (max-width:900px){.row{grid-template-columns:1fr}}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.04);}
-    .card h2{margin:0;padding:14px 16px;border-bottom:1px solid var(--border);font-size:16px}
-    .card .content{padding:12px 16px}
-    .apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
-    .app{border:1px solid var(--border);border-radius:12px;padding:12px;background:var(--pill)}
-    .app h3{margin:0 0 6px;font-size:15px}
-    .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-    .tag{font-size:12px;background:#fff;border:1px solid var(--border);padding:3px 8px;border-radius:999px;color:#374151}
-    .muted{color:var(--muted)}
-    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    button{appearance:none;border:none;background:var(--accent);color:white;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
-    button[disabled]{opacity:.5;cursor:not-allowed}
-    .ghost{background:#fff;border:1px solid var(--border);color:#111}
-    .log{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;font-size:12px;white-space:pre-wrap;background:#0b1020;color:#d7e1ff;border-radius:10px;padding:10px;min-height:120px}
-    .ok{color:var(--ok)} .warn{color:var(--warn)} .err{color:#b91c1c}
-    .hint{font-size:12px;color:var(--muted)}
-    .inline{display:flex;gap:8px;align-items:center}
+    :root{--bg:#f7f7f9;--card:#fff;--text:#1f2937;--muted:#667085;--border:#e5e7eb;--brand:#0a66c2;--ok:#16a34a;--warn:#b45309;--radius:16px;--shadow:0 10px 24px rgba(0,0,0,.08);}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    header{position:sticky;top:0;background:rgba(255,255,255,.9);backdrop-filter:saturate(1.1) blur(6px);border-bottom:1px solid var(--border)}
+    .row{max-width:1000px;margin:0 auto;padding:16px;display:flex;justify-content:space-between;gap:12px;align-items:center}
+    h1{font-size:20px;margin:0}
+    main{max-width:1000px;margin:18px auto 32px;padding:0 16px;display:grid;gap:16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+    .apps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+    .app{border:1px solid var(--border);border-radius:12px;padding:12px;display:grid;gap:6px}
+    .app h3{margin:0;font-size:16px}
+    .muted{color:var(--muted);font-size:13px}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    button{background:var(--brand);color:#fff;border:0;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer}
+    button:disabled{opacity:.6;cursor:not-allowed}
+    .pill{display:inline-block;background:#f0f2f5;border:1px solid var(--border);border-radius:999px;padding:2px 8px;font-size:12px;margin-right:6px}
+    .bar{height:10px;background:#eef2f6;border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+    .bar>div{height:100%;width:0%}
+    .good{background:var(--ok)}
+    .warn{background:var(--warn)}
+    .sr{position:absolute;left:-9999px}
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 </head>
 <body>
   <header>
-    <h1>📦 Micro Apps On-Page Packager</h1>
-    <p>Create a custom ZIP that visitors can download and host as a self-contained static site (with manifest + offline support). All client-side — no server required.</p>
+    <div class="row">
+      <h1>Build your package</h1>
+      <div class="muted">Select apps → make a ZIP (client‑side)</div>
+    </div>
   </header>
 
-  <div class="wrap">
-    <div class="row">
-      <section class="card">
-        <h2>1) Pick apps to include</h2>
-        <div class="content">
-          <p class="hint">Apps are loaded dynamically from <code>catalog.json</code> (this folder or <code>/docs/</code>). Keep that file updated with your app list.</p>
-
-          <div class="controls" style="margin-bottom:10px">
-            <button class="ghost" id="checkAll">Select all</button>
-            <button class="ghost" id="uncheckAll">Clear</button>
-            <label class="inline"><input type="checkbox" id="includeLauncher" checked /> <span>Create a simple launcher home</span></label>
-            <label class="inline"><input type="checkbox" id="includePWA" checked /> <span>Add PWA manifest + offline cache</span></label>
-            <button class="ghost" id="reloadCatalog" title="Reload catalog.json">Reload catalog</button>
-          </div>
-
-          <div id="appsList" class="apps"></div>
-        </div>
-      </section>
-
-      <section class="card">
-        <h2>2) Build your package</h2>
-        <div class="content">
-          <div class="controls">
-            <input id="pkgName" value="micro-apps-package" style="flex:1;min-width:160px;padding:10px;border:1px solid var(--border);border-radius:10px" />
-            <button id="buildBtn">Build ZIP</button>
-          </div>
-          <p class="hint">ZIP will include the selected apps under <code>/apps/&lt;slug&gt;/</code>. If an app file is missing (or blocked by CORS), it will be skipped and noted in the log.</p>
-          <div id="log" class="log" aria-live="polite"></div>
-        </div>
-      </section>
-    </div>
-
-    <section class="card" style="margin-top:16px">
-      <h2>About</h2>
-      <div class="content">
-        <ul>
-          <li><strong>Catalog:</strong> Put <code>catalog.json</code> either in <code>/docs/</code> or in this folder (<code>/docs/Build_your_package/</code>). Each entry: { name, path, slug?, tags?, files? }.</li>
-          <li><strong>Defaults:</strong> If <code>files</code> is omitted, only <code>index.html</code> is included. <code>slug</code> is derived from the folder name.</li>
-          <li><strong>Same-origin only:</strong> Host this page in the same repo as your apps.</li>
-          <li><strong>Service worker scope:</strong> The generated <code>sw.js</code> covers the packaged folder.</li>
-        </ul>
+  <main>
+    <section class="card">
+      <p class="muted">Tip: for a complete bundle (HTML + assets), place a small <code>manifest.json</code> in each app folder listing files to include. If no manifest is found, this tool will include only <code>index.html</code> for that app.</p>
+      <div class="actions">
+        <button id="btnAll">Select all</button>
+        <button id="btnNone">Clear</button>
+        <button id="btnZip">Download ZIP</button>
+        <span id="count" class="muted" aria-live="polite"></span>
       </div>
+      <div class="bar" aria-hidden="true"><div id="prog" class=""></div></div>
+      <div id="status" class="muted" style="margin-top:6px" aria-live="polite"></div>
     </section>
-  </div>
 
-<script>
-// ========== Catalog loading with robust paths ==========
-let CATALOG = [];
-const appsList = document.getElementById('appsList');
-const state = { selected: new Set(), loaded:false };
+    <section class="card">
+      <div id="apps" class="apps" role="list"></div>
+    </section>
+  </main>
 
-async function fetchAny(paths){
-  let lastErr;
-  for(const p of paths){
-    try{
-      const r = await fetch(p, {cache:'no-store'});
-      if(r.ok) return r;
-      lastErr = new Error(`HTTP ${r.status}`);
-    }catch(e){ lastErr = e; }
-  }
-  throw lastErr || new Error('catalog.json not found');
-}
+  <!-- JSZip + FileSaver -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 
-async function loadCatalog(){
-  try{
-    const res = await fetchAny([
-      new URL('./catalog.json',  location.href).toString(),  // same folder (/docs/Build_your_package/)
-      new URL('../catalog.json', location.href).toString(),  // parent (/docs/)
-      new URL('/docs/catalog.json', location.origin).toString() // user-site root (for user pages)
-    ]);
-    const raw = await res.json();
-    CATALOG = (raw||[]).map(item=>{
-      const norm = {...item};
-      if(!norm.slug){
-        const p = (norm.path||'').replace(/\/+$/,'');
-        norm.slug = p.split('/').filter(Boolean).pop() || (norm.name||'app').toLowerCase().replace(/[^a-z0-9]+/g,'-');
-      }
-      if(!norm.files || !Array.isArray(norm.files) || norm.files.length===0){ norm.files = ["index.html"]; }
-      if(!norm.tags) norm.tags = [];
-      return norm;
-    });
-    state.loaded = true;
-    renderApps();
-  }catch(err){
-    appsList.innerHTML = `<p class="hint" style="color:#b91c1c">Could not load <code>catalog.json</code> (${err.message}). Place it in this folder or in <code>/docs/</code> and click “Reload catalog”.</p>`;
-  }
-}
+  <script>
+    const PACKAGER_NAME = 'Build your package';
+    const APPS_EL = document.getElementById('apps');
+    const COUNT_EL = document.getElementById('count');
+    const PROG = document.getElementById('prog');
+    const STATUS = document.getElementById('status');
+    const BTN_ALL  = document.getElementById('btnAll');
+    const BTN_NONE = document.getElementById('btnNone');
+    const BTN_ZIP  = document.getElementById('btnZip');
 
-function renderApps(){
-  appsList.innerHTML = '';
-  CATALOG.forEach((app,i)=>{
-    const id = `app_${i}`;
-    const el = document.createElement('label');
-    el.className = 'app';
-    el.innerHTML = `
-      <div class="inline">
-        <input type="checkbox" id="${id}" data-slug="${app.slug}" />
-        <h3>${app.name||app.slug}</h3>
-      </div>
-      <div class="muted">${app.path}</div>
-      <div class="tags">${(app.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('')}</div>
-    `;
-    el.querySelector('input').addEventListener('change', (e)=>{
-      if(e.target.checked) state.selected.add(app.slug); else state.selected.delete(app.slug);
-    });
-    appsList.appendChild(el);
-  });
-}
-
-document.getElementById('reloadCatalog').addEventListener('click', loadCatalog);
-
-// bulk select
-document.getElementById('checkAll').onclick = ()=>{
-  appsList.querySelectorAll('input[type="checkbox"]').forEach(cb=>{cb.checked=true; state.selected.add(cb.dataset.slug)});
-};
-document.getElementById('uncheckAll').onclick = ()=>{
-  appsList.querySelectorAll('input[type="checkbox"]').forEach(cb=>{cb.checked=false; state.selected.delete(cb.dataset.slug)});
-};
-
-const logEl = document.getElementById('log');
-function log(msg, cls=''){ const d=document.createElement('div'); d.textContent=msg; if(cls) d.className=cls; logEl.appendChild(d); logEl.scrollTop=logEl.scrollHeight; }
-function clearLog(){ logEl.textContent=''; }
-
-async function fetchFile(url){
-  const res = await fetch(url);
-  if(!res.ok) throw new Error(`HTTP ${res.status}`);
-  const ct = res.headers.get('content-type')||'';
-  if(/text|json|javascript|xml|css|html/.test(ct)) return await res.text();
-  return new Uint8Array(await res.arrayBuffer());
-}
-
-// ========== Build ==========
-document.getElementById('buildBtn').addEventListener('click', async ()=>{
-  clearLog();
-  if(!state.loaded){ log('Catalog not loaded yet. Please try again in a moment.', 'warn'); return; }
-  const pkgName = (document.getElementById('pkgName').value||'micro-apps-package').replace(/[^a-z0-9-_\.]/gi,'-');
-  const includeLauncher = document.getElementById('includeLauncher').checked;
-  const includePWA = document.getElementById('includePWA').checked;
-
-  const chosen = CATALOG.filter(a=>state.selected.has(a.slug));
-  if(chosen.length===0){ log('Select at least one app.', 'warn'); return; }
-
-  const zip = new JSZip();
-  const root = zip.folder(pkgName);
-  const appsFolder = root.folder('apps');
-
-  log(`Packaging ${chosen.length} app(s)...`);
-
-  const precacheList = [];
-  for(const app of chosen){
-    const appFolder = appsFolder.folder(app.slug);
-    for(const file of app.files){
-      const src = (app.path||'') + file;
-      const dest = `apps/${app.slug}/${file}`;
-      try{
-        const data = await fetchFile(src);
-        appFolder.file(file, data);
-        precacheList.push(dest);
-        log(`✓ Added ${dest}`, 'ok');
-      }catch(err){
-        log(`• Skipped ${dest} (missing or CORS blocked: ${err.message})`, 'warn');
-      }
+    function normPath(p){
+      if(!p) return null;
+      p = p.replace(/\\/index\\.html$/i,'/');
+      p = p.replace(/^\\/?docs\\//i, '/micro-apps-repository/');
+      if(!p.endsWith('/')) p += '/';
+      return p;
     }
-  }
+    function slugify(name){return name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');}
 
-  if(includeLauncher){
-    const links = chosen.map(a=>`<li><a href="./apps/${a.slug}/index.html">${a.name||a.slug}</a></li>`).join('');
-    const indexHtml = `<!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>My Micro Apps</title>
-<link rel="manifest" href="./manifest.webmanifest">
-<style>body{font-family:system-ui;background:#f7f7f9;margin:0} .wrap{max-width:800px;margin:0 auto;padding:24px} h1{margin:0 0 8px} ul{line-height:1.9} a{color:#2563eb;text-decoration:none}</style>
-</head>
-<body>
-  <div class="wrap">
-    <h1>My Micro Apps</h1>
-    <p>Packaged selection. Works offline after first load.</p>
-    <ul>${links}</ul>
-    <div id="installArea"></div>
-  </div>
-<script>
-  let deferredPrompt; window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt=e; const b=document.createElement('button'); b.textContent='Install as App'; b.onclick=async()=>{ if(!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; b.remove(); }; document.getElementById('installArea').appendChild(b); });
-  if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js'); }
-<\/script>
-</body></html>`;
-    root.file('index.html', indexHtml);
-    precacheList.push('index.html');
-  }
+    function render(list){
+      APPS_EL.innerHTML='';
+      const filtered = list.filter(x => x.name !== PACKAGER_NAME);
+      filtered.forEach(app => {
+        const id = 'chk-'+slugify(app.name);
+        const card = document.createElement('div');
+        card.className = 'app';
+        card.setAttribute('role','listitem');
+        card.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <h3>${app.name}</h3>
+            <label><input id="${id}" type="checkbox" data-path="${app.path}" data-name="${app.name}" checked> Include</label>
+          </div>
+          <div class="muted">${app.about || ''}</div>
+          <div>${(app.tags||[]).map(t=>`<span class="pill">${t}</span>`).join('')}</div>
+          <div class="muted">Path: ${app.path}</div>
+        `;
+        APPS_EL.appendChild(card);
+      });
+      updateCount();
+    }
 
-  if(includePWA){
-    const manifest = {
-      name: "My Micro Apps",
-      short_name: "MicroApps",
-      start_url: ".",
-      display: "standalone",
-      background_color: "#ffffff",
-      theme_color: "#ef4444",
-      icons: [
-        { src:"icons/icon-192.png", sizes:"192x192", type:"image/png" },
-        { src:"icons/icon-512.png", sizes:"512x512", type:"image/png" }
-      ]
-    };
-    root.file('manifest.webmanifest', JSON.stringify(manifest, null, 2));
+    function updateCount(){
+      const total = APPS_EL.querySelectorAll('input[type="checkbox"]').length;
+      const sel = APPS_EL.querySelectorAll('input[type="checkbox"]:checked').length;
+      COUNT_EL.textContent = `${sel}/${total} selected`;
+    }
 
-    const emptyPngB64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAH5QKFxtg1xwAAAABJRU5ErkJggg==";
-    function b64ToUint8(b64){ const bin=atob(b64); const len=bin.length; const bytes=new Uint8Array(len); for(let i=0;i<len;i++) bytes[i]=bin.charCodeAt(i); return bytes; }
-    const icons = root.folder('icons');
-    icons.file('icon-192.png', b64ToUint8(emptyPngB64));
-    icons.file('icon-512.png', b64ToUint8(emptyPngB64));
+    BTN_ALL.addEventListener('click',()=>{
+      APPS_EL.querySelectorAll('input[type="checkbox"]').forEach(c=>c.checked=true);
+      updateCount();
+    });
+    BTN_NONE.addEventListener('click',()=>{
+      APPS_EL.querySelectorAll('input[type="checkbox"]').forEach(c=>c.checked=false);
+      updateCount();
+    });
+    APPS_EL.addEventListener('change', e=>{
+      if(e.target.matches('input[type="checkbox"]')) updateCount();
+    });
 
-    const sw = `self.addEventListener('install', e=>{
-  e.waitUntil(caches.open('micro-apps-v1').then(c=>c.addAll([${precacheList.map(p=>`'./${p.replace(/'/g,"\\'")}'`).join(',')}])))
-});
-self.addEventListener('fetch', e=>{ e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))); });`;
-    root.file('sw.js', sw);
-  }
+    async function loadCatalog(){
+      let cat = [];
+      try{
+        const res = await fetch('../catalog.json', {cache:'no-store'}).catch(()=>null);
+        if(res && res.ok){ cat = await res.json(); }
+      }catch{}
+      // Fallback list to ensure it still works even if catalog path differs
+      const FALLBACK = [
+        {name:"Audio Errands", path:"/micro-apps-repository/Audio_Errands/", tags:["Executive Functioning","Strategy Training"]},
+        {name:"Barista Chaos", path:"/micro-apps-repository/Barista_Chaos/", tags:["Executive Functioning"]},
+        {name:"Build your package", path:"/micro-apps-repository/Build_your_package/", tags:["Utility"]},
+        {name:"Emergency despatch", path:"/micro-apps-repository/Emergency_despatch/", tags:["Executive Functioning","Visuospatial"]},
+        {name:"Errands — visual memory", path:"/micro-apps-repository/Errands-visual-memory/", tags:["Visuospatial","Executive Functioning"]},
+        {name:"Fluency Coach", path:"/micro-apps-repository/Fluency_Coach/", tags:["Language","Executive Functioning","Strategy Training"]},
+        {name:"Office Day", path:"/micro-apps-repository/Office_Day/", tags:["Executive Functioning","Strategy Training"]},
+        {name:"Plan with Coco", path:"/micro-apps-repository/Plan_with_Coco/", tags:["Executive Functioning","Language"]},
+        {name:"Star Hunt", path:"/micro-apps-repository/Star_Hunt/", tags:["Visuospatial"]},
+        {name:"Taskflow", path:"/micro-apps-repository/Taskflow/", tags:["Executive Functioning"]},
+        {name:"Tower control", path:"/micro-apps-repository/Tower_control/", tags:["Executive Functioning","Visuospatial"]},
+        {name:"Visuospatial Blocks", path:"/micro-apps-repository/Visuospatial_Blocks/", tags:["Visuospatial"]},
+        {name:"Word Scavenger", path:"/micro-apps-repository/word-scavenger/", tags:["Language"]},
+        {name:"Maze Explorer", path:"/micro-apps-repository/maze-explorer/", tags:["Visuospatial","Executive Functioning"]},
+      ];
+      const mapped = (Array.isArray(cat)?cat:[]).map(it => ({
+        name: it.name || it.title || 'Untitled',
+        path: normPath(it.path || it.url),
+        tags: it.tags || [],
+        about: it.about || it.description || ''
+      })).filter(x=>x.path);
 
-  log('Zipping...');
-  const blob = await zip.generateAsync({type:'blob'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = pkgName + '.zip'; a.click();
-  setTimeout(()=>URL.revokeObjectURL(url), 30000);
-  log('Done. Your download should start now ✅', 'ok');
-});
+      const byName = new Map();
+      [...mapped, ...FALLBACK].forEach(x=>{
+        const k = x.name.toLowerCase();
+        byName.set(k, Object.assign(byName.get(k)||{}, x));
+      });
+      const arr = Array.from(byName.values()).map(x => ({...x, path: normPath(x.path)}));
+      arr.sort((a,b)=>a.name.localeCompare(b.name));
+      render(arr);
+    }
 
-// kick off
-loadCatalog();
-</script>
+    async function fileToZip(zip, url, dest){
+      const res = await fetch(url, {cache:'no-store'});
+      if(!res.ok) throw new Error(`Fetch failed ${res.status} ${url}`);
+      const blob = await res.blob();
+      zip.file(dest, blob);
+      return blob.size || 0;
+    }
+
+    async function fetchManifest(base){
+      try{
+        const res = await fetch(base + 'manifest.json', {cache:'no-store'});
+        if(!res.ok) return null;
+        const data = await res.json();
+        if(Array.isArray(data.files)) return data.files;
+        return null;
+      }catch{ return null; }
+    }
+
+    async function buildZip(){
+      const checks = Array.from(APPS_EL.querySelectorAll('input[type="checkbox"]:checked'));
+      if(!checks.length){ alert('Select at least one app.'); return; }
+
+      BTN_ZIP.disabled = true; STATUS.textContent = 'Preparing…';
+      PROG.className = ''; PROG.style.width = '0%';
+      const zip = new JSZip();
+      let totalBytes = 0, done = 0, errors = 0;
+
+      // Concurrency control
+      const concurrency = 4;
+      const queue = [];
+      function updateProgress(){ 
+        const pct = Math.max(5, Math.min(99, Math.round(100 * done / Math.max(1,totalBytes))));
+        PROG.style.width = pct + '%';
+      }
+
+      // First pass: discover files and estimate total bytes (rough via HEAD where available)
+      const tasks = [];
+      for(const c of checks){
+        const base = normPath(c.dataset.path);
+        const name = c.dataset.name;
+        const slug = slugify(name);
+        let files = await fetchManifest(base);
+        if(!files){ files = ['index.html']; } // minimal fallback
+
+        files.forEach(rel => {
+          const src = base + rel.replace(/^\\//,'');
+          const dest = `${slug}/${rel.replace(/^\\//,'')}`;
+          tasks.push({src, dest});
+          totalBytes += 100000; // optimistic placeholder; real sizes vary — progress is indicative
+        });
+
+        // Add README entry per app
+        zip.file(`${slug}/README.txt`, `App: ${name}\nSource: ${base}\nIncluded files: ${files.join(', ')}\n`);
+      }
+      updateProgress();
+
+      async function worker(){
+        while(tasks.length){
+          const {src, dest} = tasks.shift();
+          try{
+            await fileToZip(zip, src, dest);
+          }catch(e){
+            errors++;
+            // record failure
+            zip.file(dest + '.ERROR.txt', String(e));
+          }finally{
+            done += 100000;
+            updateProgress();
+          }
+        }
+      }
+      await Promise.all(Array.from({length:concurrency}, worker));
+      PROG.style.width = '100%'; PROG.className = 'good';
+      STATUS.textContent = errors? `Completed with ${errors} fetch error(s).` : 'Completed.';
+
+      const stamp = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+      const blob = await zip.generateAsync({type:'blob'});
+      saveAs(blob, `micro-apps-package_${stamp}.zip`);
+      BTN_ZIP.disabled = false;
+    }
+
+    BTN_ZIP.addEventListener('click', buildZip);
+    loadCatalog();
+  </script>
 </body>
 </html>
