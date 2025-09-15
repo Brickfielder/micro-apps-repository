@@ -1,372 +1,664 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Micro Rehab Apps</title>
-  <style>
-    :root {
-      --bg: #f7f7f9;
-      --card: #ffffff;
-      --text: #1f2937;
-      --muted: #616b74;
-      --brand: #0a66c2;
-      --brand-hover: #084f96;
-      --shadow: 0 10px 24px rgba(0,0,0,0.10);
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Micro Rehab Apps</title>
+<meta content="Browse lightweight cognitive rehab micro‑apps: visuospatial, executive functioning, language, and strategy training." name="description"/>
+<style>
+    /* ===== Design tokens ===== */
+    :root{ color-scheme: light dark; 
+      --bg: #f7f8fb;
+      --surface: #ffffff;
+      --text: #1f2937;         /* slate-800 */
+      --muted: #6b7280;        /* slate-500 */
+      --line: #e5e7eb;         /* slate-200 */
+      --accent: #ff7a6e;       /* softened coral */
+      --accent-600:#ff6254;
+      --accent-700:#f24f40;
+      --pill:#f2f4f7;          /* neutral chip bg */
       --radius: 16px;
-      --divider: #e9edf3;
-      --pill: #f0f2f5;
-      --thumb: #f6f7fb;
-      --corrugation: repeating-linear-gradient(
-        0deg,
-        rgba(0,0,0,0.03) 0px,
-        rgba(0,0,0,0.03) 1px,
-        transparent 1px,
-        transparent 6px
-      );
+      --shadow: 0 1px 2px rgba(16,24,40,.06), 0 8px 24px rgba(16,24,40,.08);
+      --maxw: 1200px;
+      --focus: 2px solid #111827;
+      --transition: 180ms ease;
     }
-    @media(prefers-color-scheme: dark){
-      :root {
-        --bg: #0b0f14;
-        --card: #0f141a;
-        --text: #e6edf3;
-        --muted: #9aa4af;
-        --brand: #78b7ff;
-        --brand-hover: #a4cfff;
-        --divider: #16202a;
-        --pill:#101820;
-        --thumb:#0e151c;
-      }
+    
     }
-    [data-theme="dark"]{
-      --bg: #0b0f14;
-      --card: #0f141a;
-      --text: #e6edf3;
-      --muted: #9aa4af;
-      --brand: #78b7ff;
-      --brand-hover: #a4cfff;
-      --divider: #16202a;
-      --pill:#101820;
-      --thumb:#0e151c;
-    }
-
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text);
       background: var(--bg);
-      color: var(--text);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      line-height: 1.45;
-      background-image: var(--corrugation);
+      background-image: repeating-linear-gradient(0deg, rgba(210,180,140,0.15) 0px, rgba(210,180,140,0.15) 1px, transparent 1px, transparent 6px);
+      background-size: 100% 6px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    /* Header */
-    header {
-      position: sticky; top: 0; z-index: 50;
-      backdrop-filter: saturate(1.2) blur(6px);
-      background: color-mix(in oklab, var(--bg) 92%, transparent);
-      border-bottom: 1px solid var(--divider);
+    /* ===== Header ===== */
+    header{
+      position: sticky; top:0; z-index: 50;
+      background: rgba(255,255,255,.9);
+      backdrop-filter: saturate(120%) blur(8px);
+      border-bottom: 1px solid var(--line);
     }
-    .row {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 14px 16px;
-      display: grid;
-      grid-template-columns: 1fr auto auto;
-      gap: 12px;
-      align-items: center;
+    
     }
-    .brand {
-      display: flex; align-items: center; gap: 12px;
+    .nav{
+      margin:0 auto; max-width:var(--maxw);
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; padding:14px 16px;
     }
-    .brand .logo {
-      width: 36px; height: 36px; border-radius: 10px;
-      display: grid; place-items: center;
-      background: var(--thumb);
-      box-shadow: inset 0 0 0 1px var(--divider);
-      font-size: 20px;
+    .brand{
+      display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit;
     }
-    .brand h1 {
-      margin: 0; font-size: 18px; letter-spacing: .2px;
+    .logo{
+      width:28px; height:28px; border-radius:8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-700));
+      box-shadow: 0 2px 8px rgba(242,79,64,.35);
     }
-    .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .brand span{ font-weight:700; letter-spacing:.2px }
+    nav a{ text-decoration:none; color:inherit; padding:8px 10px; border-radius:10px }
+    nav a:hover{ background: var(--pill) }
+    .cta{
+      background: var(--accent);
+      color:#fff; border:0; padding:10px 14px; border-radius:12px;
+      font-weight:600; cursor:pointer; box-shadow: 0 6px 16px rgba(242,79,64,.25);
+      transition: transform var(--transition);
+    }
+    .cta:hover{ transform: translateY(-1px); background: var(--accent-600) }
+    .cta:active{ transform: translateY(0) }
+    .hamburger{ display:none; background:none; border:0; padding:8px; border-radius:8px }
+    .hamburger:focus-visible{ outline: var(--focus) }
+    @media (max-width: 860px){
+      nav{ display:none }
+      .hamburger{ display:block }
+    }
 
-    .controls {
-      display: flex; gap: 10px; align-items: center;
+    /* ===== Hero ===== */
+    .hero{
+      margin:0 auto; max-width:var(--maxw);
+      padding: 48px 16px 20px;
+      display:grid; gap:16px;
     }
-    .search {
-      min-width: 220px;
-      background: var(--card);
-      border: 1px solid var(--divider);
-      padding: 8px 10px;
-      border-radius: 999px;
-      display: flex; align-items: center; gap: 8px;
+    .eyebrow{
+      display:inline-block; padding:6px 10px; border-radius:999px; background: var(--pill);
+      font-size:12px; letter-spacing:.3px; text-transform: uppercase; color: var(--muted);
+    }
+    h1{ margin:8px 0 4px; font-size: clamp(28px, 5vw, 48px); line-height:1.05 }
+    .sub{ color:var(--muted); max-width: 70ch }
+    .hero-actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center }
+    .ghost{
+      background: transparent; border:1px solid var(--line); padding:10px 14px; border-radius:12px; font-weight:600; cursor:pointer;
+    }
+    .hero .meta{ display:flex; gap:16px; align-items:center; color:var(--muted); font-size:14px }
+
+    /* ===== Featured strip (no autoplay) ===== */
+    .featured-wrap{
+      margin: 6px auto 0; max-width:var(--maxw); padding: 4px 16px 0;
+    }
+    .strip{
+      display:flex; gap:16px; overflow:auto; padding-bottom:10px;
+      scroll-snap-type: x mandatory;
+    }
+    .strip::-webkit-scrollbar{ height:8px }
+    .strip::-webkit-scrollbar-thumb{ background: var(--line); border-radius:999px }
+    .feature-card{
+      min-width: 280px; background: var(--surface); border:1px solid var(--line);
+      border-radius: var(--radius); box-shadow: var(--shadow); scroll-snap-align: start;
+      padding:14px; display:grid; gap:8px;
+      transition: box-shadow var(--transition), transform var(--transition);
+    }
+    .feature-card:hover{ transform: translateY(-2px); box-shadow: 0 6px 24px rgba(16,24,40,.12) }
+    .badge{ display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; background: rgba(255,122,110,.12); color:#b42318; font-weight:600; font-size:12px }
+
+    /* ===== Filter bar ===== */
+    .filters{
+      margin: 12px auto 0; max-width:var(--maxw); padding: 12px 16px 0;
+      position: sticky; top:64px; z-index: 30; background: var(--bg);
+      border-top: 1px solid var(--line);
+    }
+    .bar{ display:flex; gap:10px; flex-wrap:wrap; align-items:center }
+    .search{
+      flex:1 1 260px; display:flex; align-items:center; gap:8px;
+      background: var(--surface); border:1px solid var(--line); border-radius: 12px; padding: 10px 12px;
+    }
+    .search input{
+      border:0; outline:0; background:transparent; width:100%; color:var(--text);
+      font-size:15px;
+    }
+    .chips{ display:flex; gap:8px; flex-wrap:wrap }
+    .chip{
+      border:1px solid var(--line); background: var(--pill);
+      padding:8px 12px; border-radius:999px; cursor:pointer;
+      font-weight:600; font-size:14px; user-select:none;
+      transition: background var(--transition), border-color var(--transition), transform var(--transition);
+    }
+    .chip[aria-pressed="true"]{
+      background: rgba(255,122,110,.14); border-color: var(--accent-600);
+    }
+    .chip:focus-visible{ outline: var(--focus) }
+    .chip:hover{ transform: translateY(-1px) }
+
+    /* ===== App grid ===== */
+    .section{ margin: 14px auto; max-width:var(--maxw); padding: 0 16px }
+    .section h2{ font-size: clamp(22px, 2.6vw, 28px); margin: 18px 0 8px }
+    .section p.lead{ color:var(--muted); margin:0 0 14px }
+    .grid{
+      display:grid; gap:16px;
+      grid-template-columns: repeat(12, 1fr);
+    }
+    @media (max-width: 1200px){ .grid{ grid-template-columns: repeat(8,1fr) } }
+    @media (max-width: 840px){ .grid{ grid-template-columns: repeat(6,1fr) } }
+    @media (max-width: 620px){ .grid{ grid-template-columns: repeat(4,1fr) } }
+    @media (max-width: 420px){ .grid{ grid-template-columns: repeat(2,1fr) } }
+
+    .card{
+      grid-column: span 4;
+      display:grid; gap:10px; padding:14px;
+      background: var(--surface); border:1px solid var(--line); border-radius: var(--radius);
       box-shadow: var(--shadow);
+      transition: box-shadow var(--transition), transform var(--transition);
     }
-    .search input {
-      border: 0; outline: none; background: transparent; color: var(--text);
-      width: 160px;
+    .card:hover{ transform: translateY(-2px); box-shadow: 0 8px 28px rgba(16,24,40,.12) }
+    .card .thumb{
+      height:120px; border-radius:12px; border:1px solid var(--line);
+      display:flex; align-items:center; justify-content:center;
+      background: linear-gradient(180deg, rgba(255,122,110,.08), transparent);
+      font-size:34px;
     }
-    .toggle {
-      display: inline-flex; align-items: center; gap: 8px;
-      border-radius: 999px; padding: 8px 12px;
-      background: var(--card);
-      border: 1px solid var(--divider);
-      cursor: pointer;
-      user-select: none;
+    .card h3{ margin:0; font-size:18px }
+    .desc{ color:var(--muted); font-size:14px; line-height:1.4; margin:0 }
+    .tags{ display:flex; flex-wrap:wrap; gap:6px }
+    .tag{ background: var(--pill); border:1px solid var(--line); border-radius:999px; padding:4px 8px; font-size:12px; font-weight:600 }
+    .open{
+      margin-top:auto; display:inline-flex; align-items:center; gap:8px; text-decoration:none;
+      font-weight:700; color: var(--accent-700);
     }
-    .toggle .dot {
-      width: 18px; height: 18px; border-radius: 50%;
-      background: var(--thumb);
-      border: 1px solid var(--divider);
-      display: inline-grid; place-items: center;
-      font-size: 12px;
-    }
+    .open .chev{ transition: transform var(--transition) }
+    .open:hover .chev{ transform: translateX(2px) }
 
-    /* Hero */
-    .hero {
-      max-width: 920px; margin: 22px auto 8px; padding: 0 16px;
-      text-align: center;
+    /* ===== Footer ===== */
+    footer{
+      margin-top: 20px; border-top:1px solid var(--line);
+      background: var(--surface);
     }
-    .hero h2 { margin: 10px 0 6px; font-size: 28px; }
-    .hero p { margin: 0 auto; max-width: 780px; color: var(--muted); text-align: justify; }
+    .foot{
+      max-width:var(--maxw); margin:0 auto; padding: 20px 16px;
+      display:grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 16px;
+    }
+    .foot small{ color:var(--muted) }
+    @media (max-width: 800px){ .foot{ grid-template-columns: 1fr } }
 
-    /* Grid */
-    section.grid {
-      max-width: 1100px; margin: 18px auto 56px; padding: 0 16px;
+    /* ===== Reduced motion ===== */
+    @media (prefers-reduced-motion: reduce){
+      *{ transition:none !important; animation:none !important }
     }
-    .cards {
-      display: grid; grid-template-columns: repeat( auto-fit, minmax(260px, 1fr) );
-      gap: 16px;
-    }
-    .card {
-      display: grid; grid-template-rows: auto auto 1fr auto auto;
-      gap: 10px;
-      padding: 16px;
-      border-radius: var(--radius);
-      background: var(--card);
-      border: 1px solid var(--divider);
-      box-shadow: var(--shadow);
-      min-height: 230px;
-    }
-    .thumb {
-      width: 52px; height: 52px; border-radius: 14px;
-      background: var(--thumb);
-      display: grid; place-items: center;
-      font-size: 26px;
-      box-shadow: inset 0 0 0 1px var(--divider);
-    }
-    .card h3 { margin: 0; font-size: 18px; }
-    .card p.desc { margin: 0; color: var(--muted); text-align: justify; }
-    .tags { display:flex; flex-wrap: wrap; gap:6px; margin-top: 6px; }
-    .tag { background: var(--pill); border:1px solid var(--divider); padding:4px 8px; border-radius:999px; font-size:12px; }
-    .open {
-      display: inline-flex; align-items: center; gap: 6px;
-      width: max-content;
-      padding: 10px 12px; border-radius: 12px;
-      background: var(--brand); color: #fff; text-decoration: none; font-weight: 600;
-      margin-top: 4px;
-    }
-    .open:hover { background: var(--brand-hover); }
+  
+/* ===== Accessible Dark Theme (toggle-controlled) ===== */
+html[data-theme="dark"]{
+  --bg: #0b1220;              /* very dark blue-gray */
+  --surface: #111827;         /* slate-900-ish surface for cards */
+  --text: #f9fafb;            /* near-white text */
+  --muted: #cbd5e1;           /* slate-300 for body copy */
+  --line: #1f2937;            /* slate-800 lines */
+  --pill: #0f172a;            /* slate-950 chips */
+  --shadow: 0 1px 2px rgba(0,0,0,.7), 0 8px 24px rgba(0,0,0,.5);
+  /* Keep coral accent; ensure it's vivid enough on dark */
+  --accent: #ff7a6e;
+  --accent-600:#ff6254;
+  --accent-700:#ff4b3a;
+}
 
-    footer {
-      max-width: 1100px; margin: 24px auto 40px; padding: 0 16px; color: var(--muted);
-      display:flex; justify-content: space-between; align-items:center; gap:12px;
-    }
-    @media (max-width: 640px) {
-      .row { grid-template-columns: 1fr auto; }
-      .controls { grid-column: 1 / -1; justify-content: space-between; }
-      .search { width: 100%; }
-      .search input { width: 100%; }
-    }
-  </style>
+/* Dark craft-paper corrugation (very subtle) */
+html[data-theme="dark"] body{
+  background-color: var(--bg);
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 6px);
+  background-size: 100% 6px;
+}
+
+/* Ensure components adapt for dark */
+html[data-theme="dark"] header{
+  background: rgba(17,24,39,.88); /* semi-opaque surface */
+  border-bottom-color: var(--line);
+  backdrop-filter: saturate(120%) blur(8px);
+}
+
+html[data-theme="dark"] .feature-card,
+html[data-theme="dark"] .card{
+  border-color: var(--line);
+}
+
+html[data-theme="dark"] .badge{
+  background: rgba(255,122,110,.18);
+  color: #ffd0cb;
+}
+
+html[data-theme="dark"] .chip{
+  background: var(--pill);
+  border-color: var(--line);
+  color: var(--muted);
+}
+html[data-theme="dark"] .chip[aria-pressed="true"]{
+  background: rgba(255,122,110,.18);
+  border-color: var(--accent-600);
+  color: #ffe6e3;
+}
+
+html[data-theme="dark"] .search{
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+html[data-theme="dark"] .desc,
+html[data-theme="dark"] .sub,
+html[data-theme="dark"] .lead{ color: var(--muted); }
+
+/* Links/CTAs readable on dark */
+html[data-theme="dark"] .open{ color: var(--accent-600); }
+
+/* Focus rings meet contrast on dark */
+html[data-theme="dark"] :focus-visible{
+  outline: 2px solid #f8fafc; /* very light ring */
+  outline-offset: 2px;
+}
+
+/* ===== Readability: justified body copy on mobile/desktop ===== */
+p, .desc, .lead, .sub {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+}
+
+/* (old header rules removed) */ */
+.nav{
+  position: relative;
+  justify-content: center; /* center the block of items */
+  flex-wrap: wrap;
+}
+.brand{
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+nav{
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly; /* evenly space items in nav */
+  min-width: 420px;
+}
+/* keep CTA and theme toggle visually balanced */
+#themeToggle{ margin-left: 8px; }
+.cta{ margin-left: 8px; }
+
+/* On small screens, keep it simple: stack with centered brand and show CTA; hide full nav */
+@media (max-width: 860px){
+  .nav{ justify-content: center; }
+  .brand{ position: static; transform:none; order: -1; margin: 0 auto 6px; }
+  nav{ display: none; }
+  .cta{ order: 1; }
+}
+
+/* ===== Header as grid layout ===== */
+.nav {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; /* left controls, brand, right controls */
+  align-items: center;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 14px 16px;
+}
+.brand {
+  justify-self: center;
+  position: static;
+  transform: none;
+}
+nav {
+  display: flex;
+  justify-content: space-evenly;
+  gap: 20px;
+}
+#themeToggle, .cta {
+  justify-self: start;
+}
+/* Mobile adjustments */
+@media (max-width: 860px){
+  .nav {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    justify-items: center;
+  }
+  nav {
+    display: none;
+  }
+  #themeToggle, .cta {
+    justify-self: center;
+  }
+}
+
+/* ===== Dark theme: ensure toggle is visible and accessible ===== */
+html[data-theme="dark"] #themeToggle{
+  background: #111827;           /* surface */
+  color: #f8fafc;                /* near-white text */
+  border: 1px solid #334155;     /* slate-700 border for separation */
+  box-shadow: 0 2px 6px rgba(0,0,0,.5);
+}
+html[data-theme="dark"] #themeToggle:hover{
+  background:#0f172a;
+  border-color:#475569;
+}
+html[data-theme="dark"] #themeToggle:focus-visible{
+  outline: 2px solid #f8fafc;
+  outline-offset: 2px;
+}
+</style>
 </head>
 <body>
-  <header>
-    <div class="row">
-      <div class="brand" role="banner">
-        <div class="logo" aria-hidden="true">🧩</div>
-        <div>
-          <h1>Micro Rehab Apps</h1>
-          <div class="sub">Lightweight, browser‑based cognitive tools</div>
-        </div>
-      </div>
+<header role="banner">
+<div aria-label="Primary" class="nav">
+<a aria-label="Micro Rehab Apps home" class="brand" href="#top">
+<span aria-hidden="true" class="logo"></span>
+<span>Micro Rehab Apps</span>
+</a>
+<nav>
+<a href="#apps">Apps</a>
+<a href="#about">About</a>
+<a href="#contact">Contact</a>
+</nav>
+<button aria-pressed="false" class="ghost" id="themeToggle" title="Toggle theme (Light/Dark)">Theme: Light</button>
+<button aria-label="Open menu" class="hamburger" onclick="alert('Menu coming soon')">☰</button>
+</div>
+</header>
+<main id="top" role="main">
+<!-- Hero -->
+<section aria-label="Intro" class="hero">
+<span class="eyebrow">Open micro‑apps for cognitive rehab</span>
+<h1>Practice, track, and iterate — with lightweight tools that patients actually use.</h1>
+<p class="sub">A curated set of tiny, focused web apps for <strong>visuospatial</strong>, <strong>language</strong>, and <strong>executive</strong> skills — designed for clinical sessions and at‑home practice. Filter by tags, open instantly, no install.</p>
+<div class="hero-actions">
+<button class="cta" onclick="document.getElementById('apps').scrollIntoView({behavior:'smooth'});">Browse apps</button>
+<button class="ghost" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'});">How it works</button>
+<span class="meta">• Neutral palette + coral accent • Accessible by default</span>
+</div>
+</section>
+<!-- Featured strip -->
+<section aria-label="Featured" class="featured-wrap">
+<div class="strip" role="list">
+<article class="feature-card" role="listitem">
+<span class="badge">Featured</span>
+<strong>TaskFlow Planner</strong>
+<p class="desc">Plan a routine, then review and correct the sequence. Great for prospective memory and error awareness.</p>
+<a aria-label="Open TaskFlow Planner" class="open" href="/micro-apps-repository/Taskflow/">Open <span class="chev">›</span></a>
+</article>
+<article class="feature-card" role="listitem">
+<span class="badge">Featured</span>
+<strong>Emergency Dispatch</strong>
+<p class="desc">Fast triage under rules and time pressure. Trains inhibition, monitoring, and flexible problem solving.</p>
+<a aria-label="Open Emergency Dispatch" class="open" href="/micro-apps-repository/Emergency_despatch/">Open <span class="chev">›</span></a>
+</article>
+<article class="feature-card" role="listitem">
+<span class="badge">New</span>
+<strong>Fluency Coach</strong>
+<p class="desc">Guided verbal fluency with strategy prompts and end‑of‑round grouping feedback.</p>
+<a aria-label="Open Fluency Coach" class="open" href="/micro-apps-repository/Fluency_Coach/">Open <span class="chev">›</span></a>
+</article>
+</div>
+</section>
+<!-- Filters -->
+<section aria-label="Filters" class="filters">
+<div class="bar">
+<div class="search" role="search">
+<span aria-hidden="true">🔎</span>
+<input aria-label="Search apps" id="q" placeholder="Search apps, tags, or features…" type="search"/>
+</div>
+<div aria-label="Filter by tag" class="chips" role="toolbar">
+<button aria-pressed="false" class="chip" data-tag="Visuospatial" role="button">Visuospatial</button>
+<button aria-pressed="false" class="chip" data-tag="Executive Functioning" role="button">Executive Functioning</button>
+<button aria-pressed="false" class="chip" data-tag="Language" role="button">Language</button>
+<button aria-pressed="false" class="chip" data-tag="Strategy Training" role="button">Strategy Training</button>
+</div>
+</div>
+</section>
+<!-- App sections -->
+<section aria-labelledby="apps-h2" class="section" id="apps">
+<h2 id="apps-h2">All apps</h2>
+<p class="lead" id="how">Tap a tag to filter. Multiple tags apply together (intersection). You can also type in the search box.</p>
+<div class="grid" id="grid" role="list">
+<!-- Visuospatial -->
+<article class="card" data-about="Track moving targets and sustain attention with increasing density and speed." data-name="Star Hunt" data-path="/micro-apps-repository/Star_Hunt/" data-tags='["Visuospatial"]' role="listitem">
+<div aria-hidden="true" class="thumb">⭐</div>
+<h3>Star Hunt</h3>
+<p class="desc">Track stars and ignore distractors. Adjust difficulty via density and speed.</p>
+<div class="tags"><span class="tag">Visuospatial</span></div>
+<a class="open" href="/micro-apps-repository/Star_Hunt/">Open <span class="chev">›</span></a>
+</article>
+<article class="card" data-about="Chunk patterns, maintain and manipulate visuo‑spatial sequences." data-name="Visuo‑Spatial Blocks" data-path="/micro-apps-repository/Visuospatial_Blocks/" data-tags='["Visuospatial","Executive Functioning"]' role="listitem">
+<div aria-hidden="true" class="thumb">🧊</div>
+<h3>Visuo‑Spatial Blocks</h3>
+<p class="desc">Copy and manipulate patterns; practice chunking and sequence maintenance.</p>
+<div class="tags"><span class="tag">Visuospatial</span><span class="tag">Executive Functioning</span></div>
+<a class="open" href="/micro-apps-repository/Visuospatial_Blocks/">Open <span class="chev">›</span></a>
+</article>
+<article class="card" data-about="Plan ahead, resist lure paths, and keep a mental map under time." data-name="Maze Explorer" data-path="/micro-apps-repository/maze-explorer/" data-tags='["Visuospatial","Executive Functioning"]' role="listitem">
+<div aria-hidden="true" class="thumb">🗺️</div>
+<h3>Maze Explorer</h3>
+<p class="desc">Navigate mazes under time pressure; inhibit shortcuts that look right but aren’t.</p>
+<div class="tags"><span class="tag">Visuospatial</span><span class="tag">Executive Functioning</span></div>
+<a class="open" href="/micro-apps-repository/maze-explorer/">Open <span class="chev">›</span></a>
+</article>
+<!-- Language / Strategy -->
+<article class="card" data-about="Rapid lexical access with thematic prompts and distractors." data-name="Word Scavenger" data-path="/micro-apps-repository/word-scavenger/" data-tags='["Language"]' role="listitem">
+<div aria-hidden="true" class="thumb">🔤</div>
+<h3>Word Scavenger</h3>
+<p class="desc">Name items by theme; tune difficulty via distractor density.</p>
+<div class="tags"><span class="tag">Language</span></div>
+<a class="open" href="/micro-apps-repository/word-scavenger/">Open <span class="chev">›</span></a>
+</article>
+<article class="card" data-about="Verbal fluency with strategy cues; end‑of‑round grouping feedback." data-name="Fluency Coach" data-path="/micro-apps-repository/Fluency_Coach/" data-tags='["Language","Executive Functioning","Strategy Training"]' role="listitem">
+<div aria-hidden="true" class="thumb">🎤</div>
+<h3>Fluency Coach</h3>
+<p class="desc">Guided verbal fluency; shows which words cluster into strategies post‑task.</p>
+<div class="tags"><span class="tag">Language</span><span class="tag">Executive Functioning</span><span class="tag">Strategy Training</span></div>
+<a class="open" href="/micro-apps-repository/Fluency_Coach/">Open <span class="chev">›</span></a>
+</article>
+<!-- Executive -->
+<article class="card" data-about="Arrange, check, then reflect — promotes sequencing, monitoring, and error correction." data-name="TaskFlow Planner" data-path="/micro-apps-repository/Taskflow/" data-tags='["Executive Functioning"]' role="listitem">
+<div aria-hidden="true" class="thumb">🧩</div>
+<h3>TaskFlow Planner</h3>
+<p class="desc">Build the sequence, then enter review mode to compare ideal vs chosen steps.</p>
+<div class="tags"><span class="tag">Executive Functioning</span></div>
+<a class="open" href="/micro-apps-repository/Taskflow/">Open <span class="chev">›</span></a>
+</article>
+<article class="card" data-about="Plan daily activities with Coco the bird. A time-management and prospective memory game." data-name="Plan with Coco" data-path="/micro-apps-repository/Plan_with_Coco/" data-tags='["Executive Functioning","Strategy Training"]' role="listitem">
+<div aria-hidden="true" class="thumb">🐦</div>
+<h3>Plan with Coco</h3>
+<p class="desc">Plan daily activities with Coco the bird. Combines executive functioning with prospective memory.</p>
+<div class="tags"><span class="tag">Executive Functioning</span><span class="tag">Strategy Training</span></div>
+<a class="open" href="/micro-apps-repository/Plan_with_Coco/">Open <span class="chev">›</span></a>
+</article>
+<article class="card" data-about="Apply rules under time pressure; triage incidents; track errors." data-name="Emergency Dispatch" data-path="/micro-apps-repository/Emergency_despatch/" data-tags='["Executive Functioning"]' role="listitem">
+<div aria-hidden="true" class="thumb">🚑</div>
+<h3>Emergency Dispatch</h3>
+<p class="desc">Route the right unit, respect constraints, and manage the clock.</p>
+<div class="tags"><span class="tag">Executive Functioning</span></div>
+<a class="open" href="/micro-apps-repository/Emergency_despatch/">Open <span class="chev">›</span></a>
+</article>
+<!-- Added apps -->
+<article class="card" role="listitem"
+  data-name="Audio Errands"
+  data-path="/micro-apps-repository/Audio_Errands/"
+  data-tags='["Executive Functioning","Strategy Training"]'
+  data-about="Listen to short instructions and execute them in order; trains prospective memory and monitoring.">
+  <div class="thumb" aria-hidden="true">🔊</div>
+  <h3>Audio Errands</h3>
+  <p class="desc">Follow spoken multi‑step instructions, then check what you did vs. what was requested.</p>
+  <div class="tags"><span class="tag">Executive Functioning</span><span class="tag">Strategy Training</span></div>
+  <a class="open" href="/micro-apps-repository/Audio_Errands/">Open <span class="chev">›</span></a>
+</article>
 
-      <div class="controls" role="region" aria-label="Controls">
-        <div class="search" role="search">
-          <span aria-hidden="true">🔎</span>
-          <input id="search" type="search" placeholder="Search apps or tags…" autocomplete="off" />
-        </div>
-        <button id="themeToggle" class="toggle" type="button" aria-pressed="false" aria-label="Toggle dark mode">
-          <span class="dot" aria-hidden="true">◐</span>
-          <span class="lab">Theme</span>
-        </button>
-      </div>
-    </div>
-  </header>
+<article class="card" role="listitem"
+  data-name="Barista Chaos"
+  data-path="/micro-apps-repository/Barista_Chaos/"
+  data-tags='["Executive Functioning"]'
+  data-about="Rule‑based drink making with distractors; practice inhibition and working memory.">
+  <div class="thumb" aria-hidden="true">☕</div>
+  <h3>Barista Chaos</h3>
+  <p class="desc">Make drinks under time pressure and changing rules. Tracks errors and extras.</p>
+  <div class="tags"><span class="tag">Executive Functioning</span></div>
+  <a class="open" href="/micro-apps-repository/Barista_Chaos/">Open <span class="chev">›</span></a>
+</article>
 
-  <main>
-    <div class="hero">
-      <h2>Practice, measure, iterate.</h2>
-      <p>
-        A curated set of small, focused web apps for visuospatial skills, language, and executive functioning.
-        Everything runs locally in your browser — no installs. Links open the live app in its folder. 
-        Use the search to filter by name or tag.
-      </p>
-    </div>
+<article class="card" role="listitem"
+  data-name="Errands — Visual Memory"
+  data-path="/micro-apps-repository/Errands-visual-memory/"
+  data-tags='["Visuospatial","Executive Functioning"]'
+  data-about="Remember and place items in the right locations; trains spatial memory and planning.">
+  <div class="thumb" aria-hidden="true">🧠</div>
+  <h3>Errands — Visual Memory</h3>
+  <p class="desc">Memorise where items belong and complete the list efficiently.</p>
+  <div class="tags"><span class="tag">Visuospatial</span><span class="tag">Executive Functioning</span></div>
+  <a class="open" href="/micro-apps-repository/Errands-visual-memory/">Open <span class="chev">›</span></a>
+</article>
 
-    <section class="grid">
-      <div id="cards" class="cards" role="list"></div>
-    </section>
-  </main>
+<article class="card" role="listitem"
+  data-name="Office Day"
+  data-path="/micro-apps-repository/Office_Day/"
+  data-tags='["Executive Functioning","Strategy Training"]'
+  data-about="Simulated office tasks with interruptions; supports planning, task‑switching, and cueing strategies.">
+  <div class="thumb" aria-hidden="true">🗂️</div>
+  <h3>Office Day</h3>
+  <p class="desc">Handle interruptions while keeping to a plan. Practice cueing and prioritising.</p>
+  <div class="tags"><span class="tag">Executive Functioning</span><span class="tag">Strategy Training</span></div>
+  <a class="open" href="/micro-apps-repository/Office_Day/">Open <span class="chev">›</span></a>
+</article>
 
-  <footer>
-    <div>Updated 15 Sep 2025 · JSON‑driven</div>
-    <div><a href="catalog.json" target="_blank" rel="noopener">View catalog.json</a></div>
-  </footer>
+<article class="card" role="listitem"
+  data-name="Tower Control"
+  data-path="/micro-apps-repository/Tower_control/"
+  data-tags='["Executive Functioning","Visuospatial"]'
+  data-about="Route aircraft under constraints; trains inhibition, updating, and visual scanning.">
+  <div class="thumb" aria-hidden="true">🛫</div>
+  <h3>Tower Control</h3>
+  <p class="desc">Deconflict routes and apply rules quickly and accurately.</p>
+  <div class="tags"><span class="tag">Executive Functioning</span><span class="tag">Visuospatial</span></div>
+  <a class="open" href="/micro-apps-repository/Tower_control/">Open <span class="chev">›</span></a>
+</article>
 
-  <script>
-    // --- Utilities ---
-    function normalizePath(p){
-      if(!p) return null;
-      // Ensure directories (no index.html) and use the new repository root
-      p = p.replace(/\\/index\\.html$/i,'/');
-      p = p.replace(/^\\/?docs\\//i, '/micro-apps-repository/');
-      // If already correct prefix, keep it
-      if(!/^\\/?micro-apps-repository\\//i.test(p.replace(/^\\//,''))){
-        // leave as-is if it's an absolute URL or already good
-      }
-      // Guarantee trailing slash
-      if(!p.endsWith('/')) p += '/';
-      return p;
+
+</div>
+</section>
+<!-- About -->
+<section aria-label="About" class="section" id="about">
+<h2>How it works</h2>
+<p class="lead">Each micro‑app opens instantly in the browser, works on mobile and desktop, and supports short, focused practice. No accounts; minimal data; accessible by default.</p>
+</section>
+<!-- Contact -->
+<section aria-label="Contact" class="section" id="contact">
+<h2>Contact</h2>
+<p class="lead">Questions or collaboration ideas? Email <a href="mailto:info@example.com">info@example.com</a>.</p>
+</section>
+</main>
+<footer role="contentinfo">
+<div class="foot">
+<div>
+<strong>Micro Rehab Apps</strong><br/>
+<small>Open micro‑apps for cognitive rehabilitation and research.</small>
+</div>
+<div>
+<small>Repository</small><br/>
+<a class="open" href="https://github.com/yourname/micro-apps">GitHub <span class="chev">›</span></a>
+</div>
+<div>
+<small>Version</small><br/>
+<small>v1.0 · Updated 15 Sep 2025 · 13 apps linked</small>
+</div>
+</div>
+</footer>
+<script>
+    // ===== Tiny filtering/search (no frameworks) =====
+    const chips = Array.from(document.querySelectorAll('.chip'));
+    const cards = Array.from(document.querySelectorAll('.card'));
+    const q = document.getElementById('q');
+    const active = new Set();
+
+    function normalize(s){ return (s||'').toLowerCase().trim() }
+    function getCardText(card){
+      const name = card.getAttribute('data-name') || '';
+      const about = card.getAttribute('data-about') || '';
+      const tags = JSON.parse(card.getAttribute('data-tags')||'[]').join(' ');
+      return normalize(name + ' ' + about + ' ' + tags);
     }
+    const cardIndex = new Map(cards.map(c => [c, getCardText(c)]));
 
-    function el(tag, attrs={}, ...children){
-      const n = document.createElement(tag);
-      Object.entries(attrs).forEach(([k,v])=>{
-        if(v===null || v===undefined) return;
-        if(k==='class') n.className = v;
-        else if(k==='dataset'){ Object.assign(n.dataset, v); }
-        else if(k.startsWith('on') && typeof v==='function'){ n.addEventListener(k.substring(2), v); }
-        else n.setAttribute(k, v);
+    function applyFilters(){
+      const query = normalize(q.value);
+      cards.forEach(card => {
+        const tags = JSON.parse(card.getAttribute('data-tags')||'[]');
+        const matchesTags = [...active].every(tag => tags.includes(tag));
+        const matchesQuery = query ? cardIndex.get(card).includes(query) : true;
+        const show = matchesTags && matchesQuery;
+        card.style.display = show ? 'grid' : 'none';
       });
-      children.flat().forEach(c=>{
-        if(c==null) return;
-        n.appendChild(typeof c==='string' ? document.createTextNode(c) : c);
+    }
+
+    chips.forEach(ch => {
+      ch.addEventListener('click', () => {
+        const tag = ch.dataset.tag;
+        const pressed = ch.getAttribute('aria-pressed') === 'true';
+        ch.setAttribute('aria-pressed', String(!pressed));
+        if(pressed) active.delete(tag); else active.add(tag);
+        applyFilters();
       });
-      return n;
-    }
-
-    // --- Fallback master list to guarantee 13 apps appear ---
-    const FALLBACK = [
-      {name:"Audio Errands", path:"/micro-apps-repository/Audio_Errands/", tags:["Executive Functioning","Strategy Training"], icon:"🔊", about:"Follow spoken multi-step instructions under time pressure."},
-      {name:"Barista Chaos", path:"/micro-apps-repository/Barista_Chaos/", tags:["Executive Functioning"], icon:"☕", about:"Rule-based drink making with distractors; inhibition & working memory."},
-      {name:"Build your package", path:"/micro-apps-repository/Build_your_package/", tags:["Utility"], icon:"📦", about:"Bundle selected apps (utility)."},
-      {name:"Emergency despatch", path:"/micro-apps-repository/Emergency_despatch/", tags:["Executive Functioning","Visuospatial"], icon:"🚑", about:"Triage and route under constraints; scanning & updating."},
-      {name:"Errands — visual memory", path:"/micro-apps-repository/Errands-visual-memory/", tags:["Visuospatial","Executive Functioning"], icon:"🧠", about:"Remember locations and complete a list efficiently."},
-      {name:"Fluency Coach", path:"/micro-apps-repository/Fluency_Coach/", tags:["Language","Executive Functioning","Strategy Training"], icon:"💬", about:"Category & letter fluency with cueing strategies."},
-      {name:"Office Day", path:"/micro-apps-repository/Office_Day/", tags:["Executive Functioning","Strategy Training"], icon:"🗂️", about:"Simulated office tasks with interruptions."},
-      {name:"Plan with Coco", path:"/micro-apps-repository/Plan_with_Coco/", tags:["Executive Functioning","Language"], icon:"🕊️", about:"Plan with Coco through choices and distractors."},
-      {name:"Star Hunt", path:"/micro-apps-repository/Star_Hunt/", tags:["Visuospatial"], icon:"⭐", about:"Find target stars; visual search & speed."},
-      {name:"Taskflow", path:"/micro-apps-repository/Taskflow/", tags:["Executive Functioning"], icon:"🧭", about:"Plan and order tasks; sequence memory."},
-      {name:"Tower control", path:"/micro-apps-repository/Tower_control/", tags:["Executive Functioning","Visuospatial"], icon:"🛫", about:"Deconflict and route aircraft under rules."},
-      {name:"Visuospatial Blocks", path:"/micro-apps-repository/Visuospatial_Blocks/", tags:["Visuospatial"], icon:"🧱", about:"Recreate block patterns; constructional praxis."},
-      {name:"Word Scavenger", path:"/micro-apps-repository/word-scavenger/", tags:["Language"], icon:"🔤", about:"Search and collect words under constraints."},
-      {name:"Maze Explorer", path:"/micro-apps-repository/maze-explorer/", tags:["Visuospatial","Executive Functioning"], icon:"🗺️", about:"Navigate mazes with evolving rules."}
-    ];
-
-    // Some repos have both kebab-case and underscore names; ensure all 13 appear:
-    const MUST_HAVE = new Map(FALLBACK.map(x => [x.name.toLowerCase(), x]));
-
-    // --- Render ---
-    const cardsEl = document.getElementById('cards');
-    let ITEMS = [];
-
-    function render(list){
-      cardsEl.innerHTML = '';
-      list.forEach(app => {
-        const art = el('article', {class:'card', role:'listitem', dataset:{name:app.name}},
-          el('div', {class:'thumb','aria-hidden':'true'}, app.icon || '🧩'),
-          el('h3', {}, app.name),
-          el('p', {class:'desc'}, app.about || 'A lightweight browser app.'),
-          el('div', {class:'tags'}, ...(app.tags||[]).map(t=>el('span',{class:'tag'}, t))),
-          el('a', {class:'open', href: normalizePath(app.path) || '#', target:'_blank', rel:'noopener'}, 'Open ', el('span',{class:'chev','aria-hidden':'true'}, '›')),
-        );
-        cardsEl.appendChild(art);
+      ch.addEventListener('keydown', (e) => {
+        if(e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); ch.click(); }
       });
-    }
-
-    function matches(q, app){
-      if(!q) return true;
-      q = q.toLowerCase();
-      const hay = [app.name, app.about, ...(app.tags||[])].join(' ').toLowerCase();
-      return hay.includes(q);
-    }
-
-    // --- Search ---
-    const search = document.getElementById('search');
-    search.addEventListener('input', () => {
-      const q = search.value.trim();
-      render(ITEMS.filter(a => matches(q, a)));
     });
+    q.addEventListener('input', applyFilters);
 
-    // --- Theme toggle ---
-    const toggle = document.getElementById('themeToggle');
-    function applyTheme(t){ document.documentElement.dataset.theme = t; toggle.setAttribute('aria-pressed', t==='dark'); }
-    (function initTheme(){
-      const saved = localStorage.getItem('mr.theme');
-      if(saved){ applyTheme(saved); }
-    })();
-    toggle.addEventListener('click', () => {
-      const next = (document.documentElement.dataset.theme === 'dark') ? 'light' : 'dark';
-      applyTheme(next); localStorage.setItem('mr.theme', next);
-    });
-
-    // --- Load catalog.json then merge with FALLBACK to ensure completeness ---
-    async function load(){
-      let cat = [];
-      try {
-        const res = await fetch('catalog.json', {cache:'no-store'});
-        if(res.ok){ cat = await res.json(); }
-      } catch(e){ /* ignore, fallback will kick in */ }
-
-      // Map catalog to standard shape
-      const mapped = (Array.isArray(cat)?cat:[]).map(it => ({
-        name: it.name || it.title || 'Untitled App',
-        path: normalizePath(it.path || it.url) || null,
-        tags: it.tags || [],
-        about: it.about || it.description || '',
-        icon: it.icon || null
-      }));
-
-      // Normalize prefixes and ensure Coco path rule
-      mapped.forEach(m => {
-        if(m.name.toLowerCase().includes('plan') && m.name.toLowerCase().includes('coco')){
-          m.path = normalizePath('/micro-apps-repository/Plan_with_Coco/');
+    // Keyboard: Enter to open focused card
+    cards.forEach(card => {
+      card.tabIndex = 0;
+      card.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter'){
+          const link = card.querySelector('.open');
+          if(link) link.click();
         }
       });
+    });
+  
 
-      // Merge: prefer catalog entries, fill gaps with fallback, and ensure all MUST_HAVE exist
-      const byName = new Map();
-      [...mapped, ...FALLBACK].forEach(x => {
-        const key = x.name.toLowerCase();
-        const prev = byName.get(key) || {};
-        byName.set(key, Object.assign({}, prev, x));
-      });
-
-      // Guarantee the 13 essentials
-      MUST_HAVE.forEach((v,k)=>{
-        if(!byName.has(k)) byName.set(k, v);
-      });
-
-      ITEMS = Array.from(byName.values()).filter(x => x.path);
-      // Sort by name
-      ITEMS.sort((a,b)=>a.name.localeCompare(b.name));
-
-      render(ITEMS);
+// ===== Theme toggle (accessible) =====
+(function(){
+  const root = document.documentElement;
+  const btn = document.getElementById('themeToggle');
+  const key = 'mra-theme';
+  // prefer saved theme, otherwise stay light (no surprise flips)
+  const saved = localStorage.getItem(key);
+  if(saved === 'dark'){ root.setAttribute('data-theme','dark'); btn && (btn.textContent='Theme: Dark'); btn && btn.setAttribute('aria-pressed','true'); }
+  else { root.setAttribute('data-theme','light'); btn && (btn.textContent='Theme: Light'); btn && btn.setAttribute('aria-pressed','false'); }
+  function setTheme(mode){
+    root.setAttribute('data-theme', mode);
+    localStorage.setItem(key, mode);
+    if(btn){
+      btn.textContent = mode === 'dark' ? 'Theme: Dark' : 'Theme: Light';
+      btn.setAttribute('aria-pressed', mode === 'dark' ? 'true' : 'false');
     }
-    load();
-  </script>
+  }
+  if(btn){
+    btn.addEventListener('click', () => {
+      const mode = (root.getAttribute('data-theme') === 'dark') ? 'light' : 'dark';
+      setTheme(mode);
+    });
+    btn.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter' || e.key===' ') { e.preventDefault(); btn.click(); }
+    });
+  }
+})();
+</script>
 </body>
 </html>
