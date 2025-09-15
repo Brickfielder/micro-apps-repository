@@ -1,13 +1,14 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Micro Rehab Apps</title>
-  <meta name="description" content="Browse lightweight cognitive rehab micro‑apps: visuospatial, executive functioning, language, and strategy training." />
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Micro Rehab Apps</title>
+<meta content="Browse lightweight cognitive rehab micro‑apps: visuospatial, executive functioning, language, and strategy training." name="description"/>
+<style>
     /* ===== Design tokens ===== */
-    :root{
+    :root{ color-scheme: light dark; 
       --bg: #f7f8fb;
       --surface: #ffffff;
       --text: #1f2937;         /* slate-800 */
@@ -23,16 +24,7 @@
       --focus: 2px solid #111827;
       --transition: 180ms ease;
     }
-    @media (prefers-color-scheme: dark){
-      :root{
-        --bg:#0b1020;
-        --surface:#0f1426;
-        --text:#e5e7eb;
-        --muted:#94a3b8;
-        --line:#1f2937;
-        --pill:#151a2e;
-        --shadow: 0 1px 2px rgba(0,0,0,.5), 0 8px 24px rgba(0,0,0,.4);
-      }
+    
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -54,8 +46,7 @@
       backdrop-filter: saturate(120%) blur(8px);
       border-bottom: 1px solid var(--line);
     }
-    @media (prefers-color-scheme: dark){
-      header{ background: rgba(15,20,38,.8); }
+    
     }
     .nav{
       margin:0 auto; max-width:var(--maxw);
@@ -207,216 +198,237 @@
     @media (prefers-reduced-motion: reduce){
       *{ transition:none !important; animation:none !important }
     }
-  </style>
+  
+/* ===== Accessible Dark Theme (toggle-controlled) ===== */
+html[data-theme="dark"]{
+  --bg: #0b1220;              /* very dark blue-gray */
+  --surface: #111827;         /* slate-900-ish surface for cards */
+  --text: #f9fafb;            /* near-white text */
+  --muted: #cbd5e1;           /* slate-300 for body copy */
+  --line: #1f2937;            /* slate-800 lines */
+  --pill: #0f172a;            /* slate-950 chips */
+  --shadow: 0 1px 2px rgba(0,0,0,.7), 0 8px 24px rgba(0,0,0,.5);
+  /* Keep coral accent; ensure it's vivid enough on dark */
+  --accent: #ff7a6e;
+  --accent-600:#ff6254;
+  --accent-700:#ff4b3a;
+}
+
+/* Dark craft-paper corrugation (very subtle) */
+html[data-theme="dark"] body{
+  background-color: var(--bg);
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 6px);
+  background-size: 100% 6px;
+}
+
+/* Ensure components adapt for dark */
+html[data-theme="dark"] header{
+  background: rgba(17,24,39,.88); /* semi-opaque surface */
+  border-bottom-color: var(--line);
+  backdrop-filter: saturate(120%) blur(8px);
+}
+
+html[data-theme="dark"] .feature-card,
+html[data-theme="dark"] .card{
+  border-color: var(--line);
+}
+
+html[data-theme="dark"] .badge{
+  background: rgba(255,122,110,.18);
+  color: #ffd0cb;
+}
+
+html[data-theme="dark"] .chip{
+  background: var(--pill);
+  border-color: var(--line);
+  color: var(--muted);
+}
+html[data-theme="dark"] .chip[aria-pressed="true"]{
+  background: rgba(255,122,110,.18);
+  border-color: var(--accent-600);
+  color: #ffe6e3;
+}
+
+html[data-theme="dark"] .search{
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+html[data-theme="dark"] .desc,
+html[data-theme="dark"] .sub,
+html[data-theme="dark"] .lead{ color: var(--muted); }
+
+/* Links/CTAs readable on dark */
+html[data-theme="dark"] .open{ color: var(--accent-600); }
+
+/* Focus rings meet contrast on dark */
+html[data-theme="dark"] :focus-visible{
+  outline: 2px solid #f8fafc; /* very light ring */
+  outline-offset: 2px;
+}
+</style>
 </head>
 <body>
-  <header role="banner">
-    <div class="nav" aria-label="Primary">
-      <a class="brand" href="#top" aria-label="Micro Rehab Apps home">
-        <span class="logo" aria-hidden="true"></span>
-        <span>Micro Rehab Apps</span>
-      </a>
-      <nav>
-        <a href="#apps">Apps</a>
-        <a href="#about">About</a>
-        <a href="#contact">Contact</a>
-      </nav>
-      <button class="cta" onclick="document.getElementById('apps').scrollIntoView({behavior:'smooth'});">Browse Apps</button>
-      <button class="hamburger" aria-label="Open menu" onclick="alert('Menu coming soon')">☰</button>
-    </div>
-  </header>
-
-  <main id="top" role="main">
-    <!-- Hero -->
-    <section class="hero" aria-label="Intro">
-      <span class="eyebrow">Open micro‑apps for cognitive rehab</span>
-      <h1>Practice, track, and iterate — with lightweight tools that patients actually use.</h1>
-      <p class="sub">A curated set of tiny, focused web apps for <strong>visuospatial</strong>, <strong>language</strong>, and <strong>executive</strong> skills — designed for clinical sessions and at‑home practice. Filter by tags, open instantly, no install.</p>
-      <div class="hero-actions">
-        <button class="cta" onclick="document.getElementById('apps').scrollIntoView({behavior:'smooth'});">Browse apps</button>
-        <button class="ghost" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'});">How it works</button>
-        <span class="meta">• Neutral palette + coral accent • Accessible by default</span>
-      </div>
-    </section>
-
-    <!-- Featured strip -->
-    <section class="featured-wrap" aria-label="Featured">
-      <div class="strip" role="list">
-        <article class="feature-card" role="listitem">
-          <span class="badge">Featured</span>
-          <strong>TaskFlow Planner</strong>
-          <p class="desc">Plan a routine, then review and correct the sequence. Great for prospective memory and error awareness.</p>
-          <a class="open" href="/micro-apps-repository/Taskflow/" aria-label="Open TaskFlow Planner">Open <span class="chev">›</span></a>
-        </article>
-        <article class="feature-card" role="listitem">
-          <span class="badge">Featured</span>
-          <strong>Emergency Dispatch</strong>
-          <p class="desc">Fast triage under rules and time pressure. Trains inhibition, monitoring, and flexible problem solving.</p>
-          <a class="open" href="/micro-apps-repository/Emergency_despatch/" aria-label="Open Emergency Dispatch">Open <span class="chev">›</span></a>
-        </article>
-        <article class="feature-card" role="listitem">
-          <span class="badge">New</span>
-          <strong>Fluency Coach</strong>
-          <p class="desc">Guided verbal fluency with strategy prompts and end‑of‑round grouping feedback.</p>
-          <a class="open" href="/micro-apps-repository/Fluency_Coach/" aria-label="Open Fluency Coach">Open <span class="chev">›</span></a>
-        </article>
-      </div>
-    </section>
-
-    <!-- Filters -->
-    <section class="filters" aria-label="Filters">
-      <div class="bar">
-        <div class="search" role="search">
-          <span aria-hidden="true">🔎</span>
-          <input id="q" type="search" placeholder="Search apps, tags, or features…" aria-label="Search apps" />
-        </div>
-        <div class="chips" role="toolbar" aria-label="Filter by tag">
-          <button class="chip" role="button" aria-pressed="false" data-tag="Visuospatial">Visuospatial</button>
-          <button class="chip" role="button" aria-pressed="false" data-tag="Executive Functioning">Executive Functioning</button>
-          <button class="chip" role="button" aria-pressed="false" data-tag="Language">Language</button>
-          <button class="chip" role="button" aria-pressed="false" data-tag="Strategy Training">Strategy Training</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- App sections -->
-    <section id="apps" class="section" aria-labelledby="apps-h2">
-      <h2 id="apps-h2">All apps</h2>
-      <p class="lead" id="how">Tap a tag to filter. Multiple tags apply together (intersection). You can also type in the search box.</p>
-      <div class="grid" id="grid" role="list">
-        <!-- Visuospatial -->
-        <article class="card" role="listitem"
-          data-name="Star Hunt"
-          data-path="/micro-apps-repository/Star_Hunt/"
-          data-tags='["Visuospatial"]'
-          data-about="Track moving targets and sustain attention with increasing density and speed.">
-          <div class="thumb" aria-hidden="true">⭐</div>
-          <h3>Star Hunt</h3>
-          <p class="desc">Track stars and ignore distractors. Adjust difficulty via density and speed.</p>
-          <div class="tags"><span class="tag">Visuospatial</span></div>
-          <a class="open" href="/micro-apps-repository/Star_Hunt/">Open <span class="chev">›</span></a>
-        </article>
-
-        <article class="card" role="listitem"
-          data-name="Visuo‑Spatial Blocks"
-          data-path="/micro-apps-repository/Visuospatial_Blocks/"
-          data-tags='["Visuospatial","Executive Functioning"]'
-          data-about="Chunk patterns, maintain and manipulate visuo‑spatial sequences.">
-          <div class="thumb" aria-hidden="true">🧊</div>
-          <h3>Visuo‑Spatial Blocks</h3>
-          <p class="desc">Copy and manipulate patterns; practice chunking and sequence maintenance.</p>
-          <div class="tags"><span class="tag">Visuospatial</span><span class="tag">Executive Functioning</span></div>
-          <a class="open" href="/micro-apps-repository/Visuospatial_Blocks/">Open <span class="chev">›</span></a>
-        </article>
-
-        <article class="card" role="listitem"
-          data-name="Maze Explorer"
-          data-path="/micro-apps-repository/maze-explorer/"
-          data-tags='["Visuospatial","Executive Functioning"]'
-          data-about="Plan ahead, resist lure paths, and keep a mental map under time.">
-          <div class="thumb" aria-hidden="true">🗺️</div>
-          <h3>Maze Explorer</h3>
-          <p class="desc">Navigate mazes under time pressure; inhibit shortcuts that look right but aren’t.</p>
-          <div class="tags"><span class="tag">Visuospatial</span><span class="tag">Executive Functioning</span></div>
-          <a class="open" href="/micro-apps-repository/maze-explorer/">Open <span class="chev">›</span></a>
-        </article>
-
-        <!-- Language / Strategy -->
-        <article class="card" role="listitem"
-          data-name="Word Scavenger"
-          data-path="/micro-apps-repository/word-scavenger/"
-          data-tags='["Language"]'
-          data-about="Rapid lexical access with thematic prompts and distractors.">
-          <div class="thumb" aria-hidden="true">🔤</div>
-          <h3>Word Scavenger</h3>
-          <p class="desc">Name items by theme; tune difficulty via distractor density.</p>
-          <div class="tags"><span class="tag">Language</span></div>
-          <a class="open" href="/micro-apps-repository/word-scavenger/">Open <span class="chev">›</span></a>
-        </article>
-
-        <article class="card" role="listitem"
-          data-name="Fluency Coach"
-          data-path="/micro-apps-repository/Fluency_Coach/"
-          data-tags='["Language","Executive Functioning","Strategy Training"]'
-          data-about="Verbal fluency with strategy cues; end‑of‑round grouping feedback.">
-          <div class="thumb" aria-hidden="true">🎤</div>
-          <h3>Fluency Coach</h3>
-          <p class="desc">Guided verbal fluency; shows which words cluster into strategies post‑task.</p>
-          <div class="tags"><span class="tag">Language</span><span class="tag">Executive Functioning</span><span class="tag">Strategy Training</span></div>
-          <a class="open" href="/micro-apps-repository/Fluency_Coach/">Open <span class="chev">›</span></a>
-        </article>
-
-        <!-- Executive -->
-        <article class="card" role="listitem"
-          data-name="TaskFlow Planner"
-          data-path="/micro-apps-repository/Taskflow/"
-          data-tags='["Executive Functioning"]'
-          data-about="Arrange, check, then reflect — promotes sequencing, monitoring, and error correction.">
-          <div class="thumb" aria-hidden="true">🧩</div>
-          <h3>TaskFlow Planner</h3>
-          <p class="desc">Build the sequence, then enter review mode to compare ideal vs chosen steps.</p>
-          <div class="tags"><span class="tag">Executive Functioning</span></div>
-          <a class="open" href="/micro-apps-repository/Taskflow/">Open <span class="chev">›</span></a>
-        </article>
-
-
-        <article class="card" role="listitem"
-          data-name="Plan with Coco"
-          data-path="/micro-apps-repository/Plan_with_Coco/index.html"
-          data-tags='["Executive Functioning","Strategy Training"]'
-          data-about="Plan daily activities with Coco the bird. A time-management and prospective memory game.">
-          <div class="thumb" aria-hidden="true">🐦</div>
-          <h3>Plan with Coco</h3>
-          <p class="desc">Plan daily activities with Coco the bird. Combines executive functioning with prospective memory.</p>
-          <div class="tags"><span class="tag">Executive Functioning</span><span class="tag">Strategy Training</span></div>
-          <a class="open" href="/micro-apps-repository/Plan_with_Coco/index.html">Open <span class="chev">›</span></a>
-        </article>
-
-        <article class="card" role="listitem"
-          data-name="Emergency Dispatch"
-          data-path="/micro-apps-repository/Emergency_despatch/"
-          data-tags='["Executive Functioning"]'
-          data-about="Apply rules under time pressure; triage incidents; track errors.">
-          <div class="thumb" aria-hidden="true">🚑</div>
-          <h3>Emergency Dispatch</h3>
-          <p class="desc">Route the right unit, respect constraints, and manage the clock.</p>
-          <div class="tags"><span class="tag">Executive Functioning</span></div>
-          <a class="open" href="/micro-apps-repository/Emergency_despatch/">Open <span class="chev">›</span></a>
-        </article>
-      </div>
-    </section>
-
-    <!-- About -->
-    <section id="about" class="section" aria-label="About">
-      <h2>How it works</h2>
-      <p class="lead">Each micro‑app opens instantly in the browser, works on mobile and desktop, and supports short, focused practice. No accounts; minimal data; accessible by default.</p>
-    </section>
-
-    <!-- Contact -->
-    <section id="contact" class="section" aria-label="Contact">
-      <h2>Contact</h2>
-      <p class="lead">Questions or collaboration ideas? Email <a href="mailto:info@example.com">info@example.com</a>.</p>
-    </section>
-  </main>
-
-  <footer role="contentinfo">
-    <div class="foot">
-      <div>
-        <strong>Micro Rehab Apps</strong><br/>
-        <small>Open micro‑apps for cognitive rehabilitation and research.</small>
-      </div>
-      <div>
-        <small>Repository</small><br/>
-        <a class="open" href="https://github.com/yourname/micro-apps">GitHub <span class="chev">›</span></a>
-      </div>
-      <div>
-        <small>Version</small><br/>
-        <small>v1.0 · Updated 15 Sep 2025</small>
-      </div>
-    </div>
-  </footer>
-
-  <script>
+<header role="banner">
+<div aria-label="Primary" class="nav">
+<a aria-label="Micro Rehab Apps home" class="brand" href="#top">
+<span aria-hidden="true" class="logo"></span>
+<span>Micro Rehab Apps</span>
+</a>
+<nav>
+<a href="#apps">Apps</a>
+<a href="#about">About</a>
+<a href="#contact">Contact</a>
+</nav>
+<button aria-pressed="false" class="ghost" id="themeToggle" title="Toggle theme (Light/Dark)">Theme: Light</button><button class="cta" onclick="document.getElementById('apps').scrollIntoView({behavior:'smooth'});">Browse Apps</button>
+<button aria-label="Open menu" class="hamburger" onclick="alert('Menu coming soon')">☰</button>
+</div>
+</header>
+<main id="top" role="main">
+<!-- Hero -->
+<section aria-label="Intro" class="hero">
+<span class="eyebrow">Open micro‑apps for cognitive rehab</span>
+<h1>Practice, track, and iterate — with lightweight tools that patients actually use.</h1>
+<p class="sub">A curated set of tiny, focused web apps for <strong>visuospatial</strong>, <strong>language</strong>, and <strong>executive</strong> skills — designed for clinical sessions and at‑home practice. Filter by tags, open instantly, no install.</p>
+<div class="hero-actions">
+<button class="cta" onclick="document.getElementById('apps').scrollIntoView({behavior:'smooth'});">Browse apps</button>
+<button class="ghost" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'});">How it works</button>
+<span class="meta">• Neutral palette + coral accent • Accessible by default</span>
+</div>
+</section>
+<!-- Featured strip -->
+<section aria-label="Featured" class="featured-wrap">
+<div class="strip" role="list">
+<article class="feature-card" role="listitem">
+<span class="badge">Featured</span>
+<strong>TaskFlow Planner</strong>
+<p class="desc">Plan a routine, then review and correct the sequence. Great for prospective memory and error awareness.</p>
+<a aria-label="Open TaskFlow Planner" class="open" href="/micro-apps-repository/Taskflow/">Open <span class="chev">›</span></a>
+</article>
+<article class="feature-card" role="listitem">
+<span class="badge">Featured</span>
+<strong>Emergency Dispatch</strong>
+<p class="desc">Fast triage under rules and time pressure. Trains inhibition, monitoring, and flexible problem solving.</p>
+<a aria-label="Open Emergency Dispatch" class="open" href="/micro-apps-repository/Emergency_despatch/">Open <span class="chev">›</span></a>
+</article>
+<article class="feature-card" role="listitem">
+<span class="badge">New</span>
+<strong>Fluency Coach</strong>
+<p class="desc">Guided verbal fluency with strategy prompts and end‑of‑round grouping feedback.</p>
+<a aria-label="Open Fluency Coach" class="open" href="/micro-apps-repository/Fluency_Coach/">Open <span class="chev">›</span></a>
+</article>
+</div>
+</section>
+<!-- Filters -->
+<section aria-label="Filters" class="filters">
+<div class="bar">
+<div class="search" role="search">
+<span aria-hidden="true">🔎</span>
+<input aria-label="Search apps" id="q" placeholder="Search apps, tags, or features…" type="search"/>
+</div>
+<div aria-label="Filter by tag" class="chips" role="toolbar">
+<button aria-pressed="false" class="chip" data-tag="Visuospatial" role="button">Visuospatial</button>
+<button aria-pressed="false" class="chip" data-tag="Executive Functioning" role="button">Executive Functioning</button>
+<button aria-pressed="false" class="chip" data-tag="Language" role="button">Language</button>
+<button aria-pressed="false" class="chip" data-tag="Strategy Training" role="button">Strategy Training</button>
+</div>
+</div>
+</section>
+<!-- App sections -->
+<section aria-labelledby="apps-h2" class="section" id="apps">
+<h2 id="apps-h2">All apps</h2>
+<p class="lead" id="how">Tap a tag to filter. Multiple tags apply together (intersection). You can also type in the search box.</p>
+<div class="grid" id="grid" role="list">
+<!-- Visuospatial -->
+<article class="card" data-about="Track moving targets and sustain attention with increasing density and speed." data-name="Star Hunt" data-path="/micro-apps-repository/Star_Hunt/" data-tags='["Visuospatial"]' role="listitem">
+<div aria-hidden="true" class="thumb">⭐</div>
+<h3>Star Hunt</h3>
+<p class="desc">Track stars and ignore distractors. Adjust difficulty via density and speed.</p>
+<div class="tags"><span class="tag">Visuospatial</span></div>
+<a class="open" href="/micro-apps-repository/Star_Hunt/">Open <span class="chev">›</span></a>
+</article>
+<article class="card" data-about="Chunk patterns, maintain and manipulate visuo‑spatial sequences." data-name="Visuo‑Spatial Blocks" data-path="/micro-apps-repository/Visuospatial_Blocks/" data-tags='["Visuospatial","Executive Functioning"]' role="listitem">
+<div aria-hidden="true" class="thumb">🧊</div>
+<h3>Visuo‑Spatial Blocks</h3>
+<p class="desc">Copy and manipulate patterns; practice chunking and sequence maintenance.</p>
+<div class="tags"><span class="tag">Visuospatial</span><span class="tag">Executive Functioning</span></div>
+<a class="open" href="/micro-apps-repository/Visuospatial_Blocks/">Open <span class="chev">›</span></a>
+</article>
+<article class="card" data-about="Plan ahead, resist lure paths, and keep a mental map under time." data-name="Maze Explorer" data-path="/micro-apps-repository/maze-explorer/" data-tags='["Visuospatial","Executive Functioning"]' role="listitem">
+<div aria-hidden="true" class="thumb">🗺️</div>
+<h3>Maze Explorer</h3>
+<p class="desc">Navigate mazes under time pressure; inhibit shortcuts that look right but aren’t.</p>
+<div class="tags"><span class="tag">Visuospatial</span><span class="tag">Executive Functioning</span></div>
+<a class="open" href="/micro-apps-repository/maze-explorer/">Open <span class="chev">›</span></a>
+</article>
+<!-- Language / Strategy -->
+<article class="card" data-about="Rapid lexical access with thematic prompts and distractors." data-name="Word Scavenger" data-path="/micro-apps-repository/word-scavenger/" data-tags='["Language"]' role="listitem">
+<div aria-hidden="true" class="thumb">🔤</div>
+<h3>Word Scavenger</h3>
+<p class="desc">Name items by theme; tune difficulty via distractor density.</p>
+<div class="tags"><span class="tag">Language</span></div>
+<a class="open" href="/micro-apps-repository/word-scavenger/">Open <span class="chev">›</span></a>
+</article>
+<article class="card" data-about="Verbal fluency with strategy cues; end‑of‑round grouping feedback." data-name="Fluency Coach" data-path="/micro-apps-repository/Fluency_Coach/" data-tags='["Language","Executive Functioning","Strategy Training"]' role="listitem">
+<div aria-hidden="true" class="thumb">🎤</div>
+<h3>Fluency Coach</h3>
+<p class="desc">Guided verbal fluency; shows which words cluster into strategies post‑task.</p>
+<div class="tags"><span class="tag">Language</span><span class="tag">Executive Functioning</span><span class="tag">Strategy Training</span></div>
+<a class="open" href="/micro-apps-repository/Fluency_Coach/">Open <span class="chev">›</span></a>
+</article>
+<!-- Executive -->
+<article class="card" data-about="Arrange, check, then reflect — promotes sequencing, monitoring, and error correction." data-name="TaskFlow Planner" data-path="/micro-apps-repository/Taskflow/" data-tags='["Executive Functioning"]' role="listitem">
+<div aria-hidden="true" class="thumb">🧩</div>
+<h3>TaskFlow Planner</h3>
+<p class="desc">Build the sequence, then enter review mode to compare ideal vs chosen steps.</p>
+<div class="tags"><span class="tag">Executive Functioning</span></div>
+<a class="open" href="/micro-apps-repository/Taskflow/">Open <span class="chev">›</span></a>
+</article>
+<article class="card" data-about="Plan daily activities with Coco the bird. A time-management and prospective memory game." data-name="Plan with Coco" data-path="/micro-apps-repository/Plan_with_Coco/index.html" data-tags='["Executive Functioning","Strategy Training"]' role="listitem">
+<div aria-hidden="true" class="thumb">🐦</div>
+<h3>Plan with Coco</h3>
+<p class="desc">Plan daily activities with Coco the bird. Combines executive functioning with prospective memory.</p>
+<div class="tags"><span class="tag">Executive Functioning</span><span class="tag">Strategy Training</span></div>
+<a class="open" href="/micro-apps-repository/Plan_with_Coco/index.html">Open <span class="chev">›</span></a>
+</article>
+<article class="card" data-about="Apply rules under time pressure; triage incidents; track errors." data-name="Emergency Dispatch" data-path="/micro-apps-repository/Emergency_despatch/" data-tags='["Executive Functioning"]' role="listitem">
+<div aria-hidden="true" class="thumb">🚑</div>
+<h3>Emergency Dispatch</h3>
+<p class="desc">Route the right unit, respect constraints, and manage the clock.</p>
+<div class="tags"><span class="tag">Executive Functioning</span></div>
+<a class="open" href="/micro-apps-repository/Emergency_despatch/">Open <span class="chev">›</span></a>
+</article>
+</div>
+</section>
+<!-- About -->
+<section aria-label="About" class="section" id="about">
+<h2>How it works</h2>
+<p class="lead">Each micro‑app opens instantly in the browser, works on mobile and desktop, and supports short, focused practice. No accounts; minimal data; accessible by default.</p>
+</section>
+<!-- Contact -->
+<section aria-label="Contact" class="section" id="contact">
+<h2>Contact</h2>
+<p class="lead">Questions or collaboration ideas? Email <a href="mailto:info@example.com">info@example.com</a>.</p>
+</section>
+</main>
+<footer role="contentinfo">
+<div class="foot">
+<div>
+<strong>Micro Rehab Apps</strong><br/>
+<small>Open micro‑apps for cognitive rehabilitation and research.</small>
+</div>
+<div>
+<small>Repository</small><br/>
+<a class="open" href="https://github.com/yourname/micro-apps">GitHub <span class="chev">›</span></a>
+</div>
+<div>
+<small>Version</small><br/>
+<small>v1.0 · Updated 15 Sep 2025</small>
+</div>
+</div>
+</footer>
+<script>
     // ===== Tiny filtering/search (no frameworks) =====
     const chips = Array.from(document.querySelectorAll('.chip'));
     const cards = Array.from(document.querySelectorAll('.card'));
@@ -467,6 +479,35 @@
         }
       });
     });
-  </script>
+  
+
+// ===== Theme toggle (accessible) =====
+(function(){
+  const root = document.documentElement;
+  const btn = document.getElementById('themeToggle');
+  const key = 'mra-theme';
+  // prefer saved theme, otherwise stay light (no surprise flips)
+  const saved = localStorage.getItem(key);
+  if(saved === 'dark'){ root.setAttribute('data-theme','dark'); btn && (btn.textContent='Theme: Dark'); btn && btn.setAttribute('aria-pressed','true'); }
+  else { root.setAttribute('data-theme','light'); btn && (btn.textContent='Theme: Light'); btn && btn.setAttribute('aria-pressed','false'); }
+  function setTheme(mode){
+    root.setAttribute('data-theme', mode);
+    localStorage.setItem(key, mode);
+    if(btn){
+      btn.textContent = mode === 'dark' ? 'Theme: Dark' : 'Theme: Light';
+      btn.setAttribute('aria-pressed', mode === 'dark' ? 'true' : 'false');
+    }
+  }
+  if(btn){
+    btn.addEventListener('click', () => {
+      const mode = (root.getAttribute('data-theme') === 'dark') ? 'light' : 'dark';
+      setTheme(mode);
+    });
+    btn.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter' || e.key===' ') { e.preventDefault(); btn.click(); }
+    });
+  }
+})();
+</script>
 </body>
 </html>
