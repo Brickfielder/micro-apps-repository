@@ -4,242 +4,179 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Build your package</title>
-  <meta name="description" content="Select micro-apps and download them as a single ZIP." />
   <style>
-    :root{--bg:#f7f7f9;--card:#fff;--text:#1f2937;--muted:#667085;--border:#e5e7eb;--brand:#0a66c2;--ok:#16a34a;--warn:#b45309;--radius:16px;--shadow:0 10px 24px rgba(0,0,0,.08);}
+    :root{--bg:#f7f7f9;--card:#fff;--text:#1f2937;--muted:#667085;--border:#e5e7eb;--brand:#0a66c2;--brand2:#084f96;--radius:16px;--shadow:0 10px 22px rgba(0,0,0,.08)}
     body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
-    header{position:sticky;top:0;background:rgba(255,255,255,.9);backdrop-filter:saturate(1.1) blur(6px);border-bottom:1px solid var(--border)}
-    .row{max-width:1000px;margin:0 auto;padding:16px;display:flex;justify-content:space-between;gap:12px;align-items:center}
-    h1{font-size:20px;margin:0}
-    main{max-width:1000px;margin:18px auto 32px;padding:0 16px;display:grid;gap:16px}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+    header{padding:26px 16px;text-align:center;border-bottom:1px solid var(--border);background:linear-gradient(#ffffff, #fafbff)}
+    header h1{margin:0;font-size:26px}
+    header p{margin:8px auto 0;max-width:760px;color:var(--muted)}
+    main{max-width:980px;margin:24px auto 40px;padding:0 16px;display:grid;gap:16px}
+    .panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+    .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+    .btn{background:var(--brand);color:#fff;border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .btn.secondary{background:#eef2f8;color:#0b3a6b}
     .apps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
-    .app{border:1px solid var(--border);border-radius:12px;padding:12px;display:grid;gap:6px}
+    .app{border:1px solid var(--border);border-radius:12px;padding:12px;display:grid;gap:8px}
     .app h3{margin:0;font-size:16px}
+    .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
     .muted{color:var(--muted);font-size:13px}
-    .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-    button{background:var(--brand);color:#fff;border:0;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer}
-    button:disabled{opacity:.6;cursor:not-allowed}
-    .pill{display:inline-block;background:#f0f2f5;border:1px solid var(--border);border-radius:999px;padding:2px 8px;font-size:12px;margin-right:6px}
-    .bar{height:10px;background:#eef2f6;border-radius:999px;overflow:hidden;border:1px solid var(--border)}
-    .bar>div{height:100%;width:0%}
-    .good{background:var(--ok)}
-    .warn{background:var(--warn)}
-    .sr{position:absolute;left:-9999px}
+    .pill{display:inline-block;background:#f5f7fa;border:1px solid var(--border);border-radius:999px;padding:2px 8px;font-size:12px;margin-right:6px}
+    .progress{height:12px;background:#eef2f6;border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+    .progress>div{height:100%;width:0%;background:var(--brand);transition:width .2s}
+    .center{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+    @media (max-width:600px){header h1{font-size:22px}}
   </style>
 </head>
 <body>
   <header>
-    <div class="row">
-      <h1>Build your package</h1>
-      <div class="muted">Select apps → make a ZIP (client‑side)</div>
-    </div>
+    <h1>Build your package</h1>
+    <p>Select apps and download a single ZIP. This simple packager includes each app’s <code>index.html</code> only — reliable on GitHub Pages. (For full offline bundles we can add per‑app manifests later.)</p>
   </header>
 
   <main>
-    <section class="card">
-      <p class="muted">Tip: for a complete bundle (HTML + assets), place a small <code>manifest.json</code> in each app folder listing files to include. If no manifest is found, this tool will include only <code>index.html</code> for that app.</p>
-      <div class="actions">
-        <button id="btnAll">Select all</button>
-        <button id="btnNone">Clear</button>
-        <button id="btnZip">Download ZIP</button>
-        <span id="count" class="muted" aria-live="polite"></span>
+    <section class="panel">
+      <div class="controls">
+        <div class="center">
+          <button id="btnAll" class="btn secondary">Select all</button>
+          <button id="btnNone" class="btn secondary">Clear</button>
+          <button id="btnZip" class="btn">Download ZIP</button>
+        </div>
+        <div id="count" class="muted" aria-live="polite"></div>
       </div>
-      <div class="bar" aria-hidden="true"><div id="prog" class=""></div></div>
+      <div class="progress" style="margin-top:8px"><div id="bar"></div></div>
       <div id="status" class="muted" style="margin-top:6px" aria-live="polite"></div>
     </section>
 
-    <section class="card">
+    <section class="panel">
       <div id="apps" class="apps" role="list"></div>
     </section>
   </main>
 
-  <!-- JSZip + FileSaver -->
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 
   <script>
-    const PACKAGER_NAME = 'Build your package';
-    const APPS_EL = document.getElementById('apps');
-    const COUNT_EL = document.getElementById('count');
-    const PROG = document.getElementById('prog');
+    const ABS_CATALOG = '/micro-apps-repository/catalog.json';
+    const PACKAGER = 'Build your package';
+    const APPS = document.getElementById('apps');
+    const COUNT = document.getElementById('count');
+    const BAR = document.getElementById('bar');
     const STATUS = document.getElementById('status');
-    const BTN_ALL  = document.getElementById('btnAll');
+    const BTN_ALL = document.getElementById('btnAll');
     const BTN_NONE = document.getElementById('btnNone');
-    const BTN_ZIP  = document.getElementById('btnZip');
+    const BTN_ZIP = document.getElementById('btnZip');
 
     function normPath(p){
       if(!p) return null;
       p = p.replace(/\\/index\\.html$/i,'/');
-      p = p.replace(/^\\/?docs\\//i, '/micro-apps-repository/');
+      p = p.replace(/^\\/?docs\\//i,'/micro-apps-repository/');
       if(!p.endsWith('/')) p += '/';
       return p;
     }
-    function slugify(name){return name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');}
+    function slug(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');}
 
     function render(list){
-      APPS_EL.innerHTML='';
-      const filtered = list.filter(x => x.name !== PACKAGER_NAME);
-      filtered.forEach(app => {
-        const id = 'chk-'+slugify(app.name);
+      APPS.innerHTML='';
+      list.filter(x => x.name !== PACKAGER).forEach(x => {
+        const id = 'chk-' + slug(x.name);
         const card = document.createElement('div');
         card.className = 'app';
         card.setAttribute('role','listitem');
         card.innerHTML = `
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
-            <h3>${app.name}</h3>
-            <label><input id="${id}" type="checkbox" data-path="${app.path}" data-name="${app.name}" checked> Include</label>
+          <div class="row">
+            <h3>${x.name}</h3>
+            <label><input id="${id}" type="checkbox" data-name="${x.name}" data-path="${x.path}" checked> Include</label>
           </div>
-          <div class="muted">${app.about || ''}</div>
-          <div>${(app.tags||[]).map(t=>`<span class="pill">${t}</span>`).join('')}</div>
-          <div class="muted">Path: ${app.path}</div>
+          ${x.about ? `<div class="muted">${x.about}</div>`: ''}
+          <div>${(x.tags||[]).map(t=>`<span class="pill">${t}</span>`).join('')}</div>
+          <div class="muted">Path: ${x.path}</div>
         `;
-        APPS_EL.appendChild(card);
+        APPS.appendChild(card);
       });
       updateCount();
     }
-
     function updateCount(){
-      const total = APPS_EL.querySelectorAll('input[type="checkbox"]').length;
-      const sel = APPS_EL.querySelectorAll('input[type="checkbox"]:checked').length;
-      COUNT_EL.textContent = `${sel}/${total} selected`;
+      const total = APPS.querySelectorAll('input[type=checkbox]').length;
+      const sel = APPS.querySelectorAll('input[type=checkbox]:checked').length;
+      COUNT.textContent = `${sel}/${total} selected`;
     }
+    APPS.addEventListener('change', e=>{ if(e.target.matches('input[type=checkbox]')) updateCount(); });
+    BTN_ALL.onclick = ()=>{ APPS.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=true); updateCount(); };
+    BTN_NONE.onclick = ()=>{ APPS.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=false); updateCount(); };
 
-    BTN_ALL.addEventListener('click',()=>{
-      APPS_EL.querySelectorAll('input[type="checkbox"]').forEach(c=>c.checked=true);
-      updateCount();
-    });
-    BTN_NONE.addEventListener('click',()=>{
-      APPS_EL.querySelectorAll('input[type="checkbox"]').forEach(c=>c.checked=false);
-      updateCount();
-    });
-    APPS_EL.addEventListener('change', e=>{
-      if(e.target.matches('input[type="checkbox"]')) updateCount();
-    });
-
-    async function loadCatalog(){
-      let cat = [];
+    async function load(){
+      let list = [];
       try{
-        const res = await fetch('../catalog.json', {cache:'no-store'}).catch(()=>null);
-        if(res && res.ok){ cat = await res.json(); }
+        const res = await fetch(ABS_CATALOG, {cache:'no-store'});
+        if(res.ok) list = await res.json();
       }catch{}
-      // Fallback list to ensure it still works even if catalog path differs
-      const FALLBACK = [
-        {name:"Audio Errands", path:"/micro-apps-repository/Audio_Errands/", tags:["Executive Functioning","Strategy Training"]},
-        {name:"Barista Chaos", path:"/micro-apps-repository/Barista_Chaos/", tags:["Executive Functioning"]},
-        {name:"Build your package", path:"/micro-apps-repository/Build_your_package/", tags:["Utility"]},
-        {name:"Emergency despatch", path:"/micro-apps-repository/Emergency_despatch/", tags:["Executive Functioning","Visuospatial"]},
-        {name:"Errands — visual memory", path:"/micro-apps-repository/Errands-visual-memory/", tags:["Visuospatial","Executive Functioning"]},
-        {name:"Fluency Coach", path:"/micro-apps-repository/Fluency_Coach/", tags:["Language","Executive Functioning","Strategy Training"]},
-        {name:"Office Day", path:"/micro-apps-repository/Office_Day/", tags:["Executive Functioning","Strategy Training"]},
-        {name:"Plan with Coco", path:"/micro-apps-repository/Plan_with_Coco/", tags:["Executive Functioning","Language"]},
-        {name:"Star Hunt", path:"/micro-apps-repository/Star_Hunt/", tags:["Visuospatial"]},
-        {name:"Taskflow", path:"/micro-apps-repository/Taskflow/", tags:["Executive Functioning"]},
-        {name:"Tower control", path:"/micro-apps-repository/Tower_control/", tags:["Executive Functioning","Visuospatial"]},
-        {name:"Visuospatial Blocks", path:"/micro-apps-repository/Visuospatial_Blocks/", tags:["Visuospatial"]},
-        {name:"Word Scavenger", path:"/micro-apps-repository/word-scavenger/", tags:["Language"]},
-        {name:"Maze Explorer", path:"/micro-apps-repository/maze-explorer/", tags:["Visuospatial","Executive Functioning"]},
-      ];
-      const mapped = (Array.isArray(cat)?cat:[]).map(it => ({
-        name: it.name || it.title || 'Untitled',
-        path: normPath(it.path || it.url),
-        tags: it.tags || [],
-        about: it.about || it.description || ''
-      })).filter(x=>x.path);
-
-      const byName = new Map();
-      [...mapped, ...FALLBACK].forEach(x=>{
-        const k = x.name.toLowerCase();
-        byName.set(k, Object.assign(byName.get(k)||{}, x));
-      });
-      const arr = Array.from(byName.values()).map(x => ({...x, path: normPath(x.path)}));
-      arr.sort((a,b)=>a.name.localeCompare(b.name));
-      render(arr);
+      // Fallback if catalog fails
+      if(!Array.isArray(list) || !list.length){
+        list = [
+          {name:"Audio Errands", path:"/micro-apps-repository/Audio_Errands/", tags:["Executive Functioning","Strategy Training"]},
+          {name:"Barista Chaos", path:"/micro-apps-repository/Barista_Chaos/", tags:["Executive Functioning"]},
+          {name:"Build your package", path:"/micro-apps-repository/Build_your_package/", tags:["Utility"]},
+          {name:"Emergency despatch", path:"/micro-apps-repository/Emergency_despatch/", tags:["Executive Functioning","Visuospatial"]},
+          {name:"Errands — visual memory", path:"/micro-apps-repository/Errands-visual-memory/", tags:["Visuospatial","Executive Functioning"]},
+          {name:"Fluency Coach", path:"/micro-apps-repository/Fluency_Coach/", tags:["Language","Executive Functioning","Strategy Training"]},
+          {name:"Office Day", path:"/micro-apps-repository/Office_Day/", tags:["Executive Functioning","Strategy Training"]},
+          {name:"Plan with Coco", path:"/micro-apps-repository/Plan_with_Coco/", tags:["Executive Functioning","Language"]},
+          {name:"Star Hunt", path:"/micro-apps-repository/Star_Hunt/", tags:["Visuospatial"]},
+          {name:"Taskflow", path:"/micro-apps-repository/Taskflow/", tags:["Executive Functioning"]},
+          {name:"Tower control", path:"/micro-apps-repository/Tower_control/", tags:["Executive Functioning","Visuospatial"]},
+          {name:"Visuospatial Blocks", path:"/micro-apps-repository/Visuospatial_Blocks/", tags:["Visuospatial"]},
+          {name:"Word Scavenger", path:"/micro-apps-repository/word-scavenger/", tags:["Language"]},
+          {name:"Maze Explorer", path:"/micro-apps-repository/maze-explorer/", tags:["Visuospatial","Executive Functioning"]},
+        ];
+      }
+      list = list.map(it => ({...it, path: normPath(it.path || it.url)})).filter(x=>x.path);
+      list.sort((a,b)=>a.name.localeCompare(b.name));
+      render(list);
     }
 
-    async function fileToZip(zip, url, dest){
+    async function addFileToZip(zip, url, dest){
       const res = await fetch(url, {cache:'no-store'});
-      if(!res.ok) throw new Error(`Fetch failed ${res.status} ${url}`);
+      if(!res.ok) throw new Error(res.status + ' ' + url);
       const blob = await res.blob();
       zip.file(dest, blob);
-      return blob.size || 0;
     }
 
-    async function fetchManifest(base){
-      try{
-        const res = await fetch(base + 'manifest.json', {cache:'no-store'});
-        if(!res.ok) return null;
-        const data = await res.json();
-        if(Array.isArray(data.files)) return data.files;
-        return null;
-      }catch{ return null; }
-    }
+    async function makeZip(){
+      const checks = [...APPS.querySelectorAll('input[type=checkbox]:checked')];
+      if(!checks.length){ alert('Select at least one app'); return; }
+      BTN_ZIP.disabled = true;
+      BAR.style.width = '0%'; STATUS.textContent = 'Fetching files…';
 
-    async function buildZip(){
-      const checks = Array.from(APPS_EL.querySelectorAll('input[type="checkbox"]:checked'));
-      if(!checks.length){ alert('Select at least one app.'); return; }
-
-      BTN_ZIP.disabled = true; STATUS.textContent = 'Preparing…';
-      PROG.className = ''; PROG.style.width = '0%';
       const zip = new JSZip();
-      let totalBytes = 0, done = 0, errors = 0;
+      const total = checks.length;
+      let i = 0, failures = 0;
 
-      // Concurrency control
-      const concurrency = 4;
-      const queue = [];
-      function updateProgress(){ 
-        const pct = Math.max(5, Math.min(99, Math.round(100 * done / Math.max(1,totalBytes))));
-        PROG.style.width = pct + '%';
-      }
-
-      // First pass: discover files and estimate total bytes (rough via HEAD where available)
-      const tasks = [];
       for(const c of checks){
+        i++;
         const base = normPath(c.dataset.path);
         const name = c.dataset.name;
-        const slug = slugify(name);
-        let files = await fetchManifest(base);
-        if(!files){ files = ['index.html']; } // minimal fallback
-
-        files.forEach(rel => {
-          const src = base + rel.replace(/^\\//,'');
-          const dest = `${slug}/${rel.replace(/^\\//,'')}`;
-          tasks.push({src, dest});
-          totalBytes += 100000; // optimistic placeholder; real sizes vary — progress is indicative
-        });
-
-        // Add README entry per app
-        zip.file(`${slug}/README.txt`, `App: ${name}\nSource: ${base}\nIncluded files: ${files.join(', ')}\n`);
-      }
-      updateProgress();
-
-      async function worker(){
-        while(tasks.length){
-          const {src, dest} = tasks.shift();
-          try{
-            await fileToZip(zip, src, dest);
-          }catch(e){
-            errors++;
-            // record failure
-            zip.file(dest + '.ERROR.txt', String(e));
-          }finally{
-            done += 100000;
-            updateProgress();
-          }
+        const dst = slug(name) + '/index.html';
+        try{
+          await addFileToZip(zip, base + 'index.html', dst);
+        }catch(e){
+          failures++;
+          zip.file(dst + '.ERROR.txt', String(e));
         }
+        BAR.style.width = Math.round(100 * i / total) + '%';
+        STATUS.textContent = `Added ${i}/${total} app pages…`;
       }
-      await Promise.all(Array.from({length:concurrency}, worker));
-      PROG.style.width = '100%'; PROG.className = 'good';
-      STATUS.textContent = errors? `Completed with ${errors} fetch error(s).` : 'Completed.';
 
-      const stamp = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+      STATUS.textContent = failures ? `Packaging (${failures} failed fetches)…` : 'Packaging…';
       const blob = await zip.generateAsync({type:'blob'});
-      saveAs(blob, `micro-apps-package_${stamp}.zip`);
+      const stamp = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+      saveAs(blob, 'micro-apps-basic-package_' + stamp + '.zip');
+      STATUS.textContent = failures ? `Done with ${failures} error(s).` : 'Done.';
       BTN_ZIP.disabled = false;
     }
 
-    BTN_ZIP.addEventListener('click', buildZip);
-    loadCatalog();
+    BTN_ZIP.onclick = makeZip;
+    load();
   </script>
 </body>
 </html>
