@@ -57,7 +57,7 @@
   <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 
   <script>
-    const ABS_CATALOG = '/micro-apps-repository/catalog.json';
+    const ABS_CATALOG = location.origin + location.pathname.replace(/Build_your_package.*$/, '') + 'catalog.json';
     const PACKAGER = 'Build your package';
     const APPS = document.getElementById('apps');
     const COUNT = document.getElementById('count');
