@@ -267,6 +267,95 @@ html[data-theme="dark"] :focus-visible{
   outline: 2px solid #f8fafc; /* very light ring */
   outline-offset: 2px;
 }
+
+/* ===== Readability: justified body copy on mobile/desktop ===== */
+p, .desc, .lead, .sub {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+}
+
+/* (old header rules removed) */ */
+.nav{
+  position: relative;
+  justify-content: center; /* center the block of items */
+  flex-wrap: wrap;
+}
+.brand{
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+nav{
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly; /* evenly space items in nav */
+  min-width: 420px;
+}
+/* keep CTA and theme toggle visually balanced */
+#themeToggle{ margin-left: 8px; }
+.cta{ margin-left: 8px; }
+
+/* On small screens, keep it simple: stack with centered brand and show CTA; hide full nav */
+@media (max-width: 860px){
+  .nav{ justify-content: center; }
+  .brand{ position: static; transform:none; order: -1; margin: 0 auto 6px; }
+  nav{ display: none; }
+  .cta{ order: 1; }
+}
+
+/* ===== Header as grid layout ===== */
+.nav {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; /* left controls, brand, right controls */
+  align-items: center;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 14px 16px;
+}
+.brand {
+  justify-self: center;
+  position: static;
+  transform: none;
+}
+nav {
+  display: flex;
+  justify-content: space-evenly;
+  gap: 20px;
+}
+#themeToggle, .cta {
+  justify-self: start;
+}
+/* Mobile adjustments */
+@media (max-width: 860px){
+  .nav {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    justify-items: center;
+  }
+  nav {
+    display: none;
+  }
+  #themeToggle, .cta {
+    justify-self: center;
+  }
+}
+
+/* ===== Dark theme: ensure toggle is visible and accessible ===== */
+html[data-theme="dark"] #themeToggle{
+  background: #111827;           /* surface */
+  color: #f8fafc;                /* near-white text */
+  border: 1px solid #334155;     /* slate-700 border for separation */
+  box-shadow: 0 2px 6px rgba(0,0,0,.5);
+}
+html[data-theme="dark"] #themeToggle:hover{
+  background:#0f172a;
+  border-color:#475569;
+}
+html[data-theme="dark"] #themeToggle:focus-visible{
+  outline: 2px solid #f8fafc;
+  outline-offset: 2px;
+}
 </style>
 </head>
 <body>
@@ -281,7 +370,7 @@ html[data-theme="dark"] :focus-visible{
 <a href="#about">About</a>
 <a href="#contact">Contact</a>
 </nav>
-<button aria-pressed="false" class="ghost" id="themeToggle" title="Toggle theme (Light/Dark)">Theme: Light</button><button class="cta" onclick="document.getElementById('apps').scrollIntoView({behavior:'smooth'});">Browse Apps</button>
+<button aria-pressed="false" class="ghost" id="themeToggle" title="Toggle theme (Light/Dark)">Theme: Light</button>
 <button aria-label="Open menu" class="hamburger" onclick="alert('Menu coming soon')">☰</button>
 </div>
 </header>
@@ -409,7 +498,7 @@ html[data-theme="dark"] :focus-visible{
 <!-- Contact -->
 <section aria-label="Contact" class="section" id="contact">
 <h2>Contact</h2>
-<p class="lead">Questions or collaboration ideas? Email <a href="mailto:m.mion@nhs.net">m.mion@nhs.net</a>.</p>
+<p class="lead">Questions or collaboration ideas? Email <a href="mailto:info@example.com">info@example.com</a>.</p>
 </section>
 </main>
 <footer role="contentinfo">
