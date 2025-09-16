@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Memory in Action — WhatsApp Scenarios (Progressive Cues + New Distractors)</title>
+<meta name="color-scheme" content="light dark">
+<style>
+  :root{
+    --bg:#f6f7fb; --card:#ffffff; --ink:#0f172a; --muted:#667085; --brand:#0a66c2; --brand-ink:#084f96;
+    --border:#e5e7eb; --shadow:0 16px 40px rgba(16,24,40,.08); --radius:18px;
+    --pill:#eef2f7; --success:#16a34a; --danger:#ef4444;
+    --bubble-a:#ffffff; --bubble-a-b:#e5e7eb; --bubble-b:#e8f1fb; --bubble-b-b:#cfe3fc;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0b1220; --card:#0f172a; --ink:#e5e7eb; --muted:#9ca3af; --brand:#8abaff; --brand-ink:#cde2ff;
+      --border:#1f2a44; --shadow:0 16px 40px rgba(0,0,0,.55); --pill:#101a33; --success:#22c55e; --danger:#f87171;
+      --bubble-a:#0f172a; --bubble-a-b:#26324f; --bubble-b:#0c2250; --bubble-b-b:#2a64c2;
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;line-height:1.55}
+  h1{margin:18px 0 6px;font-size:34px}
+  .sub{color:var(--muted);margin-bottom:22px}
+  .wrap{max-width:1200px;margin:0 auto;padding:20px}
+  .grid{display:grid;grid-template-columns:360px 1fr;gap:20px}
+  @media (max-width:900px){ .grid{grid-template-columns:1fr} }
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+  .sectionTitle{font-weight:800;margin:0 0 8px;font-size:22px}
+  .label{font-size:13px;color:var(--muted);margin-bottom:6px}
+  input[type="text"],select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:transparent;color:var(--ink);font-size:15px}
+  input::placeholder,textarea::placeholder{color:var(--muted)}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .pill{display:inline-flex;align-items:center;gap:8px;background:var(--pill);padding:6px 10px;border-radius:999px;font-size:12px;color:var(--muted)}
+  .btn{cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:12px;padding:10px 14px;font-size:15px}
+  .btn.primary{background:var(--brand);color:#fff}
+  .btn.primary:hover{background:var(--brand-ink)}
+  .btn.ghost{background:var(--pill);color:var(--ink)}
+  .btn.success{background:var(--success);color:#fff}
+  .btn.warn{background:var(--danger);color:#fff}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  .muted{color:var(--muted)}
+  .stat{display:inline-block;margin-right:10px;border-radius:999px;padding:6px 10px;background:#eef2ff;color:#1e3a8a;font-size:12px}
+  @media (prefers-color-scheme: dark){ .stat{background:#0c2250;color:#cfe3fc} }
+  .log{background:#0b1220;color:#d1d5db;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;border-radius:12px;padding:10px;height:120px;overflow:auto;border:1px solid var(--border)}
+  @media (prefers-color-scheme: dark){ .log{background:#0a0f1c} }
+  .chatWrap{border:1px solid var(--border);border-radius:16px;background:linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,.25))}
+  @media (prefers-color-scheme: dark){ .chatWrap{background:linear-gradient(180deg, rgba(15,23,42,.7), rgba(15,23,42,.3))} }
+  .chatHeader{display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid var(--border)}
+  .avatar{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-ink));color:#fff;font-weight:900;display:grid;place-items:center}
+  .chat{max-height:420px;overflow-y:auto;padding:12px}
+  .msg{display:flex;gap:8px;align-items:flex-end;margin:8px 0}
+  .bubble{max-width:72%;padding:12px 14px;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,.05);font-size:15px}
+  .fromA .bubble{background:var(--bubble-a);border:1px solid var(--bubble-a-b);border-top-left-radius:8px}
+  .fromB{justify-content:flex-end}
+  .fromB .bubble{background:var(--bubble-b);border:1px solid var(--bubble-b-b);border-top-right-radius:8px}
+  .progress{height:8px;background:#eef2f7;border-radius:999px;overflow:hidden;margin:0 12px 10px}
+  .progress>span{display:block;height:100%;background:var(--brand);width:0%}
+  .typing{display:flex;gap:6px;margin:4px 0 0 8px;opacity:.7}
+  .typing .dot{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:blink 1s infinite alternate}
+  .typing .dot:nth-child(2){animation-delay:.2s}
+  .typing .dot:nth-child(3){animation-delay:.4s}
+  @keyframes blink { from{opacity:.3;transform:translateY(0)} to{opacity:1;transform:translateY(-2px)} }
+  /* Puzzle */
+  .puzzleWrap{display:inline-grid;gap:8px;margin-top:12px}
+  .tile{width:72px;height:72px;border-radius:12px;border:1px solid var(--border);display:grid;place-items:center;font-weight:700;background:var(--pill)}
+  .tile.empty{visibility:hidden}
+  .pStatus{margin-top:8px}
+  /* Cues */
+  .cue{margin-top:8px;padding:10px;border:1px dashed var(--border);border-radius:10px;background:var(--pill)}
+  .mc{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .mc .btn{padding:6px 10px;font-size:13px;border-radius:999px}
+  .hidden{display:none}
+  /* Stroop */
+  .stroop-word{font-size:28px;font-weight:800;margin:8px 0}
+  .stroop-grid{display:flex;gap:8px;flex-wrap:wrap}
+  .stroop-score{margin-top:6px}
+  /* Matching */
+  .match-grid{display:grid;grid-template-columns:repeat(4,80px);gap:10px;margin-top:8px}
+  .match-card{height:80px;border:1px solid var(--border);border-radius:12px;display:grid;place-items:center;background:var(--pill);cursor:pointer;font-weight:700}
+  .match-card.revealed{background:#fff}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Memory in Action — WhatsApp Scenarios</h1>
+    <div class="sub">Watch and listen to a short conversation, complete a quick distractor task, then answer recall questions. Clear, playful, and aligned with the Micro Apps look.</div>
+    <div class="grid">
+      <div class="card">
+        <div class="sectionTitle">Settings</div>
+        <div class="label">Scenario</div><select id="scenarioSel"></select>
+        <div class="label" style="margin-top:8px">Message speed</div>
+        <select id="speedSel"><option value="4500" selected>Every 4.5s (recommended)</option><option value="5000">Every 5s (slower)</option><option value="3500">Every 3.5s (faster)</option></select>
+        <div class="label" style="margin-top:8px">Distractor</div>
+        <select id="distractorSel">
+          <option value="puzzle" selected>Sliding Puzzle</option>
+          <option value="stroop">Stroop Task</option>
+          <option value="match">Matching Pairs</option>
+        </select>
+        <div class="row" style="margin-top:8px"><div style="flex:1">
+          <div class="label">Voice</div><select id="voiceSel"><option>Loading voices…</option></select></div></div>
+        <div class="row" style="margin-top:8px">
+          <div style="flex:1"><div class="label">Rate</div><input type="range" id="voiceRate" min="0.7" max="1.2" step="0.05" value="0.95"></div>
+          <div style="flex:1"><div class="label">Pitch</div><input type="range" id="voicePitch" min="0.5" max="2" step="0.1" value="1"></div>
+          <div style="flex:1"><div class="label">Volume</div><input type="range" id="voiceVol" min="0" max="1" step="0.05" value="1"></div>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <button class="btn primary" id="btnStart">Start session</button>
+          <button class="btn ghost" id="btnPause" disabled>Pause</button>
+          <button class="btn ghost" id="btnStopVoice" disabled>Stop voice</button>
+          <button class="btn ghost" id="btnReset">Reset</button>
+        </div>
+        <div class="row" style="margin-top:8px"><button class="btn ghost" id="btnDemo">Quick demo</button><button class="btn ghost" id="btnDownload">Download CSV</button></div>
+        <div style="margin-top:12px"><span class="stat" id="statLen">Length: 10 msgs</span><span class="stat" id="statScenario">Scenario: —</span></div>
+        <div style="margin-top:12px"><div class="label">Session log</div><div id="log" class="log" aria-live="polite"></div></div>
+      </div>
+      <div class="card">
+        <div class="sectionTitle">Task area</div>
+        <div class="pill">Strategy step → Conversation → <strong>Distractor</strong> → Recall</div>
+        <section id="strategyCard" style="margin-top:12px">
+          <div class="label">Choose your strategy</div>
+          <div class="row" role="group">
+            <button class="btn ghost" data-strategy="Notepad">📝 Notepad</button>
+            <button class="btn ghost" data-strategy="Grouping">🧩 Grouping</button>
+            <button class="btn ghost" data-strategy="Visualization">🎨 Visualization</button>
+            <button class="btn ghost" data-strategy="Cued">🧠 Cued recognition</button>
+            <button class="btn ghost" data-strategy="None">🙋 No strategy</button>
+          </div>
+          <div id="strategyInfo" style="margin-top:10px">
+            <div class="pill">Tip: If you repeat the same strategy 3×, I’ll suggest variety.</div>
+          </div>
+        </section>
+        <section id="scenarioCard" class="hidden" style="margin-top:12px">
+          <div class="chatWrap">
+            <div class="chatHeader"><div class="avatar">A</div><div><strong id="chatTitle">Conversation</strong><div class="muted" style="font-size:12px">10 messages will appear</div></div><div style="margin-left:auto" class="muted" id="chatCounter">0/10</div></div>
+            <div class="progress"><span id="chatProgress"></span></div>
+            <div class="chat" id="chat"></div>
+            <div class="typing hidden" id="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          </div>
+          <div class="row" style="margin-top:8px;justify-content:flex-end"><button class="btn primary" id="btnToDistractor" disabled>Continue → Distractor</button></div>
+        </section>
+        <!-- DISTRACTOR CARD -->
+        <section id="distractorCard" class="hidden" style="margin-top:12px">
+          <div class="label">Distractor task</div>
+          <!-- Sliding Puzzle UI -->
+          <div id="puzzleUI" class="hidden">
+            <div class="label">Complete the sliding puzzle to continue (3×3, max 4×4).</div>
+            <div class="row"><div><div class="puzzleWrap" id="puzzleGrid" style="grid-template-columns:repeat(3,72px)"></div><div class="pStatus muted" id="pStatus">Moves: 0</div>
+            <div class="row" style="margin-top:8px"><button class="btn ghost" id="btnShuffle">Shuffle</button><button class="btn ghost" id="btnSize">Size: 3×3</button><button class="btn warn" id="btnSkip">Skip (after 20s)</button></div></div></div>
+          </div>
+          <!-- Stroop UI -->
+          <div id="stroopUI" class="hidden">
+            <div class="label">Say the ink color, not the word. Click the correct color.</div>
+            <div id="stroopWord" class="stroop-word">BLUE</div>
+            <div class="stroop-grid" id="stroopBtns"></div>
+            <div class="stroop-score muted" id="stroopScore">0/12</div>
+          </div>
+          <!-- Matching UI -->
+          <div id="matchUI" class="hidden">
+            <div class="label">Find all pairs. Two mismatches add 1s lockout.</div>
+            <div class="match-grid" id="matchGrid"></div>
+            <div class="muted" id="matchStatus">Pairs found: 0/6</div>
+          </div>
+        </section>
+        <!-- RECALL -->
+        <section id="recallCard" class="hidden" style="margin-top:12px">
+          <div class="label">Recall — 5 Questions</div>
+          <div class="muted">Answer freely. If stuck, click “Show hint”, then “More” for options.</div>
+          <div id="recallInputs" style="margin-top:8px"></div>
+          <div class="row" style="margin-top:10px"><button class="btn primary" id="btnCheck">Check answers</button></div>
+        </section>
+        <section id="feedbackCard" class="hidden" style="margin-top:12px">
+          <div class="label">Feedback</div>
+          <div id="feedbackZone"></div>
+          <div class="row" style="margin-top:10px"><button class="btn success" id="btnRestart">Start another session</button></div>
+        </section>
+      </div>
+    </div>
+  </div>
+<script>
+(function(){
+  const $ = s=>document.querySelector(s);
+  const $$ = s=>Array.from(document.querySelectorAll(s));
+  const log = (msg)=>{ const el=$('#log'); const t=new Date().toLocaleTimeString(); el.textContent += '['+t+'] '+msg+'\\n'; el.scrollTop=el.scrollHeight; };
+
+  const scenarioSel=$('#scenarioSel'), speedSel=$('#speedSel'), voiceSel=$('#voiceSel'), distractorSel=$('#distractorSel');
+  const vRate=$('#voiceRate'), vPitch=$('#voicePitch'), vVol=$('#voiceVol');
+  const btnStart=$('#btnStart'), btnPause=$('#btnPause'), btnStopVoice=$('#btnStopVoice'), btnReset=$('#btnReset'), btnDownload=$('#btnDownload'), btnDemo=$('#btnDemo');
+  const strategyCard=$('#strategyCard'), scenarioCard=$('#scenarioCard'), distractorCard=$('#distractorCard'), recallCard=$('#recallCard'), feedbackCard=$('#feedbackCard');
+  const chat=$('#chat'), typing=$('#typing'), chatProgress=$('#chatProgress'), chatCounter=$('#chatCounter'), chatTitle=$('#chatTitle');
+  const btnToDistractor=$('#btnToDistractor');
+  // Puzzle
+  const puzzleGrid=$('#puzzleGrid'), pStatus=$('#pStatus'), btnShuffle=$('#btnShuffle'), btnSkip=$('#btnSkip'), btnSize=$('#btnSize');
+  // Stroop
+  const stroopUI=$('#stroopUI'), stroopWord=$('#stroopWord'), stroopBtns=$('#stroopBtns'), stroopScore=$('#stroopScore');
+  // Matching
+  const matchUI=$('#matchUI'), matchGrid=$('#matchGrid'), matchStatus=$('#matchStatus');
+  // Recall
+  const recallInputs=$('#recallInputs'), btnCheck=$('#btnCheck'); const btnRestart=$('#btnRestart');
+
+  let currentStrategy=null, lastStrategies=[], strategyCounts={Notepad:0,Grouping:0,Visualization:0,Cued:0,None:0};
+  let playing=false, paused=false, msgIdx=0, currentThread=null;
+  let sessionLog=[];
+  const STRATEGY_DETAILS={
+    Notepad:{title:'Notepad',desc:'Write quick bullet points while the chat unfolds to anchor details (names, places, numbers). Keep it minimal so you still listen actively.',
+            examples:['“Luca – text at 12:00”','“Meet: library entrance”','“Buy: beans + plant”']},
+    Grouping:{title:'Grouping',desc:'Actively organise information into meaningful clusters (people, places, times, tasks). This reduces load and boosts recall.',
+            examples:['People: Anna, Luca','Places: library, market, pharmacy','Times: 10:00 market, 12:00 text']},
+    Visualization:{title:'Visualization',desc:'Create a quick mental scene linking the items (method of loci or vivid imagery). Exaggerate colours, sizes, or actions.',
+                  examples:['Picture the library doors with a coffee bean doormat','See rain on an umbrella with a pharmacy cross','Imagine texting Luca at a giant clock at 12']},
+    Cued:{title:'Cued recognition',desc:'Plan to use progressive cues if free recall is hard: start with a semantic hint, then show options.',
+          examples:['First reveal a general hint','Then show multiple-choice options','Use cues after a brief free‑recall attempt']},
+    None:{title:'No strategy',desc:'Proceed without a compensatory strategy — useful as a baseline to compare performance.',examples:['—']}
+  };
+
+  /* Threads (unchanged content, cues only MC options) */
+  
+  const THREADS=[
+    { title:'Weekend plan',
+      msgs:[
+        {from:'Anna', text:'Hey! Free this Saturday?'},{from:'You', text:'Possibly. What\'s up?'},
+        {from:'Anna', text:'Street market in town — starts at 10.'},
+        {from:'Anna', text:'I want to buy coffee beans and a small plant.'},
+        {from:'You', text:'Sounds nice. Where do we meet?'},
+        {from:'Anna', text:'Let\'s meet at the library entrance.'},
+        {from:'Anna', text:'After the market I need the pharmacy.'},
+        {from:'You', text:'Ok. Do I need to bring anything?'},
+        {from:'Anna', text:'If you can, bring an umbrella — forecast is light rain.'},
+        {from:'Anna', text:'Oh, and I promised to text Luca at noon.'}
+      ],
+      qs:[
+        {prompt:'What time does the street market start?', ans:['10','10am','ten','10 am'], hints:['Morning, on the hour.','Before noon, exactly ten o\'clock.'], cue:{ mc:['10am','9am','noon','8:30']}},
+        {prompt:'Where are you meeting?', ans:['library entrance','library'], hints:['It\'s a specific spot at a public building.','The entrance of the place with books.'], cue:{ mc:['Library entrance','Hall A','Green Street','Platform 4']}},
+        {prompt:'Name one thing Anna wants to buy.', ans:['coffee','coffee beans','plant','a plant'], hints:['Two items: one you drink, one you water.','The drink ingredient and a small living thing.'], cue:{ mc:['Coffee beans','Tickets','Headphones','Notebook']}},
+        {prompt:'What might the weather be like?', ans:['rain','light rain','raining'], hints:['A type of precipitation.','It\'s not heavy.'], cue:{ mc:['Rain','Sunny','Snow','Wind']}},
+        {prompt:'Who needs to be texted at noon?', ans:['luca'], hints:['A short male first name.','Four letters, common in Italy.'], cue:{ mc:['Luca','Marco','Sara','Amira']}}
+      ]
+    },
+    { title:'Travel update',
+      msgs:[
+        {from:'Marco', text:'Train strike ended — services normal tomorrow.'},
+        {from:'You', text:'Great. What time is our train?'},
+        {from:'Marco', text:'9:40 from Platform 4.'},
+        {from:'Marco', text:'Bring ID — ticket is digital.'},
+        {from:'You', text:'Do we need seats reserved?'},
+        {from:'Marco', text:'Yes, already done: Coach B, seats 12 and 13.'},
+        {from:'Marco', text:'I\'ll grab snacks at the station.'},
+        {from:'You', text:'I\'ll pack chargers tonight.'},
+        {from:'Marco', text:'Weather looks cool, take a light jacket.'},
+        {from:'You', text:'Perfect, see you at the barriers.'}
+      ],
+      qs:[
+        {prompt:'What time is the train?', ans:['9:40','940','9 40'], hints:['Morning, in the nine o\'clock hour.','Not on the hour—twenty minutes to ten.'], cue:{ mc:['9:40','10:10','8:55','12:15']}},
+        {prompt:'Which platform?', ans:['4','platform 4'], hints:['A single digit, even number.','It\'s less than 5.'], cue:{ mc:['4','2','7','1']}},
+        {prompt:'Which coach are the reserved seats in?', ans:['b','coach b'], hints:['A letter near the start of the alphabet.','It\'s the second letter.'], cue:{ mc:['Coach B','Coach A','Coach D','Coach F']}},
+        {prompt:'Name one item to bring.', ans:['id','chargers','charger','light jacket','jacket'], hints:['Required for digital tickets.','Two letters commonly used for identity.'], cue:{ mc:['ID','Passport','Umbrella','Sunglasses']}},
+        {prompt:'Who is bringing snacks?', ans:['marco'], hints:['Not you.','The person messaging you.'], cue:{ mc:['Marco','You','Anna','Tom']}}
+      ]
+    },
+    { title:'Clinic appointment',
+      msgs:[
+        {from:'Reception', text:'Reminder: Dr Patel appointment on Tuesday.'},
+        {from:'You', text:'What time again?'},
+        {from:'Reception', text:'11:20. Please arrive 10 minutes early.'},
+        {from:'Reception', text:'Bring your insurance card and medication list.'},
+        {from:'You', text:'Location?'},
+        {from:'Reception', text:'Riverside Clinic, second floor, Room 204.'},
+        {from:'You', text:'Parking?'},
+        {from:'Reception', text:'Yes, use the south car park. First hour free.'},
+        {from:'Reception', text:'If you have a cough, wear a mask.'},
+        {from:'You', text:'Thanks, see you Tuesday.'}
+      ],
+      qs:[
+        {prompt:'What time is the appointment?', ans:['11:20','1120','11 20'], hints:['Late morning, after eleven.','Twenty past eleven.'], cue:{ mc:['11:20','10:30','12:00','9:45']}},
+        {prompt:'Which floor?', ans:['second','2nd'], hints:['Not ground, not first.','One flight above the first floor.'], cue:{ mc:['Second','First','Fourth','Ground']}},
+        {prompt:'Room number?', ans:['204'], hints:['Three digits.','Starts with 2 and ends with 4.'], cue:{ mc:['204','402','104','210']}},
+        {prompt:'Name one thing to bring.', ans:['insurance','medication list','medication','insurance card'], hints:['Paperwork and health info.','Your health coverage card and list of medicines.'], cue:{ mc:['Insurance card','Passport','Driving licence','Cash']}},
+        {prompt:'Which car park to use?', ans:['south','south car park'], hints:['Compass direction.','Opposite of north.'], cue:{ mc:['South','North','East','Multi-storey']}}
+      ]
+    },
+    { title:'Conference day',
+      msgs:[
+        {from:'Organizer', text:'Registration opens at 8:30.'},
+        {from:'You', text:'Where do I go first?'},
+        {from:'Organizer', text:'Keynote in Hall A at 9:00.'},
+        {from:'Organizer', text:'Your poster session is 14:00–15:30 in Gallery 2.'},
+        {from:'You', text:'Wi‑Fi?'},
+        {from:'Organizer', text:'Network: CONF2025, password: nexus.'},
+        {from:'You', text:'Lunch?'},
+        {from:'Organizer', text:'Vouchers at the foyer, vegetarian options available.'},
+        {from:'Organizer', text:'Reception at 18:00 on the terrace.'},
+        {from:'You', text:'Perfect.'}
+      ],
+      qs:[
+        {prompt:'When does registration open?', ans:['8:30','830','8 30'], hints:['In the eight o\'clock hour.','On the half hour.'], cue:{ mc:['8:30','9:00','7:45','10:00']}},
+        {prompt:'Where is the keynote?', ans:['hall a','a'], hints:['A hall, not a gallery.','The primary hall with a single-letter label.'], cue:{ mc:['Hall A','Gallery 2','Hall C','Auditorium B']}},
+        {prompt:'Poster session time?', ans:['14:00','1400','14 00','2pm','2:00'], hints:['Early afternoon.','Exactly on the hour at two p.m.'], cue:{ mc:['14:00','13:30','15:00','11:00']}},
+        {prompt:'Wi‑Fi password?', ans:['nexus'], hints:['A five-letter tech word.','Means a connection or link.'], cue:{ mc:['nexus','orion','vector','delta']}},
+        {prompt:'Reception location?', ans:['terrace','on the terrace'], hints:['An outdoor elevated area.','Open-air terrace.'], cue:{ mc:['Terrace','Foyer','Hall A','Café']}}
+      ]
+    }
+  ];
+
+
+  const show=(el)=>el.classList.remove('hidden');
+  const hide=(el)=>el.classList.add('hidden');
+  const norm=s=>(s||'').toLowerCase().replace(/[^a-z0-9\\s]/g,'').trim();
+  function el(tag, cls, txt){ const e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e; }
+
+  function initPicker(){ scenarioSel.innerHTML=''; THREADS.forEach((t,i)=>{ const o=document.createElement('option'); o.value=String(i); o.textContent=t.title; scenarioSel.appendChild(o);}); $('#statScenario').textContent='Scenario: '+THREADS[0].title; }
+  initPicker();
+  scenarioSel.addEventListener('change',()=> $('#statScenario').textContent='Scenario: '+THREADS[parseInt(scenarioSel.value,10)].title );
+
+  function maybeNudge(choice){ lastStrategies.push(choice); if(lastStrategies.length>3) lastStrategies.shift(); if(lastStrategies.length===3 && lastStrategies.every(s=>s===choice)){ log('Tip: try a different strategy this round (you chose '+choice+' three times).'); } return choice; }
+
+  function clearChat(){ chat.innerHTML=''; msgIdx=0; chatCounter.textContent='0/10'; chatProgress.style.width='0%'; btnToDistractor.disabled=true; }
+  function appendMsg(m){ const row=el('div','msg '+(m.from==='You'?'fromB':'fromA')); const bubble=el('div','bubble', m.text); row.appendChild(bubble); chat.appendChild(row); chat.scrollTop=chat.scrollHeight; chatCounter.textContent=msgIdx+'/'+currentThread.msgs.length; chatProgress.style.width=(msgIdx/currentThread.msgs.length*100)+'%'; }
+  let scheduleHandle=null; function schedule(fn,ms){ clearTimeout(scheduleHandle); scheduleHandle=setTimeout(fn,ms); }
+  function pickVoice(){ const name=voiceSel.value, voices=speechSynthesis.getVoices(); return voices.find(v=>v.name===name) || voices.find(v=>/^en|^it/.test(v.lang)) || voices[0]; }
+  function stopSpeak(){ if('speechSynthesis' in window){ speechSynthesis.cancel(); } }
+  function speak(text){ if(!('speechSynthesis' in window)) return {onend:cb=>cb&&cb()}; const u=new SpeechSynthesisUtterance(text); const v=pickVoice(); if(v) u.voice=v; u.rate=parseFloat(vRate.value); u.pitch=parseFloat(vPitch.value); u.volume=parseFloat(vVol.value); u.lang=(v&&v.lang)||(navigator.language||'en-GB'); speechSynthesis.cancel(); speechSynthesis.speak(u); return u; }
+  function playNext(){ if(!playing || paused) return; if(msgIdx>=currentThread.msgs.length){ playing=false; typing.classList.add('hidden'); btnToDistractor.disabled=false; return; } const m=currentThread.msgs[msgIdx++]; typing.classList.remove('hidden'); schedule(()=>{ typing.classList.add('hidden'); appendMsg(m); btnStopVoice.disabled=false; const started=performance.now(); const u=speak((m.from==='You'?'You say: ':'') + (m.from!=='You'? (m.from+' says: ') : '') + m.text); const minGap=parseInt(speedSel.value,10); const go=()=>{ const elapsed=performance.now()-started; const wait=Math.max(minGap-elapsed,0); schedule(playNext,wait); }; if(u && 'onend' in u){ u.onend=go; } else { schedule(playNext,minGap); } }, 350 + Math.random()*200); }
+  function startThread(sc){ clearChat(); playing=true; paused=false; currentThread = sc; msgIdx=0; chatTitle.textContent=sc.title; playNext(); }
+
+  // DISTRACTORS
+  // Sliding puzzle
+  let puzzleSize=3, emptyPos, moves=0, skipUnlockTimer=null;
+  function coords(i){ return {r:Math.floor(i/puzzleSize), c:i%puzzleSize}; } function indexFrom(rc){ return rc.r*puzzleSize+rc.c; }
+  function neighbors(idx){ const {r,c}=coords(idx); const ns=[]; if(r>0) ns.push(indexFrom({r:r-1,c})); if(r<puzzleSize-1) ns.push(indexFrom({r:r+1,c})); if(c>0) ns.push(indexFrom({r, c:c-1})); if(c<puzzleSize-1) ns.push(indexFrom({r, c:c+1})); return ns; }
+  function renderPuzzle(arr){ const grid=$('#puzzleGrid'); grid.innerHTML=''; grid.style.gridTemplateColumns='repeat('+puzzleSize+',72px)'; arr.forEach((n,i)=>{ const d=document.createElement('div'); d.className='tile'+(n===0?' empty':''); d.textContent = n===0? '' : n; d.addEventListener('click',()=>{ if(n===0) return; const nb=neighbors(i); if(nb.includes(emptyPos)){ [arr[i],arr[emptyPos]]=[arr[emptyPos],arr[i]]; emptyPos=i; moves++; pStatus.textContent='Moves: '+moves; renderPuzzle(arr); if(isSolved(arr)){ log('Puzzle solved. Proceed to recall.'); showRecall(); } } }); grid.appendChild(d); }); }
+  function goalArray(){ const arr=[]; for(let i=1;i<puzzleSize*puzzleSize;i++) arr.push(i); arr.push(0); return arr; }
+  function isSolved(arr){ const g=goalArray(); for(let i=0;i<arr.length;i++){ if(arr[i]!==g[i]) return false; } return true; }
+  function shufflePuzzle(){ const arr=goalArray().slice(); emptyPos=arr.length-1; moves=0; pStatus.textContent='Moves: 0'; for(let k=0;k<200;k++){ const ns=neighbors(emptyPos); const pick=ns[Math.floor(Math.random()*ns.length)]; [arr[emptyPos],arr[pick]]=[arr[pick],arr[emptyPos]]; emptyPos=pick; } renderPuzzle(arr); btnSkip.disabled=true; clearTimeout(skipUnlockTimer); skipUnlockTimer=setTimeout(()=>{ btnSkip.disabled=false; }, 20000); }
+  // Stroop
+  const COLORS=[
+    {name:'RED', css:'red'},{name:'GREEN', css:'green'},{name:'BLUE', css:'blue'},{name:'YELLOW', css:'goldenrod'}
+  ];
+  let stroopTrials=12, stroopIdx=0, stroopCorrect=0;
+  function stroopNext(){ if(stroopIdx>=stroopTrials){ log('Stroop finished. Proceed to recall.'); showRecall(); return; }
+    stroopIdx++; const word=COLORS[Math.floor(Math.random()*COLORS.length)]; const ink=COLORS[Math.floor(Math.random()*COLORS.length)];
+    stroopWord.textContent=word.name; stroopWord.style.color=ink.css;
+    stroopBtns.innerHTML=''; COLORS.forEach(c=>{ const b=document.createElement('button'); b.className='btn ghost'; b.textContent=c.name; b.onclick=()=>{ if(c.name===ink.name){ stroopCorrect++; } stroopScore.textContent=stroopCorrect+'/'+stroopTrials; stroopNext(); }; stroopBtns.appendChild(b); });
+  }
+  function startStroop(){ stroopIdx=0; stroopCorrect=0; stroopScore.textContent='0/'+stroopTrials; stroopNext(); }
+  // Matching
+  let firstPick=null, lock=false, pairsFound=0, mismatches=0;
+  function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()* (i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+  function startMatching(){ firstPick=null; lock=false; pairsFound=0; mismatches=0; matchStatus.textContent='Pairs found: 0/6';
+    const syms=['🍎','🚗','🐶','🎵','🌟','📚']; const deck=shuffle([...syms,...syms]);
+    matchGrid.innerHTML=''; deck.forEach((sym,idx)=>{
+      const card=document.createElement('div'); card.className='match-card'; card.dataset.sym=sym; card.dataset.idx=idx; card.textContent='?';
+      card.onclick=()=>{
+        if(lock || card.classList.contains('revealed')) return;
+        card.classList.add('revealed'); card.textContent=sym;
+        if(!firstPick){ firstPick=card; return; }
+        if(firstPick.dataset.sym===card.dataset.sym){ pairsFound++; firstPick=null; matchStatus.textContent='Pairs found: '+pairsFound+'/6'; if(pairsFound===6){ log('Matching complete. Proceed to recall.'); showRecall(); } }
+        else{ mismatches++; if(mismatches%2===0){ lock=true; setTimeout(()=>{ [firstPick,card].forEach(c=>{ c.classList.remove('revealed'); c.textContent='?'; }); lock=false; firstPick=null; }, 1000); } else { setTimeout(()=>{ [firstPick,card].forEach(c=>{ c.classList.remove('revealed'); c.textContent='?'; }); firstPick=null; }, 350); } }
+      };
+      matchGrid.appendChild(card);
+    });
+  }
+
+  function showDistractor(){
+    hide(scenarioCard); show(distractorCard);
+    // Toggle UIs
+    $('#puzzleUI').classList.add('hidden');
+    $('#stroopUI').classList.add('hidden');
+    $('#matchUI').classList.add('hidden');
+    const choice=distractorSel.value;
+    if(choice==='puzzle'){ $('#puzzleUI').classList.remove('hidden'); shufflePuzzle(); }
+    else if(choice==='stroop'){ $('#stroopUI').classList.remove('hidden'); startStroop(); }
+    else { $('#matchUI').classList.remove('hidden'); startMatching(); }
+  }
+
+  function semanticHint(prompt){/* legacy */
+    const p=prompt.toLowerCase();
+    if(p.includes('time')) return 'Hint: it was a specific time.';
+    if(p.startsWith('where')||p.includes('where')) return 'Hint: it was a place.';
+    if(p.startsWith('who')||p.includes('who')) return 'Hint: it was a person.';
+    if(p.includes('which platform')||p.includes('room')||p.includes('which coach')) return 'Hint: it was a number/label.';
+    if(p.includes('name one thing')||p.includes('bring')) return 'Hint: it was an item mentioned.';
+    if(p.includes('weather')) return 'Hint: it was a weather condition.';
+    if(p.includes('password')) return 'Hint: a short word given explicitly.';
+    return 'Hint: it was stated explicitly in the chat.';
+  }
+
+  function renderRecall(sc){
+    recallInputs.innerHTML='';
+    sc.qs.forEach((q,i)=>{
+      const wrap=document.createElement('div');
+      wrap.innerHTML='<div class="label">'+(i+1)+'. '+q.prompt+'</div><input type="text" data-qi="'+i+'" />'+
+        '<div class="row" style="margin-top:6px"><button class="btn ghost showCue" data-qi="'+i+'">Show hint</button></div>'+
+        '<div class="cue hidden" id="cue-'+i+'"></div>';
+      recallInputs.appendChild(wrap);
+      const cueEl=wrap.querySelector('#cue-'+i);
+      // Stage 1: hint level 1
+      const h1=document.createElement('div'); h1.className='muted'; h1.id='h1-'+i; h1.textContent=(q.hints && q.hints[0]) ? q.hints[0] : 'Hint available.';
+      // Stage 2: hint level 2
+      const h2=document.createElement('div'); h2.className='muted hidden'; h2.id='h2-'+i; h2.style.marginTop='4px'; h2.textContent=(q.hints && q.hints[1]) ? q.hints[1] : 'More detail available.';
+      // Stage 3: multiple choice
+      const mc=document.createElement('div'); mc.className='mc hidden'; mc.id='mc-'+i;
+      (q.cue.mc||[]).forEach(opt=>{ const b=document.createElement('button'); b.className='btn ghost'; b.textContent=opt; b.onclick=()=>{ wrap.querySelector('input').value=opt; }; mc.appendChild(b); });
+      cueEl.appendChild(h1); cueEl.appendChild(h2); cueEl.appendChild(mc);
+    });
+    // Button behaviour: Show hint -> More -> Options -> Hide
+    $$('.showCue').forEach(btn=> btn.addEventListener('click',()=>{
+      const i=btn.getAttribute('data-qi');
+      const cue=document.getElementById('cue-'+i);
+      const h2=document.getElementById('h2-'+i);
+      const mc=document.getElementById('mc-'+i);
+      if(cue.classList.contains('hidden')){ // Reveal hint1
+        cue.classList.remove('hidden'); btn.textContent='More';
+      } else if(h2.classList.contains('hidden')){ // Reveal hint2
+        h2.classList.remove('hidden'); btn.textContent='Options';
+      } else if(mc.classList.contains('hidden')){ // Reveal options
+        mc.classList.remove('hidden'); btn.textContent='Hide cues';
+      } else { // Hide all
+        cue.classList.add('hidden'); h2.classList.add('hidden'); mc.classList.add('hidden'); btn.textContent='Show hint';
+      }
+    }));
+    if(currentStrategy==='Cued'){ // auto-show first stage
+      $$('.showCue').forEach(b=>b.click());
+    }
+  }
+
+  
+  function showRecall(){
+    hide(distractorCard);
+    show(recallCard);
+    const sc = THREADS[parseInt(scenarioSel.value,10)];
+    renderRecall(sc);
+  }
+
+function grade(sc){ let correct=0,total=sc.qs.length,details=[]; Array.from(recallInputs.querySelectorAll('input')).forEach((inp,i)=>{ const val=norm(inp.value); const ok=sc.qs[i].ans.some(a=> val.includes(norm(a))); if(ok) correct++; details.push({prompt:sc.qs[i].prompt, text:inp.value || '(blank)', ok}); }); return {correct,total,details}; }
+
+  // Controls
+  btnStart.onclick=()=>{ hide(strategyCard); show(scenarioCard); const idx=parseInt(scenarioSel.value,10) || 0; const sc=THREADS[idx]; startThread(sc); log('Session started.'); btnPause.disabled=false; };
+  $('#strategyCard').addEventListener('click',(e)=>{ const b=e.target.closest('button[data-strategy]'); if(!b) return; currentStrategy=maybeNudge(b.getAttribute('data-strategy')); const info=STRATEGY_DETAILS[currentStrategy]; if(info){ const ex=info.examples.map(x=>'• '+x).join('<br>'); $('#strategyInfo').innerHTML='<div class="pill">'+info.title+': '+info.desc+'</div>'+'<div class="tip" style="margin-top:6px"><strong>Examples</strong><br>'+ex+'</div>'; } log('Strategy: '+currentStrategy); });
+  btnPause.onclick=()=>{ paused=!paused; btnPause.textContent=paused?'Resume':'Pause'; if(!paused) playNext(); };
+  btnStopVoice.onclick=()=>stopSpeak();
+  btnReset.onclick=()=>{ stopSpeak(); location.reload(); };
+  btnDownload.onclick=()=>{ if(sessionLog.length===0){ log('Nothing to download yet.'); return; } const escape=v=>('\"'+String(v).replace(/\"/g,'\"\"')+'\"'); const header=Object.keys(sessionLog[0]).map(escape).join(','); const lines=sessionLog.map(r=>Object.values(r).map(escape).join(',')); const csv=[header,...lines].join('\\n'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='memory_in_action_sessions.csv'; a.click(); URL.revokeObjectURL(url); };
+  btnDemo.onclick=()=>{ scenarioSel.value='0'; $('#statScenario').textContent='Scenario: '+THREADS[0].title; };
+  btnToDistractor.onclick=()=> showDistractor();
+  btnShuffle && (btnShuffle.onclick=()=> shufflePuzzle());
+  btnSize && (btnSize.onclick=()=>{ puzzleSize = puzzleSize===3 ? 4 : 3; btnSize.textContent = 'Size: '+puzzleSize+'×'+puzzleSize; shufflePuzzle(); });
+  btnSkip && (btnSkip.onclick=()=>{ if(btnSkip.disabled) return; log('Puzzle skipped.'); showRecall(); });
+  btnCheck.onclick=()=>{
+  const sc=THREADS[parseInt(scenarioSel.value,10)];
+  const g=grade(sc);
+  hide(recallCard);
+  show(feedbackCard);
+  const pct=Math.round((g.correct/g.total)*100);
+  let html='<div class="pill">Accuracy: '+g.correct+'/'+g.total+' ('+pct+'%) — Strategy: '+(currentStrategy||'—')+'</div>';
+  g.details.forEach((d, i)=>{
+    const corr = (sc.qs[i].ans || []).join(' / ');
+    html+='<div style="margin-top:6px">'+(d.ok?'✅':'❌')+' <em>'+d.prompt+'</em> — <strong>'+d.text+'</strong>'+(d.ok?'':'<div class="muted" style="margin-top:2px">Correct: '+corr+'</div>')+'</div>';
+  });
+  document.getElementById('feedbackZone').innerHTML=html;
+  sessionLog.push({timestamp:new Date().toISOString(), scenario:sc.title, strategy:currentStrategy, correct:g.correct, total:g.total, percent:pct});
+  log('Recall checked — '+g.correct+'/'+g.total+'.');
+};;
+  btnRestart.onclick=()=>{ location.reload(); };
+
+  // Init voices
+  function loadVoices(){ const voices=speechSynthesis.getVoices().sort((a,b)=>(a.lang+a.name).localeCompare(b.lang+b.name)); voiceSel.innerHTML=''; voices.forEach(v=>{ const o=document.createElement('option'); o.value=v.name; o.textContent=v.name+' — '+v.lang; voiceSel.appendChild(o); }); const target=['Google UK English Female','Microsoft Sonia Online (Natural) - English (Great Britain)','Google italiano']; const hit=voices.find(v=>target.includes(v.name)) || voices.find(v=> v.lang.startsWith(navigator.language||'en')); if(hit) voiceSel.value=hit.name; }
+  if('speechSynthesis' in window){ speechSynthesis.onvoiceschanged=loadVoices; setTimeout(loadVoices,100); }
+
+  function renderScenarioStats(){ $('#statScenario').textContent='Scenario: '+THREADS[parseInt(scenarioSel.value,10)].title; }
+  renderScenarioStats();
+
+  function clearChatUI(){ chat.innerHTML=''; }
+  function onConversationEnd(){ btnToDistractor.disabled=false; }
+
+  // Start playback helpers
+  function playController(){ /* wrapper if needed later */ }
+  // Hook end condition already in playNext()
+
+  log('Ready. Pick a strategy and press Start session.');
+})();
+</script>
+</body>
+</html>
