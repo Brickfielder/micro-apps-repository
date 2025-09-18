@@ -1,1 +1,49 @@
+:root{
+  color-scheme: light dark;
+  /* Brand + surfaces */
+  --bg:#f6f7fb; --surface:#ffffff; --text:#0f172a; --muted:#64748b; --line:#e5e7eb;
+  --accent:#3b82f6; --accent-600:#2563eb; --accent-50:#eef2ff;
+  --ok:#16a34a; --warn:#b45309; --danger:#dc2626;
+  --radius:18px; --shadow:0 8px 30px rgba(2,6,23,.06);
+  --maxw: 1200px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0b0f14; --surface:#0f141a; --text:#e5e7eb; --muted:#9aa4b2; --line:#1f2937;
+    --accent:#60a5fa; --accent-600:#3b82f6; --accent-50:#0b1220;
+    --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box} html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
 
+.container{max-width:var(--maxw);margin:0 auto;padding:24px 16px}
+/* Title row */
+.page-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.badge{background:var(--accent-50);color:var(--accent-600);border:1px solid var(--line);
+  padding:6px 10px;border-radius:999px;font-weight:600;font-size:12px}
+.h1{font-weight:800;font-size:40px;letter-spacing:.2px;margin:0}
+.h1 .accent{color:var(--accent)}
+
+/* Toolbar buttons (right side) */
+.toolbar{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:14px;
+  border:1px solid var(--line);background:#f8fafc;color:var(--text);cursor:pointer}
+.btn:hover{filter:brightness(.98)}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.ghost{background:var(--surface)}
+.btn.pill{border-radius:999px}
+.btn[disabled]{opacity:.6;cursor:not-allowed}
+
+/* Grid + cards */
+.grid{display:grid;gap:18px;margin-top:18px}
+@media(min-width:900px){ .grid{grid-template-columns:1fr 1fr} }
+.card{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:18px}
+.card h2{margin:0 0 6px;font-size:20px}
+.subtle{background:#fff7ed;border-color:#fde5c7}           /* warm tip box */
+@media (prefers-color-scheme: dark){ .subtle{background:#20160a;border-color:#3b2f1d} }
+
+/* Utility */
+.divider{height:1px;background:var(--line);margin:12px 0}
+.kbd{background:#eef2f7;border:1px solid #cfd8e3;border-bottom-width:2px;border-radius:6px;
+  padding:.1em .4em;font:12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
