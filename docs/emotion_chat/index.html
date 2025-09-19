@@ -11,152 +11,241 @@
   WhatsApp-style scenarios to practice emotion recognition, theory of mind, and social reasoning.
 </p>
 <style>
+  /* ===================== Design tokens ===================== */
   :root{
     color-scheme: light dark;
-    --bg:#f7f8fb; --surface:#ffffff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
-    --accent:#ff7a6e; --accent-600:#ff6254; --accent-700:#f24f40; --pill:#f2f4f7;
-    --good:#16a34a; --bad:#b91c1c;
-    --radius:16px; --shadow:0 8px 24px rgba(0,0,0,0.08);
+
+    /* Colors */
+    --bg: #f6f7fb;
+    --surface: #ffffff;
+    --surface-alt: #f1f5f9;
+    --text: #0f172a;      /* slate-900 */
+    --muted: #475569;     /* slate-600 */
+    --line: #e2e8f0;      /* slate-200 */
+    --accent: #3b82f6;    /* blue-500 */
+    --accent-600:#2563eb; /* blue-600 */
+    --accent-700:#1d4ed8; /* blue-700 */
+    --pill:#eef2ff;
+
+    --good:#16a34a;
+    --bad:#b91c1c;
+
+    /* Type scale (clamped for responsiveness) */
+    --font-base: clamp(17px, 1.2vw, 19px);
+    --h1: clamp(30px, 3.5vw, 44px);
+    --h2: clamp(18px, 2vw, 22px);
+    --h3: clamp(16px, 1.6vw, 18px);
+    --small: clamp(13px, 1.2vw, 14.5px);
+
+    /* Layout */
+    --radius: 16px;
+    --radius-lg: 22px;
+    --shadow: 0 8px 28px rgba(2, 6, 23, 0.08);
+    --shadow-sm: 0 2px 8px rgba(2, 6, 23, 0.06);
+    --gap: 18px;
   }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--text);
-    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;line-height:1.45}
-  header{position:sticky;top:0;z-index:5;background:linear-gradient(180deg,#fff,rgba(255,255,255,.92));
-    backdrop-filter:saturate(1.1) blur(6px);border-bottom:1px solid var(--line)}
-  .wrap{max-width:1100px;margin:0 auto;padding:16px}
-  h1{margin:6px 0 0;font-size:22px}
-  p.sub{margin:4px 0 12px;color:var(--muted);font-size:14px}
-  .bar{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin:12px 0 8px}
-  .bar label{font-size:12px;color:var(--muted)}
-  select,button,textarea,input{font:inherit}
-  select,button{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff}
-  button.primary{background:var(--accent);color:#fff;border:none}
-  button.primary:hover{background:var(--accent-600)}
-  button.secondary{background:#fff}
-  button.ghost{background:transparent;border-color:transparent;color:var(--muted)}
-  button:disabled{opacity:.6;cursor:not-allowed}
-  main{padding:16px}
-  .grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:16px}
-  @media (max-width:980px){ .grid{grid-template-columns:1fr} }
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
-  .card h2{font-size:18px;margin:0 0 10px}
-  .pad{padding:16px}
-/* --- Screenshot-like palette/typography for header --- */
-:root{
-  --title: #111827;       /* slate-900 */
-  --brand: #3b82f6;       /* blue-500 */
-  --brand-600: #2563eb;   /* blue-600 */
-}
 
-/* keep your header sticky behavior; (re)declare for clarity */
-header{
-  position: sticky; top: 0; z-index: 5;
-  background: linear-gradient(180deg,#fff,rgba(255,255,255,.92));
-  backdrop-filter: saturate(1.1) blur(6px);
-  border-bottom: 1px solid var(--line);
-}
+  *{ box-sizing:border-box }
+  html, body { height:100% }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+    line-height:1.55;
+    font-size: var(--font-base);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
 
-/* small “Prototype” chip, like the screenshot */
-.chip{
-  display:inline-flex; align-items:center;
-  padding:6px 10px; border-radius:999px;
-  font-size:12px; background:#eef2ff; color:#4f46e5;
-  border:1px solid #e5e7eb; margin: 2px 0 6px 0;
-}
+  /* ===================== Header ===================== */
+  header{
+    position:sticky; top:0; z-index:10;
+    background: linear-gradient(180deg, #fff, rgba(255,255,255,.94));
+    backdrop-filter: saturate(1.05) blur(6px);
+    border-bottom: 1px solid var(--line);
+  }
+  .wrap{ max-width: 1200px; margin: 0 auto; padding: 20px 22px; }
+  .headstack{ display: grid; gap: 8px; }
 
-/* big bold title with blue accent on the right-hand word */
-.brandtitle{
-  margin:0; color:var(--title);
-  font-weight:800; letter-spacing:-0.01em; line-height:1.1;
-  font-size: clamp(22px, 3.2vw, 34px);
-}
-.brandtitle .accent{ color:var(--brand); }
+  .chip{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:6px 12px; border-radius:999px; font-size: var(--small);
+    background:#eef2ff; color:#4f46e5; border:1px solid var(--line);
+    box-shadow: var(--shadow-sm);
+    width:max-content;
+  }
 
-/* subtitle tone/spacing to match screenshot */
-p.sub.lead{
-  margin:4px 0 10px;
-  color: var(--muted);
-  font-size: clamp(13px, 1.6vw, 15px);
-}
+  .brandtitle{
+    margin:0;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    font-size: var(--h1);
+    color: var(--text);
+  }
+  .brandtitle .accent{ color: var(--accent); }
 
-/* align primary button to the same blue family */
-button.primary{ background: var(--brand); color:#fff; border:none; }
-button.primary:hover{ background: var(--brand-600); }
+  p.sub{ margin: 2px 0 14px; color: var(--muted); font-size: var(--small) }
 
-/* dark-mode tweaks so header stays readable */
-@media (prefers-color-scheme: dark){
-  :root{ --title:#e5e7eb; }
-  header{ background: linear-gradient(180deg,#0b1220,rgba(11,18,32,.92)); }
-  .chip{ background:#1e293b; color:#93c5fd; border-color:#334155; }
-}
+  /* Controls bar */
+  .bar{
+    display:flex; flex-wrap:wrap; gap: 12px 14px; align-items:flex-end;
+    margin: 8px 0 6px;
+  }
+  .bar label{ font-size: var(--small); color:var(--muted); display:inline-grid; gap:6px }
+  select,button,textarea,input{ font:inherit }
+  select,button{
+    border:1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 14px;
+    background:#fff;
+    box-shadow: var(--shadow-sm);
+  }
+  button.primary{ background:var(--accent); color:#fff; border:none }
+  button.primary:hover{ background:var(--accent-600) }
+  button.secondary{ background:#fff }
+  button.ghost{ background:transparent; border-color:transparent; color:var(--muted) }
+  button:disabled{ opacity:.6; cursor:not-allowed }
 
-  /* Chat */
-  .chat{background:#e9eef5;border-radius:var(--radius);padding:14px;height:520px;overflow:auto;border:1px solid var(--line)}
-  .bubble{max-width:78%;padding:12px 14px;border-radius:16px;margin:8px 0;display:inline-block;word-wrap:break-word;
-    box-shadow:0 2px 6px rgba(0,0,0,.06);font-size:15px}
-  .fromA{background:#fff;border:1px solid #e6e6e6}
-  .fromB{background:#ffe8e5;border:1px solid #ffd2cc}
-  .name{display:block;font-size:12px;color:var(--muted);margin-bottom:2px}
-  .footer{display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:10px}
-  .divider{height:1px;background:var(--line);margin:10px 0}
-  .small{font-size:12px;color:var(--muted)}
+  /* Visible focus for keyboard users */
+  :where(button, a, select, textarea, input):focus-visible{
+    outline: 3px solid color-mix(in oklab, var(--accent) 60%, white);
+    outline-offset: 2px;
+    border-color: var(--accent-600);
+  }
 
-  /* Steps */
-  .step{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px}
-  .step h3{margin:4px 0 12px;font-size:16px}
-  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  @media(max-width:720px){ .row{grid-template-columns:1fr} }
-  textarea{width:100%;min-height:110px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#fff;resize:vertical}
-  .legend{color:var(--muted);font-size:13px}
+  /* ===================== Main layout ===================== */
+  main{ padding: 22px }
+  .grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+  }
+  @media (max-width: 980px){ .grid{ grid-template-columns:1fr } }
 
-  /* Pills — wide, grid */
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+  }
+  .pad{ padding: 18px 18px 16px }
+  .card h2{ font-size: var(--h2); margin:0 0 12px }
+
+  /* ===================== Chat ===================== */
+  .chat{
+    background: var(--surface-alt);
+    border-radius: var(--radius);
+    padding: 16px;
+    height: 560px;
+    overflow:auto;
+    border:1px solid var(--line);
+  }
+  .bubble{
+    max-width: 78%;
+    padding: 12px 14px;
+    border-radius: 16px;
+    margin: 10px 0;
+    display: inline-block;
+    word-wrap: break-word;
+    box-shadow: var(--shadow-sm);
+    font-size: clamp(15px, 1.4vw, 16px);
+  }
+  .fromA{ background:#fff; border:1px solid #e6e6e6 }
+  .fromB{ background:#ffe8e5; border:1px solid #ffd2cc }
+  .name{ display:block; font-size: var(--small); color:var(--muted); margin-bottom:4px }
+  .footer{ display:flex; gap:8px; justify-content:space-between; align-items:center; margin-top:12px }
+  .divider{ height:1px; background:var(--line); margin:12px 0 }
+  .small{ font-size: var(--small); color:var(--muted) }
+
+  /* ===================== Steps ===================== */
+  .step{
+    background:#fff; border:1px solid var(--line);
+    border-radius: 14px; padding: 14px;
+  }
+  .step h3{ margin:6px 0 12px; font-size: var(--h3) }
+  .row{ display:grid; grid-template-columns:1fr 1fr; gap: 12px }
+  @media(max-width: 720px){ .row{ grid-template-columns:1fr } }
+
+  textarea{
+    width:100%; min-height:130px;
+    padding: 12px 14px; border-radius: 12px; border:1px solid var(--line); background:#fff; resize:vertical
+  }
+  textarea::placeholder{ color: #94a3b8 }
+
+  .legend{ color:var(--muted); font-size: var(--small) }
+
+  /* ===================== Pills ===================== */
   .pills{
-    display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap:10px; padding:6px 0;
+    display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px; padding: 6px 0;
   }
   .pill{
-    display:inline-flex;align-items:center;justify-content:center;
-    padding:10px 14px;background:var(--pill);border:1px solid var(--line);
-    border-radius:999px;cursor:pointer;user-select:none;font-size:15px;min-height:42px
+    display:inline-flex; align-items:center; justify-content:center;
+    padding: 12px 16px; min-height: 46px;
+    background: var(--pill);
+    border: 1px solid #c7d2fe;
+    border-radius: 999px; cursor:pointer; user-select:none;
+    font-weight: 600;
+    transition: transform .06s ease-out;
   }
-  .pill[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:transparent}
-  .feedback{border-left:4px solid var(--accent);padding-left:12px;margin:8px 0}
-  .kpi{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
-  .tag{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:13px;
-    border:1px solid var(--line);background:#fff}
-  .tag.good{border-color:#b7e3c4;background:#ecfdf5;color:#065f46}
-  .tag.bad{border-color:#f6c7c7;background:#fef2f2;color:#7f1d1d}
+  .pill:active{ transform: scale(.98) }
+  .pill[aria-pressed="true"]{
+    background: var(--accent);
+    color: #fff;
+    border-color: transparent;
+  }
+
+  .feedback{ border-left: 4px solid var(--accent); padding-left:12px; margin:10px 0 }
+  .kpi{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px }
+  .tag{
+    display:inline-flex; align-items:center; gap:6px;
+    padding: 8px 12px; border-radius:999px; font-size: var(--small);
+    border:1px solid var(--line); background:#fff
+  }
+  .tag.good{ border-color:#b7e3c4; background:#ecfdf5; color:#065f46 }
+  .tag.bad{ border-color:#f6c7c7; background:#fef2f2; color:#7f1d1d }
+
+  /* ===================== Dark mode ===================== */
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0b1220; --surface:#0f172a; --surface-alt:#111827;
+      --text:#e6edf7; --muted:#9fb0c8; --line:#233047;
+      --pill:#172554;
+    }
+    header{ background: linear-gradient(180deg,#0f172a,rgba(15,23,42,.92)); }
+    .chip{ background:#1e293b; color:#93c5fd; border-color:#334155 }
+    select,button{ background:#0f172a; color:var(--text); border-color:#233047 }
+    .fromA{ background:#0b1220; border-color:#233047 }
+    .fromB{ background:#172554; border-color:#1e3a8a }
+    textarea{ background:#0b1220; color:var(--text); border-color:#233047 }
+    .card{ box-shadow: 0 8px 28px rgba(0,0,0,.35) }
+  }
+
+  /* ===================== Motion/accessibility ===================== */
+  @media (prefers-reduced-motion: reduce){
+    * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  }
 </style>
 </head>
 <body>
-  <header>
-    <div class="wrap">
-      <h1>Emotion Chat</h1>
-      <p class="sub">Read a chat, then infer each person’s emotions. Step 1: free choice → Step 2: choose all that apply → Step 3: feedback.</p>
-      <div class="bar">
-        <label>
-          Scenario<br/>
-          <select id="scenario"></select>
-        </label>
-        <label>
-          Distractors per person<br/>
-          <select id="distractors">
-            <option>6</option>
-            <option selected>8</option>
-            <option>10</option>
-            <option>12</option>
-            <option>14</option>
-          </select>
-        </label>
-        <button id="play" class="primary">Play chat</button>
-        <button id="skip" class="secondary" disabled>Skip chat</button>
-        <button id="reset" class="ghost" disabled>Reset</button>
-        <button id="download" class="secondary" title="Download CSV of your results" disabled>Download CSV</button>
-        <span class="small" id="status" aria-live="polite"></span>
-      </div>
-    </div>
-  </header>
+<header>
+  <div class="wrap headstack">
+    <span class="chip">Prototype</span>
 
+    <h1 class="brandtitle">
+      Emotion Chat — <span id="accentWord" class="accent"></span>
+    </h1>
+
+    <p class="sub">
+      WhatsApp-style scenarios to practice emotion recognition, theory of mind, and social reasoning.
+    </p>
+
+    <!-- keep your existing .bar exactly as is -->
+    <div class="bar"> … </div>
+  </div>
+</header>
   <main class="wrap">
     <div class="grid">
       <!-- Left: Chat -->
