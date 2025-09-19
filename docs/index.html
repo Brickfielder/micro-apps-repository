@@ -56,6 +56,10 @@
   html[data-theme="dark"] .open{color:var(--accent-600)}
   /* Readability */
   p,.desc,.lead,.sub{text-align:justify;text-justify:inter-word;hyphens:auto}
+  /* --- Hero full-width override --- */
+.hero{ max-width:none; }                /* span the full viewport width */
+.hero .sub{ max-width:none; font-size:1.1rem; }
+h1{ font-size: clamp(28px, 5vw, 56px); }
 </style>
 </head>
 <body>
