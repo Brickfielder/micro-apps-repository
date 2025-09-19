@@ -114,12 +114,19 @@
       "desc": "WhatsApp-style conversational memory with TTS; 10-message study, a short distractor, then recall with progressive cues."
     },
     {
-  "name": "Emotion Chat",
-  "path": "/micro-apps-repository/emotion_chat/",
-  "tags": ["Social Cognition", "Executive Functioning", "Strategy Training"],
-  "thumb": "😊",
-  "badge": "New",
-  "desc": "Role-play a WhatsApp-style chat: identify emotions in context, select strategies, and get feedback with distractors."
-    }
+      "name": "Emotion Chat",
+      "path": "/micro-apps-repository/emotion_chat/",
+      "tags": ["Social Cognition", "Executive Functioning", "Strategy Training"],
+      "thumb": "😊",
+      "badge": "New",
+      "desc": "Role-play a WhatsApp-style chat: identify emotions in context, select strategies, and get feedback with distractors."
+    },
+    {
+          "name": "Signal Master",
+      "path": "/micro-apps-repository/signal_master/",
+      "tags": ["Executive Functioning", "Strategy Training"],
+      "thumb": "😊",
+      "badge": "New",
+      "desc": "A fast-paced game that trains attention and flexibility by challenging you to adapt to changing rules and signals."
   ]
 }
