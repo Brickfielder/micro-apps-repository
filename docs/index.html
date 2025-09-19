@@ -100,12 +100,28 @@
   html[data-theme="dark"] body{background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0px,rgba(255,255,255,.06) 1px,transparent 1px,transparent 6px)}
   html[data-theme="dark"] .badge{background:rgba(255,122,110,.18);color:#ffd0cb}
   html[data-theme="dark"] .open{color:var(--accent-600)}
-/* Hero should match the grid container width */
+/* Hero uses the same container width as the grid */
 .hero{
-  max-width: var(--maxw);     /* same as .section/.featured/.filters */
+  max-width: var(--maxw);
   margin: 0 auto;
-  padding-inline: 16px;       /* same side padding as the grid sections */
+  padding-inline: 16px;
 }
+
+/* Fully justify the H1 and stretch the last line */
+.hero h1{
+  text-wrap: pretty;            /* override any earlier text-wrap: balance */
+  text-align: justify;
+  text-align-last: justify;     /* Firefox/Edge */
+  text-justify: inter-word;
+  hyphens: auto;                /* allow hyphenation to reduce gaps */
+}
+/* Chrome/WebKit: force the last line to justify as well */
+.hero h1::after{
+  content: "";
+  display: inline-block;
+  width: 100%;
+}
+
 </style>
 </head>
 <body>
