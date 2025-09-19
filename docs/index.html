@@ -152,6 +152,55 @@ html[data-theme="dark"] header.scrolled{
   html[data-theme="dark"] .badge{background:rgba(255,122,110,.18);color:#ffd0cb}
   html[data-theme="dark"] .open{color:var(--accent-600)}
 
+  /* ===== NAV LAYOUT + LINK STYLES (you lost these) ===== */
+.nav{
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; /* brand | nav | controls */
+  align-items: center;
+  gap: 12px;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 14px 16px;
+}
+
+/* Brand (left) */
+.brand{
+  justify-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+.logo{
+  width: 28px; height: 28px; border-radius: 8px;
+  background: linear-gradient(135deg,var(--accent),var(--accent-700));
+  box-shadow: 0 2px 8px rgba(242,79,64,.35);
+}
+
+/* Center nav links */
+nav a{
+  margin: 0 10px;
+  text-decoration: none;    /* removes underline */
+  color: inherit;           /* follows --text */
+  font-weight: 600;
+}
+nav{ justify-self: center; }
+
+/* Right-side buttons */
+.ghost,.cta{
+  border-radius: 12px; padding: 10px 14px; font-weight: 600; cursor: pointer;
+}
+.ghost{ background: transparent; border: 1px solid var(--line); }
+.ghost:focus-visible{ outline: 2px solid var(--accent-600); outline-offset: 2px; }
+.cta{ background: var(--accent); color: #fff; border: 0; box-shadow: 0 6px 16px rgba(242,79,64,.25); }
+
+/* Small screens: stack neatly */
+@media (max-width: 720px){
+  .nav{ grid-template-columns: 1fr auto; row-gap: 8px; }
+  nav{ grid-column: 1 / -1; justify-self: start; }
+}
+
   /* Hero uses the same container width as the grid */
   .hero{
     max-width: var(--maxw);
