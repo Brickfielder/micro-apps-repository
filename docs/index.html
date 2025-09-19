@@ -34,7 +34,7 @@
   .ghost{background:transparent;border:1px solid var(--line)}
   .cta{background:var(--accent);color:#fff;border:0;box-shadow:0 6px 16px rgba(242,79,64,.25)}
 
-  /* Hero (same width as page, not full-bleed) */
+  /* Hero */
   .hero{max-width:var(--maxw);margin:0 auto;padding:48px 16px 20px;display:grid;gap:16px}
   .eyebrow{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--pill);
            font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
@@ -43,13 +43,20 @@
     margin:8px 0 4px;
     font-size: clamp(32px, 6vw, 64px);
     line-height: 1.05;
-    text-wrap: balance;               /* nicer line breaks when not justifying */
+    text-wrap: balance;
   }
-  /* Fully justify the headline (including last line) */
-  .h1-just{ text-align:justify; text-justify:inter-word; hyphens:auto; }
-  .h1-just::after{ content:""; display:inline-block; width:100%; }
 
-  .sub{ color:var(--muted); max-width:80ch; font-size:1.05rem; }
+  .sub{
+    color:var(--muted);
+    max-width:80ch;
+    font-size:1.05rem;
+    line-height:1.55;
+    text-align:justify;
+    text-justify:inter-word;
+    hyphens:auto;
+    -webkit-hyphens:auto;
+    -ms-hyphens:auto;
+  }
 
   /* Sections */
   .section,.featured-wrap,.filters{max-width:var(--maxw);margin:6px auto 0;padding:4px 16px}
@@ -88,9 +95,6 @@
   html[data-theme="dark"] body{background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0px,rgba(255,255,255,.06) 1px,transparent 1px,transparent 6px)}
   html[data-theme="dark"] .badge{background:rgba(255,122,110,.18);color:#ffd0cb}
   html[data-theme="dark"] .open{color:var(--accent-600)}
-
-  /* Readability */
-  p,.desc,.lead,.sub{ text-align:justify; text-justify:inter-word; hyphens:auto; }
 </style>
 </head>
 <body>
@@ -111,7 +115,7 @@
 <main id="top" role="main">
   <section class="hero" aria-label="Intro">
     <span class="eyebrow">Open micro-apps for cognitive rehab</span>
-    <h1 class="h1-just">Practice, track, and iterate — with lightweight tools that patients actually use.</h1>
+    <h1>Practice, track, and iterate — with lightweight tools that patients actually use.</h1>
     <p class="sub">These micro-apps are prototypes in active development. They have been tested primarily on desktop browsers, and some functions may not work as expected on tablets or mobile devices. If you encounter issues, or if you’d like to suggest improvements, please get in touch — your feedback directly shapes how these tools evolve.</p>
     <div class="hero-actions" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <button class="cta" onclick="document.getElementById('apps').scrollIntoView({behavior:'smooth'})">Browse apps</button>
@@ -166,7 +170,7 @@
     </div>
     <div>
       <small>Version</small><br/>
-      <small>v1.2 · Justified hero, JSON-driven index</small>
+      <small>v1.3 · Justified disclaimer, balanced title</small>
     </div>
   </div>
 </footer>
