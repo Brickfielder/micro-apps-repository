@@ -3,8 +3,13 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Emotion Chat — Social Cognition Micro-App</title>
-<meta name="description" content="WhatsApp-style scenarios to practice emotion recognition, theory of mind, and social reasoning." />
+<span class="chip">Prototype</span>
+<h1 class="brandtitle">
+  Emotion Chat — <span id="accentWord" class="accent"></span>
+</h1>
+<p class="sub lead">
+  WhatsApp-style scenarios to practice emotion recognition, theory of mind, and social reasoning.
+</p>
 <style>
   :root{
     color-scheme: light dark;
@@ -36,6 +41,54 @@
   .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
   .card h2{font-size:18px;margin:0 0 10px}
   .pad{padding:16px}
+/* --- Screenshot-like palette/typography for header --- */
+:root{
+  --title: #111827;       /* slate-900 */
+  --brand: #3b82f6;       /* blue-500 */
+  --brand-600: #2563eb;   /* blue-600 */
+}
+
+/* keep your header sticky behavior; (re)declare for clarity */
+header{
+  position: sticky; top: 0; z-index: 5;
+  background: linear-gradient(180deg,#fff,rgba(255,255,255,.92));
+  backdrop-filter: saturate(1.1) blur(6px);
+  border-bottom: 1px solid var(--line);
+}
+
+/* small “Prototype” chip, like the screenshot */
+.chip{
+  display:inline-flex; align-items:center;
+  padding:6px 10px; border-radius:999px;
+  font-size:12px; background:#eef2ff; color:#4f46e5;
+  border:1px solid #e5e7eb; margin: 2px 0 6px 0;
+}
+
+/* big bold title with blue accent on the right-hand word */
+.brandtitle{
+  margin:0; color:var(--title);
+  font-weight:800; letter-spacing:-0.01em; line-height:1.1;
+  font-size: clamp(22px, 3.2vw, 34px);
+}
+.brandtitle .accent{ color:var(--brand); }
+
+/* subtitle tone/spacing to match screenshot */
+p.sub.lead{
+  margin:4px 0 10px;
+  color: var(--muted);
+  font-size: clamp(13px, 1.6vw, 15px);
+}
+
+/* align primary button to the same blue family */
+button.primary{ background: var(--brand); color:#fff; border:none; }
+button.primary:hover{ background: var(--brand-600); }
+
+/* dark-mode tweaks so header stays readable */
+@media (prefers-color-scheme: dark){
+  :root{ --title:#e5e7eb; }
+  header{ background: linear-gradient(180deg,#0b1220,rgba(11,18,32,.92)); }
+  .chip{ background:#1e293b; color:#93c5fd; border-color:#334155; }
+}
 
   /* Chat */
   .chat{background:#e9eef5;border-radius:var(--radius);padding:14px;height:520px;overflow:auto;border:1px solid var(--line)}
@@ -165,6 +218,7 @@
 
 <script>
 /* ========= Global master list (add new items for broader coverage) ========= */
+const accentWord = $("accentWord");
 const MASTER_PILLS = [
   "Happy","Excited","Frustrated","Irritated","Calm","Disappointed","Guilty","Sad","Defensive","Anxious",
   "Embarrassed","Angry","Relieved","Neutral","Confused","Optimistic","Proud","Distant","Supportive",
@@ -456,6 +510,7 @@ function populateScenarioList(){
 }
 function loadScenario(id){
   current = SCENARIOS.find(s=>s.id===id) || SCENARIOS[0];
+  accentWord.textContent = current.title;
   idx=0; revealed=false; startTime=0; endTime=0;
   clearInterval(timer); timer=null; clearChat(); step3.hidden=true;
   progressEl.textContent = `0 / ${current.messages.length}`;
