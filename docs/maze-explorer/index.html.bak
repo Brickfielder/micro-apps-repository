@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Maze Explorer — Anchor Latency, Metrics, Idle Timer</title>
-<style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maze Explorer — Anchor Latency, Metrics, Idle Timer</title>
+  <style>
     :root{
       --green:#2E8B57;
       --dark:#1c6640;
@@ -49,44 +49,52 @@
       .btn{ width:54px; height:54px; font-size:22px; } #coach{ width:54vw; font-size:15px; }
     }
   </style>
-<meta content="maze-explorer" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script></head>
-<body><main id="app-root">
-<h2>Maze Explorer — Start <em>bottom‑right</em>, Finish <em>top‑left</em></h2>
-<div id="rules">
-<b>Task:</b> Find your way from the <u>bottom‑right</u> start square to the <u>top‑left</u> yellow goal.<br/>
-<b>Rules:</b> Swipe or use arrow buttons to move. Every <b>10 moves</b>, tap the <span style="color:#d62828"><b>red left anchor</b></span> before continuing.
-    If the <b>coach panel</b> appears on the right, you may be moving away—<b>tap the panel to close</b> and consider backtracking.<br/>
-<b>Timing:</b> The timer counts only <i>active time</i>. If there’s no move or anchor tap for <b>30 seconds</b>, timing pauses automatically and resumes on the next action.
+</head>
+<body>
+  <h2>Maze Explorer — Start <em>bottom‑right</em>, Finish <em>top‑left</em></h2>
+
+  <div id="rules">
+    <b>Task:</b> Find your way from the <u>bottom‑right</u> start square to the <u>top‑left</u> yellow goal.<br>
+    <b>Rules:</b> Swipe or use arrow buttons to move. Every <b>10 moves</b>, tap the <span style="color:#d62828"><b>red left anchor</b></span> before continuing.
+    If the <b>coach panel</b> appears on the right, you may be moving away—<b>tap the panel to close</b> and consider backtracking.<br>
+    <b>Timing:</b> The timer counts only <i>active time</i>. If there’s no move or anchor tap for <b>30 seconds</b>, timing pauses automatically and resumes on the next action.
   </div>
-<div id="toolbar">
-<label for="difficulty">Difficulty:</label>
-<select aria-label="Select difficulty" id="difficulty">
-<option value="10">Easy (10×10)</option>
-<option value="16">Medium (16×16)</option>
-<option value="20">Hard (20×20)</option>
-</select>
-</div>
-<div class="wrap" id="wrap">
-<div id="leftAnchor" title="Tap here to re‑anchor left"></div>
-<canvas height="520" id="mazeCanvas" width="520"></canvas>
-<div id="coach" role="alert">You might be moving away from the goal on the right. <b>Tap to close</b> and try backtracking.</div>
-</div>
-<div id="anchorTip">Touch the <b>red left anchor</b> to continue.</div>
-<div id="controls">
-<button aria-label="up" class="btn" id="up">↑</button>
-<button aria-label="left" class="btn" id="left">←</button>
-<button aria-label="down" class="btn" id="down">↓</button>
-<button aria-label="right" class="btn" id="right">→</button>
-</div>
-<div id="statusBar"></div>
-<div id="logBar">
-<button id="downloadBtn">Download session log (CSV)</button>
-<span id="idleBadge">Paused — no activity</span>
-</div>
-<div id="metrics">
-    Completed mazes: <b><span id="mCompleted">0</span></b>  | 
+
+  <div id="toolbar">
+    <label for="difficulty">Difficulty:</label>
+    <select id="difficulty" aria-label="Select difficulty">
+      <option value="10">Easy (10×10)</option>
+      <option value="16">Medium (16×16)</option>
+      <option value="20">Hard (20×20)</option>
+    </select>
+  </div>
+
+  <div class="wrap" id="wrap">
+    <div id="leftAnchor" title="Tap here to re‑anchor left"></div>
+    <canvas id="mazeCanvas" width="520" height="520"></canvas>
+    <div id="coach" role="alert">You might be moving away from the goal on the right. <b>Tap to close</b> and try backtracking.</div>
+  </div>
+  <div id="anchorTip">Touch the <b>red left anchor</b> to continue.</div>
+
+  <div id="controls">
+    <button class="btn" id="up" aria-label="up">&#x2191;</button>
+    <button class="btn" id="left" aria-label="left">&#x2190;</button>
+    <button class="btn" id="down" aria-label="down">&#x2193;</button>
+    <button class="btn" id="right" aria-label="right">&#x2192;</button>
+  </div>
+
+  <div id="statusBar"></div>
+
+  <div id="logBar">
+    <button id="downloadBtn">Download session log (CSV)</button>
+    <span id="idleBadge">Paused — no activity</span>
+  </div>
+
+  <div id="metrics">
+    Completed mazes: <b><span id="mCompleted">0</span></b> &nbsp;|&nbsp;
     Active time on this device: <b><span id="mActive">00:00:00</span></b>
-</div>
+  </div>
+
 <script>
 (function(){
   // ===== Config =====
@@ -658,5 +666,5 @@
   resizeCanvas();
   logEvent('session_start', {init_size: 10});
 })();</script>
-</main></body>
+</body>
 </html>

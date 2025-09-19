@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Reminder Quest — Office Day — v1.4</title>
-<style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reminder Quest — Office Day — v1.4</title>
+  <style>
     :root{
       --bg:#f7f7fb;
       --ink:#1b1f24;
@@ -88,153 +88,162 @@
       .grid3{grid-template-columns:1fr}
     }
   </style>
-<meta content="Office_Day" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script></head>
-<body><main id="app-root">
-<header aria-label="App header">
-<div class="row">
-<span aria-hidden="true" class="tag">Prototype</span>
-<h1>Reminder Quest — <span style="color:var(--primary)">Office Day</span></h1>
-</div>
-<div class="controls">
-<button aria-label="Start a new round" id="startBtn">Start new round</button>
-<button class="secondary" id="downloadBtn" title="Download CSV log">Download CSV</button>
-<button class="ghost" id="difficultyBtn" title="Open difficulty panel">Difficulty</button>
-<button class="ghost" id="helpBtn">How to play</button>
-</div>
-</header>
-<main>
-<section aria-label="Game area" class="grid">
-<!-- LEFT COLUMN -->
-<div aria-labelledby="ongoingTitle" class="card">
-<div class="flex">
-<h2 id="ongoingTitle">Ongoing Task — Document Sorting</h2>
-<div class="row" style="gap:16px">
-<div aria-live="polite" class="timer" id="timer">03:00</div>
-<div aria-live="polite" class="timer small" id="timerElapsed">Elapsed 00:00</div>
-</div>
-</div>
-<p class="muted">Approve <strong>green</strong> documents and reject <strong>red</strong> ones.
+</head>
+<body>
+  <header aria-label="App header">
+    <div class="row">
+      <span class="tag" aria-hidden="true">Prototype</span>
+      <h1>Reminder Quest — <span style="color:var(--primary)">Office Day</span></h1>
+    </div>
+    <div class="controls">
+      <button id="startBtn" aria-label="Start a new round">Start new round</button>
+      <button id="downloadBtn" class="secondary" title="Download CSV log">Download CSV</button>
+      <button id="difficultyBtn" class="ghost" title="Open difficulty panel">Difficulty</button>
+      <button id="helpBtn" class="ghost">How to play</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="grid" aria-label="Game area">
+      <!-- LEFT COLUMN -->
+      <div class="card" aria-labelledby="ongoingTitle">
+        <div class="flex">
+          <h2 id="ongoingTitle">Ongoing Task — Document Sorting</h2>
+          <div class="row" style="gap:16px">
+            <div class="timer" id="timer" aria-live="polite">03:00</div>
+            <div class="timer small" id="timerElapsed" aria-live="polite">Elapsed 00:00</div>
+          </div>
+        </div>
+        <p class="muted">Approve <strong>green</strong> documents and reject <strong>red</strong> ones.
           This keeps you busy while you remember your <em>other</em> tasks.</p>
-<div aria-label="Incoming documents" class="doc-stream" id="docStream" role="list"></div>
-<div class="divider"></div>
-<div aria-live="polite" class="phone">
-<div class="icon" id="phoneIcon" title="Phone status">📞</div>
-<div class="muted" id="phoneStatus">Phone is quiet.</div>
-<div class="btnrow" id="phoneButtons" style="display:none">
-<button aria-label="Answer phone" class="ghost" id="answerBtn">Answer</button>
-<button aria-label="Ignore phone" class="ghost" id="ignoreBtn">Ignore</button>
-</div>
-</div>
-</div>
-<!-- RIGHT COLUMN -->
-<div aria-labelledby="pmTitle" class="card">
-<h2 id="pmTitle">Prospective Tasks</h2>
-<div aria-live="polite" class="notice" id="briefingBox" role="status">
-<strong>Briefing will appear when you start a round.</strong>
-</div>
-<div class="divider"></div>
-<div class="row">
-<button class="secondary" disabled="" id="sendReportBtn">Send report</button>
-<span class="muted">Use only when the briefing says so (time-based).</span>
-</div>
-<div class="divider"></div>
-<div aria-live="polite" class="statbar" id="statsPills"></div>
-<div class="divider"></div>
-<div aria-label="Event log" class="log" id="log" role="log"></div>
-</div>
-</section>
-</main>
-<!-- BRIEFING MODAL -->
-<div aria-labelledby="modalTitle" aria-modal="true" class="modal-backdrop" id="modalBackdrop" role="dialog">
-<div class="modal">
-<h3 id="modalTitle">Briefing</h3>
-<p class="muted">Remember these while you work:</p>
-<div class="two">
-<div>
-<h4>Time-based</h4>
-<ul id="timeTasks"></ul>
-</div>
-<div>
-<h4>Event-based</h4>
-<ul id="eventTasks"></ul>
-</div>
-</div>
-<div class="divider"></div>
-<div class="row">
-<button id="beginRoundBtn">Begin round</button>
-<button class="ghost" id="cancelRoundBtn">Cancel</button>
-</div>
-</div>
-</div>
-<!-- HELP MODAL -->
-<div aria-labelledby="helpTitle" aria-modal="true" class="modal-backdrop" id="helpBackdrop" role="dialog">
-<div class="modal">
-<h3 id="helpTitle">How to play</h3>
-<ol>
-<li><strong>Start new round</strong> to see your briefing.</li>
-<li>Keep working: approve <em>green</em> docs, reject <em>red</em> docs.</li>
-<li><strong>Prospective memory:</strong> act at the right <strong>elapsed time</strong> (e.g., “Send report at 01:30”)
+        <div class="doc-stream" id="docStream" role="list" aria-label="Incoming documents"></div>
+
+        <div class="divider"></div>
+
+        <div class="phone" aria-live="polite">
+          <div class="icon" id="phoneIcon" title="Phone status">📞</div>
+          <div id="phoneStatus" class="muted">Phone is quiet.</div>
+          <div class="btnrow" id="phoneButtons" style="display:none">
+            <button id="answerBtn" class="ghost" aria-label="Answer phone">Answer</button>
+            <button id="ignoreBtn" class="ghost" aria-label="Ignore phone">Ignore</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="card" aria-labelledby="pmTitle">
+        <h2 id="pmTitle">Prospective Tasks</h2>
+        <div id="briefingBox" class="notice" role="status" aria-live="polite">
+          <strong>Briefing will appear when you start a round.</strong>
+        </div>
+        <div class="divider"></div>
+        <div class="row">
+          <button id="sendReportBtn" class="secondary" disabled>Send report</button>
+          <span class="muted">Use only when the briefing says so (time-based).</span>
+        </div>
+        <div class="divider"></div>
+        <div class="statbar" aria-live="polite" id="statsPills"></div>
+        <div class="divider"></div>
+        <div class="log" id="log" aria-label="Event log" role="log"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- BRIEFING MODAL -->
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <h3 id="modalTitle">Briefing</h3>
+      <p class="muted">Remember these while you work:</p>
+      <div class="two">
+        <div>
+          <h4>Time-based</h4>
+          <ul id="timeTasks"></ul>
+        </div>
+        <div>
+          <h4>Event-based</h4>
+          <ul id="eventTasks"></ul>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="row">
+        <button id="beginRoundBtn">Begin round</button>
+        <button id="cancelRoundBtn" class="ghost">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HELP MODAL -->
+  <div class="modal-backdrop" id="helpBackdrop" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="modal">
+      <h3 id="helpTitle">How to play</h3>
+      <ol>
+        <li><strong>Start new round</strong> to see your briefing.</li>
+        <li>Keep working: approve <em>green</em> docs, reject <em>red</em> docs.</li>
+        <li><strong>Prospective memory:</strong> act at the right <strong>elapsed time</strong> (e.g., “Send report at 01:30”)
             or in response to the right event (Answer only when the <strong>Manager</strong> calls).</li>
-<li>Top-right = <strong>remaining</strong>; small clock = <strong>elapsed</strong>.</li>
-<li>Scoring tracks correct recalls, misses, early/late actions, and mistakes. Difficulty adapts between rounds.</li>
-</ol>
-<div class="row">
-<button id="closeHelpBtn">Close</button>
-</div>
-</div>
-</div>
-<!-- DIFFICULTY MODAL -->
-<div aria-labelledby="difficultyTitle" aria-modal="true" class="modal-backdrop" id="difficultyBackdrop" role="dialog">
-<div class="modal">
-<h3 id="difficultyTitle">Difficulty &amp; Session Settings</h3>
-<p class="help">Changes are saved to this browser and apply to the <strong>next round</strong>. You can also lock values to prevent auto-adaptation.</p>
-<div class="grid3">
-<div class="formrow">
-<label for="timeWindow">± Time window (s)</label>
-<input id="timeWindow" max="15" min="1" step="1" type="range"/>
-<output id="timeWindowOut">6</output>
-</div>
-<div class="formrow">
-<label for="docEveryMs">Doc interval (ms)</label>
-<input id="docEveryMs" max="3500" min="1200" step="100" type="range"/>
-<output id="docEveryMsOut">2500</output>
-</div>
-<div class="formrow">
-<label for="phoneChance">Phone chance (/8s)</label>
-<input id="phoneChance" max="0.5" min="0.05" step="0.01" type="range"/>
-<output id="phoneChanceOut">0.22</output>
-</div>
-<div class="formrow">
-<label for="fakeManagerRate">Fake-caller rate</label>
-<input id="fakeManagerRate" max="0.9" min="0" step="0.05" type="range"/>
-<output id="fakeManagerRateOut">0.5</output>
-</div>
-<div class="formrow">
-<label for="pmTimeTasks">Time PM tasks</label>
-<input id="pmTimeTasks" max="3" min="1" step="1" type="range"/>
-<output id="pmTimeTasksOut">1</output>
-</div>
-<div class="formrow">
-<label for="pmEventTasks">Event PM tasks</label>
-<input id="pmEventTasks" max="3" min="1" step="1" type="range"/>
-<output id="pmEventTasksOut">1</output>
-</div>
-</div>
-<div class="divider"></div>
-<div class="two">
-<div class="formrow">
-<label><input id="lockAdapt" type="checkbox"/> Lock difficulty (disable auto-adapt)</label>
-<span class="help">If checked, the app will not adjust difficulty after a round.</span>
-</div>
-<div class="row" style="justify-content:flex-end">
-<button id="saveDiffBtn">Save</button>
-<button class="ghost" id="resetDiffBtn">Reset to defaults</button>
-<button class="ghost" id="closeDiffBtn">Close</button>
-</div>
-</div>
-</div>
-</div>
-<script>
+        <li>Top-right = <strong>remaining</strong>; small clock = <strong>elapsed</strong>.</li>
+        <li>Scoring tracks correct recalls, misses, early/late actions, and mistakes. Difficulty adapts between rounds.</li>
+      </ol>
+      <div class="row">
+        <button id="closeHelpBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIFFICULTY MODAL -->
+  <div class="modal-backdrop" id="difficultyBackdrop" role="dialog" aria-modal="true" aria-labelledby="difficultyTitle">
+    <div class="modal">
+      <h3 id="difficultyTitle">Difficulty & Session Settings</h3>
+      <p class="help">Changes are saved to this browser and apply to the <strong>next round</strong>. You can also lock values to prevent auto-adaptation.</p>
+      <div class="grid3">
+        <div class="formrow">
+          <label for="timeWindow">± Time window (s)</label>
+          <input type="range" id="timeWindow" min="1" max="15" step="1">
+          <output id="timeWindowOut">6</output>
+        </div>
+        <div class="formrow">
+          <label for="docEveryMs">Doc interval (ms)</label>
+          <input type="range" id="docEveryMs" min="1200" max="3500" step="100">
+          <output id="docEveryMsOut">2500</output>
+        </div>
+        <div class="formrow">
+          <label for="phoneChance">Phone chance (/8s)</label>
+          <input type="range" id="phoneChance" min="0.05" max="0.5" step="0.01">
+          <output id="phoneChanceOut">0.22</output>
+        </div>
+        <div class="formrow">
+          <label for="fakeManagerRate">Fake-caller rate</label>
+          <input type="range" id="fakeManagerRate" min="0" max="0.9" step="0.05">
+          <output id="fakeManagerRateOut">0.5</output>
+        </div>
+        <div class="formrow">
+          <label for="pmTimeTasks">Time PM tasks</label>
+          <input type="range" id="pmTimeTasks" min="1" max="3" step="1">
+          <output id="pmTimeTasksOut">1</output>
+        </div>
+        <div class="formrow">
+          <label for="pmEventTasks">Event PM tasks</label>
+          <input type="range" id="pmEventTasks" min="1" max="3" step="1">
+          <output id="pmEventTasksOut">1</output>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="two">
+        <div class="formrow">
+          <label><input type="checkbox" id="lockAdapt"> Lock difficulty (disable auto-adapt)</label>
+          <span class="help">If checked, the app will not adjust difficulty after a round.</span>
+        </div>
+        <div class="row" style="justify-content:flex-end">
+          <button id="saveDiffBtn">Save</button>
+          <button id="resetDiffBtn" class="ghost">Reset to defaults</button>
+          <button id="closeDiffBtn" class="ghost">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
     // ====== Defaults & Load ======
     const ROUND_SECONDS_DEFAULT = 180; // fixed 3 minutes
     const DEFAULTS = {
@@ -646,5 +655,5 @@
     setStatsPills();
     $brief.innerHTML = `<strong>Welcome.</strong> Click <em>Start new round</em> to receive your briefing. Use the <strong>elapsed</strong> clock to time actions.`;
   </script>
-</main></body>
+</body>
 </html>

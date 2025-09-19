@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Errands Memory — Rehab Game</title>
-<style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Errands Memory — Rehab Game</title>
+  <style>
     :root{
       --bg:#f8fafc;--card:#ffffff;--text:#0f172a;--muted:#64748b;--accent:#2563eb;--good:#10b981;--bad:#ef4444;--shadow:0 10px 30px rgba(2,6,23,.08);--radius:18px
     }
@@ -49,98 +49,105 @@
     .countdown-label{font-size:14px;color:#d1d5db;margin-bottom:6px;letter-spacing:.02em}
     .countdown-number{font-size:clamp(38px,6vmin,72px);font-weight:900;letter-spacing:.02em}
   </style>
-<meta content="Errands-visual-memory" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script></head>
-<body><main id="app-root">
-<header>
-<h1>Errands Memory — Rehab Game</h1>
-<p class="lead">Watch a sequence of shops light up, then click them in the same order (or in reverse). Simple, playful, and closer to real life than abstract blocks.</p>
-</header>
-<main class="app">
-<section class="card controls">
-<h2 style="margin:0 0 12px">Settings</h2>
-<div class="row">
-<div>
-<label>Mode</label>
-<select id="mode">
-<option value="forward">Forward (standard)</option>
-<option value="backward">Backward (reverse order)</option>
-</select>
-</div>
-<div>
-<label>Start sequence length</label>
-<input id="startLen" max="8" min="2" type="number" value="3"/>
-</div>
-</div>
-<div class="row">
-<div>
-<label>Max sequence length</label>
-<input id="maxLen" max="12" min="3" type="number" value="8"/>
-</div>
-<div>
-<label>Shops shown</label>
-<select id="shopCount">
-<option selected="" value="8">8</option>
-<option value="12">12</option>
-<option value="16">16</option>
-</select>
-</div>
-</div>
-<div class="row">
-<div>
-<label>Stimulus ON (ms)</label>
-<input id="onMs" max="2000" min="200" step="50" type="number" value="700"/>
-</div>
-<div>
-<label>Gap (ms)</label>
-<input id="gapMs" max="1500" min="50" step="50" type="number" value="350"/>
-</div>
-</div>
-<div class="row">
-<div>
-<label>Trials per length</label>
-<input id="trialsPerLen" max="5" min="1" type="number" value="1"/>
-</div>
-<div>
-<label>Fail rule</label>
-<select id="failRule">
-<option value="2">Stop after 2 fails at same length</option>
-<option value="1">Stop after 1 fail at same length</option>
-<option value="3">Stop after 3 fails at same length</option>
-</select>
-</div>
-</div>
-<div class="buttons">
-<button id="startBtn">Start session</button>
-<button class="secondary" disabled="" id="pauseBtn">Pause</button>
-<button class="ghost" id="resetBtn">Reset</button>
-<button class="secondary" disabled="" id="downloadBtn">Download CSV</button>
-<button class="ghost" id="demoBtn">Quick demo</button>
-</div>
-<div class="status" id="status">
-<span class="badge">Length: <strong id="lenBadge" style="margin-left:6px">—</strong></span>
-<span class="badge" id="trialBadge">Trial: —</span>
-<span class="badge success" id="bestSpan">Best span: —</span>
-</div>
-<h3 style="margin:16px 0 8px">Session log</h3>
-<div aria-live="polite" class="log" id="log"></div>
-</section>
-<section class="card">
-<h2 style="margin:0 0 8px">Task area</h2>
-<p style="margin-top:0;color:var(--muted)">Focus on the shops. They will light up in order. Watch carefully, then click them in the same order (or in reverse if Backward mode is selected).</p>
-<div class="street-wrap">
-<div aria-label="Street of shops" class="street" id="street" role="application"></div>
-<!-- Non-blocking countdown overlay inside the task area -->
-<div aria-atomic="true" aria-live="assertive" class="countdown-overlay" id="countdown">
-<div class="countdown-bubble" role="status">
-<div class="countdown-label">Get ready…</div>
-<div class="countdown-number" id="countdownNum">2</div>
-</div>
-</div>
-<span class="sr-only" id="ariaStatus"></span>
-</div>
-</section>
-</main>
-<script>
+</head>
+<body>
+  <header>
+    <h1>Errands Memory — Rehab Game</h1>
+    <p class="lead">Watch a sequence of shops light up, then click them in the same order (or in reverse). Simple, playful, and closer to real life than abstract blocks.</p>
+  </header>
+
+  <main class="app">
+    <section class="card controls">
+      <h2 style="margin:0 0 12px">Settings</h2>
+      <div class="row">
+        <div>
+          <label>Mode</label>
+          <select id="mode">
+            <option value="forward">Forward (standard)</option>
+            <option value="backward">Backward (reverse order)</option>
+          </select>
+        </div>
+        <div>
+          <label>Start sequence length</label>
+          <input id="startLen" type="number" min="2" max="8" value="3" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Max sequence length</label>
+          <input id="maxLen" type="number" min="3" max="12" value="8" />
+        </div>
+        <div>
+          <label>Shops shown</label>
+          <select id="shopCount">
+            <option value="8" selected>8</option>
+            <option value="12">12</option>
+            <option value="16">16</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Stimulus ON (ms)</label>
+          <input id="onMs" type="number" min="200" max="2000" step="50" value="700" />
+        </div>
+        <div>
+          <label>Gap (ms)</label>
+          <input id="gapMs" type="number" min="50" max="1500" step="50" value="350" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Trials per length</label>
+          <input id="trialsPerLen" type="number" min="1" max="5" value="1" />
+        </div>
+        <div>
+          <label>Fail rule</label>
+          <select id="failRule">
+            <option value="2">Stop after 2 fails at same length</option>
+            <option value="1">Stop after 1 fail at same length</option>
+            <option value="3">Stop after 3 fails at same length</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button id="startBtn">Start session</button>
+        <button id="pauseBtn" class="secondary" disabled>Pause</button>
+        <button id="resetBtn" class="ghost">Reset</button>
+        <button id="downloadBtn" class="secondary" disabled>Download CSV</button>
+        <button id="demoBtn" class="ghost">Quick demo</button>
+      </div>
+
+      <div class="status" id="status">
+        <span class="badge">Length: <strong id="lenBadge" style="margin-left:6px">—</strong></span>
+        <span class="badge" id="trialBadge">Trial: —</span>
+        <span class="badge success" id="bestSpan">Best span: —</span>
+      </div>
+
+      <h3 style="margin:16px 0 8px">Session log</h3>
+      <div class="log" id="log" aria-live="polite"></div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin:0 0 8px">Task area</h2>
+      <p style="margin-top:0;color:var(--muted)">Focus on the shops. They will light up in order. Watch carefully, then click them in the same order (or in reverse if Backward mode is selected).</p>
+
+      <div class="street-wrap">
+        <div id="street" class="street" role="application" aria-label="Street of shops"></div>
+        <!-- Non-blocking countdown overlay inside the task area -->
+        <div id="countdown" class="countdown-overlay" aria-live="assertive" aria-atomic="true">
+          <div class="countdown-bubble" role="status">
+            <div class="countdown-label">Get ready…</div>
+            <div class="countdown-number" id="countdownNum">2</div>
+          </div>
+        </div>
+        <span class="sr-only" id="ariaStatus"></span>
+      </div>
+    </section>
+  </main>
+
+  <script>
     // Master list (up to 16 shops) — we slice from this based on the setting
     const ALL_SHOPS = [
       { key:'bakery', label:'Bakery', emoji:'🥖' },
@@ -365,5 +372,5 @@
 
     initStreet(); updateBadges(); log('Ready. Choose settings and press Start session.');
   </script>
-</main></body>
+</body>
 </html>

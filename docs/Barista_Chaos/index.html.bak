@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Barista Chaos — Micro Rehab App</title>
-<style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Barista Chaos — Micro Rehab App</title>
+  <style>
     :root{
       --bg:#faf7f2;
       --card:#ffffff;
@@ -61,70 +61,74 @@
     .modal .actions{display:flex; gap:8px; justify-content:flex-end}
     .kudos{color:var(--success); font-weight:700}
   </style>
-<meta content="Barista_Chaos" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script></head>
-<body><main id="app-root">
-<header>
-<h1><span class="cup">☕</span><span>Barista Chaos</span></h1>
-<div class="instructions">
-<strong>How it works</strong><br/>
+</head>
+<body>
+  <header>
+    <h1><span class="cup">☕</span><span>Barista Chaos</span></h1>
+    <div class="instructions">
+      <strong>How it works</strong><br>
       Build each order by adding items from the <em>Options</em> on the right into your <em>Preparation Tray</em>, then press <strong>Serve</strong>.
       <ul style="margin:8px 0 0 18px; padding:0">
-<li>Match the ticket chips (e.g., size, coffee, milk, sweetener, temp).</li>
-<li><strong>Rule 1 — Decaf bell:</strong> if the ticket shows <em>Decaf</em>, you must click <strong>🔔 Ring Bell</strong> before serving. <em>Ringing the bell when there is no decaf is neutral (not an error).</em></li>
-<li><strong>Rule 2 — Extra-hot sleeve:</strong> if the ticket shows <em>Extra hot</em>, you must click <strong>🧻 Add Sleeve</strong> before serving.</li>
-<li><strong>Any-of requirement:</strong> when the ticket says <em>add honey or soy</em>, either one satisfies the ticket; choosing both is allowed and not penalized.</li>
-<li>Incidents happen often: sometimes sugar becomes <em>Honey</em>, or milk must be <em>Soy</em>. The ticket will update accordingly.</li>
-</ul>
-</div>
-<div class="controls">
-<div aria-label="Countdown" class="seg" role="group">
-<button class="active" data-timer="90">90s</button>
-<button data-timer="60">60s</button>
-<button data-timer="45">45s</button>
-<button data-timer="30">30s</button>
-<button data-timer="15">15s</button>
-</div>
-<button class="btn primary" id="newOrderBtn">Start new order</button>
-<button class="btn" disabled="" id="serveBtn">Serve</button>
-<button class="btn" id="ringBtn" title="Ring for decaf">🔔 Ring Bell</button>
-<button class="btn" id="sleeveBtn" title="Add sleeve for extra-hot">🧻 Add Sleeve</button>
-<button class="btn" id="downloadBtn" title="Download CSV log">⬇️ Download CSV</button>
-</div>
-</header>
-<main>
-<div class="layout">
-<section class="card order">
-<div class="statusbar">
-<div class="timer">Order <span id="orderNum">—</span> · ⏳ <span id="countdown">--:--</span></div>
-<div class="sign none" id="sign"><span id="signText">No incident</span></div>
-</div>
-<h2 style="margin:10px 0 8px;font-size:18px">Ticket</h2>
-<div class="ticket" id="ticket"></div>
-<h3 style="margin:16px 0 8px;font-size:16px">Preparation tray</h3>
-<div class="tray" id="tray"></div>
-<p id="feedback" style="margin:10px 0 0; color:var(--muted)">Add items to match the ticket, then press <strong>Serve</strong>.</p>
-</section>
-<aside class="card">
-<h2 style="margin:0 0 8px;font-size:18px">Options</h2>
-<div class="grid" id="options"></div>
-</aside>
-</div>
-</main>
-<dialog id="incidentDlg">
-<div class="modal">
-<h3 id="incidentTitle">Incident</h3>
-<p id="incidentMsg">—</p>
-<div class="actions"><button class="btn" id="incidentClose">OK</button></div>
-</div>
-</dialog>
-<dialog id="resultDlg">
-<div class="modal">
-<h3 id="resultTitle">Result</h3>
-<p id="resultMsg">—</p>
-<div class="actions"><button class="btn success" id="nextOrderBtn">OK</button></div>
-</div>
-</dialog>
-<script>
+        <li>Match the ticket chips (e.g., size, coffee, milk, sweetener, temp).</li>
+        <li><strong>Rule 1 — Decaf bell:</strong> if the ticket shows <em>Decaf</em>, you must click <strong>🔔 Ring Bell</strong> before serving. <em>Ringing the bell when there is no decaf is neutral (not an error).</em></li>
+        <li><strong>Rule 2 — Extra-hot sleeve:</strong> if the ticket shows <em>Extra hot</em>, you must click <strong>🧻 Add Sleeve</strong> before serving.</li>
+        <li><strong>Any-of requirement:</strong> when the ticket says <em>add honey or soy</em>, either one satisfies the ticket; choosing both is allowed and not penalized.</li>
+        <li>Incidents happen often: sometimes sugar becomes <em>Honey</em>, or milk must be <em>Soy</em>. The ticket will update accordingly.</li>
+      </ul>
+    </div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Countdown">
+        <button class="active" data-timer="90">90s</button>
+        <button data-timer="60">60s</button>
+        <button data-timer="45">45s</button>
+        <button data-timer="30">30s</button>
+        <button data-timer="15">15s</button>
+      </div>
+      <button class="btn primary" id="newOrderBtn">Start new order</button>
+      <button class="btn" id="serveBtn" disabled>Serve</button>
+      <button class="btn" id="ringBtn" title="Ring for decaf">🔔 Ring Bell</button>
+      <button class="btn" id="sleeveBtn" title="Add sleeve for extra-hot">🧻 Add Sleeve</button>
+      <button class="btn" id="downloadBtn" title="Download CSV log">⬇️ Download CSV</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="layout">
+      <section class="card order">
+        <div class="statusbar">
+          <div class="timer">Order <span id="orderNum">—</span> · ⏳ <span id="countdown">--:--</span></div>
+          <div class="sign none" id="sign"><span id="signText">No incident</span></div>
+        </div>
+        <h2 style="margin:10px 0 8px;font-size:18px">Ticket</h2>
+        <div class="ticket" id="ticket"></div>
+        <h3 style="margin:16px 0 8px;font-size:16px">Preparation tray</h3>
+        <div class="tray" id="tray"></div>
+        <p id="feedback" style="margin:10px 0 0; color:var(--muted)">Add items to match the ticket, then press <strong>Serve</strong>.</p>
+      </section>
+
+      <aside class="card">
+        <h2 style="margin:0 0 8px;font-size:18px">Options</h2>
+        <div class="grid" id="options"></div>
+      </aside>
+    </div>
+  </main>
+
+  <dialog id="incidentDlg">
+    <div class="modal">
+      <h3 id="incidentTitle">Incident</h3>
+      <p id="incidentMsg">—</p>
+      <div class="actions"><button class="btn" id="incidentClose">OK</button></div>
+    </div>
+  </dialog>
+  <dialog id="resultDlg">
+    <div class="modal">
+      <h3 id="resultTitle">Result</h3>
+      <p id="resultMsg">—</p>
+      <div class="actions"><button class="btn success" id="nextOrderBtn">OK</button></div>
+    </div>
+  </dialog>
+
+  <script>
     // ===== State: timer + logging =====
     const logs = []; // per-order records
     let timerDurationSec = 90; // default, set by seg buttons
@@ -443,5 +447,5 @@
     }
     init();
   </script>
-</main></body>
+</body>
 </html>

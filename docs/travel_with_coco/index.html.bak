@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>Travel with Coco — Milestones v0.3</title>
-<style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Travel with Coco — Milestones v0.3</title>
+  <style>
     :root{
       --bg:#f6f7fb; --card:#ffffff; --text:#111827; --muted:#6b7280;
       --brand:#2563eb; --brand-2:#7c3aed; --ok:#16a34a; --warn:#b45309; --danger:#dc2626;
@@ -51,22 +51,24 @@
 
     @media (max-width:680px){ .dash{grid-template-columns:repeat(2,1fr)} }
   </style>
-<meta content="travel_with_coco" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script></head>
-<body><main id="app-root">
-<header>
-<div class="wrap">
-<h1>🌍 Travel with Coco <span class="muted">— Prototype v0.3</span></h1>
-<p class="sub">Plan a journey with your cheeky companion. Reach your destination city before you run out of resources.</p>
-<div aria-live="polite" class="dash">
-<div class="tile"><div class="label">💰 Money</div><div class="value" id="moneyVal">—</div></div>
-<div class="tile"><div class="label">⏳ Time left (days)</div><div class="value" id="timeVal">—</div></div>
-<div class="tile"><div class="label">🔋 Energy</div><div class="value" id="energyVal">—</div></div>
-<div class="tile"><div class="label">🐦 Coco’s Mood</div><div class="value" id="moodVal">—</div></div>
-</div>
-</div>
-</header>
-<main aria-live="polite" class="wrap" id="app"></main>
-<script>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>🌍 Travel with Coco <span class="muted">— Prototype v0.3</span></h1>
+      <p class="sub">Plan a journey with your cheeky companion. Reach your destination city before you run out of resources.</p>
+      <div class="dash" aria-live="polite">
+        <div class="tile"><div class="label">💰 Money</div><div id="moneyVal" class="value">—</div></div>
+        <div class="tile"><div class="label">⏳ Time left (days)</div><div id="timeVal" class="value">—</div></div>
+        <div class="tile"><div class="label">🔋 Energy</div><div id="energyVal" class="value">—</div></div>
+        <div class="tile"><div class="label">🐦 Coco’s Mood</div><div id="moodVal" class="value">—</div></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap" id="app" aria-live="polite"></main>
+
+  <script>
     // ----------------------
     // Game State v0.3 — Presets + CSV + Sleek UI
     // ----------------------
@@ -453,5 +455,5 @@
     updateDash();
     screenStart();
   </script>
-</main></body>
+</body>
 </html>

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>TaskFlow — Plan · Check · Feedback (Tap &amp; Drag)</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TaskFlow — Plan · Check · Feedback (Tap & Drag)</title>
 <style>
 :root{
   --bg:#f7f9fc; 
@@ -106,75 +106,83 @@ footer{ color:#666; font-size:12px; margin:12px 0 30px }
 .toolbtn{ border:1px solid #c2cce7; background:#fff; border-radius:8px; padding:2px 8px; font-size:13px; }
 .modeChip{ font-size:12px; padding:4px 8px; border-radius:999px; background:#eef2fa; border:1px solid #c2cce7 }
 </style>
-<meta content="Taskflow" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script></head>
-<body><main id="app-root">
+</head>
+<body>
 <header>
-<h1>TaskFlow — Plan · Check · Feedback</h1>
-<div class="sub">Mobile = tap to move &amp; reorder; Desktop = drag-and-drop. The left list locks when empty; review in the middle, then Confirm for feedback.</div>
+  <h1>TaskFlow — Plan · Check · Feedback</h1>
+  <div class="sub">Mobile = tap to move & reorder; Desktop = drag-and-drop. The left list locks when empty; review in the middle, then Confirm for feedback.</div>
 </header>
 <main>
-<div class="controls">
-<label>Scenario: 
+  <div class="controls">
+    <label>Scenario: 
       <select id="scenarioSelect">
-<option value="clinic">🏥 Clinic Day Planner</option>
-<option value="meal">🍝 Simple Meal + Child Pickup</option>
-</select>
-</label>
-<label>Difficulty:
+        <option value="clinic">🏥 Clinic Day Planner</option>
+        <option value="meal">🍝 Simple Meal + Child Pickup</option>
+      </select>
+    </label>
+    <label>Difficulty:
       <select id="difficultySelect">
-<option value="easy">Easy (6 steps)</option>
-<option value="medium">Medium</option>
-</select>
-</label>
-<button class="primary" id="startBtn">Start New Trial ▶</button>
-<button id="resetBtn">Reset</button>
-<button class="ghost" id="downloadBtn">Download CSV</button>
-<span class="sub" id="status"></span>
-<span aria-live="polite" class="modeChip" id="modeChip"></span>
-</div>
-<!-- Briefing panel -->
-<section aria-label="Scenario briefing" class="panel" id="briefPanel">
-<div class="brief-title" id="briefTitle">Scenario:</div>
-<div class="brief-body" id="briefBody"></div>
-</section>
-<div class="grid" id="sections">
-<!-- 1) PLAN (source-only) -->
-<section aria-label="Planning board" class="panel" id="planPanel">
-<h2>1) Plan (choose your steps &amp; order) 🧠</h2>
-<div class="hint">Move each item into the middle list in the order you think is correct. On mobile, tap items. On desktop, drag using the ⋮ handle.</div>
-<div aria-live="polite" class="list" id="planList"></div>
-<div class="soft" style="margin-top:6px">Tip: you can reorder later in the middle list before confirming</div>
-</section>
-<!-- 2) CHECK (review & adjust) -->
-<section aria-label="Check board" class="panel" id="checkPanel">
-<h2>2) Check &amp; adjust 🔍</h2>
-<div class="hint">When the left list empties, it will grey out. Reorder here until you’re happy, then Confirm.</div>
-<div aria-live="polite" class="list" id="checkList"></div>
-<div style="display:flex; gap:10px; margin-top:10px">
-<button class="primary" disabled="" id="confirmBtn">Confirm Plan ✓</button>
-</div>
-</section>
-<!-- 3) FEEDBACK -->
-<section aria-label="Feedback board" class="panel" id="feedbackPanel">
-<h2>3) Feedback — Alignment &amp; Reflection 🧾</h2>
-<div class="split">
-<div>
-<div class="hint"><strong>Suggested sequence</strong></div>
-<div class="list" id="idealList"></div>
-</div>
-<div>
-<div class="hint">Your sequence</div>
-<div class="list" id="userList"></div>
-</div>
-</div>
-<div id="summary" style="margin-top:10px; font-weight:600"></div>
-<div class="reflections" id="reflections" style="margin-top:6px"></div>
-</section>
-</div>
-<footer>
+        <option value="easy">Easy (6 steps)</option>
+        <option value="medium">Medium</option>
+      </select>
+    </label>
+    <button id="startBtn" class="primary">Start New Trial ▶</button>
+    <button id="resetBtn">Reset</button>
+    <button id="downloadBtn" class="ghost">Download CSV</button>
+    <span id="status" class="sub"></span>
+    <span id="modeChip" class="modeChip" aria-live="polite"></span>
+  </div>
+
+  <!-- Briefing panel -->
+  <section class="panel" id="briefPanel" aria-label="Scenario briefing">
+    <div id="briefTitle" class="brief-title">Scenario:</div>
+    <div id="briefBody" class="brief-body"></div>
+  </section>
+
+  <div class="grid" id="sections">
+
+    <!-- 1) PLAN (source-only) -->
+    <section class="panel" id="planPanel" aria-label="Planning board">
+      <h2>1) Plan (choose your steps & order) 🧠</h2>
+      <div class="hint">Move each item into the middle list in the order you think is correct. On mobile, tap items. On desktop, drag using the ⋮ handle.</div>
+      <div id="planList" class="list" aria-live="polite"></div>
+      <div class="soft" style="margin-top:6px">Tip: you can reorder later in the middle list before confirming</div>
+    </section>
+
+    <!-- 2) CHECK (review & adjust) -->
+    <section class="panel" id="checkPanel" aria-label="Check board">
+      <h2>2) Check & adjust 🔍</h2>
+      <div class="hint">When the left list empties, it will grey out. Reorder here until you’re happy, then Confirm.</div>
+      <div id="checkList" class="list" aria-live="polite"></div>
+      <div style="display:flex; gap:10px; margin-top:10px">
+        <button id="confirmBtn" class="primary" disabled>Confirm Plan ✓</button>
+      </div>
+    </section>
+
+    <!-- 3) FEEDBACK -->
+    <section class="panel" id="feedbackPanel" aria-label="Feedback board">
+      <h2>3) Feedback — Alignment & Reflection 🧾</h2>
+      <div class="split">
+        <div>
+          <div class="hint"><strong>Suggested sequence</strong></div>
+          <div id="idealList" class="list"></div>
+        </div>
+        <div>
+          <div class="hint">Your sequence</div>
+          <div id="userList" class="list"></div>
+        </div>
+      </div>
+      <div id="summary" style="margin-top:10px; font-weight:600"></div>
+      <div id="reflections" class="reflections" style="margin-top:6px"></div>
+    </section>
+
+  </div>
+
+  <footer>
     Prototype for research/demonstration only — not a medical device. No data leaves your browser. ©
   </footer>
 </main>
+
 <script>
 /* ------------------ Scenario Briefings ------------------ */
 const BRIEFINGS = {
@@ -634,5 +642,5 @@ function init(){
 }
 document.addEventListener('DOMContentLoaded', init);
 </script>
-</main></body>
+</body>
 </html>

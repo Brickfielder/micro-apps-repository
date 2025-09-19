@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Tower Control — Executive Function Trainer</title>
-<meta content="Manage changing protocols and prioritise actions under pressure to train working memory, cognitive flexibility, and inhibition." name="description"/>
+<meta name="description" content="Manage changing protocols and prioritise actions under pressure to train working memory, cognitive flexibility, and inhibition." />
 <style>
   /* ===== Micro Apps brand tokens (light first) ===== */
   :root{
@@ -218,107 +218,118 @@
   /* ===== Accessibility helpers ===== */
   .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0}
 </style>
-<meta content="Tower_control" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script></head>
-<body><main id="app-root">
-<div class="container">
-<header>
-<div class="wrap hero" role="banner">
-<div class="title">
-<h1 aria-label="Tower Control">Tower Control</h1>
-<p class="subtitle">Executive Function Trainer • Micro Rehab Apps</p>
-<div aria-hidden="true" class="badges">
-<span class="pill">🧠 Working Memory</span>
-<span class="pill">🔁 Flexibility</span>
-<span class="pill">🛑 Inhibition</span>
-</div>
-</div>
-<div aria-label="Session controls" class="toolbar">
-<button aria-controls="main" class="btn primary" id="startBtn">Start mission</button>
-<button class="btn ghost" disabled="" id="pauseBtn">Pause</button>
-<button aria-label="Trigger emergency" class="btn danger" disabled="" id="emergencyBtn">🚨 Emergency</button>
-<button aria-label="Export CSV" class="btn" id="downloadBtn">📊 Export data</button>
-</div>
-</div>
-</header>
-<main id="main" tabindex="-1">
-<div class="main-wrap">
-<div class="grid">
-<!-- LEFT: Instructions / Protocols / Queue -->
-<section aria-labelledby="instTitle" class="card pad">
-<h2 class="section-title" id="instTitle">Mission briefing</h2>
-<div class="instructions">
-<strong>How it works</strong><br/>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="wrap hero" role="banner">
+        <div class="title">
+          <h1 aria-label="Tower Control">Tower Control</h1>
+          <p class="subtitle">Executive Function Trainer • Micro Rehab Apps</p>
+          <div class="badges" aria-hidden="true">
+            <span class="pill">🧠 Working Memory</span>
+            <span class="pill">🔁 Flexibility</span>
+            <span class="pill">🛑 Inhibition</span>
+          </div>
+        </div>
+        <div class="toolbar" aria-label="Session controls">
+          <button class="btn primary" id="startBtn" aria-controls="main">Start mission</button>
+          <button class="btn ghost" id="pauseBtn" disabled>Pause</button>
+          <button class="btn danger" id="emergencyBtn" disabled aria-label="Trigger emergency">🚨 Emergency</button>
+          <button class="btn" id="downloadBtn" aria-label="Export CSV">📊 Export data</button>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" tabindex="-1">
+      <div class="main-wrap">
+        <div class="grid">
+          <!-- LEFT: Instructions / Protocols / Queue -->
+          <section class="card pad" aria-labelledby="instTitle">
+            <h2 class="section-title" id="instTitle">Mission briefing</h2>
+            <div class="instructions">
+              <strong>How it works</strong><br/>
               Select aircraft on the radar, then apply the correct action based on the active protocol(s).
               Prioritise emergencies and adapt when rules change.
               <ul>
-<li>Click an aircraft to select</li>
-<li>Use the action buttons to Clear / Land / Hold / Redirect</li>
-<li>Watch the <em>Active Protocols</em> below</li>
-</ul>
-</div>
-<h3 class="section-title" style="margin-top:14px">Active protocols</h3>
-<div class="protocols" id="protocols"></div>
-<h3 class="section-title" style="margin-top:12px">Task queue</h3>
-<div id="taskQueue"></div>
-</section>
-<!-- CENTER: Radar -->
-<section aria-labelledby="radarTitle" class="card pad radar-zone">
-<h2 class="sr-only" id="radarTitle">Radar</h2>
-<div class="radar-shell">
-<div aria-hidden="true" class="radar-screen"></div>
-<div aria-hidden="true" class="radar-grid"></div>
-<div aria-label="Aircraft positions" id="aircraftContainer"></div>
-</div>
-</section>
-<!-- RIGHT: Stats / List / Actions -->
-<aside aria-labelledby="statusTitle" class="card pad">
-<h2 class="section-title" id="statusTitle">Status</h2>
-<div aria-label="Session stats" class="stats" role="group">
-<div class="stat">
-<div>Success Rate</div>
-<div class="big" id="successRate">---%</div>
-</div>
-<div class="stat">
-<div>Completed</div>
-<div class="big" id="completed">0</div>
-</div>
-<div class="stat">
-<div>Working Mem</div>
-<div class="big" id="memoryLoad">0/4</div>
-</div>
-</div>
-<h3 class="section-title">Aircraft</h3>
-<div aria-live="polite" id="aircraftList"></div>
-<div aria-label="Aircraft actions" class="actions" role="group">
-<button class="btn" disabled="" id="clearBtn">Clear Route</button>
-<button class="btn" disabled="" id="landBtn">Land</button>
-<button class="btn" disabled="" id="holdBtn">Hold Pattern</button>
-<button class="btn" disabled="" id="redirectBtn">Redirect</button>
-</div>
-<div style="margin-top:14px;">
-<h4 style="margin:0 0 6px 0">Selected: <span id="selectedInfo">None</span></h4>
-<div id="selectedDetails" style="font-size:13px;color:var(--muted)">Click an aircraft to select</div>
-</div>
-</aside>
-</div>
-</div>
-</main>
-<footer>
-<div class="footer-inner">
-<span>Executive Function Training</span>
-<span aria-hidden="true">•</span>
-<span>Working Memory • Cognitive Flexibility • Inhibitory Control</span>
-</div>
-</footer>
-</div>
-<!-- Modal -->
-<div aria-labelledby="resultTitle" aria-modal="true" class="modal" id="resultModal" role="dialog">
-<div class="modal-content">
-<h3 id="resultTitle">Mission Complete</h3>
-<p id="resultMessage"></p>
-<button class="btn primary" id="nextLevelBtn">Continue</button>
-</div>
-</div>
+                <li>Click an aircraft to select</li>
+                <li>Use the action buttons to Clear / Land / Hold / Redirect</li>
+                <li>Watch the <em>Active Protocols</em> below</li>
+              </ul>
+            </div>
+
+            <h3 class="section-title" style="margin-top:14px">Active protocols</h3>
+            <div id="protocols" class="protocols"></div>
+
+            <h3 class="section-title" style="margin-top:12px">Task queue</h3>
+            <div id="taskQueue"></div>
+          </section>
+
+          <!-- CENTER: Radar -->
+          <section class="card pad radar-zone" aria-labelledby="radarTitle">
+            <h2 class="sr-only" id="radarTitle">Radar</h2>
+            <div class="radar-shell">
+              <div class="radar-screen" aria-hidden="true"></div>
+              <div class="radar-grid" aria-hidden="true"></div>
+              <div id="aircraftContainer" aria-label="Aircraft positions"></div>
+            </div>
+          </section>
+
+          <!-- RIGHT: Stats / List / Actions -->
+          <aside class="card pad" aria-labelledby="statusTitle">
+            <h2 class="section-title" id="statusTitle">Status</h2>
+            <div class="stats" role="group" aria-label="Session stats">
+              <div class="stat">
+                <div>Success Rate</div>
+                <div id="successRate" class="big">---%</div>
+              </div>
+              <div class="stat">
+                <div>Completed</div>
+                <div id="completed" class="big">0</div>
+              </div>
+              <div class="stat">
+                <div>Working Mem</div>
+                <div id="memoryLoad" class="big">0/4</div>
+              </div>
+            </div>
+
+            <h3 class="section-title">Aircraft</h3>
+            <div id="aircraftList" aria-live="polite"></div>
+
+            <div class="actions" role="group" aria-label="Aircraft actions">
+              <button class="btn" id="clearBtn" disabled>Clear Route</button>
+              <button class="btn" id="landBtn" disabled>Land</button>
+              <button class="btn" id="holdBtn" disabled>Hold Pattern</button>
+              <button class="btn" id="redirectBtn" disabled>Redirect</button>
+            </div>
+
+            <div style="margin-top:14px;">
+              <h4 style="margin:0 0 6px 0">Selected: <span id="selectedInfo">None</span></h4>
+              <div id="selectedDetails" style="font-size:13px;color:var(--muted)">Click an aircraft to select</div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="footer-inner">
+        <span>Executive Function Training</span>
+        <span aria-hidden="true">•</span>
+        <span>Working Memory • Cognitive Flexibility • Inhibitory Control</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="resultModal" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <div class="modal-content">
+      <h3 id="resultTitle">Mission Complete</h3>
+      <p id="resultMessage"></p>
+      <button class="btn primary" id="nextLevelBtn">Continue</button>
+    </div>
+  </div>
+
 <script>
 /* ===== Game state (kept as in your original) ===== */
 let gameState = {
@@ -724,5 +735,5 @@ elements.nextLevelBtn.addEventListener('click', ()=>{
 /* Kick off */
 initGame();
 </script>
-</main></body>
+</body>
 </html>

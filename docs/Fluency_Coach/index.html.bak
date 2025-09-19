@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Fluency Coach — Strategy-Led Verbal Fluency</title>
 <style>
   :root{
@@ -49,96 +49,108 @@
   .grp{background:#f9fafb;border:1px dashed #e5e7eb;border-radius:12px;padding:12px}
   .grp h4{margin:0 0 6px}
 </style>
-<meta content="Fluency_Coach" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script></head>
-<body><main id="app-root">
+</head>
+<body>
 <header>
-<h1>Fluency Coach</h1>
-<div class="k">Strategy-led verbal fluency with voice input, repetition detection, expanded category checking, and end-of-session grouping.</div>
+  <h1>Fluency Coach</h1>
+  <div class="k">Strategy-led verbal fluency with voice input, repetition detection, expanded category checking, and end-of-session grouping.</div>
 </header>
+
 <div class="wrap">
-<div class="row cols-3">
-<div class="card">
-<h3>1) Setup</h3>
-<div class="flex">
-<label>Category
+  <div class="row cols-3">
+    <div class="card">
+      <h3>1) Setup</h3>
+      <div class="flex">
+        <label>Category
           <select id="category">
-<option value="animals">Animals</option>
-<option value="produce">Fruits &amp; Vegetables</option>
-<option value="tools">Tools &amp; Household Objects</option>
-<option value="jobs">Occupations</option>
-<option value="transport">Transportation Modes</option>
-<option value="emotions">Emotions</option>
-</select>
-</label>
-<label>Duration
+            <option value="animals">Animals</option>
+            <option value="produce">Fruits &amp; Vegetables</option>
+            <option value="tools">Tools &amp; Household Objects</option>
+            <option value="jobs">Occupations</option>
+            <option value="transport">Transportation Modes</option>
+            <option value="emotions">Emotions</option>
+          </select>
+        </label>
+        <label>Duration
           <select id="duration">
-<option>60</option>
-<option>90</option>
-<option>45</option>
-<option>30</option>
-<option>15</option>
-</select>
-</label>
-<label>Input
+            <option>60</option>
+            <option>90</option>
+            <option>45</option>
+            <option>30</option>
+            <option>15</option>
+          </select>
+        </label>
+        <label>Input
           <select id="inputMode">
-<option value="speech">🎤 Speech</option>
-<option value="manual">⌨️ Manual</option>
-</select>
-</label>
-</div>
-<div class="flex" style="margin-top:8px">
-<label class="small"><input checked="" id="useExtended" type="checkbox"/> Use extended lexicon (broader matching)</label>
-</div>
-<div class="notice small" id="speechWarn" style="display:none;margin-top:10px">
+            <option value="speech">🎤 Speech</option>
+            <option value="manual">⌨️ Manual</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="flex" style="margin-top:8px">
+        <label class="small"><input type="checkbox" id="useExtended" checked /> Use extended lexicon (broader matching)</label>
+      </div>
+
+      <div id="speechWarn" class="notice small" style="display:none;margin-top:10px">
         Speech recognition not available in this browser. Use Chrome desktop, or choose Manual input.
       </div>
-<div class="strategy" id="strategyBox">
-<div class="small"><strong>Strategy coach</strong> (read before starting)</div>
-<ul class="tips small" id="tips"></ul>
-</div>
-<div class="foot">
-<div class="status">
-<span class="tag ok">On-target: <span class="live" id="okCount">0</span></span>
-<span class="tag rep">Repetitions: <span class="live" id="repCount">0</span></span>
-<span class="tag off">Off-target: <span class="live" id="offCount">0</span></span>
-</div>
-<div class="live">⏱️ <span id="timer">60</span>s</div>
-</div>
-<div class="flex" style="margin-top:8px">
-<button id="btnStart">Start</button>
-<button class="secondary" disabled="" id="btnPause">Pause</button>
-<button class="ghost" disabled="" id="btnStop">Stop</button>
-<button class="ghost" disabled="" id="btnExport">Download CSV</button>
-</div>
-<div class="flex" id="manualBox" style="display:none;margin-top:8px">
-<input id="manualInput" placeholder="Type a word and press Enter…" type="text"/>
-<button class="secondary" id="btnAdd">Add</button>
-</div>
-<div class="small" style="margin-top:8px">
+
+      <div class="strategy" id="strategyBox">
+        <div class="small"><strong>Strategy coach</strong> (read before starting)</div>
+        <ul class="tips small" id="tips"></ul>
+      </div>
+
+      <div class="foot">
+        <div class="status">
+          <span class="tag ok">On-target: <span id="okCount" class="live">0</span></span>
+          <span class="tag rep">Repetitions: <span id="repCount" class="live">0</span></span>
+          <span class="tag off">Off-target: <span id="offCount" class="live">0</span></span>
+        </div>
+        <div class="live">⏱️ <span id="timer">60</span>s</div>
+      </div>
+
+      <div class="flex" style="margin-top:8px">
+        <button id="btnStart">Start</button>
+        <button id="btnPause" class="secondary" disabled>Pause</button>
+        <button id="btnStop" class="ghost" disabled>Stop</button>
+        <button id="btnExport" class="ghost" disabled>Download CSV</button>
+      </div>
+
+      <div id="manualBox" style="display:none;margin-top:8px" class="flex">
+        <input id="manualInput" type="text" placeholder="Type a word and press Enter…" />
+        <button id="btnAdd" class="secondary">Add</button>
+      </div>
+
+      <div class="small" style="margin-top:8px">
         Tip: speak single words clearly (e.g., “dog”, “cat”). Multi-word items are allowed; you can approve flagged items.
       </div>
+    </div>
+
+    <div class="card">
+      <h3>2) Live Responses</h3>
+      <div class="grid hdr">
+        <div>+Time</div><div>Word</div><div>Status</div><div>Override</div><div>Delete</div>
+      </div>
+      <div id="list"></div>
+    </div>
+
+    <div class="card">
+      <h3>3) Session Notes</h3>
+      <textarea id="notes" rows="10" style="width:100%;border-radius:12px;border:1px solid #e5e7eb;padding:10px" placeholder="Clinician notes (e.g., strategy use, cues, fatigue)…"></textarea>
+      <div class="small" style="margin-top:8px">Overrides are logged in the CSV. You can approve items flagged as off-target/unknown.</div>
+    </div>
+  </div>
+
+  <div class="row cols-1" style="margin-top:12px">
+    <div class="card">
+      <h3>4) Strategy Grouping (end of session)</h3>
+      <div class="small">When you press <b>Stop</b>, valid items are automatically grouped into suggested sub-categories. Use this to teach/reflect on chunking.</div>
+      <div id="groups" class="groups" style="margin-top:10px"></div>
+    </div>
+  </div>
 </div>
-<div class="card">
-<h3>2) Live Responses</h3>
-<div class="grid hdr">
-<div>+Time</div><div>Word</div><div>Status</div><div>Override</div><div>Delete</div>
-</div>
-<div id="list"></div>
-</div>
-<div class="card">
-<h3>3) Session Notes</h3>
-<textarea id="notes" placeholder="Clinician notes (e.g., strategy use, cues, fatigue)…" rows="10" style="width:100%;border-radius:12px;border:1px solid #e5e7eb;padding:10px"></textarea>
-<div class="small" style="margin-top:8px">Overrides are logged in the CSV. You can approve items flagged as off-target/unknown.</div>
-</div>
-</div>
-<div class="row cols-1" style="margin-top:12px">
-<div class="card">
-<h3>4) Strategy Grouping (end of session)</h3>
-<div class="small">When you press <b>Stop</b>, valid items are automatically grouped into suggested sub-categories. Use this to teach/reflect on chunking.</div>
-<div class="groups" id="groups" style="margin-top:10px"></div>
-</div>
-</div>
-</div>
+
 <script>
 /* ========= Expanded Lexicons =========
    Notes:
@@ -810,5 +822,5 @@ function resetSession(){
   if(!canSpeech){ els.inputMode.value='manual'; els.manualBox.style.display='block'; }
 })();
 </script>
-</main></body>
+</body>
 </html>

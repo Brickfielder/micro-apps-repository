@@ -1,0 +1,117 @@
+/* Shared theme for Micro Apps Repository
+ * Defines design tokens for colors, typography, spacing, and components.
+ * This file should be referenced by every app via:
+ *   <link rel="stylesheet" href="/shared/theme.css">
+ */
+
+/* Establish root variables for both light and dark themes. */
+:root{
+  color-scheme: light dark;
+
+  /* Palette: light theme */
+  --bg: #f7f8fb;
+  --surface: #ffffff;
+  --text: #1f2937;       /* slate-800 */
+  --muted: #6b7280;      /* slate-500 */
+  --line: #e5e7eb;       /* slate-200 */
+  --accent: #ff7a6e;     /* soft coral */
+  --accent-600: #ff6254;
+  --accent-700: #f24f40;
+
+  /* Typography scale */
+  --font: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell,
+          Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji",
+          "Segoe UI Emoji", "Segoe UI Symbol";
+  --size-hero: clamp(1.75rem, 2.5vw + 1rem, 2.75rem);
+  --size-lead: clamp(1rem, .6vw + .9rem, 1.25rem);
+  --size-body: 1rem;
+  --maxw: 1100px;
+  --pad: 20px;
+
+  /* Radius and shadow */
+  --radius: 16px;
+  --shadow: 0 1px 2px rgba(16,24,40,.06), 0 8px 24px rgba(16,24,40,.08);
+}
+
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg: #0f172a;
+    --surface: #111827;
+    --text: #f9fafb;
+    --muted: #9ca3af;
+    --line: #1f2937;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.6);
+  }
+}
+
+*{ box-sizing: border-box; }
+html, body{ height:100%; }
+body{
+  margin:0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--size-body);
+  line-height: 1.6;
+}
+
+/* Wrapper for all apps */
+.app-wrap{
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: calc(var(--pad) * 1.2) var(--pad);
+}
+
+/* Standard hero section injected by frame.js */
+.app-hero{
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: clamp(18px, 2.5vw, 28px);
+  margin: clamp(12px, 1.5vw, 18px) 0 24px;
+}
+.app-hero h1{
+  font-size: var(--size-hero);
+  margin: 0 0 .35em;
+  letter-spacing: -0.01em;
+}
+.app-hero p.lead{
+  font-size: var(--size-lead);
+  color: var(--muted);
+  margin: 0;
+}
+
+/* Default container for an app's UI */
+#app-root{
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: clamp(16px, 2vw, 28px);
+  min-height: 40vh;
+}
+
+/* Focus outline for accessibility */
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Utility pill component used for tags or metadata */
+.pill{
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f2f4f7;
+  color: #334155;
+  font-size: .85rem;
+  margin-right: 8px;
+}
+@media (prefers-color-scheme: dark){
+  .pill{
+    background: #1f2937;
+    color: #e5e7eb;
+  }
+}
