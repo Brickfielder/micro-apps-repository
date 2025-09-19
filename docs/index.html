@@ -13,14 +13,41 @@
     --pill:#f2f4f7; --radius:16px;
     --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.08);
     --maxw:1200px;
+
+    /* Neural background vars */
+    --bg-grad-1:#f7f8fb;
+    --bg-grad-2:#eef2f7;
+    --bg-grad-3:#e6f1ff;
+    --node-color: #3b82f6;        /* blue-500 */
+    --link-max-opacity: 0.35;     /* easy knob if links feel too strong */
+    --link-distance: 160;         /* link threshold distance in px */
+    --node-radius: 2.5;
+    --node-glow: 8;
   }
+
   html,body{height:100%} *{box-sizing:border-box}
+
   body{
-    margin:0; font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,"Helvetica Neue",Arial;
-    color:var(--text); background:var(--bg);
-    background-image:repeating-linear-gradient(0deg,rgba(210,180,140,.15) 0px,rgba(210,180,140,.15) 1px,transparent 1px,transparent 6px);
-    background-size:100% 6px;
+    margin:0;
+    font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,"Helvetica Neue",Arial;
+    color:var(--text);
+    /* Light, airy base gradient (canvas draws the neural web above this) */
+    background:
+      radial-gradient(circle at 20% 30%, var(--bg-grad-3), var(--bg-grad-1)),
+      radial-gradient(circle at 80% 70%, var(--bg-grad-2), transparent);
+    /* Removed the repeating lines background to avoid fighting with the network */
   }
+
+  /* Keep the neural canvas behind everything but above the body bg */
+  #network{
+    position: fixed;
+    inset: 0;
+    z-index: 0;       /* Below content, above body background */
+    pointer-events: none;
+  }
+
+  /* Ensure page content sits above the canvas */
+  header, main, footer { position: relative; z-index: 1; }
 
   /* Header / nav */
   header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.9);
@@ -69,7 +96,7 @@
   .feature-card{min-width:280px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;display:grid;gap:8px;scroll-snap-align:start}
   .badge{display:inline-flex;gap:6px;padding:4px 10px;border-radius:999px;background:rgba(255,122,110,.12);color:#b42318;font-weight:600;font-size:12px}
 
-  .filters{position:sticky;top:64px;z-index:30;background:var(--bg);border-top:1px solid var(--line)}
+  .filters{position:sticky;top:64px;z-index:30;background:transparent;border-top:1px solid var(--line)}
   .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
   .search{flex:1 1 260px;display:flex;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
   .search input{border:0;outline:0;background:transparent;width:100%}
@@ -96,35 +123,43 @@
     --bg:#0b1220; --surface:#111827; --text:#f9fafb; --muted:#cbd5e1; --line:#1f2937; --pill:#0f172a;
     --shadow:0 1px 2px rgba(0,0,0,.7),0 8px 24px rgba(0,0,0,.5);
     --accent:#ff7a6e; --accent-600:#ff6254; --accent-700:#ff4b3a;
+
+    --bg-grad-1:#0b1220;
+    --bg-grad-2:#111827;
+    --bg-grad-3:#0f172a;
+    --node-color:#4dd0e1; /* lighter cyan on dark */
+    --link-max-opacity: 0.28;
   }
-  html[data-theme="dark"] body{background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0px,rgba(255,255,255,.06) 1px,transparent 1px,transparent 6px)}
   html[data-theme="dark"] .badge{background:rgba(255,122,110,.18);color:#ffd0cb}
   html[data-theme="dark"] .open{color:var(--accent-600)}
-/* Hero uses the same container width as the grid */
-.hero{
-  max-width: var(--maxw);
-  margin: 0 auto;
-  padding-inline: 16px;
-}
 
-/* Fully justify the H1 and stretch the last line */
-.hero h1{
-  text-wrap: pretty;            /* override any earlier text-wrap: balance */
-  text-align: justify;
-  text-align-last: justify;     /* Firefox/Edge */
-  text-justify: inter-word;
-  hyphens: auto;                /* allow hyphenation to reduce gaps */
-}
-/* Chrome/WebKit: force the last line to justify as well */
-.hero h1::after{
-  content: "";
-  display: inline-block;
-  width: 100%;
-}
+  /* Hero uses the same container width as the grid */
+  .hero{
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding-inline: 16px;
+  }
 
+  /* Fully justify the H1 and stretch the last line */
+  .hero h1{
+    text-wrap: pretty;
+    text-align: justify;
+    text-align-last: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+  }
+  .hero h1::after{
+    content: "";
+    display: inline-block;
+    width: 100%;
+  }
 </style>
 </head>
 <body>
+
+<!-- Glowing neural background canvas -->
+<canvas id="network" aria-hidden="true"></canvas>
+
 <header role="banner">
   <div class="nav">
     <a class="brand" href="#top" aria-label="Micro Rehab Apps home">
@@ -135,7 +170,10 @@
       <a href="#about">About</a>
       <a href="#contact">Contact</a>
     </nav>
-    <button id="themeToggle" class="ghost" aria-pressed="false" title="Toggle theme">Theme: Light</button>
+    <div style="justify-self:flex-end; display:flex; gap:8px;">
+      <button id="bgToggle" class="ghost" aria-pressed="true" title="Toggle animated background">Background: Animated</button>
+      <button id="themeToggle" class="ghost" aria-pressed="false" title="Toggle theme">Theme: Light</button>
+    </div>
   </div>
 </header>
 
@@ -197,22 +235,137 @@
     </div>
     <div>
       <small>Version</small><br/>
-      <small>v1.4 · Hero matches grid width</small>
+      <small>v1.5 · Neural background</small>
     </div>
   </div>
 </footer>
 
 <script>
-  // Theme toggle
+  /* ===== Theme toggle ===== */
   (function(){
     const root=document.documentElement,btn=document.getElementById('themeToggle'),key='mra-theme';
     const saved=localStorage.getItem(key);
     const set=(m)=>{root.setAttribute('data-theme',m);btn.textContent='Theme: '+(m==='dark'?'Dark':'Light');btn.setAttribute('aria-pressed',m==='dark')}
     set(saved==='dark'?'dark':'light');
-    btn.addEventListener('click',()=>set(root.getAttribute('data-theme')==='dark'?'light':'dark'));
+    btn.addEventListener('click',()=>{ const next=root.getAttribute('data-theme')==='dark'?'light':'dark'; localStorage.setItem(key,next); set(next); });
   })();
 
-  // Helpers
+  /* ===== Glowing neural background ===== */
+  (function(){
+    const canvas=document.getElementById('network');
+    const ctx=canvas.getContext('2d');
+    let w,h,particles=[], reqId=null, running=true;
+
+    function resize(){
+      w=canvas.width=window.innerWidth;
+      h=canvas.height=window.innerHeight;
+      initParticles();
+    }
+    window.addEventListener('resize',resize,{passive:true});
+
+    function initParticles(){
+      // density ~ 1 particle per ~30k px^2, capped for perf
+      const target = Math.min(120, Math.max(40, Math.round((w*h)/30000)));
+      particles.length=0;
+      for(let i=0;i<target;i++){
+        particles.push({
+          x:Math.random()*w,
+          y:Math.random()*h,
+          vx:(Math.random()-0.5)*0.4,
+          vy:(Math.random()-0.5)*0.4
+        });
+      }
+    }
+
+    function colorVars(){
+      // pull current CSS variables so theme switch updates canvas without reload
+      const cs=getComputedStyle(document.documentElement);
+      return {
+        node: cs.getPropertyValue('--node-color').trim() || '#3b82f6',
+        linkMax: parseFloat(cs.getPropertyValue('--link-max-opacity')) || 0.35,
+        linkDist: parseFloat(cs.getPropertyValue('--link-distance')) || 160,
+        r: parseFloat(cs.getPropertyValue('--node-radius')) || 2.5,
+        glow: parseFloat(cs.getPropertyValue('--node-glow')) || 8
+      };
+    }
+    let vars = colorVars();
+
+    // Update vars when theme changes
+    const mo=new MutationObserver(()=>{ vars=colorVars(); });
+    mo.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+    function draw(){
+      if(!running){ return; }
+      ctx.clearRect(0,0,w,h);
+
+      // links
+      for(let i=0;i<particles.length;i++){
+        const p=particles[i];
+        for(let j=i+1;j<particles.length;j++){
+          const q=particles[j];
+          const dx=p.x-q.x, dy=p.y-q.y, dist=Math.hypot(dx,dy);
+          if(dist<vars.linkDist){
+            const alpha = Math.max(0, vars.linkMax - dist/(vars.linkDist*3));
+            ctx.strokeStyle=`rgba(${hex2rgb(vars.node)},${alpha})`;
+            ctx.lineWidth=1;
+            ctx.beginPath();
+            ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y);
+            ctx.stroke();
+          }
+        }
+      }
+      // nodes
+      for(const p of particles){
+        ctx.fillStyle=`rgba(${hex2rgb(vars.node)},0.85)`;
+        ctx.shadowBlur=vars.glow;
+        ctx.shadowColor=`rgba(${hex2rgb(vars.node)},0.7)`;
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,vars.r,0,Math.PI*2);
+        ctx.fill();
+        ctx.shadowBlur=0;
+
+        // move
+        p.x+=p.vx; p.y+=p.vy;
+        if(p.x<0||p.x>w) p.vx*=-1;
+        if(p.y<0||p.y>h) p.vy*=-1;
+      }
+      reqId=requestAnimationFrame(draw);
+    }
+
+    function hex2rgb(hex){
+      const h=hex.replace('#','').trim();
+      const bigint=parseInt(h.length===3 ? h.split('').map(c=>c+c).join('') : h,16);
+      const r=(bigint>>16)&255, g=(bigint>>8)&255, b=bigint&255;
+      return `${r},${g},${b}`;
+    }
+
+    // Animation controls + toggle + reduced-motion
+    const bgKey='mra-bg-animated';
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const saved = localStorage.getItem(bgKey);
+    const wantAnim = saved ? saved==='true' : !prefersReduced;
+
+    const toggleBtn = document.getElementById('bgToggle');
+    function setAnim(on){
+      running = on;
+      toggleBtn.textContent = 'Background: ' + (on ? 'Animated' : 'Static');
+      toggleBtn.setAttribute('aria-pressed', String(on));
+      localStorage.setItem(bgKey, String(on));
+      if(on){
+        if(!reqId){ reqId=requestAnimationFrame(draw); }
+      }else{
+        if(reqId){ cancelAnimationFrame(reqId); reqId=null; }
+        ctx.clearRect(0,0,w,h); // keep the clean static gradient
+      }
+    }
+    toggleBtn.addEventListener('click', ()=> setAnim(!running));
+
+    // Kick off
+    resize();
+    setAnim(wantAnim);
+  })();
+
+  /* ===== App index logic (unchanged, just moved down) ===== */
   const $ = (sel)=>document.querySelector(sel);
   const grid = $('#grid'), strip = $('#featuredStrip'), q = $('#q'), tagBar = $('#tagBar');
   let DATA = [], ACTIVE_TAGS = new Set(), CARD_INDEX = new Map(), ALL_TAGS = [];
@@ -272,7 +425,6 @@
     });
   }
 
-  // Fetch and render
   fetch('catalog.json', {cache:'no-store'})
     .then(r=>r.json())
     .then(json=>{
