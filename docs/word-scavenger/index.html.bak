@@ -1,118 +1,134 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Word Scavenge — USN rehab (updated)</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Word Scavenge — USN rehab (updated)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
     @keyframes wiggle { 0%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} 100%{transform:translateX(0)} }
     .wiggle { animation: wiggle .22s ease-in-out; }
     .anchor-stripe { width: 44px; background: #ef4444; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; writing-mode: vertical-rl; text-orientation: mixed; user-select: none; }
     .anchor-stripe.sticky { position: sticky; top: 7rem; border-radius: 10px; box-shadow: 0 10px 20px rgba(0,0,0,.15); }
   </style>
-<meta content="word-scavenger" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script></head>
-<body class="min-h-screen bg-slate-50 text-slate-900"><main id="app-root">
-<header class="sticky top-0 z-10 bg-white/80 backdrop-blur border-b border-slate-200">
-<div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-<div class="flex items-center gap-3">
-<div class="w-10 h-10 rounded-2xl bg-slate-900 text-white grid place-content-center font-bold">WS</div>
-<div>
-<div class="text-xl font-semibold">Word Scavenge</div>
-<div class="text-xs text-slate-500">Tap the <span class="text-red-600 font-semibold">left red anchor stripe</span>, then pick a left word → match on the right</div>
-</div>
-</div>
-<div class="flex items-center gap-2">
-<button class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-sm" id="helpBtn">Hide help</button>
-<button class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-sm" id="settingsBtn">Hide settings</button>
-<button class="px-3 py-2 rounded-xl text-sm shadow bg-amber-600 text-white" id="pauseBtn">Pause</button>
-<button class="px-3 py-2 rounded-xl text-sm bg-slate-900 text-white shadow" id="newBtn">New session</button>
-</div>
-</div>
-</header>
-<main class="max-w-6xl mx-auto px-4 mt-4">
-<section class="mb-4 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm" id="help">
-<div class="font-semibold mb-1">How it works</div>
-<ul class="list-disc ml-5 text-sm text-slate-600 space-y-1">
-<li>Before <em>every</em> match, the patient must <span class="font-semibold text-red-600">tap the red left anchor stripe</span>.</li>
-<li>Then select a word on the <span class="font-semibold">left</span>, and match it with the corresponding word on the right.</li>
-<li>Correct matches are <span class="font-semibold">locked and highlighted in green on both sides</span>.</li>
-<li>Starting on the right is blocked and logged as a compliance event.</li>
-<li>Timer pauses automatically after <span class="font-mono" id="idleHint">30s</span> of inactivity.</li>
-<li>Download a CSV log with all sessions stored locally (persists between runs).</li>
-</ul>
-</section>
-<section class="mb-6 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm grid md:grid-cols-2 gap-4" id="settings">
-<div class="space-y-3">
-<label class="block text-sm">Word set</label>
-<select class="w-full p-2 rounded-xl border border-slate-300" id="setSelect"></select>
-<label class="block text-sm">Number of pairs: <span id="pairCountLab">8</span></label>
-<input class="w-full" id="pairCount" max="12" min="4" type="range" value="8"/>
-<div class="flex items-center gap-2">
-<input checked="" id="requireLeftStart" type="checkbox"/>
-<label class="text-sm" for="requireLeftStart">Require left-start (recommended)</label>
-</div>
-<div class="flex items-center gap-2">
-<input checked="" id="requireAnchor" type="checkbox"/>
-<label class="text-sm" for="requireAnchor">Require left-margin anchor before each match</label>
-</div>
-<label class="block text-sm">Auto-pause if idle (seconds)</label>
-<input class="w-28 p-2 rounded-xl border border-slate-300" id="idleSecs" max="300" min="5" type="number" value="30"/>
-<div class="flex items-center gap-2">
-<input checked="" id="bigText" type="checkbox"/>
-<label class="text-sm" for="bigText">Large text mode</label>
-</div>
-<div class="flex gap-2">
-<button class="px-3 py-2 rounded-xl bg-slate-900 text-white text-sm shadow" id="downloadBtn">Download CSV log</button>
-<button class="px-3 py-2 rounded-xl bg-white text-slate-700 border border-slate-300 text-sm hover:bg-slate-50" id="clearBtn">Clear all data</button>
-</div>
-</div>
-<div class="space-y-3">
-<div class="flex items-center gap-2">
-<input id="useCustom" type="checkbox"/>
-<label class="text-sm" for="useCustom">Use custom list</label>
-</div>
-<textarea class="w-full h-40 p-3 rounded-xl border border-slate-300 disabled:opacity-50 font-mono text-xs" disabled="" id="customPairs" placeholder="left,right\ncat,meow\n..."></textarea>
-<div class="text-xs text-slate-500">Format: one pair per line, comma-separated. Left word will appear in the left column.</div>
-</div>
-</section>
-<!-- Stats cards -->
-<section class="grid md:grid-cols-5 gap-3 mb-4">
-<div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-3"><div class="text-xs text-slate-500">Solved</div><div class="text-xl font-semibold" id="statSolved">0/0</div></div>
-<div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-3"><div class="text-xs text-slate-500">Accuracy</div><div class="text-xl font-semibold" id="statAcc">0%</div></div>
-<div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-3"><div class="text-xs text-slate-500">Errors</div><div class="text-xl font-semibold" id="statErr">0</div></div>
-<div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-3"><div class="text-xs text-slate-500">Right-first attempts</div><div class="text-xl font-semibold" id="statRFA">0</div></div>
-<div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-3"><div class="text-xs text-slate-500">Active time</div><div class="text-xl font-semibold" id="statTime">0:00</div></div>
-</section>
-<!-- Game area -->
-<section class="grid md:grid-cols-[auto,1fr,1fr] items-start gap-4">
-<!-- Left anchor stripe -->
-<div class="anchor-stripe sticky" id="anchorBtn">ANCHOR</div>
-<!-- Left column -->
-<div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-<div class="text-sm font-semibold mb-2">Left — start here</div>
-<div class="grid gap-2" id="leftList"></div>
-</div>
-<!-- Right column -->
-<div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-<div class="text-sm font-semibold mb-2">Right — find the match</div>
-<div class="grid gap-2" id="rightList"></div>
-</div>
-</section>
-<section class="hidden mt-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900" id="completeBanner">
-<div class="font-semibold">Session complete</div>
-<div class="text-sm">Well done! Download the CSV log for your records, or start a new session.</div>
-</section>
-</main>
-<!-- Pause overlay -->
-<div class="hidden fixed inset-0 bg-black/40 grid place-items-center" id="pauseOverlay">
-<div class="bg-white p-6 rounded-2xl shadow-2xl w-[min(92vw,560px)] text-center">
-<div class="text-xl font-semibold mb-1">Paused</div>
-<div class="text-sm text-slate-600 mb-4">Timer is stopped. Click resume to continue.</div>
-<button class="px-4 py-2 rounded-xl bg-emerald-600 text-white shadow" id="resumeBtn">Resume</button>
-</div>
-</div>
-<script>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900">
+  <header class="sticky top-0 z-10 bg-white/80 backdrop-blur border-b border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white grid place-content-center font-bold">WS</div>
+        <div>
+          <div class="text-xl font-semibold">Word Scavenge</div>
+          <div class="text-xs text-slate-500">Tap the <span class="text-red-600 font-semibold">left red anchor stripe</span>, then pick a left word → match on the right</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="helpBtn" class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-sm">Hide help</button>
+        <button id="settingsBtn" class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-sm">Hide settings</button>
+        <button id="pauseBtn" class="px-3 py-2 rounded-xl text-sm shadow bg-amber-600 text-white">Pause</button>
+        <button id="newBtn" class="px-3 py-2 rounded-xl text-sm bg-slate-900 text-white shadow">New session</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 mt-4">
+    <section id="help" class="mb-4 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+      <div class="font-semibold mb-1">How it works</div>
+      <ul class="list-disc ml-5 text-sm text-slate-600 space-y-1">
+        <li>Before <em>every</em> match, the patient must <span class="font-semibold text-red-600">tap the red left anchor stripe</span>.</li>
+        <li>Then select a word on the <span class="font-semibold">left</span>, and match it with the corresponding word on the right.</li>
+        <li>Correct matches are <span class="font-semibold">locked and highlighted in green on both sides</span>.</li>
+        <li>Starting on the right is blocked and logged as a compliance event.</li>
+        <li>Timer pauses automatically after <span class="font-mono" id="idleHint">30s</span> of inactivity.</li>
+        <li>Download a CSV log with all sessions stored locally (persists between runs).</li>
+      </ul>
+    </section>
+
+    <section id="settings" class="mb-6 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm grid md:grid-cols-2 gap-4">
+      <div class="space-y-3">
+        <label class="block text-sm">Word set</label>
+        <select id="setSelect" class="w-full p-2 rounded-xl border border-slate-300"></select>
+
+        <label class="block text-sm">Number of pairs: <span id="pairCountLab">8</span></label>
+        <input type="range" id="pairCount" min="4" max="12" value="8" class="w-full" />
+
+        <div class="flex items-center gap-2">
+          <input id="requireLeftStart" type="checkbox" checked />
+          <label for="requireLeftStart" class="text-sm">Require left-start (recommended)</label>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <input id="requireAnchor" type="checkbox" checked />
+          <label for="requireAnchor" class="text-sm">Require left-margin anchor before each match</label>
+        </div>
+
+        <label class="block text-sm">Auto-pause if idle (seconds)</label>
+        <input type="number" id="idleSecs" min="5" max="300" value="30" class="w-28 p-2 rounded-xl border border-slate-300" />
+
+        <div class="flex items-center gap-2">
+          <input id="bigText" type="checkbox" checked />
+          <label for="bigText" class="text-sm">Large text mode</label>
+        </div>
+
+        <div class="flex gap-2">
+          <button id="downloadBtn" class="px-3 py-2 rounded-xl bg-slate-900 text-white text-sm shadow">Download CSV log</button>
+          <button id="clearBtn" class="px-3 py-2 rounded-xl bg-white text-slate-700 border border-slate-300 text-sm hover:bg-slate-50">Clear all data</button>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <div class="flex items-center gap-2">
+          <input id="useCustom" type="checkbox" />
+          <label for="useCustom" class="text-sm">Use custom list</label>
+        </div>
+        <textarea id="customPairs" disabled class="w-full h-40 p-3 rounded-xl border border-slate-300 disabled:opacity-50 font-mono text-xs" placeholder="left,right\ncat,meow\n..."></textarea>
+        <div class="text-xs text-slate-500">Format: one pair per line, comma-separated. Left word will appear in the left column.</div>
+      </div>
+    </section>
+
+    <!-- Stats cards -->
+    <section class="grid md:grid-cols-5 gap-3 mb-4">
+      <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-3"><div class="text-xs text-slate-500">Solved</div><div id="statSolved" class="text-xl font-semibold">0/0</div></div>
+      <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-3"><div class="text-xs text-slate-500">Accuracy</div><div id="statAcc" class="text-xl font-semibold">0%</div></div>
+      <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-3"><div class="text-xs text-slate-500">Errors</div><div id="statErr" class="text-xl font-semibold">0</div></div>
+      <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-3"><div class="text-xs text-slate-500">Right-first attempts</div><div id="statRFA" class="text-xl font-semibold">0</div></div>
+      <div class="rounded-2xl bg-white border border-slate-200 shadow-sm p-3"><div class="text-xs text-slate-500">Active time</div><div id="statTime" class="text-xl font-semibold">0:00</div></div>
+    </section>
+
+    <!-- Game area -->
+    <section class="grid md:grid-cols-[auto,1fr,1fr] items-start gap-4">
+      <!-- Left anchor stripe -->
+      <div class="anchor-stripe sticky" id="anchorBtn">ANCHOR</div>
+
+      <!-- Left column -->
+      <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <div class="text-sm font-semibold mb-2">Left — start here</div>
+        <div id="leftList" class="grid gap-2"></div>
+      </div>
+
+      <!-- Right column -->
+      <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+        <div class="text-sm font-semibold mb-2">Right — find the match</div>
+        <div id="rightList" class="grid gap-2"></div>
+      </div>
+    </section>
+
+    <section id="completeBanner" class="hidden mt-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900">
+      <div class="font-semibold">Session complete</div>
+      <div class="text-sm">Well done! Download the CSV log for your records, or start a new session.</div>
+    </section>
+  </main>
+
+  <!-- Pause overlay -->
+  <div id="pauseOverlay" class="hidden fixed inset-0 bg-black/40 grid place-items-center">
+    <div class="bg-white p-6 rounded-2xl shadow-2xl w-[min(92vw,560px)] text-center">
+      <div class="text-xl font-semibold mb-1">Paused</div>
+      <div class="text-sm text-slate-600 mb-4">Timer is stopped. Click resume to continue.</div>
+      <button id="resumeBtn" class="px-4 py-2 rounded-xl bg-emerald-600 text-white shadow">Resume</button>
+    </div>
+  </div>
+
+  <script>
   // -------- Word sets --------
   const SETS = {
     "Everyday pairs": [
@@ -510,5 +526,5 @@
   initControls(); newSession(); updateTime(true);
 
   </script>
-</main></body>
+</body>
 </html>

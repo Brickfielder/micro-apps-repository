@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Emergency Dispatch — Executive Function Trainer</title>
-<meta content="Route the correct unit to each incident while following a single active restriction rule." name="description"/>
+<meta name="description" content="Route the correct unit to each incident while following a single active restriction rule." />
 <style>
   /* ===== Micro-Apps brand (light) ===== */
   :root{
@@ -180,92 +180,102 @@
   }
   .content h3{margin:0 0 10px; color:#111827}
 </style>
-<meta content="Emergency_despatch" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script></head>
-<body><main id="app-root">
-<div class="container">
-<header>
-<div>
-<h1>Emergency Dispatch</h1>
-<div class="subtitle">Route the correct unit to each incident. <span class="badge">One Active Rule Only</span></div>
-</div>
-<div class="header-right">
-<div class="kpi">
-<span class="pill">Level: <span id="level">1</span></span>
-<span class="pill ok">Score: <span id="score">0</span></span>
-<span class="pill warn">Time: <span id="timer">03:00</span></span>
-</div>
-<button class="btn primary" id="startBtn">Start New Shift</button>
-<button class="btn" disabled="" id="pauseBtn">Pause</button>
-<button class="btn" disabled="" id="downloadBtn">Download CSV</button>
-</div>
-</header>
-<main>
-<!-- Left: Rules & WM -->
-<section class="panel">
-<div class="section-title">Briefing</div>
-<div class="rule-card">
-<strong>Baseline</strong><br/>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Emergency Dispatch</h1>
+        <div class="subtitle">Route the correct unit to each incident. <span class="badge">One Active Rule Only</span></div>
+      </div>
+      <div class="header-right">
+        <div class="kpi">
+          <span class="pill">Level: <span id="level">1</span></span>
+          <span class="pill ok">Score: <span id="score">0</span></span>
+          <span class="pill warn">Time: <span id="timer">03:00</span></span>
+        </div>
+        <button class="btn primary" id="startBtn">Start New Shift</button>
+        <button class="btn" id="pauseBtn" disabled>Pause</button>
+        <button class="btn" id="downloadBtn" disabled>Download CSV</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- Left: Rules & WM -->
+      <section class="panel">
+        <div class="section-title">Briefing</div>
+        <div class="rule-card">
+          <strong>Baseline</strong><br>
           Match <em>incident type</em> to the <em>correct unit</em>: 🩺 Medical → Ambulance • 🔥 Fire → Fire • 🚨 Police → Police.
         </div>
-<div class="rule-card active" id="activeRuleCard">
-<strong>Active Restriction (Single)</strong>
-<div id="activeRuleText" style="margin-top:6px; color:var(--muted);">—</div>
-</div>
-<div class="rule-card">
-<strong>Session</strong>
-<div style="margin-top:6px; color:var(--muted);">3 minutes. Ends early if more than 8 incidents are pending. Incidents spawn <em>inside the dashed square</em>.</div>
-</div>
-<div class="section-title">Working Memory</div>
-<div class="mem" id="wmBar"></div>
-</section>
-<!-- Map -->
-<section class="map">
-<div class="grid" id="grid"></div>
-<div class="district n">NORTH</div>
-<div class="district s">SOUTH</div>
-<div class="district w">WEST</div>
-<div class="district e">EAST</div>
-<div class="compass">N • E • S • W</div>
-<div id="mapLayer"></div>
-</section>
-<!-- Right: Incidents & Controls -->
-<section class="panel side-right">
-<div class="stats">
-<div class="stat"><div>Success</div><strong id="success">--%</strong></div>
-<div class="stat"><div>Resolved</div><strong id="resolved">0</strong></div>
-<div class="stat"><div>Errors</div><strong id="errors">0</strong></div>
-</div>
-<div class="section-title">Incidents</div>
-<div class="inc-list" id="incList"></div>
-<div class="section-title">Dispatch</div>
-<div class="controls">
-<button class="btn" disabled="" id="btnAmb">🚑 Ambulance</button>
-<button class="btn" disabled="" id="btnFire">🚒 Fire</button>
-<button class="btn" disabled="" id="btnPol">🚓 Police</button>
-<button class="btn success" disabled="" id="btnHold">⏳ Hold</button>
-</div>
-<div style="margin-top:10px; font-size:12px; color:var(--muted)">
-<span class="badge">Executive Skills: Working Memory • Flexibility • Inhibition</span>
-</div>
-</section>
-</main>
-<footer>
-<span>Prototype — self-contained, no external libraries</span>
-<span>•</span>
-<span>Made for cognitive rehab research</span>
-</footer>
-</div>
-<!-- Results -->
-<div class="modal" id="resultModal">
-<div class="content">
-<h3 id="resultTitle">Shift Complete</h3>
-<p id="resultBody"></p>
-<div style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px">
-<button class="btn" id="closeModal">Close</button>
-<button class="btn primary" id="nextLevel">Next Level</button>
-</div>
-</div>
-</div>
+        <div class="rule-card active" id="activeRuleCard">
+          <strong>Active Restriction (Single)</strong>
+          <div id="activeRuleText" style="margin-top:6px; color:var(--muted);">—</div>
+        </div>
+        <div class="rule-card">
+          <strong>Session</strong>
+          <div style="margin-top:6px; color:var(--muted);">3 minutes. Ends early if more than 8 incidents are pending. Incidents spawn <em>inside the dashed square</em>.</div>
+        </div>
+
+        <div class="section-title">Working Memory</div>
+        <div id="wmBar" class="mem"></div>
+      </section>
+
+      <!-- Map -->
+      <section class="map">
+        <div class="grid" id="grid"></div>
+        <div class="district n">NORTH</div>
+        <div class="district s">SOUTH</div>
+        <div class="district w">WEST</div>
+        <div class="district e">EAST</div>
+        <div class="compass">N • E • S • W</div>
+        <div id="mapLayer"></div>
+      </section>
+
+      <!-- Right: Incidents & Controls -->
+      <section class="panel side-right">
+        <div class="stats">
+          <div class="stat"><div>Success</div><strong id="success">--%</strong></div>
+          <div class="stat"><div>Resolved</div><strong id="resolved">0</strong></div>
+          <div class="stat"><div>Errors</div><strong id="errors">0</strong></div>
+        </div>
+
+        <div class="section-title">Incidents</div>
+        <div class="inc-list" id="incList"></div>
+
+        <div class="section-title">Dispatch</div>
+        <div class="controls">
+          <button class="btn" id="btnAmb" disabled>🚑 Ambulance</button>
+          <button class="btn" id="btnFire" disabled>🚒 Fire</button>
+          <button class="btn" id="btnPol" disabled>🚓 Police</button>
+          <button class="btn success" id="btnHold" disabled>⏳ Hold</button>
+        </div>
+
+        <div style="margin-top:10px; font-size:12px; color:var(--muted)">
+          <span class="badge">Executive Skills: Working Memory • Flexibility • Inhibition</span>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Prototype — self-contained, no external libraries</span>
+      <span>•</span>
+      <span>Made for cognitive rehab research</span>
+    </footer>
+  </div>
+
+  <!-- Results -->
+  <div class="modal" id="resultModal">
+    <div class="content">
+      <h3 id="resultTitle">Shift Complete</h3>
+      <p id="resultBody"></p>
+      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px">
+        <button class="btn" id="closeModal">Close</button>
+        <button class="btn primary" id="nextLevel">Next Level</button>
+      </div>
+    </div>
+  </div>
+
 <script>
   // ===== Types & Data =====
   const TYPES = {
@@ -621,5 +631,5 @@
   // Init
   window.addEventListener('load', ()=>reset(1));
 </script>
-</main></body>
+</body>
 </html>

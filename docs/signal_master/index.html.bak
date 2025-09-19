@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Signal Master — Mirror Train v1.1 (CSV export)</title>
-<meta content="Train routing game: single switch, evolving rules, and a Phase-3 Mirror train that follows the opposite of the previous train’s correct route. Includes CSV export of session stats." name="description"/>
+<meta name="description" content="Train routing game: single switch, evolving rules, and a Phase-3 Mirror train that follows the opposite of the previous train’s correct route. Includes CSV export of session stats.">
 <style>
   :root{
     color-scheme: light dark;
@@ -94,112 +94,120 @@
     .stage{ aspect-ratio: 10/16 }
   }
 </style>
-<meta content="signal_master" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script></head>
-<body><main id="app-root">
+</head>
+<body>
 <header aria-label="Top bar">
-<div class="bar">
-<div class="brand"><span aria-hidden="true">🚂</span><span>Signal Master</span></div>
-<div class="right">
-<div class="badge"><strong>Score:</strong> <span id="score">0</span></div>
-<div class="badge">⏱ <strong>Time:</strong> <span id="time">3:00</span></div>
-</div>
-</div>
+  <div class="bar">
+    <div class="brand"><span aria-hidden="true">🚂</span><span>Signal Master</span></div>
+    <div class="right">
+      <div class="badge"><strong>Score:</strong>&nbsp;<span id="score">0</span></div>
+      <div class="badge">⏱ <strong>Time:</strong>&nbsp;<span id="time">3:00</span></div>
+    </div>
+  </div>
 </header>
+
 <main>
-<section aria-label="Gameplay" class="stage" role="region">
-<div class="hud">
-<div class="left">
-<span class="pill"><span>Level</span><small>Mirror Train</small></span>
-<div aria-label="Train legend" class="legend">
-<span class="swatch"><span class="dot red"></span> Passenger</span>
-<span class="swatch"><span class="dot blue"></span> Cargo</span>
-<span class="swatch"><span class="dot yellow"></span> Express</span>
-<span class="swatch"><span class="dot mirror"></span> Mirror</span>
-</div>
-</div>
-<div class="center" id="ruleHeadline">Rules over speed — route correctly in real time</div>
-<div class="right">
-<span class="badge" id="prevCorrectBadge" style="display:none">Prev correct: —</span>
-<span class="pill">Session • 3 min</span>
-</div>
-</div>
-<!-- Track View -->
-<div aria-label="Track with single junction" class="track-wrap" id="track" role="img">
-<div class="overlay" id="overlay" style="display:none"><div class="banner" id="banner"></div></div>
-<svg aria-hidden="true" viewbox="0 0 1100 560" xmlns="http://www.w3.org/2000/svg">
-<defs>
-<pattern height="20" id="sleepers" patternunits="userSpaceOnUse" width="20">
-<rect fill="currentColor" height="2" opacity="0.12" width="20" x="0" y="9"></rect>
-</pattern>
-</defs>
-<g opacity="0.9" stroke="#475569" stroke-linecap="round" stroke-width="6">
-<line x1="80" x2="480" y1="280" y2="280"></line>
-<line x1="480" x2="1040" y1="280" y2="210"></line> <!-- LEFT end -->
-<line x1="480" x2="1040" y1="280" y2="350"></line> <!-- RIGHT end -->
-</g>
-<g fill="url(#sleepers)" stroke="none">
-<rect height="24" width="400" x="80" y="268"></rect>
-<polygon points="480,268 1040,198 1040,222 480,292"></polygon>
-<polygon points="480,268 1040,338 1040,362 480,292"></polygon>
-</g>
-<circle cx="480" cy="280" fill="#f24f40" r="10"></circle>
-<g fill="#6b7280" font-family="system-ui" font-size="16">
-<text x="1048" y="212">LEFT</text>
-<text x="1048" y="352">RIGHT</text>
-</g>
-</svg>
-</div>
-<!-- Controls -->
-<div aria-label="Controls and rules" class="controls">
-<div class="lever">
-<span aria-hidden="true">🔀</span><strong>Main Switch:</strong>
-<button aria-label="Set switch LEFT" id="btnLeft" type="button">LEFT</button>
-<button aria-label="Set switch RIGHT" class="alt" id="btnRight" type="button">RIGHT</button>
-<span class="badge" id="switchState" style="margin-left:8px">Current: RIGHT</span>
-</div>
-<div aria-live="polite" class="rules">
-<div class="rule" id="rule1">Phase 1: Passenger (red 👤) → LEFT</div>
-<div class="rule" id="rule2">Phase 1: Cargo (blue 📦) → RIGHT</div>
-</div>
-</div>
-<!-- Start overlay -->
-<div class="overlay" id="startOverlay">
-<div class="banner">
-<h3>Signal Master</h3>
-<p class="big">Single switch. Route quickly &amp; accurately. Rules evolve.</p>
-<p><strong>Phase 1 (0–60s):</strong> Passenger (👤) → LEFT; Cargo (📦) → RIGHT.</p>
-<p><strong>Phase 2 (60–120s):</strong> Express (⚡) appears → RIGHT.</p>
-<p><strong>Phase 3 (120–180s):</strong> Mirror (◼️◻️) must go the <strong>opposite</strong> of the previous train’s <em>correct</em> route.<br/><small>(First Mirror defaults to RIGHT.)</small></p>
-<button class="btn primary" id="btnStart">Start</button>
-</div>
-</div>
-</section>
+  <section class="stage" role="region" aria-label="Gameplay">
+    <div class="hud">
+      <div class="left">
+        <span class="pill"><span>Level</span><small>Mirror Train</small></span>
+        <div class="legend" aria-label="Train legend">
+          <span class="swatch"><span class="dot red"></span> Passenger</span>
+          <span class="swatch"><span class="dot blue"></span> Cargo</span>
+          <span class="swatch"><span class="dot yellow"></span> Express</span>
+          <span class="swatch"><span class="dot mirror"></span> Mirror</span>
+        </div>
+      </div>
+      <div class="center" id="ruleHeadline">Rules over speed — route correctly in real time</div>
+      <div class="right">
+        <span id="prevCorrectBadge" class="badge" style="display:none">Prev correct: —</span>
+        <span class="pill">Session • 3 min</span>
+      </div>
+    </div>
+
+    <!-- Track View -->
+    <div id="track" class="track-wrap" role="img" aria-label="Track with single junction">
+      <div id="overlay" class="overlay" style="display:none"><div class="banner" id="banner"></div></div>
+
+      <svg viewBox="0 0 1100 560" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <pattern id="sleepers" width="20" height="20" patternUnits="userSpaceOnUse">
+            <rect x="0" y="9" width="20" height="2" fill="currentColor" opacity="0.12"/>
+          </pattern>
+        </defs>
+        <g stroke="#475569" stroke-width="6" stroke-linecap="round" opacity="0.9">
+          <line x1="80" y1="280" x2="480" y2="280" />
+          <line x1="480" y1="280" x2="1040" y2="210" /> <!-- LEFT end -->
+          <line x1="480" y1="280" x2="1040" y2="350" /> <!-- RIGHT end -->
+        </g>
+        <g stroke="none" fill="url(#sleepers)">
+          <rect x="80" y="268" width="400" height="24" />
+          <polygon points="480,268 1040,198 1040,222 480,292"/>
+          <polygon points="480,268 1040,338 1040,362 480,292"/>
+        </g>
+        <circle cx="480" cy="280" r="10" fill="#f24f40" />
+        <g font-family="system-ui" font-size="16" fill="#6b7280">
+          <text x="1048" y="212">LEFT</text>
+          <text x="1048" y="352">RIGHT</text>
+        </g>
+      </svg>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls" aria-label="Controls and rules">
+      <div class="lever">
+        <span aria-hidden="true">🔀</span><strong>Main Switch:</strong>
+        <button type="button" id="btnLeft" aria-label="Set switch LEFT">LEFT</button>
+        <button type="button" id="btnRight" class="alt" aria-label="Set switch RIGHT">RIGHT</button>
+        <span id="switchState" class="badge" style="margin-left:8px">Current: RIGHT</span>
+      </div>
+
+      <div class="rules" aria-live="polite">
+        <div class="rule" id="rule1">Phase 1: Passenger (red 👤) → LEFT</div>
+        <div class="rule" id="rule2">Phase 1: Cargo (blue 📦) → RIGHT</div>
+      </div>
+    </div>
+
+    <!-- Start overlay -->
+    <div id="startOverlay" class="overlay">
+      <div class="banner">
+        <h3>Signal Master</h3>
+        <p class="big">Single switch. Route quickly & accurately. Rules evolve.</p>
+        <p><strong>Phase 1 (0–60s):</strong> Passenger (👤) → LEFT; Cargo (📦) → RIGHT.</p>
+        <p><strong>Phase 2 (60–120s):</strong> Express (⚡) appears → RIGHT.</p>
+        <p><strong>Phase 3 (120–180s):</strong> Mirror (◼️◻️) must go the <strong>opposite</strong> of the previous train’s <em>correct</em> route.<br/><small>(First Mirror defaults to RIGHT.)</small></p>
+        <button class="btn primary" id="btnStart">Start</button>
+      </div>
+    </div>
+  </section>
 </main>
+
 <dialog id="summary">
-<form class="modal" method="dialog">
-<header><h2>Session Summary</h2></header>
-<table>
-<tr><th>Total trains</th><td id="sumTotal">0</td></tr>
-<tr><th>Correct routes</th><td id="sumCorrect">0</td></tr>
-<tr><th>Wrong routes</th><td id="sumWrong">0</td></tr>
-<tr><th>Accuracy</th><td id="sumAcc">0%</td></tr>
-<tr><th>Avg reaction time</th><td id="sumRT">–</td></tr>
-<tr><th>Final score</th><td id="sumScore">0</td></tr>
-</table>
-<div class="end-actions">
-<div>
-<button class="btn" id="btnCsv" type="button">Download CSV</button>
-<span class="note">Detailed per-train log</span>
-</div>
-<div>
-<button class="btn" value="close">Close</button>
-<button class="btn primary" onclick="location.reload()">Play again</button>
-</div>
-</div>
-<!-- hidden link used for download -->
-<a id="csvLink" style="display:none"></a>
-</form>
+  <form method="dialog" class="modal">
+    <header><h2>Session Summary</h2></header>
+    <table>
+      <tr><th>Total trains</th><td id="sumTotal">0</td></tr>
+      <tr><th>Correct routes</th><td id="sumCorrect">0</td></tr>
+      <tr><th>Wrong routes</th><td id="sumWrong">0</td></tr>
+      <tr><th>Accuracy</th><td id="sumAcc">0%</td></tr>
+      <tr><th>Avg reaction time</th><td id="sumRT">–</td></tr>
+      <tr><th>Final score</th><td id="sumScore">0</td></tr>
+    </table>
+    <div class="end-actions">
+      <div>
+        <button type="button" id="btnCsv" class="btn">Download CSV</button>
+        <span class="note">Detailed per-train log</span>
+      </div>
+      <div>
+        <button class="btn" value="close">Close</button>
+        <button class="btn primary" onclick="location.reload()">Play again</button>
+      </div>
+    </div>
+    <!-- hidden link used for download -->
+    <a id="csvLink" style="display:none"></a>
+  </form>
 </dialog>
+
 <script>
 (()=>{
   // ===== Geometry =====
@@ -501,5 +509,5 @@
   }, {passive:false});
 })();
 </script>
-</main></body>
+</body>
 </html>

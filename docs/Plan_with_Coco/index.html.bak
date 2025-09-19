@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<title>Plan with Coco — Scored Scenarios</title>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<style>
+  <meta charset="UTF-8">
+  <title>Plan with Coco — Scored Scenarios</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
     :root{--bg:#f8fcff;--card:#fff;--text:#222;--muted:#6b7280;--pill:#eef2ff;--accent:#2563eb;}
     *{box-sizing:border-box}
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji;background:var(--bg);color:var(--text);margin:0;padding:16px;display:flex;flex-direction:column;gap:12px;align-items:center}
@@ -31,105 +31,112 @@
     .rules li{margin-bottom:4px}
     .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 0.95rem;}
   </style>
-<meta content="Plan_with_Coco" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script></head>
-<body><main id="app-root">
-<div class="header">
-<svg aria-hidden="true" class="logo" viewbox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-<circle cx="28" cy="28" fill="#60a5fa" r="18"></circle><!-- body -->
-<circle cx="35" cy="24" fill="#93c5fd" r="6"></circle><!-- head -->
-<circle cx="37" cy="23" fill="#111" r="2"></circle><!-- eye -->
-<polygon fill="#f59e0b" points="42,26 48,24 42,22"></polygon><!-- beak -->
-<path d="M14 30 C22 38, 34 40, 46 34" fill="none" stroke="#3b82f6" stroke-width="4"></path><!-- wing -->
-</svg>
-<div class="titleText">Plan with Coco — Scored Scenarios</div>
-</div>
-<div class="box">
-<div class="title">🧠 Instructions</div>
-<div>
-      Choose a scenario, then plan together with <strong>Coco 🐦</strong>.<br/>
+</head>
+<body>
+  <div class="header">
+    <svg class="logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="28" cy="28" r="18" fill="#60a5fa"/><!-- body -->
+      <circle cx="35" cy="24" r="6" fill="#93c5fd"/><!-- head -->
+      <circle cx="37" cy="23" r="2" fill="#111"/><!-- eye -->
+      <polygon points="42,26 48,24 42,22" fill="#f59e0b"/><!-- beak -->
+      <path d="M14 30 C22 38, 34 40, 46 34" stroke="#3b82f6" stroke-width="4" fill="none"/><!-- wing -->
+    </svg>
+    <div class="titleText">Plan with Coco — Scored Scenarios</div>
+  </div>
+
+  <div class="box">
+    <div class="title">🧠 Instructions</div>
+    <div>
+      Choose a scenario, then plan together with <strong>Coco 🐦</strong>.<br>
       Each of you gets <strong>4 turns</strong> (total 8 accepted items). Some items are <em>plausible but not essential</em> — focus on what’s needed.
       You can <strong>Accept</strong> or <strong>Reject</strong> Coco’s suggestions. Cover the scenario’s categories and earn extra points via bonus rules.
     </div>
-<div class="mono">
-<strong>Scoring rubric:</strong><br/>
-      • +2 pts for each required category covered<br/>
-      • +1 pt for each satisfied <em>bonus rule</em><br/>
-      • −1 pt per non‑essential item accepted<br/>
+    <div class="mono">
+      <strong>Scoring rubric:</strong><br>
+      • +2 pts for each required category covered<br>
+      • +1 pt for each satisfied <em>bonus rule</em><br>
+      • −1 pt per non‑essential item accepted<br>
       • +2 pts “Perfect plan” bonus if all required categories are covered and 0 non‑essentials accepted
     </div>
-</div>
-<div class="box row">
-<div>
-<strong>Scenario</strong><br/>
-<select id="scenarioSelect" onchange="selectScenario()">
-<option value="">-- Choose --</option>
-<option value="0">Picnic on a hot day</option>
-<option value="1">Rainy day hike</option>
-<option value="2">Outdoor birthday party</option>
-<option value="3">Beach afternoon</option>
-<option value="4">Park concert (evening)</option>
-<option value="5">Winter walk in the park</option>
-<option value="6">Family picnic with toddler</option>
-<option value="7">Sunset viewpoint hike</option>
-<option value="8">Lakeside BBQ</option>
-<option value="9">Community sports day</option>
-</select>
-</div>
-<div class="hidden" id="catsBox">
-<strong>Required categories</strong>
-<div class="badges" id="catBadges"></div>
-</div>
-<div class="hidden" id="rulesBox">
-<strong>Scenario rules</strong>
-<ul class="rules" id="rulesList"></ul>
-</div>
-<div class="status hidden" id="progress">Turn <span id="turnNum">1</span> of 8 • Player turns left: <span id="pLeft">4</span> • Coco turns left: <span id="cLeft">4</span></div>
-</div>
-<div class="grid">
-<div class="box">
-<div class="title">🧍 Your turn</div>
-<select id="playerChoice">
-<option value="">Choose an item</option>
-<!-- Food -->
-<option data-cat="food" value="Sandwiches">🥪 Sandwiches</option>
-<option data-cat="food" value="Fruit">🍉 Fruit</option>
-<option data-cat="food" value="Trail Mix">🥜 Trail Mix</option>
-<!-- Drinks -->
-<option data-cat="drink" value="Water">💧 Water</option>
-<option data-cat="drink" value="Juice">🧃 Juice</option>
-<!-- Safety -->
-<option data-cat="safety" value="Sunscreen">🧴 Sunscreen</option>
-<option data-cat="safety" value="Umbrella">☂️ Umbrella</option>
-<option data-cat="safety" value="Map">🗺️ Map</option>
-<!-- Comfort -->
-<option data-cat="comfort" value="Blanket">🧺 Blanket</option>
-<option data-cat="comfort" value="Jacket">🧥 Jacket</option>
-<!-- Activity -->
-<option data-cat="activity" value="Kite">🪁 Kite</option>
-<option data-cat="activity" value="Frisbee">🥏 Frisbee</option>
-<!-- Non-essentials (hidden) -->
-<option data-cat="?" value="Glitter">✨ Glitter</option>
-<option data-cat="?" value="Garlic">🧄 Garlic</option>
-<option data-cat="?" value="Alarm Clock">⏰ Alarm Clock</option>
-<option data-cat="?" value="Novelty Socks">🧦 Novelty Socks</option>
-</select>
-<button id="playerBtn" onclick="playerTurn()">Add Item</button>
-</div>
-<div class="box">
-<div class="title">🐦 Coco</div>
-<div class="status" id="statusBubble">Coco is waiting for your pick…</div>
-<div class="row hidden" id="cocoControls">
-<button class="secondary" onclick="acceptCocoItem()">✅ Accept</button>
-<button class="secondary" onclick="rejectCocoItem()">❌ Reject</button>
-</div>
-</div>
-</div>
-<div class="box">
-<div class="title">📝 Plan so far</div>
-<ul id="planList"></ul>
-<div class="status" id="liveCats"></div>
-</div>
-<div class="box hidden" id="results"></div>
+  </div>
+
+  <div class="box row">
+    <div>
+      <strong>Scenario</strong><br>
+      <select id="scenarioSelect" onchange="selectScenario()">
+        <option value="">-- Choose --</option>
+        <option value="0">Picnic on a hot day</option>
+        <option value="1">Rainy day hike</option>
+        <option value="2">Outdoor birthday party</option>
+        <option value="3">Beach afternoon</option>
+        <option value="4">Park concert (evening)</option>
+        <option value="5">Winter walk in the park</option>
+        <option value="6">Family picnic with toddler</option>
+        <option value="7">Sunset viewpoint hike</option>
+        <option value="8">Lakeside BBQ</option>
+        <option value="9">Community sports day</option>
+      </select>
+    </div>
+    <div id="catsBox" class="hidden">
+      <strong>Required categories</strong>
+      <div id="catBadges" class="badges"></div>
+    </div>
+    <div id="rulesBox" class="hidden">
+      <strong>Scenario rules</strong>
+      <ul id="rulesList" class="rules"></ul>
+    </div>
+    <div id="progress" class="status hidden">Turn <span id="turnNum">1</span> of 8 • Player turns left: <span id="pLeft">4</span> • Coco turns left: <span id="cLeft">4</span></div>
+  </div>
+
+  <div class="grid">
+    <div class="box">
+      <div class="title">🧍 Your turn</div>
+      <select id="playerChoice">
+        <option value="">Choose an item</option>
+        <!-- Food -->
+        <option value="Sandwiches" data-cat="food">🥪 Sandwiches</option>
+        <option value="Fruit" data-cat="food">🍉 Fruit</option>
+        <option value="Trail Mix" data-cat="food">🥜 Trail Mix</option>
+        <!-- Drinks -->
+        <option value="Water" data-cat="drink">💧 Water</option>
+        <option value="Juice" data-cat="drink">🧃 Juice</option>
+        <!-- Safety -->
+        <option value="Sunscreen" data-cat="safety">🧴 Sunscreen</option>
+        <option value="Umbrella" data-cat="safety">☂️ Umbrella</option>
+        <option value="Map" data-cat="safety">🗺️ Map</option>
+        <!-- Comfort -->
+        <option value="Blanket" data-cat="comfort">🧺 Blanket</option>
+        <option value="Jacket" data-cat="comfort">🧥 Jacket</option>
+        <!-- Activity -->
+        <option value="Kite" data-cat="activity">🪁 Kite</option>
+        <option value="Frisbee" data-cat="activity">🥏 Frisbee</option>
+        <!-- Non-essentials (hidden) -->
+        <option value="Glitter" data-cat="?">✨ Glitter</option>
+        <option value="Garlic" data-cat="?">🧄 Garlic</option>
+        <option value="Alarm Clock" data-cat="?">⏰ Alarm Clock</option>
+        <option value="Novelty Socks" data-cat="?">🧦 Novelty Socks</option>
+      </select>
+      <button id="playerBtn" onclick="playerTurn()">Add Item</button>
+    </div>
+
+    <div class="box">
+      <div class="title">🐦 Coco</div>
+      <div id="statusBubble" class="status">Coco is waiting for your pick…</div>
+      <div class="row hidden" id="cocoControls">
+        <button class="secondary" onclick="acceptCocoItem()">✅ Accept</button>
+        <button class="secondary" onclick="rejectCocoItem()">❌ Reject</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="title">📝 Plan so far</div>
+    <ul id="planList"></ul>
+    <div id="liveCats" class="status"></div>
+  </div>
+
+  <div id="results" class="box hidden"></div>
+
 <script>
   // --- 10 Scenarios with extra rules ---
   // Rule types supported:
@@ -382,5 +389,5 @@
     res.innerHTML=html; res.classList.remove("hidden"); document.getElementById("statusBubble").textContent="Planning complete.";
   }
 </script>
-</main></body>
+</body>
 </html>

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Build your package</title>
-<style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Build your package</title>
+  <style>
     :root{--bg:#f7f7f9;--card:#fff;--text:#1f2937;--muted:#667085;--border:#e5e7eb;--brand:#0a66c2;--brand2:#084f96;--radius:16px;--shadow:0 10px 22px rgba(0,0,0,.08)}
     body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
     header{padding:26px 16px;text-align:center;border-bottom:1px solid var(--border);background:linear-gradient(#ffffff, #fafbff)}
@@ -27,32 +27,36 @@
     .center{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
     @media (max-width:600px){header h1{font-size:22px}}
   </style>
-<meta content="Build_your_package" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script></head>
-<body><main id="app-root">
-<header>
-<h1>Build your package</h1>
-<p>Select apps and download a single ZIP. This simple packager includes each app’s <code>index.html</code> only — reliable on GitHub Pages. (For full offline bundles we can add per‑app manifests later.)</p>
-</header>
-<main>
-<section class="panel">
-<div class="controls">
-<div class="center">
-<button class="btn secondary" id="btnAll">Select all</button>
-<button class="btn secondary" id="btnNone">Clear</button>
-<button class="btn" id="btnZip">Download ZIP</button>
-</div>
-<div aria-live="polite" class="muted" id="count"></div>
-</div>
-<div class="progress" style="margin-top:8px"><div id="bar"></div></div>
-<div aria-live="polite" class="muted" id="status" style="margin-top:6px"></div>
-</section>
-<section class="panel">
-<div class="apps" id="apps" role="list"></div>
-</section>
-</main>
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-<script>
+</head>
+<body>
+  <header>
+    <h1>Build your package</h1>
+    <p>Select apps and download a single ZIP. This simple packager includes each app’s <code>index.html</code> only — reliable on GitHub Pages. (For full offline bundles we can add per‑app manifests later.)</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <div class="controls">
+        <div class="center">
+          <button id="btnAll" class="btn secondary">Select all</button>
+          <button id="btnNone" class="btn secondary">Clear</button>
+          <button id="btnZip" class="btn">Download ZIP</button>
+        </div>
+        <div id="count" class="muted" aria-live="polite"></div>
+      </div>
+      <div class="progress" style="margin-top:8px"><div id="bar"></div></div>
+      <div id="status" class="muted" style="margin-top:6px" aria-live="polite"></div>
+    </section>
+
+    <section class="panel">
+      <div id="apps" class="apps" role="list"></div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
+  <script>
     const ABS_CATALOG = location.origin + location.pathname.replace(/Build_your_package.*$/, '') + 'catalog.json';
     const PACKAGER = 'Build your package';
     const APPS = document.getElementById('apps');
@@ -174,5 +178,5 @@
     BTN_ZIP.onclick = makeZip;
     load();
   </script>
-</main></body>
+</body>
 </html>

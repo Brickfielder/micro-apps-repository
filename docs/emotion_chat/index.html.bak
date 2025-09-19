@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Emotion Chat — Social Cognition Micro-App</title>
-<meta content="WhatsApp-style scenarios to practice emotion recognition, theory of mind, and social reasoning." name="description"/>
+<meta name="description" content="WhatsApp-style scenarios to practice emotion recognition, theory of mind, and social reasoning." />
 <style>
   /* ===================== Design tokens ===================== */
   :root{
@@ -161,90 +161,97 @@
     *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important }
   }
 </style>
-<meta content="emotion_chat" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script></head>
-<body><main id="app-root">
-<header>
-<div class="wrap stack">
-<span class="chip">Prototype</span>
-<h1 class="brandtitle">Emotion Chat — <span class="accent" id="accentWord"></span></h1>
-<p class="sub">WhatsApp-style scenarios to practice emotion recognition, theory of mind, and social reasoning.</p>
-<div class="bar">
-<label>
+</head>
+<body>
+  <header>
+    <div class="wrap stack">
+      <span class="chip">Prototype</span>
+      <h1 class="brandtitle">Emotion Chat — <span id="accentWord" class="accent"></span></h1>
+      <p class="sub">WhatsApp-style scenarios to practice emotion recognition, theory of mind, and social reasoning.</p>
+
+      <div class="bar">
+        <label>
           Scenario
           <select id="scenario"></select>
-</label>
-<label>
+        </label>
+        <label>
           Distractors per person
           <select id="distractors">
-<option>6</option>
-<option selected="">8</option>
-<option>10</option>
-<option>12</option>
-<option>14</option>
-</select>
-</label>
-<button class="primary" id="play">Play chat</button>
-<button class="secondary" disabled="" id="skip">Skip chat</button>
-<button class="ghost" disabled="" id="reset">Reset</button>
-<button class="secondary" disabled="" id="download" title="Download CSV of your results">Download CSV</button>
-<span aria-live="polite" class="small" id="status"></span>
-</div>
-</div>
-</header>
-<main class="wrap">
-<div class="grid">
-<!-- Left: Chat -->
-<section aria-labelledby="chatTitle" class="card pad">
-<h2 id="chatTitle">Chat</h2>
-<div aria-label="Chat transcript" aria-live="polite" class="chat" id="chat"></div>
-<div class="footer">
-<span class="small" id="progress">0 / 0</span>
-<span class="small" id="timerText"></span>
-</div>
-</section>
-<!-- Right: Steps -->
-<section aria-labelledby="respTitle" class="card pad">
-<h2 id="respTitle">Your responses</h2>
-<div class="step" id="step1">
-<h3>Step 1 — Free choice</h3>
-<div class="row">
-<div>
-<label class="legend" for="freeA" id="labelA"></label>
-<textarea id="freeA" placeholder="Type one or more emotions…"></textarea>
-</div>
-<div>
-<label class="legend" for="freeB" id="labelB"></label>
-<textarea id="freeB" placeholder="Type one or more emotions…"></textarea>
-</div>
-</div>
-<div class="divider"></div>
-<button class="primary" disabled="" id="proceed">Continue to Step 2</button>
-<span class="small" id="step1Hint">Finish the chat, then fill both boxes to proceed.</span>
-</div>
-<div class="step" hidden="" id="step2">
-<h3>Step 2 — Select emotions (choose all that apply)</h3>
-<div class="row" style="grid-template-columns:1fr 1fr">
-<div>
-<div class="legend" id="pillTitleA"></div>
-<div class="pills" id="pillsA"></div>
-</div>
-<div>
-<div class="legend" id="pillTitleB"></div>
-<div class="pills" id="pillsB"></div>
-</div>
-</div>
-<div class="divider"></div>
-<button class="primary" disabled="" id="submit">Show feedback</button>
-</div>
-<div class="step" hidden="" id="step3">
-<h3>Step 3 — Feedback</h3>
-<div class="feedback" id="fbA"></div>
-<div class="feedback" id="fbB"></div>
-<div class="kpi" id="kpi"></div>
-</div>
-</section>
-</div>
-</main>
+            <option>6</option>
+            <option selected>8</option>
+            <option>10</option>
+            <option>12</option>
+            <option>14</option>
+          </select>
+        </label>
+        <button id="play" class="primary">Play chat</button>
+        <button id="skip" class="secondary" disabled>Skip chat</button>
+        <button id="reset" class="ghost" disabled>Reset</button>
+        <button id="download" class="secondary" title="Download CSV of your results" disabled>Download CSV</button>
+        <span class="small" id="status" aria-live="polite"></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="grid">
+      <!-- Left: Chat -->
+      <section class="card pad" aria-labelledby="chatTitle">
+        <h2 id="chatTitle">Chat</h2>
+        <div id="chat" class="chat" aria-live="polite" aria-label="Chat transcript"></div>
+        <div class="footer">
+          <span class="small" id="progress">0 / 0</span>
+          <span class="small" id="timerText"></span>
+        </div>
+      </section>
+
+      <!-- Right: Steps -->
+      <section class="card pad" aria-labelledby="respTitle">
+        <h2 id="respTitle">Your responses</h2>
+
+        <div class="step" id="step1">
+          <h3>Step 1 — Free choice</h3>
+          <div class="row">
+            <div>
+              <label id="labelA" for="freeA" class="legend"></label>
+              <textarea id="freeA" placeholder="Type one or more emotions…"></textarea>
+            </div>
+            <div>
+              <label id="labelB" for="freeB" class="legend"></label>
+              <textarea id="freeB" placeholder="Type one or more emotions…"></textarea>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <button id="proceed" class="primary" disabled>Continue to Step 2</button>
+          <span class="small" id="step1Hint">Finish the chat, then fill both boxes to proceed.</span>
+        </div>
+
+        <div class="step" id="step2" hidden>
+          <h3>Step 2 — Select emotions (choose all that apply)</h3>
+          <div class="row" style="grid-template-columns:1fr 1fr">
+            <div>
+              <div id="pillTitleA" class="legend"></div>
+              <div id="pillsA" class="pills"></div>
+            </div>
+            <div>
+              <div id="pillTitleB" class="legend"></div>
+              <div id="pillsB" class="pills"></div>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <button id="submit" class="primary" disabled>Show feedback</button>
+        </div>
+
+        <div class="step" id="step3" hidden>
+          <h3>Step 3 — Feedback</h3>
+          <div id="fbA" class="feedback"></div>
+          <div id="fbB" class="feedback"></div>
+          <div class="kpi" id="kpi"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
 <script>
 /* ========= Global master list ========= */
 const MASTER_PILLS = [
@@ -699,5 +706,5 @@ freeB.addEventListener("input", updateProceedState);
 populateScenarioList();
 loadScenario(SCENARIOS[0].id);
 </script>
-</main></body>
+</body>
 </html>

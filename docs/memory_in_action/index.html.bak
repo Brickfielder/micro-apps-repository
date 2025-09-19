@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Memory in Action — WhatsApp Scenarios (Progressive Cues + New Distractors)</title>
-<meta content="light dark" name="color-scheme"/>
+<meta name="color-scheme" content="light dark">
 <style>
   :root{
     --bg:#f6f7fb; --card:#ffffff; --ink:#0f172a; --muted:#667085; --brand:#0a66c2; --brand-ink:#084f96;
@@ -82,103 +82,103 @@
   .match-card{height:80px;border:1px solid var(--border);border-radius:12px;display:grid;place-items:center;background:var(--pill);cursor:pointer;font-weight:700}
   .match-card.revealed{background:#fff}
 </style>
-<meta content="memory_in_action" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script></head>
-<body><main id="app-root">
-<div class="wrap">
-<h1>Memory in Action — WhatsApp Scenarios</h1>
-<div class="sub">Watch and listen to a short conversation, complete a quick distractor task, then answer recall questions. Clear, playful, and aligned with the Micro Apps look.</div>
-<div class="grid">
-<div class="card">
-<div class="sectionTitle">Settings</div>
-<div class="label">Scenario</div><select id="scenarioSel"></select>
-<div class="label" style="margin-top:8px">Message speed</div>
-<select id="speedSel"><option selected="" value="4500">Every 4.5s (recommended)</option><option value="5000">Every 5s (slower)</option><option value="3500">Every 3.5s (faster)</option></select>
-<div class="label" style="margin-top:8px">Distractor</div>
-<select id="distractorSel">
-<option selected="" value="puzzle">Sliding Puzzle</option>
-<option value="stroop">Stroop Task</option>
-<option value="match">Matching Pairs</option>
-</select>
-<div class="row" style="margin-top:8px"><div style="flex:1">
-<div class="label">Voice</div><select id="voiceSel"><option>Loading voices…</option></select></div></div>
-<div class="row" style="margin-top:8px">
-<div style="flex:1"><div class="label">Rate</div><input id="voiceRate" max="1.2" min="0.7" step="0.05" type="range" value="0.95"/></div>
-<div style="flex:1"><div class="label">Pitch</div><input id="voicePitch" max="2" min="0.5" step="0.1" type="range" value="1"/></div>
-<div style="flex:1"><div class="label">Volume</div><input id="voiceVol" max="1" min="0" step="0.05" type="range" value="1"/></div>
-</div>
-<div class="row" style="margin-top:12px">
-<button class="btn primary" id="btnStart">Start session</button>
-<button class="btn ghost" disabled="" id="btnPause">Pause</button>
-<button class="btn ghost" disabled="" id="btnStopVoice">Stop voice</button>
-<button class="btn ghost" id="btnReset">Reset</button>
-</div>
-<div class="row" style="margin-top:8px"><button class="btn ghost" id="btnDemo">Quick demo</button><button class="btn ghost" id="btnDownload">Download CSV</button></div>
-<div style="margin-top:12px"><span class="stat" id="statLen">Length: 10 msgs</span><span class="stat" id="statScenario">Scenario: —</span></div>
-<div style="margin-top:12px"><div class="label">Session log</div><div aria-live="polite" class="log" id="log"></div></div>
-</div>
-<div class="card">
-<div class="sectionTitle">Task area</div>
-<div class="pill">Strategy step → Conversation → <strong>Distractor</strong> → Recall</div>
-<section id="strategyCard" style="margin-top:12px">
-<div class="label">Choose your strategy</div>
-<div class="row" role="group">
-<button class="btn ghost" data-strategy="Notepad">📝 Notepad</button>
-<button class="btn ghost" data-strategy="Grouping">🧩 Grouping</button>
-<button class="btn ghost" data-strategy="Visualization">🎨 Visualization</button>
-<button class="btn ghost" data-strategy="Cued">🧠 Cued recognition</button>
-<button class="btn ghost" data-strategy="None">🙋 No strategy</button>
-</div>
-<div id="strategyInfo" style="margin-top:10px">
-<div class="pill">Tip: If you repeat the same strategy 3×, I’ll suggest variety.</div>
-</div>
-</section>
-<section class="hidden" id="scenarioCard" style="margin-top:12px">
-<div class="chatWrap">
-<div class="chatHeader"><div class="avatar">A</div><div><strong id="chatTitle">Conversation</strong><div class="muted" style="font-size:12px">10 messages will appear</div></div><div class="muted" id="chatCounter" style="margin-left:auto">0/10</div></div>
-<div class="progress"><span id="chatProgress"></span></div>
-<div class="chat" id="chat"></div>
-<div class="typing hidden" id="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
-</div>
-<div class="row" style="margin-top:8px;justify-content:flex-end"><button class="btn primary" disabled="" id="btnToDistractor">Continue → Distractor</button></div>
-</section>
-<!-- DISTRACTOR CARD -->
-<section class="hidden" id="distractorCard" style="margin-top:12px">
-<div class="label">Distractor task</div>
-<!-- Sliding Puzzle UI -->
-<div class="hidden" id="puzzleUI">
-<div class="label">Complete the sliding puzzle to continue (3×3, max 4×4).</div>
-<div class="row"><div><div class="puzzleWrap" id="puzzleGrid" style="grid-template-columns:repeat(3,72px)"></div><div class="pStatus muted" id="pStatus">Moves: 0</div>
-<div class="row" style="margin-top:8px"><button class="btn ghost" id="btnShuffle">Shuffle</button><button class="btn ghost" id="btnSize">Size: 3×3</button><button class="btn warn" id="btnSkip">Skip (after 20s)</button></div></div></div>
-</div>
-<!-- Stroop UI -->
-<div class="hidden" id="stroopUI">
-<div class="label">Say the ink color, not the word. Click the correct color.</div>
-<div class="stroop-word" id="stroopWord">BLUE</div>
-<div class="stroop-grid" id="stroopBtns"></div>
-<div class="stroop-score muted" id="stroopScore">0/12</div>
-</div>
-<!-- Matching UI -->
-<div class="hidden" id="matchUI">
-<div class="label">Find all pairs. Two mismatches add 1s lockout.</div>
-<div class="match-grid" id="matchGrid"></div>
-<div class="muted" id="matchStatus">Pairs found: 0/6</div>
-</div>
-</section>
-<!-- RECALL -->
-<section class="hidden" id="recallCard" style="margin-top:12px">
-<div class="label">Recall — 5 Questions</div>
-<div class="muted">Answer freely. If stuck, click “Show hint”, then “More” for options.</div>
-<div id="recallInputs" style="margin-top:8px"></div>
-<div class="row" style="margin-top:10px"><button class="btn primary" id="btnCheck">Check answers</button></div>
-</section>
-<section class="hidden" id="feedbackCard" style="margin-top:12px">
-<div class="label">Feedback</div>
-<div id="feedbackZone"></div>
-<div class="row" style="margin-top:10px"><button class="btn success" id="btnRestart">Start another session</button></div>
-</section>
-</div>
-</div>
-</div>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Memory in Action — WhatsApp Scenarios</h1>
+    <div class="sub">Watch and listen to a short conversation, complete a quick distractor task, then answer recall questions. Clear, playful, and aligned with the Micro Apps look.</div>
+    <div class="grid">
+      <div class="card">
+        <div class="sectionTitle">Settings</div>
+        <div class="label">Scenario</div><select id="scenarioSel"></select>
+        <div class="label" style="margin-top:8px">Message speed</div>
+        <select id="speedSel"><option value="4500" selected>Every 4.5s (recommended)</option><option value="5000">Every 5s (slower)</option><option value="3500">Every 3.5s (faster)</option></select>
+        <div class="label" style="margin-top:8px">Distractor</div>
+        <select id="distractorSel">
+          <option value="puzzle" selected>Sliding Puzzle</option>
+          <option value="stroop">Stroop Task</option>
+          <option value="match">Matching Pairs</option>
+        </select>
+        <div class="row" style="margin-top:8px"><div style="flex:1">
+          <div class="label">Voice</div><select id="voiceSel"><option>Loading voices…</option></select></div></div>
+        <div class="row" style="margin-top:8px">
+          <div style="flex:1"><div class="label">Rate</div><input type="range" id="voiceRate" min="0.7" max="1.2" step="0.05" value="0.95"></div>
+          <div style="flex:1"><div class="label">Pitch</div><input type="range" id="voicePitch" min="0.5" max="2" step="0.1" value="1"></div>
+          <div style="flex:1"><div class="label">Volume</div><input type="range" id="voiceVol" min="0" max="1" step="0.05" value="1"></div>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <button class="btn primary" id="btnStart">Start session</button>
+          <button class="btn ghost" id="btnPause" disabled>Pause</button>
+          <button class="btn ghost" id="btnStopVoice" disabled>Stop voice</button>
+          <button class="btn ghost" id="btnReset">Reset</button>
+        </div>
+        <div class="row" style="margin-top:8px"><button class="btn ghost" id="btnDemo">Quick demo</button><button class="btn ghost" id="btnDownload">Download CSV</button></div>
+        <div style="margin-top:12px"><span class="stat" id="statLen">Length: 10 msgs</span><span class="stat" id="statScenario">Scenario: —</span></div>
+        <div style="margin-top:12px"><div class="label">Session log</div><div id="log" class="log" aria-live="polite"></div></div>
+      </div>
+      <div class="card">
+        <div class="sectionTitle">Task area</div>
+        <div class="pill">Strategy step → Conversation → <strong>Distractor</strong> → Recall</div>
+        <section id="strategyCard" style="margin-top:12px">
+          <div class="label">Choose your strategy</div>
+          <div class="row" role="group">
+            <button class="btn ghost" data-strategy="Notepad">📝 Notepad</button>
+            <button class="btn ghost" data-strategy="Grouping">🧩 Grouping</button>
+            <button class="btn ghost" data-strategy="Visualization">🎨 Visualization</button>
+            <button class="btn ghost" data-strategy="Cued">🧠 Cued recognition</button>
+            <button class="btn ghost" data-strategy="None">🙋 No strategy</button>
+          </div>
+          <div id="strategyInfo" style="margin-top:10px">
+            <div class="pill">Tip: If you repeat the same strategy 3×, I’ll suggest variety.</div>
+          </div>
+        </section>
+        <section id="scenarioCard" class="hidden" style="margin-top:12px">
+          <div class="chatWrap">
+            <div class="chatHeader"><div class="avatar">A</div><div><strong id="chatTitle">Conversation</strong><div class="muted" style="font-size:12px">10 messages will appear</div></div><div style="margin-left:auto" class="muted" id="chatCounter">0/10</div></div>
+            <div class="progress"><span id="chatProgress"></span></div>
+            <div class="chat" id="chat"></div>
+            <div class="typing hidden" id="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          </div>
+          <div class="row" style="margin-top:8px;justify-content:flex-end"><button class="btn primary" id="btnToDistractor" disabled>Continue → Distractor</button></div>
+        </section>
+        <!-- DISTRACTOR CARD -->
+        <section id="distractorCard" class="hidden" style="margin-top:12px">
+          <div class="label">Distractor task</div>
+          <!-- Sliding Puzzle UI -->
+          <div id="puzzleUI" class="hidden">
+            <div class="label">Complete the sliding puzzle to continue (3×3, max 4×4).</div>
+            <div class="row"><div><div class="puzzleWrap" id="puzzleGrid" style="grid-template-columns:repeat(3,72px)"></div><div class="pStatus muted" id="pStatus">Moves: 0</div>
+            <div class="row" style="margin-top:8px"><button class="btn ghost" id="btnShuffle">Shuffle</button><button class="btn ghost" id="btnSize">Size: 3×3</button><button class="btn warn" id="btnSkip">Skip (after 20s)</button></div></div></div>
+          </div>
+          <!-- Stroop UI -->
+          <div id="stroopUI" class="hidden">
+            <div class="label">Say the ink color, not the word. Click the correct color.</div>
+            <div id="stroopWord" class="stroop-word">BLUE</div>
+            <div class="stroop-grid" id="stroopBtns"></div>
+            <div class="stroop-score muted" id="stroopScore">0/12</div>
+          </div>
+          <!-- Matching UI -->
+          <div id="matchUI" class="hidden">
+            <div class="label">Find all pairs. Two mismatches add 1s lockout.</div>
+            <div class="match-grid" id="matchGrid"></div>
+            <div class="muted" id="matchStatus">Pairs found: 0/6</div>
+          </div>
+        </section>
+        <!-- RECALL -->
+        <section id="recallCard" class="hidden" style="margin-top:12px">
+          <div class="label">Recall — 5 Questions</div>
+          <div class="muted">Answer freely. If stuck, click “Show hint”, then “More” for options.</div>
+          <div id="recallInputs" style="margin-top:8px"></div>
+          <div class="row" style="margin-top:10px"><button class="btn primary" id="btnCheck">Check answers</button></div>
+        </section>
+        <section id="feedbackCard" class="hidden" style="margin-top:12px">
+          <div class="label">Feedback</div>
+          <div id="feedbackZone"></div>
+          <div class="row" style="margin-top:10px"><button class="btn success" id="btnRestart">Start another session</button></div>
+        </section>
+      </div>
+    </div>
+  </div>
 <script>
 (function(){
   const $ = s=>document.querySelector(s);
@@ -481,5 +481,5 @@ function grade(sc){ let correct=0,total=sc.qs.length,details=[]; Array.from(reca
   log('Ready. Pick a strategy and press Start session.');
 })();
 </script>
-</main></body>
+</body>
 </html>

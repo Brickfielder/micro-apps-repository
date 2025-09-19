@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Star Hunting (20×8, Visible, Sweep)</title>
 <style>
   :root{
@@ -106,62 +106,71 @@
   .footer{ font-size:12px; color:#6b7280; text-align:center; }
   .kbd{ font-family: ui-monospace, monospace; background:#e5e7eb; border:1px solid #9ca3af; padding:2px 6px; border-radius:6px; color:#111827; }
 </style>
-<meta content="Star_Hunt" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script></head>
-<body><main id="app-root">
-<main aria-label="Star Hunting app" class="app">
-<div class="instructions">
-<strong>Instructions:</strong> Click on every ★ star you see inside the grid.
+</head>
+<body>
+  <main class="app" aria-label="Star Hunting app">
+    <div class="instructions">
+      <strong>Instructions:</strong> Click on every ★ star you see inside the grid.
       Scan across the whole board until all stars are found. Try to avoid clicking empty squares.
       When you complete the grid, you can download your report or start a new session.
     </div>
-<section aria-label="Controls and status" class="header" role="region">
-<div class="group">
-<label for="stars">Stars</label>
-<select aria-label="Number of stars" id="stars">
-<option value="8">8</option>
-<option selected="" value="10">10</option>
-<option value="12">12</option>
-<option value="15">15</option>
-<option value="20">20</option>
-<option value="25">25</option>
-<option value="30">30</option>
-</select>
-<button class="primary" id="new" type="button">New Session</button>
-<button class="ghost" id="download" type="button">Download Report (CSV)</button>
-</div>
-<div aria-label="Guiding sweep controls" class="group">
-<label for="sweep">Sweep</label>
-<select id="sweep">
-<option value="off">Off</option>
-<option selected="" value="on">On</option>
-</select>
-<label for="sweepSpeed">Speed</label>
-<select id="sweepSpeed">
-<option value="500">0.5s</option>
-<option selected="" value="1000">1s</option>
-</select>
-<label for="sweepDir">Direction</label>
-<select id="sweepDir">
-<option selected="" value="rtl">Right → Left</option>
-<option value="ltr">Left → Right</option>
-</select>
-</div>
-<div aria-live="polite" class="stats" role="status">
-<div>Timer (grid): <b id="timer">00:00</b></div>
-<div>Found: <b id="found">0</b>/<span id="total">0</span></div>
-<div>Clicks: <b id="clicks">0</b></div>
-<div>Errors: <b id="errors">0</b></div>
-<div>Grids done: <b id="grids">0</b></div>
-<div>Total time: <b id="totaltime">00:00</b></div>
-</div>
-</section>
-<section class="board-wrap">
-<div aria-label="Hunting grid" class="board" id="board" role="grid"></div>
-</section>
-<p class="footer">
+
+    <section class="header" role="region" aria-label="Controls and status">
+      <div class="group">
+        <label for="stars">Stars</label>
+        <select id="stars" aria-label="Number of stars">
+          <option value="8">8</option>
+          <option value="10" selected>10</option>
+          <option value="12">12</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+  	  <option value="25">25</option>
+  	  <option value="30">30</option>
+        </select>
+
+        <button id="new" class="primary" type="button">New Session</button>
+        <button id="download" class="ghost" type="button">Download Report (CSV)</button>
+      </div>
+
+      <div class="group" aria-label="Guiding sweep controls">
+        <label for="sweep">Sweep</label>
+        <select id="sweep">
+          <option value="off">Off</option>
+          <option value="on" selected>On</option>
+        </select>
+
+        <label for="sweepSpeed">Speed</label>
+        <select id="sweepSpeed">
+          <option value="500">0.5s</option>
+          <option value="1000" selected>1s</option>
+        </select>
+
+        <label for="sweepDir">Direction</label>
+        <select id="sweepDir">
+          <option value="rtl" selected>Right → Left</option>
+          <option value="ltr">Left → Right</option>
+        </select>
+      </div>
+
+      <div class="stats" role="status" aria-live="polite">
+        <div>Timer (grid): <b id="timer">00:00</b></div>
+        <div>Found: <b id="found">0</b>/<span id="total">0</span></div>
+        <div>Clicks: <b id="clicks">0</b></div>
+        <div>Errors: <b id="errors">0</b></div>
+        <div>Grids done: <b id="grids">0</b></div>
+        <div>Total time: <b id="totaltime">00:00</b></div>
+      </div>
+    </section>
+
+    <section class="board-wrap">
+      <div id="board" class="board" role="grid" aria-label="Hunting grid"></div>
+    </section>
+
+    <p class="footer">
       Tip: navigate with <span class="kbd">Tab</span> + <span class="kbd">Enter</span>. Stars are always visible; tap all ★’s.
     </p>
-</main>
+  </main>
+
 <script>
 (function(){
   const COLS = 20, ROWS = 8;        // fixed grid as requested
@@ -391,5 +400,5 @@
   })();
 })();
 </script>
-</main></body>
+</body>
 </html>
