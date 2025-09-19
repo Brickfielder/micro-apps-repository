@@ -100,6 +100,13 @@
   html[data-theme="dark"] body{background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0px,rgba(255,255,255,.06) 1px,transparent 1px,transparent 6px)}
   html[data-theme="dark"] .badge{background:rgba(255,122,110,.18);color:#ffd0cb}
   html[data-theme="dark"] .open{color:var(--accent-600)}
+  /* Make the title use the full container width (no balanced wrapping) */
+.hero h1{
+  text-wrap: normal;      /* overrides the earlier text-wrap: balance */
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
 </style>
 </head>
 <body>
