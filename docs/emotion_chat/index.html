@@ -3,153 +3,110 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<span class="chip">Prototype</span>
-<h1 class="brandtitle">
-  Emotion Chat — <span id="accentWord" class="accent"></span>
-</h1>
-<p class="sub lead">
-  WhatsApp-style scenarios to practice emotion recognition, theory of mind, and social reasoning.
-</p>
+<title>Emotion Chat — Social Cognition Micro-App</title>
+<meta name="description" content="WhatsApp-style scenarios to practice emotion recognition, theory of mind, and social reasoning." />
 <style>
   /* ===================== Design tokens ===================== */
   :root{
     color-scheme: light dark;
 
-    /* Colors */
-    --bg: #f6f7fb;
-    --surface: #ffffff;
-    --surface-alt: #f1f5f9;
-    --text: #0f172a;      /* slate-900 */
-    --muted: #475569;     /* slate-600 */
-    --line: #e2e8f0;      /* slate-200 */
-    --accent: #3b82f6;    /* blue-500 */
-    --accent-600:#2563eb; /* blue-600 */
-    --accent-700:#1d4ed8; /* blue-700 */
-    --pill:#eef2ff;
+    /* Colors (light) */
+    --bg:#f6f7fb;
+    --surface:#ffffff;
+    --surface-alt:#f1f5f9;
+    --text:#0f172a;        /* slate-900 */
+    --muted:#475569;       /* slate-600 */
+    --line:#e2e8f0;        /* slate-200 */
+    --brand:#3b82f6;       /* blue-500 */
+    --brand-600:#2563eb;   /* blue-600 */
+    --brand-700:#1d4ed8;   /* blue-700 */
+    --chip-bg:#eef2ff;
+    --chip-fg:#4f46e5;
 
-    --good:#16a34a;
-    --bad:#b91c1c;
+    --good:#16a34a; --bad:#b91c1c;
 
-    /* Type scale (clamped for responsiveness) */
+    /* Type scale */
     --font-base: clamp(17px, 1.2vw, 19px);
-    --h1: clamp(30px, 3.5vw, 44px);
+    --h1: clamp(30px, 3.4vw, 44px);
     --h2: clamp(18px, 2vw, 22px);
     --h3: clamp(16px, 1.6vw, 18px);
     --small: clamp(13px, 1.2vw, 14.5px);
 
     /* Layout */
-    --radius: 16px;
-    --radius-lg: 22px;
-    --shadow: 0 8px 28px rgba(2, 6, 23, 0.08);
-    --shadow-sm: 0 2px 8px rgba(2, 6, 23, 0.06);
-    --gap: 18px;
+    --r:16px; --r-lg:22px;
+    --shadow: 0 8px 28px rgba(2,6,23,.08);
+    --shadow-sm: 0 2px 8px rgba(2,6,23,.06);
   }
 
   *{ box-sizing:border-box }
   html, body { height:100% }
   body{
-    margin:0;
-    background:var(--bg);
-    color:var(--text);
+    margin:0; background:var(--bg); color:var(--text);
     font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
-    line-height:1.55;
-    font-size: var(--font-base);
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
+    font-size: var(--font-base); line-height:1.55;
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
   }
 
   /* ===================== Header ===================== */
   header{
-    position:sticky; top:0; z-index:10;
-    background: linear-gradient(180deg, #fff, rgba(255,255,255,.94));
+    position: sticky; top: 0; z-index: 10;
+    background: linear-gradient(180deg,#fff,rgba(255,255,255,.94));
     backdrop-filter: saturate(1.05) blur(6px);
     border-bottom: 1px solid var(--line);
   }
   .wrap{ max-width: 1200px; margin: 0 auto; padding: 20px 22px; }
-  .headstack{ display: grid; gap: 8px; }
-
+  .stack{ display:grid; gap:10px }
   .chip{
-    display:inline-flex; align-items:center; gap:8px;
+    width:max-content; display:inline-flex; align-items:center; gap:8px;
     padding:6px 12px; border-radius:999px; font-size: var(--small);
-    background:#eef2ff; color:#4f46e5; border:1px solid var(--line);
+    background:var(--chip-bg); color:var(--chip-fg); border:1px solid var(--line);
     box-shadow: var(--shadow-sm);
-    width:max-content;
   }
-
   .brandtitle{
-    margin:0;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-    line-height: 1.15;
-    font-size: var(--h1);
-    color: var(--text);
+    margin:0; font-weight:800; letter-spacing:-0.01em; line-height:1.15; font-size:var(--h1);
   }
-  .brandtitle .accent{ color: var(--accent); }
-
-  p.sub{ margin: 2px 0 14px; color: var(--muted); font-size: var(--small) }
+  .brandtitle .accent{ color: var(--brand) }
+  p.sub{ margin:0; color:var(--muted); font-size: var(--small) }
 
   /* Controls bar */
-  .bar{
-    display:flex; flex-wrap:wrap; gap: 12px 14px; align-items:flex-end;
-    margin: 8px 0 6px;
-  }
+  .bar{ display:flex; flex-wrap:wrap; gap: 12px 14px; align-items:flex-end; margin-top: 8px }
   .bar label{ font-size: var(--small); color:var(--muted); display:inline-grid; gap:6px }
   select,button,textarea,input{ font:inherit }
   select,button{
-    border:1px solid var(--line);
-    border-radius: 12px;
-    padding: 12px 14px;
-    background:#fff;
-    box-shadow: var(--shadow-sm);
+    border:1px solid var(--line); border-radius: 12px; padding: 12px 14px; background:#fff; box-shadow: var(--shadow-sm);
   }
-  button.primary{ background:var(--accent); color:#fff; border:none }
-  button.primary:hover{ background:var(--accent-600) }
+  button.primary{ background:var(--brand); color:#fff; border:none }
+  button.primary:hover{ background:var(--brand-600) }
   button.secondary{ background:#fff }
   button.ghost{ background:transparent; border-color:transparent; color:var(--muted) }
   button:disabled{ opacity:.6; cursor:not-allowed }
 
-  /* Visible focus for keyboard users */
-  :where(button, a, select, textarea, input):focus-visible{
-    outline: 3px solid color-mix(in oklab, var(--accent) 60%, white);
+  /* Visible, accessible focus */
+  :where(button,a,select,textarea,input):focus-visible{
+    outline: 3px solid color-mix(in oklab, var(--brand) 60%, white);
     outline-offset: 2px;
-    border-color: var(--accent-600);
+    border-color: var(--brand-600);
   }
 
-  /* ===================== Main layout ===================== */
+  /* ===================== Main ===================== */
   main{ padding: 22px }
-  .grid{
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 22px;
-  }
+  .grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 22px }
   @media (max-width: 980px){ .grid{ grid-template-columns:1fr } }
 
   .card{
-    background:var(--surface);
-    border:1px solid var(--line);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow);
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--shadow);
   }
   .pad{ padding: 18px 18px 16px }
-  .card h2{ font-size: var(--h2); margin:0 0 12px }
+  .card h2{ font-size: var(--h2); margin: 0 0 12px }
 
-  /* ===================== Chat ===================== */
+  /* Chat */
   .chat{
-    background: var(--surface-alt);
-    border-radius: var(--radius);
-    padding: 16px;
-    height: 560px;
-    overflow:auto;
-    border:1px solid var(--line);
+    background: var(--surface-alt); border-radius: var(--r);
+    padding: 16px; height: 560px; overflow:auto; border:1px solid var(--line);
   }
   .bubble{
-    max-width: 78%;
-    padding: 12px 14px;
-    border-radius: 16px;
-    margin: 10px 0;
-    display: inline-block;
-    word-wrap: break-word;
-    box-shadow: var(--shadow-sm);
+    max-width: 78%; padding: 12px 14px; border-radius: 16px; margin: 10px 0;
+    display:inline-block; word-wrap:break-word; box-shadow: var(--shadow-sm);
     font-size: clamp(15px, 1.4vw, 16px);
   }
   .fromA{ background:#fff; border:1px solid #e6e6e6 }
@@ -159,63 +116,39 @@
   .divider{ height:1px; background:var(--line); margin:12px 0 }
   .small{ font-size: var(--small); color:var(--muted) }
 
-  /* ===================== Steps ===================== */
-  .step{
-    background:#fff; border:1px solid var(--line);
-    border-radius: 14px; padding: 14px;
-  }
+  /* Steps */
+  .step{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px }
   .step h3{ margin:6px 0 12px; font-size: var(--h3) }
-  .row{ display:grid; grid-template-columns:1fr 1fr; gap: 12px }
+  .row{ display:grid; grid-template-columns:1fr 1fr; gap:12px }
   @media(max-width: 720px){ .row{ grid-template-columns:1fr } }
-
-  textarea{
-    width:100%; min-height:130px;
-    padding: 12px 14px; border-radius: 12px; border:1px solid var(--line); background:#fff; resize:vertical
-  }
-  textarea::placeholder{ color: #94a3b8 }
-
+  textarea{ width:100%; min-height:130px; padding:12px 14px; border-radius:12px; border:1px solid var(--line); background:#fff; resize:vertical }
+  textarea::placeholder{ color:#94a3b8 }
   .legend{ color:var(--muted); font-size: var(--small) }
 
-  /* ===================== Pills ===================== */
-  .pills{
-    display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 12px; padding: 6px 0;
-  }
+  /* Pills */
+  .pills{ display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:12px; padding:6px 0 }
   .pill{
     display:inline-flex; align-items:center; justify-content:center;
-    padding: 12px 16px; min-height: 46px;
-    background: var(--pill);
-    border: 1px solid #c7d2fe;
-    border-radius: 999px; cursor:pointer; user-select:none;
-    font-weight: 600;
+    padding: 12px 16px; min-height: 46px; font-weight:600;
+    background:#eef2ff; border:1px solid #c7d2fe; border-radius:999px; cursor:pointer; user-select:none;
     transition: transform .06s ease-out;
   }
   .pill:active{ transform: scale(.98) }
-  .pill[aria-pressed="true"]{
-    background: var(--accent);
-    color: #fff;
-    border-color: transparent;
-  }
+  .pill[aria-pressed="true"]{ background:var(--brand); color:#fff; border-color:transparent }
 
-  .feedback{ border-left: 4px solid var(--accent); padding-left:12px; margin:10px 0 }
+  .feedback{ border-left:4px solid var(--brand); padding-left:12px; margin:10px 0 }
   .kpi{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px }
-  .tag{
-    display:inline-flex; align-items:center; gap:6px;
-    padding: 8px 12px; border-radius:999px; font-size: var(--small);
-    border:1px solid var(--line); background:#fff
-  }
+  .tag{ display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border-radius:999px; font-size:var(--small); border:1px solid var(--line); background:#fff }
   .tag.good{ border-color:#b7e3c4; background:#ecfdf5; color:#065f46 }
   .tag.bad{ border-color:#f6c7c7; background:#fef2f2; color:#7f1d1d }
 
-  /* ===================== Dark mode ===================== */
+  /* Dark mode */
   @media (prefers-color-scheme: dark){
     :root{
-      --bg:#0b1220; --surface:#0f172a; --surface-alt:#111827;
-      --text:#e6edf7; --muted:#9fb0c8; --line:#233047;
-      --pill:#172554;
+      --bg:#0b1220; --surface:#0f172a; --surface-alt:#111827; --text:#e6edf7; --muted:#9fb0c8; --line:#233047;
+      --chip-bg:#1e293b; --chip-fg:#93c5fd;
     }
     header{ background: linear-gradient(180deg,#0f172a,rgba(15,23,42,.92)); }
-    .chip{ background:#1e293b; color:#93c5fd; border-color:#334155 }
     select,button{ background:#0f172a; color:var(--text); border-color:#233047 }
     .fromA{ background:#0b1220; border-color:#233047 }
     .fromB{ background:#172554; border-color:#1e3a8a }
@@ -223,33 +156,47 @@
     .card{ box-shadow: 0 8px 28px rgba(0,0,0,.35) }
   }
 
-  /* ===================== Motion/accessibility ===================== */
+  /* Motion */
   @media (prefers-reduced-motion: reduce){
-    * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+    *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important }
   }
 </style>
 </head>
 <body>
-<header>
-  <div class="wrap headstack">
-    <span class="chip">Prototype</span>
+  <header>
+    <div class="wrap stack">
+      <span class="chip">Prototype</span>
+      <h1 class="brandtitle">Emotion Chat — <span id="accentWord" class="accent"></span></h1>
+      <p class="sub">WhatsApp-style scenarios to practice emotion recognition, theory of mind, and social reasoning.</p>
 
-    <h1 class="brandtitle">
-      Emotion Chat — <span id="accentWord" class="accent"></span>
-    </h1>
+      <div class="bar">
+        <label>
+          Scenario
+          <select id="scenario"></select>
+        </label>
+        <label>
+          Distractors per person
+          <select id="distractors">
+            <option>6</option>
+            <option selected>8</option>
+            <option>10</option>
+            <option>12</option>
+            <option>14</option>
+          </select>
+        </label>
+        <button id="play" class="primary">Play chat</button>
+        <button id="skip" class="secondary" disabled>Skip chat</button>
+        <button id="reset" class="ghost" disabled>Reset</button>
+        <button id="download" class="secondary" title="Download CSV of your results" disabled>Download CSV</button>
+        <span class="small" id="status" aria-live="polite"></span>
+      </div>
+    </div>
+  </header>
 
-    <p class="sub">
-      WhatsApp-style scenarios to practice emotion recognition, theory of mind, and social reasoning.
-    </p>
-
-    <!-- keep your existing .bar exactly as is -->
-    <div class="bar"> … </div>
-  </div>
-</header>
   <main class="wrap">
     <div class="grid">
       <!-- Left: Chat -->
-      <section class="card pad">
+      <section class="card pad" aria-labelledby="chatTitle">
         <h2 id="chatTitle">Chat</h2>
         <div id="chat" class="chat" aria-live="polite" aria-label="Chat transcript"></div>
         <div class="footer">
@@ -259,8 +206,8 @@
       </section>
 
       <!-- Right: Steps -->
-      <section class="card pad">
-        <h2>Your responses</h2>
+      <section class="card pad" aria-labelledby="respTitle">
+        <h2 id="respTitle">Your responses</h2>
 
         <div class="step" id="step1">
           <h3>Step 1 — Free choice</h3>
@@ -306,8 +253,7 @@
   </main>
 
 <script>
-/* ========= Global master list (add new items for broader coverage) ========= */
-const accentWord = $("accentWord");
+/* ========= Global master list ========= */
 const MASTER_PILLS = [
   "Happy","Excited","Frustrated","Irritated","Calm","Disappointed","Guilty","Sad","Defensive","Anxious",
   "Embarrassed","Angry","Relieved","Neutral","Confused","Optimistic","Proud","Distant","Supportive",
@@ -315,13 +261,9 @@ const MASTER_PILLS = [
   "Grateful","Appreciative","Concerned","Bored","Regretful","Apathetic"
 ];
 
-/* ========= Scenarios (10 total). Titles do NOT reveal target emotions. ========= */
+/* ========= Scenarios (10) ========= */
 const SCENARIOS = [
-  // ORIGINAL 4 (titles simplified)
-  {
-    id:"A",
-    title:"Group Project",
-    people:{A:"Alex", B:"Sam"},
+  { id:"A", title:"Group Project", people:{A:"Alex", B:"Sam"},
     messages:[
       {from:"A", text:"Hey, have you added your part to the doc yet?"},
       {from:"B", text:"Not yet, had a busy day. Will do later."},
@@ -342,10 +284,7 @@ const SCENARIOS = [
       B:"Defensiveness (“You always stress too much”), irritation (🙄)."
     }
   },
-  {
-    id:"B",
-    title:"Missed Call",
-    people:{A:"Maya", B:"Leo"},
+  { id:"B", title:"Missed Call", people:{A:"Maya", B:"Leo"},
     messages:[
       {from:"A", text:"Tried calling you 3 times last night, where were you? 😕"},
       {from:"B", text:"Sorry, phone was on silent."},
@@ -367,10 +306,7 @@ const SCENARIOS = [
       B:"Avoidance, defensiveness (“overthink”), distance (“Don’t wait up”)."
     }
   },
-  {
-    id:"C",
-    title:"Forgotten Favour",
-    people:{A:"Liam", B:"Noah"},
+  { id:"C", title:"Forgotten Favour", people:{A:"Liam", B:"Noah"},
     messages:[
       {from:"A", text:"Hey, did you manage to pick up my parcel?"},
       {from:"B", text:"Ah, totally slipped my mind 😬 sorry."},
@@ -391,10 +327,7 @@ const SCENARIOS = [
       B:"“😬 sorry” = guilt; “cut me some slack” = defensive."
     }
   },
-  {
-    id:"D",
-    title:"Concert Ticket",
-    people:{A:"Ella", B:"Sophie"},
+  { id:"D", title:"Concert Ticket", people:{A:"Ella", B:"Sophie"},
     messages:[
       {from:"A", text:"Guess what, I got tickets to the concert!! 🎶🔥"},
       {from:"B", text:"No way, lucky you."},
@@ -416,12 +349,7 @@ const SCENARIOS = [
       B:"Dismissive lines + 🙄 + “Don’t bother” = envy, irritation, hurt."
     }
   },
-
-  // NEW 6
-  {
-    id:"E",
-    title:"Lost Wallet",
-    people:{A:"Nina", B:"Omar"},
+  { id:"E", title:"Lost Wallet", people:{A:"Nina", B:"Omar"},
     messages:[
       {from:"A", text:"I just found your wallet by the café!"},
       {from:"B", text:"No way—are you serious??"},
@@ -435,15 +363,9 @@ const SCENARIOS = [
       {from:"B", text:"I can finally breathe."}
     ],
     correct:{ A:["Supportive","Calm","Content"], B:["Relieved","Grateful","Appreciative"] },
-    cues:{
-      A:"Practical reassurance + calm tone.",
-      B:"Relief (“finally breathe”), gratitude (“owe you one”)."
-    }
+    cues:{ A:"Practical reassurance + calm tone.", B:"Relief (“finally breathe”), gratitude (“owe you one”)." }
   },
-  {
-    id:"F",
-    title:"Presentation Praise",
-    people:{A:"Ava", B:"Ben"},
+  { id:"F", title:"Presentation Praise", people:{A:"Ava", B:"Ben"},
     messages:[
       {from:"A", text:"Your presentation was fantastic today!"},
       {from:"B", text:"Oh—thanks! I’m glad it landed."},
@@ -457,15 +379,9 @@ const SCENARIOS = [
       {from:"B", text:"Great idea!"}
     ],
     correct:{ A:["Supportive","Happy"], B:["Proud","Relieved","Happy"] },
-    cues:{
-      A:"Warm encouragement and affirmation.",
-      B:"Acknowledges effort → pride; post-event easing → relief."
-    }
+    cues:{ A:"Warm encouragement and affirmation.", B:"Acknowledges effort → pride; post-event easing → relief." }
   },
-  {
-    id:"G",
-    title:"Awkward Joke",
-    people:{A:"Chloe", B:"Dan"},
+  { id:"G", title:"Awkward Joke", people:{A:"Chloe", B:"Dan"},
     messages:[
       {from:"A", text:"About earlier… my joke wasn’t great."},
       {from:"B", text:"It caught people off guard."},
@@ -479,15 +395,9 @@ const SCENARIOS = [
       {from:"B", text:"Good call."}
     ],
     correct:{ A:["Embarrassed","Regretful","Anxious"], B:["Supportive","Concerned","Calm"] },
-    cues:{
-      A:"Admits mistake, ‘feel silly’, asks about apology → embarrassment/regret.",
-      B:"Gentle guidance; steady tone."
-    }
+    cues:{ A:"Admits mistake → embarrassment/regret.", B:"Gentle guidance; steady tone." }
   },
-  {
-    id:"H",
-    title:"Flat Tyre",
-    people:{A:"Priya", B:"Tom"},
+  { id:"H", title:"Flat Tyre", people:{A:"Priya", B:"Tom"},
     messages:[
       {from:"A", text:"Stuck with a flat tyre on the A2."},
       {from:"B", text:"Are you safe? Hazards on?"},
@@ -501,15 +411,9 @@ const SCENARIOS = [
       {from:"B", text:"You’ll be fine. We’ve got this."}
     ],
     correct:{ A:["Anxious","Relieved"], B:["Concerned","Supportive","Calm"] },
-    cues:{
-      A:"Initial stress then relief when help is coming.",
-      B:"Checks safety, offers concrete help."
-    }
+    cues:{ A:"Stress then relief when help is coming.", B:"Checks safety, offers concrete help." }
   },
-  {
-    id:"I",
-    title:"Party Invite",
-    people:{A:"Zoe", B:"Mark"},
+  { id:"I", title:"Party Invite", people:{A:"Zoe", B:"Mark"},
     messages:[
       {from:"A", text:"You coming to Jess’s party tonight?"},
       {from:"B", text:"Maybe. Long week."},
@@ -523,15 +427,9 @@ const SCENARIOS = [
       {from:"B", text:"Catch up another time?"}
     ],
     correct:{ A:["Disappointed","Hurt"], B:["Bored","Apathetic","Distant"] },
-    cues:{
-      A:"Deflation after efforts to persuade.",
-      B:"Low-energy, non-committal replies; opts out."
-    }
+    cues:{ A:"Deflation after efforts to persuade.", B:"Low-energy, non-committal; opts out." }
   },
-  {
-    id:"J",
-    title:"Unexpected Gift",
-    people:{A:"Hana", B:"Luca"},
+  { id:"J", title:"Unexpected Gift", people:{A:"Hana", B:"Luca"},
     messages:[
       {from:"A", text:"Left something at your door 😊"},
       {from:"B", text:"What? I just saw a box!"},
@@ -545,24 +443,18 @@ const SCENARIOS = [
       {from:"B", text:"Thank you—really."}
     ],
     correct:{ A:["Supportive","Happy"], B:["Surprised","Grateful","Appreciative"] },
-    cues:{
-      A:"Attuned generosity; upbeat tone.",
-      B:"“Didn’t expect this” + thanks → surprise + gratitude."
-    }
+    cues:{ A:"Attuned generosity; upbeat tone.", B:"“Didn’t expect this” + thanks → surprise + gratitude." }
   }
 ];
 
 /* ========= State ========= */
 let current=null, timer=null, idx=0, revealed=false, startTime=0, endTime=0;
 let RESULTS=[];
-
 const $ = id => document.getElementById(id);
-const chatEl = $("chat"), scenarioSel = $("scenario");
-const playBtn = $("play"), skipBtn = $("skip"), resetBtn = $("reset");
-const downloadBtn = $("download");
-const statusEl = $("status"), progressEl = $("progress"), chatTitle = $("chatTitle");
-const timerText = $("timerText");
 
+const chatEl = $("chat"), scenarioSel = $("scenario");
+const playBtn = $("play"), skipBtn = $("skip"), resetBtn = $("reset"), downloadBtn = $("download");
+const statusEl = $("status"), progressEl = $("progress"), chatTitle = $("chatTitle"), timerText = $("timerText");
 const step1 = $("step1"), proceedBtn = $("proceed"), step1Hint = $("step1Hint");
 const step2 = $("step2"), submitBtn = $("submit"), step3 = $("step3");
 const freeA = $("freeA"), freeB = $("freeB");
@@ -571,6 +463,7 @@ const pillTitleA = $("pillTitleA"), pillTitleB = $("pillTitleB");
 const pillsA = $("pillsA"), pillsB = $("pillsB");
 const fbA = $("fbA"), fbB = $("fbB"), kpi = $("kpi");
 const distractorsSel = $("distractors");
+const accentWord = $("accentWord");
 
 /* ========= Helpers ========= */
 function clearChat(){ chatEl.innerHTML=""; }
@@ -599,13 +492,13 @@ function populateScenarioList(){
 }
 function loadScenario(id){
   current = SCENARIOS.find(s=>s.id===id) || SCENARIOS[0];
-  accentWord.textContent = current.title;
   idx=0; revealed=false; startTime=0; endTime=0;
   clearInterval(timer); timer=null; clearChat(); step3.hidden=true;
   progressEl.textContent = `0 / ${current.messages.length}`;
   timerText.textContent = "";
   chatTitle.textContent = `Chat — ${current.people.A} & ${current.people.B}`;
   statusEl.textContent = "Ready";
+  accentWord.textContent = current.title;
   setDisabled(playBtn,false); setDisabled(skipBtn,true); setDisabled(resetBtn,true);
   setDisabled(downloadBtn, RESULTS.length===0);
 
@@ -619,17 +512,15 @@ function loadScenario(id){
   pillTitleA.textContent = `Select all that apply for ${current.people.A}`;
   pillTitleB.textContent = `Select all that apply for ${current.people.B}`;
 
-  // Pre-build pills so it's instant when shown (based on distractor setting)
+  // Pre-build pills
   buildPills();
   updateProceedState();
 }
 function buildPills(){
-  // Build per-person grid = correct + N distractors from MASTER (excluding duplicates/synonyms handled later)
   const N = parseInt(distractorsSel.value, 10) || 8;
 
   const makeGrid = (correctArr)=>{
     const correctSet = new Set(normalise(correctArr));
-    // candidates = MASTER items not in correct (case-insensitive match)
     const candidates = MASTER_PILLS.filter(p=>!correctSet.has(normalise([p])[0]));
     const distractors = shuffle(candidates).slice(0, Math.max(0,N));
     const final = shuffle([...new Set([...correctArr, ...distractors])]);
@@ -696,11 +587,7 @@ function skipChat(){
 function resetAll(){ loadScenario(scenarioSel.value); }
 
 /* ========= Step transitions ========= */
-$("proceed").addEventListener("click", ()=>{
-  step2.hidden = false;
-  // focus first pill
-  const first = pillsA.querySelector('.pill'); if(first) first.focus();
-});
+$("proceed").addEventListener("click", ()=>{ step2.hidden = false; const first = pillsA.querySelector('.pill'); if(first) first.focus(); });
 
 /* ========= Normalisation / Feedback ========= */
 function normalise(arr){
@@ -805,10 +692,7 @@ function downloadCSV(){
 
 /* ========= Events ========= */
 scenarioSel.addEventListener("change", e=>loadScenario(e.target.value));
-distractorsSel.addEventListener("change", ()=>{
-  // regenerate pill grids with new distractor count
-  buildPills();
-});
+distractorsSel.addEventListener("change", ()=>{ buildPills(); });
 playBtn.addEventListener("click", playChat);
 skipBtn.addEventListener("click", skipChat);
 resetBtn.addEventListener("click", resetAll);
