@@ -31,7 +31,7 @@
     .rules li{margin-bottom:4px}
     .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 0.95rem;}
   </style>
-<meta content="Plan_with_Coco" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../shared/theme.css" rel="stylesheet"/><script defer="" src="../shared/frame.js"></script></head>
+<meta content="Plan_with_Coco" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../shared/theme.css" rel="stylesheet"/><script defer="" src="../shared/frame.js"></script><script defer="" src="../shared/clinician_feedback.js"></script></head>
 <body><main id="app-root">
 <div class="header">
 <svg aria-hidden="true" class="logo" viewbox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
@@ -382,5 +382,15 @@
     res.innerHTML=html; res.classList.remove("hidden"); document.getElementById("statusBubble").textContent="Planning complete.";
   }
 </script>
-</main></body>
+<section id="clinician-notes">
+<div style="background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 16px; margin-top: 24px;">
+<label for="clinician-comment" style="display:block;font-weight:600;margin-bottom:8px;">
+      Clinician comments (optional)
+    </label>
+<textarea id="clinician-comment" placeholder="Enter any notes relevant to this session..." rows="4" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); font: inherit; resize: vertical;"></textarea>
+<p style="margin:8px 0 0; color: var(--muted); font-size: 0.9rem;">
+      This note will be added as <code>clinician_comment</code> in the exported CSV.
+    </p>
+</div>
+</section></main></body>
 </html>

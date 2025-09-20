@@ -49,7 +49,7 @@
   .grp{background:#f9fafb;border:1px dashed #e5e7eb;border-radius:12px;padding:12px}
   .grp h4{margin:0 0 6px}
 </style>
-<meta content="Fluency_Coach" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../shared/theme.css" rel="stylesheet"/><script defer="" src="../shared/frame.js"></script></head>
+<meta content="Fluency_Coach" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../shared/theme.css" rel="stylesheet"/><script defer="" src="../shared/frame.js"></script><script defer="" src="../shared/clinician_feedback.js"></script></head>
 <body><main id="app-root">
 <header>
 <h1>Fluency Coach</h1>
@@ -810,5 +810,15 @@ function resetSession(){
   if(!canSpeech){ els.inputMode.value='manual'; els.manualBox.style.display='block'; }
 })();
 </script>
-</main></body>
+<section id="clinician-notes">
+<div style="background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 16px; margin-top: 24px;">
+<label for="clinician-comment" style="display:block;font-weight:600;margin-bottom:8px;">
+      Clinician comments (optional)
+    </label>
+<textarea id="clinician-comment" placeholder="Enter any notes relevant to this session..." rows="4" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); font: inherit; resize: vertical;"></textarea>
+<p style="margin:8px 0 0; color: var(--muted); font-size: 0.9rem;">
+      This note will be added as <code>clinician_comment</code> in the exported CSV.
+    </p>
+</div>
+</section></main></body>
 </html>

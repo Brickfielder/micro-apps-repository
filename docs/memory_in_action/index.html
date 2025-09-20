@@ -82,7 +82,7 @@
   .match-card{height:80px;border:1px solid var(--border);border-radius:12px;display:grid;place-items:center;background:var(--pill);cursor:pointer;font-weight:700}
   .match-card.revealed{background:#fff}
 </style>
-<meta content="memory_in_action" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../shared/theme.css" rel="stylesheet"/><script defer="" src="../shared/frame.js"></script></head>
+<meta content="memory_in_action" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../shared/theme.css" rel="stylesheet"/><script defer="" src="../shared/frame.js"></script><script defer="" src="../shared/clinician_feedback.js"></script></head>
 <body><main id="app-root">
 <div class="wrap">
 <h1>Memory in Action — WhatsApp Scenarios</h1>
@@ -481,5 +481,15 @@ function grade(sc){ let correct=0,total=sc.qs.length,details=[]; Array.from(reca
   log('Ready. Pick a strategy and press Start session.');
 })();
 </script>
-</main></body>
+<section id="clinician-notes">
+<div style="background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 16px; margin-top: 24px;">
+<label for="clinician-comment" style="display:block;font-weight:600;margin-bottom:8px;">
+      Clinician comments (optional)
+    </label>
+<textarea id="clinician-comment" placeholder="Enter any notes relevant to this session..." rows="4" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); font: inherit; resize: vertical;"></textarea>
+<p style="margin:8px 0 0; color: var(--muted); font-size: 0.9rem;">
+      This note will be added as <code>clinician_comment</code> in the exported CSV.
+    </p>
+</div>
+</section></main></body>
 </html>
