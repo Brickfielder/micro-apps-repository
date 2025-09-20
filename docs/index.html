@@ -1,85 +1,199 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Micro Apps — Gallery</title>
-
-  <!-- Shared theme (relative to docs/) -->
-  <link rel="stylesheet" href="shared/theme.css" />
-
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Cognitive Rehabilitation Micro-Apps</title>
+  <meta name="description" content="Interactive, lightweight tools to support assessment, practice, and research in cognitive rehabilitation.">
   <style>
-    .gallery-wrap{max-width:1100px;margin:0 auto;padding:24px 20px 56px;}
-    .gallery-hero{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px;margin:8px 0 20px;}
-    .gallery-hero h1{font-size:clamp(1.6rem,2.5vw,2.2rem);margin:0 0 6px;}
-    .gallery-hero p{margin:0;color:var(--muted);font-size:var(--size-lead);}
-    .controls{display:flex;gap:10px;margin:16px 0;}
-    .controls input[type="search"]{flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit}
-    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}
-    .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:16px;text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:transform .06s ease, box-shadow .12s ease;min-height:160px}
-    .card:hover{transform:translateY(-1px)}
-    .card h3{margin:0 0 6px;font-size:1.1rem;display:flex;align-items:center;gap:.5rem}
-    .card p{margin:0;color:var(--muted);font-size:.95rem}
-    .empty{color:var(--muted);padding:16px;border:1px dashed var(--line);border-radius:12px;text-align:center}
-    .emoji{font-size:1.25rem;line-height:1}
+    :root{
+      --bg:#f7f8fb; --surface:#fff; --text:#1f2937; --muted:#6b7280;
+      --line:#e5e7eb; --accent:#ff7a6e; --accent-600:#ff6254; --accent-700:#f24f40;
+      --pill:#f2f4f7; --radius:16px;
+      --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.08);
+      --focus:#7dd3fc;
+    }
+    [data-theme="dark"]{
+      --bg:#0b1020; --surface:#0f172a; --text:#e5e7eb; --muted:#9aa5b1;
+      --line:#233047; --pill:#16223a;
+      --shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.45);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif;
+      background:var(--bg);color:var(--text);min-height:100vh;position:relative;z-index:0}
+    canvas#nodes{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1}
+    header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);
+      padding:12px 24px;display:flex;flex-direction:column;gap:12px}
+    .topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
+  .hero {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 720px;
+  margin: 0 auto;        /* centers horizontally */
+  text-align: center;    /* centers text inside */
+}
+    .title{font-size:clamp(28px, 5vw, 42px);font-weight:600;margin:0;line-height:1.1}
+    .subtitle{font-size:clamp(16px, 2vw, 20px);color:var(--muted);margin:0;line-height:1.4}
+    .controls{display:flex;gap:8px}
+    .btn-toggle{border:none;background:var(--pill);padding:6px 12px;border-radius:999px;cursor:pointer}
+    .toolbar{display:grid;grid-template-columns:1fr auto auto;gap:10px}
+    @media (max-width:860px){ .toolbar{ grid-template-columns:1fr; } }
+    .input,.select{font:inherit;border:1px solid var(--line);background:var(--surface);color:var(--text);
+      border-radius:12px;padding:10px 12px}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;padding-top:6px}
+    .chip{font:inherit;border:1px solid transparent;background:var(--pill);
+      border-radius:12px;padding:6px 10px;cursor:pointer}
+    .chip[aria-pressed="true"]{background:var(--accent);color:white}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;padding:24px}
+    .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+      box-shadow:var(--shadow);padding:16px;transition:.2s}
+    .card:hover{transform:translateY(-2px)}
+    .card h3{margin:0 0 8px;font-size:18px;display:flex;align-items:center;gap:8px}
+    .emoji{font-size:22px}
+    .card p{margin:0;color:var(--muted);font-size:14px}
+    .tagrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+    .tagpill{display:inline-flex;align-items:center;padding:4px 8px;
+      border-radius:999px;background:var(--pill);border:1px solid var(--line);
+      font-size:12px;color:var(--muted)}
+    [data-theme="dark"] .tagpill{border-color:rgba(255,255,255,.08)}
+    .empty{text-align:center;color:var(--muted);padding:48px 12px}
   </style>
 </head>
 <body>
-  <div class="gallery-wrap">
-    <header class="gallery-hero" aria-describedby="subtitle">
-      <h1>Micro Apps</h1>
-      <p id="subtitle">Consistent header, fonts, and clinician comments across apps.</p>
-      <div class="controls">
-        <input id="q" type="search" placeholder="Filter apps by name or description…" aria-label="Filter apps" />
-      </div>
-    </header>
+  <canvas id="nodes"></canvas>
 
-    <section class="cards" id="cards" aria-live="polite"></section>
-    <div id="empty" class="empty" hidden>No matches. Try a different search.</div>
-  </div>
+  <header>
+    <div class="topbar">
+      <div class="hero">
+        <h1 class="title">Cognitive Rehabilitation Micro-Apps</h1>
+        <p class="subtitle">
+          Interactive, lightweight tools to support assessment, practice, and research in cognitive rehabilitation.
+        </p>
+      </div>
+      <div class="controls">
+        <button id="themeToggle" class="btn-toggle" aria-label="Toggle dark mode">🌙</button>
+        <button id="animToggle" class="btn-toggle" aria-label="Toggle background animation">🎞️</button>
+      </div>
+    </div>
+    <form class="toolbar" role="search" onsubmit="event.preventDefault();">
+      <input id="q" class="input" type="search" placeholder="Search apps…" autocomplete="off"/>
+      <select id="sort" class="select" aria-label="Sort">
+        <option value="title-asc">Sort: A → Z</option>
+        <option value="title-desc">Sort: Z → A</option>
+        <option value="slug-asc">Sort: Newest</option>
+      </select>
+      <button id="clear" type="button" class="btn-toggle">Clear</button>
+    </form>
+    <div class="chips" id="chips"></div>
+  </header>
+
+  <main>
+    <section id="grid" class="grid" aria-live="polite"></section>
+    <div id="empty" class="empty" hidden>No results found.</div>
+  </main>
 
   <script>
-    const cardsEl = document.getElementById('cards');
-    const emptyEl = document.getElementById('empty');
-    const searchEl = document.getElementById('q');
+    // === Theme toggle ===
+    const root=document.documentElement, themeBtn=document.getElementById('themeToggle');
+    function setTheme(t){root.setAttribute('data-theme',t);localStorage.setItem('theme',t);
+      themeBtn.textContent=(t==='dark')?'☀️':'🌙';}
+    const savedTheme=localStorage.getItem('theme');
+    if(savedTheme){setTheme(savedTheme);}else{setTheme(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');}
+    themeBtn.onclick=()=> setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark');
 
-    /** Render a single card */
+    // === Animation toggle + brain nodes ===
+    const canvas=document.getElementById('nodes'),ctx=canvas.getContext('2d');
+    let W,H,nodes=[],anim=true;
+    function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+    window.addEventListener('resize',resize);resize();
+    const NUM=40;
+    for(let i=0;i<NUM;i++){nodes.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.6,vy:(Math.random()-.5)*.6});}
+    function step(){
+      if(!anim) return;
+      ctx.clearRect(0,0,W,H);
+      ctx.strokeStyle=getComputedStyle(root).getPropertyValue('--line');
+      for(let i=0;i<NUM;i++){
+        const a=nodes[i];a.x+=a.vx;a.y+=a.vy;
+        if(a.x<0||a.x>W) a.vx*=-1; if(a.y<0||a.y>H) a.vy*=-1;
+        ctx.beginPath();ctx.arc(a.x,a.y,2,0,Math.PI*2);
+        ctx.fillStyle=getComputedStyle(root).getPropertyValue('--accent');ctx.fill();
+        for(let j=i+1;j<NUM;j++){const b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);
+          if(d<140){ctx.globalAlpha=1-d/140;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.globalAlpha=1;}}
+      }
+      requestAnimationFrame(step);
+    }
+    const animBtn=document.getElementById('animToggle');
+    function setAnim(on){anim=on;localStorage.setItem('anim',on?'on':'off');
+      animBtn.textContent=on?'🎞️':'⏸️';
+      if(on) requestAnimationFrame(step); else ctx.clearRect(0,0,W,H);}
+    const savedAnim=localStorage.getItem('anim');
+    const prefersReduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(savedAnim){setAnim(savedAnim==='on');}else{setAnim(!prefersReduced);}
+    animBtn.onclick=()=> setAnim(!anim);
+
+    // === Catalog + filters ===
+    const grid=document.getElementById('grid'),empty=document.getElementById('empty');
+    const input=document.getElementById('q'),sortSel=document.getElementById('sort'),clearBtn=document.getElementById('clear');
+    const chipsEl=document.getElementById('chips');
+    const TAGS={"executive":"Executive","attention":"Attention","memory":"Memory","language":"Language","visuospatial":"Visuospatial","social":"Social cognition"};
+
+    let catalog=[],activeTags=new Set(),q='',sortBy='title-asc';
+
+    function buildChips(allTags){
+      chipsEl.innerHTML='';
+      for(const tag of allTags){
+        const label=TAGS[tag]||tag;
+        const b=document.createElement('button');
+        b.className='chip';b.type='button';b.setAttribute('aria-pressed','false');b.dataset.tag=tag;
+        b.textContent=label;
+        b.addEventListener('click',()=>{const on=b.getAttribute('aria-pressed')==='true';
+          b.setAttribute('aria-pressed',String(!on));
+          if(on)activeTags.delete(tag); else activeTags.add(tag);
+          render();});
+        chipsEl.appendChild(b);
+      }
+    }
+
+    clearBtn.addEventListener('click',()=>{input.value='';q='';sortSel.value='title-asc';sortBy='title-asc';activeTags.clear();
+      document.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed','false'));render();});
+    input.addEventListener('input',()=>{q=input.value.trim().toLowerCase();render();});
+    sortSel.addEventListener('change',()=>{sortBy=sortSel.value;render();});
+
+    function match(app){
+      const matchesText=!q||(app.title.toLowerCase().includes(q)||app.description.toLowerCase().includes(q));
+      const matchesTags=activeTags.size===0||[...activeTags].every(t=>app.tags?.includes(t));
+      return matchesText&&matchesTags;
+    }
+    function sort(items){
+      if(sortBy==='title-asc')return items.sort((a,b)=>a.title.localeCompare(b.title));
+      if(sortBy==='title-desc')return items.sort((a,b)=>b.title.localeCompare(a.title));
+      if(sortBy==='slug-asc')return items.sort((a,b)=>b.slug.localeCompare(a.slug));
+      return items;
+    }
     function cardTpl(item){
-      const emoji = item.emoji ? `<span class="emoji" aria-hidden="true">${item.emoji}</span>` : '';
-      const title = item.title || item.slug;
-      const desc  = item.description || '';
-      return `
-        <a class="card" href="apps/${item.slug}/" aria-label="${title}">
-          <h3>${emoji}<span>${title}</span></h3>
-          <p>${desc}</p>
-        </a>
-      `;
+      const emoji=item.emoji?`<span class="emoji">${item.emoji}</span>`:'';
+      const tagHtml=(item.tags||[]).map(t=>`<span class="tagpill">${TAGS[t]||t}</span>`).join('');
+      const tagsBlock=tagHtml?`<div class="tagrow">${tagHtml}</div>`:'';
+      return `<a class="card" href="apps/${item.slug}/">
+        <h3>${emoji}${item.title}</h3>
+        <p>${item.description}</p>
+        ${tagsBlock}
+      </a>`;
+    }
+    function render(){
+      const filtered=sort(catalog.filter(match));
+      grid.innerHTML=filtered.map(cardTpl).join('');
+      empty.hidden=filtered.length!==0;
     }
 
-    /** Render list with optional filter */
-    function render(list, q=''){
-      const norm = q.trim().toLowerCase();
-      const filtered = !norm ? list : list.filter(i =>
-        (i.title||'').toLowerCase().includes(norm) ||
-        (i.description||'').toLowerCase().includes(norm) ||
-        (i.slug||'').toLowerCase().includes(norm)
-      );
-      cardsEl.innerHTML = filtered.map(cardTpl).join('');
-      emptyEl.hidden = filtered.length !== 0;
-    }
-
-    /** Load catalog and init */
-    fetch('catalog.json')
-      .then(r => r.json())
-      .then(items => {
-        // basic sanity: require slug
-        const clean = items.filter(i => i && i.slug);
-        render(clean);
-        searchEl.addEventListener('input', () => render(clean, searchEl.value));
-      })
-      .catch(err => {
-        cardsEl.innerHTML = `<div class="empty">Could not load catalog.json</div>`;
-        console.warn('Catalog load failed', err);
+    fetch('catalog.json?v='+Date.now())
+      .then(r=>r.json())
+      .then(data=>{
+        catalog=data;
+        const allTags=[...new Set(catalog.flatMap(app=>app.tags||[]))];
+        buildChips(allTags);
+        render();
       });
   </script>
 </body>
