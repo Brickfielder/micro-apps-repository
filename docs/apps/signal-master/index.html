@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Signal Master â€” Mirror Train v1.1 (CSV export)</title>
-<meta content="Train routing game: single switch, evolving rules, and a Phase-3 Mirror train that follows the opposite of the previous trainâ€™s correct route. Includes CSV export of session stats." name="description"/>
+<title>Signal Master Ã¢â‚¬â€ Mirror Train v1.1 (CSV export)</title>
+<meta content="Train routing game: single switch, evolving rules, and a Phase-3 Mirror train that follows the opposite of the previous trainÃ¢â‚¬â„¢s correct route. Includes CSV export of session stats." name="description"/>
 <style>
   :root{
     color-scheme: light dark;
@@ -99,10 +99,10 @@
 <body><main id="app-root">
 <header aria-label="Top bar">
 <div class="bar">
-<div class="brand"><span aria-hidden="true">ðŸš‚</span><span>Signal Master</span></div>
+<div class="brand"><span aria-hidden="true">Ã°Å¸Å¡â€š</span><span>Signal Master</span></div>
 <div class="right">
-<div class="badge"><strong>Score:</strong>Â <span id="score">0</span></div>
-<div class="badge">â± <strong>Time:</strong>Â <span id="time">3:00</span></div>
+<div class="badge"><strong>Score:</strong>Ã‚Â <span id="score">0</span></div>
+<div class="badge">Ã¢ÂÂ± <strong>Time:</strong>Ã‚Â <span id="time">3:00</span></div>
 </div>
 </div>
 </header>
@@ -118,10 +118,10 @@
 <span class="swatch"><span class="dot mirror"></span> Mirror</span>
 </div>
 </div>
-<div class="center" id="ruleHeadline">Rules over speed â€” route correctly in real time</div>
+<div class="center" id="ruleHeadline">Rules over speed Ã¢â‚¬â€ route correctly in real time</div>
 <div class="right">
-<span class="badge" id="prevCorrectBadge" style="display:none">Prev correct: â€”</span>
-<span class="pill">Session â€¢ 3 min</span>
+<span class="badge" id="prevCorrectBadge" style="display:none">Prev correct: Ã¢â‚¬â€</span>
+<span class="pill">Session Ã¢â‚¬Â¢ 3 min</span>
 </div>
 </div>
 <!-- Track View -->
@@ -153,14 +153,14 @@
 <!-- Controls -->
 <div aria-label="Controls and rules" class="controls">
 <div class="lever">
-<span aria-hidden="true">ðŸ”€</span><strong>Main Switch:</strong>
+<span aria-hidden="true">Ã°Å¸â€â‚¬</span><strong>Main Switch:</strong>
 <button aria-label="Set switch LEFT" id="btnLeft" type="button">LEFT</button>
 <button aria-label="Set switch RIGHT" class="alt" id="btnRight" type="button">RIGHT</button>
 <span class="badge" id="switchState" style="margin-left:8px">Current: RIGHT</span>
 </div>
 <div aria-live="polite" class="rules">
-<div class="rule" id="rule1">Phase 1: Passenger (red ðŸ‘¤) â†’ LEFT</div>
-<div class="rule" id="rule2">Phase 1: Cargo (blue ðŸ“¦) â†’ RIGHT</div>
+<div class="rule" id="rule1">Phase 1: Passenger (red Ã°Å¸â€˜Â¤) Ã¢â€ â€™ LEFT</div>
+<div class="rule" id="rule2">Phase 1: Cargo (blue Ã°Å¸â€œÂ¦) Ã¢â€ â€™ RIGHT</div>
 </div>
 </div>
 <!-- Start overlay -->
@@ -168,9 +168,9 @@
 <div class="banner">
 <h3>Signal Master</h3>
 <p class="big">Single switch. Route quickly &amp; accurately. Rules evolve.</p>
-<p><strong>Phase 1 (0â€“60s):</strong> Passenger (ðŸ‘¤) â†’ LEFT; Cargo (ðŸ“¦) â†’ RIGHT.</p>
-<p><strong>Phase 2 (60â€“120s):</strong> Express (âš¡) appears â†’ RIGHT.</p>
-<p><strong>Phase 3 (120â€“180s):</strong> Mirror (â—¼ï¸â—»ï¸) must go the <strong>opposite</strong> of the previous trainâ€™s <em>correct</em> route.<br/><small>(First Mirror defaults to RIGHT.)</small></p>
+<p><strong>Phase 1 (0Ã¢â‚¬â€œ60s):</strong> Passenger (Ã°Å¸â€˜Â¤) Ã¢â€ â€™ LEFT; Cargo (Ã°Å¸â€œÂ¦) Ã¢â€ â€™ RIGHT.</p>
+<p><strong>Phase 2 (60Ã¢â‚¬â€œ120s):</strong> Express (Ã¢Å¡Â¡) appears Ã¢â€ â€™ RIGHT.</p>
+<p><strong>Phase 3 (120Ã¢â‚¬â€œ180s):</strong> Mirror (Ã¢â€”Â¼Ã¯Â¸ÂÃ¢â€”Â»Ã¯Â¸Â) must go the <strong>opposite</strong> of the previous trainÃ¢â‚¬â„¢s <em>correct</em> route.<br/><small>(First Mirror defaults to RIGHT.)</small></p>
 <button class="btn primary" id="btnStart">Start</button>
 </div>
 </div>
@@ -184,7 +184,7 @@
 <tr><th>Correct routes</th><td id="sumCorrect">0</td></tr>
 <tr><th>Wrong routes</th><td id="sumWrong">0</td></tr>
 <tr><th>Accuracy</th><td id="sumAcc">0%</td></tr>
-<tr><th>Avg reaction time</th><td id="sumRT">â€“</td></tr>
+<tr><th>Avg reaction time</th><td id="sumRT">Ã¢â‚¬â€œ</td></tr>
 <tr><th>Final score</th><td id="sumScore">0</td></tr>
 </table>
 <div class="end-actions">
@@ -261,21 +261,21 @@
   }
   function setRulesText(){
     if(phase===1){
-      rule1.textContent = 'Phase 1: Passenger (red ðŸ‘¤) â†’ LEFT';
-      rule2.textContent = 'Phase 1: Cargo (blue ðŸ“¦) â†’ RIGHT';
-      ruleHeadline.textContent = 'Rules over speed â€” route correctly in real time';
+      rule1.textContent = 'Phase 1: Passenger (red Ã°Å¸â€˜Â¤) Ã¢â€ â€™ LEFT';
+      rule2.textContent = 'Phase 1: Cargo (blue Ã°Å¸â€œÂ¦) Ã¢â€ â€™ RIGHT';
+      ruleHeadline.textContent = 'Rules over speed Ã¢â‚¬â€ route correctly in real time';
       prevCorrectBadge.style.display = 'none';
     } else if(phase===2){
-      rule1.textContent = 'Phase 2: Passenger (ðŸ‘¤) â†’ LEFT; Express (âš¡) â†’ RIGHT';
-      rule2.textContent = 'Phase 2: Cargo (ðŸ“¦) â†’ RIGHT';
-      ruleHeadline.textContent = 'Timetable change â€” Express (yellow âš¡) goes RIGHT';
+      rule1.textContent = 'Phase 2: Passenger (Ã°Å¸â€˜Â¤) Ã¢â€ â€™ LEFT; Express (Ã¢Å¡Â¡) Ã¢â€ â€™ RIGHT';
+      rule2.textContent = 'Phase 2: Cargo (Ã°Å¸â€œÂ¦) Ã¢â€ â€™ RIGHT';
+      ruleHeadline.textContent = 'Timetable change Ã¢â‚¬â€ Express (yellow Ã¢Å¡Â¡) goes RIGHT';
       prevCorrectBadge.style.display = 'none';
     } else {
-      rule1.textContent = 'Phase 3: Mirror (â—¼ï¸â—»ï¸) goes OPPOSITE the previous trainâ€™s correct route';
-      rule2.textContent = 'Passenger: LEFT â€¢ Express: RIGHT â€¢ Cargo: RIGHT â€¢ Mirror: opposite of previous correct';
-      ruleHeadline.textContent = 'Two-step routing (in your head) â€” remember the previous correct and flip it';
+      rule1.textContent = 'Phase 3: Mirror (Ã¢â€”Â¼Ã¯Â¸ÂÃ¢â€”Â»Ã¯Â¸Â) goes OPPOSITE the previous trainÃ¢â‚¬â„¢s correct route';
+      rule2.textContent = 'Passenger: LEFT Ã¢â‚¬Â¢ Express: RIGHT Ã¢â‚¬Â¢ Cargo: RIGHT Ã¢â‚¬Â¢ Mirror: opposite of previous correct';
+      ruleHeadline.textContent = 'Two-step routing (in your head) Ã¢â‚¬â€ remember the previous correct and flip it';
       prevCorrectBadge.style.display = '';
-      prevCorrectBadge.textContent = 'Prev correct: ' + (lastCorrectRoute ?? 'â€”');
+      prevCorrectBadge.textContent = 'Prev correct: ' + (lastCorrectRoute ?? 'Ã¢â‚¬â€');
     }
   }
 
@@ -308,7 +308,7 @@
     const carClass = type==='Passenger' ? 'passenger' :
                      type==='Cargo' ? 'cargo' :
                      type==='Express' ? 'express' : 'mirror';
-    const icon = type==='Passenger' ? 'ðŸ‘¤' : type==='Cargo' ? 'ðŸ“¦' : type==='Express' ? 'âš¡' : 'â†”ï¸Ž';
+    const icon = type==='Passenger' ? 'Ã°Å¸â€˜Â¤' : type==='Cargo' ? 'Ã°Å¸â€œÂ¦' : type==='Express' ? 'Ã¢Å¡Â¡' : 'Ã¢â€ â€Ã¯Â¸Å½';
 
     el.innerHTML = `<div class="label"><em>${type} ${icon}</em></div>
                     <div class="car ${carClass}">
@@ -345,7 +345,7 @@
     // Snapshot the correct direction at SPAWN (stable per train)
     const correctDir = correctDirectionFor(data.type);
     if(phase===3){
-      document.getElementById('prevCorrectBadge').textContent = 'Prev correct: ' + (lastCorrectRoute ?? 'â€”');
+      document.getElementById('prevCorrectBadge').textContent = 'Prev correct: ' + (lastCorrectRoute ?? 'Ã¢â‚¬â€');
     }
 
     function raf(){
@@ -415,13 +415,13 @@
       timeEl.textContent = fmtTime(remaining);
       if(elapsedGameplay===60){ triggerPhaseBreak(2,
         `<h3>New Timetable</h3>
-         <p class="big">Express (âš¡) now spawns and must go <strong>RIGHT</strong>.</p>
-         <p>Passenger (ðŸ‘¤) â†’ LEFT â€¢ Cargo (ðŸ“¦) â†’ RIGHT</p>`); }
+         <p class="big">Express (Ã¢Å¡Â¡) now spawns and must go <strong>RIGHT</strong>.</p>
+         <p>Passenger (Ã°Å¸â€˜Â¤) Ã¢â€ â€™ LEFT Ã¢â‚¬Â¢ Cargo (Ã°Å¸â€œÂ¦) Ã¢â€ â€™ RIGHT</p>`); }
       if(elapsedGameplay===120){ triggerPhaseBreak(3,
         `<h3>Mirror Train</h3>
-         <p class="big">Mirror (â—¼ï¸â—»ï¸) must go the <strong>OPPOSITE</strong> of the previous trainâ€™s correct route.</p>
-         <p>Passenger: LEFT â€¢ Cargo: RIGHT â€¢ Express: RIGHT</p>
-         <p><small>First Mirror defaults to RIGHT if there isnâ€™t a previous.</small></p>`); }
+         <p class="big">Mirror (Ã¢â€”Â¼Ã¯Â¸ÂÃ¢â€”Â»Ã¯Â¸Â) must go the <strong>OPPOSITE</strong> of the previous trainÃ¢â‚¬â„¢s correct route.</p>
+         <p>Passenger: LEFT Ã¢â‚¬Â¢ Cargo: RIGHT Ã¢â‚¬Â¢ Express: RIGHT</p>
+         <p><small>First Mirror defaults to RIGHT if there isnÃ¢â‚¬â„¢t a previous.</small></p>`); }
       if(remaining<=0){ endSession(); }
     }, 1000);
 
@@ -434,7 +434,7 @@
 
   function triggerPhaseBreak(nextPhase, html){
     isPaused = true;
-    banner.innerHTML = html + `<p style="margin-top:8px;color:var(--muted)">Resuming in ~10 secondsâ€¦</p>`;
+    banner.innerHTML = html + `<p style="margin-top:8px;color:var(--muted)">Resuming in ~10 secondsÃ¢â‚¬Â¦</p>`;
     overlay.style.display = 'flex';
     setTimeout(()=>{
       phase = nextPhase;
@@ -452,7 +452,7 @@
     document.getElementById('sumCorrect').textContent = String(correct);
     document.getElementById('sumWrong').textContent = String(wrong);
     document.getElementById('sumAcc').textContent = acc + '%';
-    document.getElementById('sumRT').textContent = avgRTms ? (avgRTms/1000).toFixed(2)+' s' : 'â€“';
+    document.getElementById('sumRT').textContent = avgRTms ? (avgRTms/1000).toFixed(2)+' s' : 'Ã¢â‚¬â€œ';
     document.getElementById('sumScore').textContent = String(score);
     summaryDlg.showModal();
 

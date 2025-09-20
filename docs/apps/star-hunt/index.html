@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>Star Hunting (20Ã—8, Visible, Sweep)</title>
+<title>Star Hunting (20Ãƒâ€”8, Visible, Sweep)</title>
 <style>
   :root{
     --cols: 20;                 /* fixed columns */
@@ -94,7 +94,7 @@
   .overlay p{ margin:8px 0 16px; color:#f9fafb; }
   .overlay .row{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
 
-  /* Guiding sweep (defaults Right â†’ Left) */
+  /* Guiding sweep (defaults Right Ã¢â€ â€™ Left) */
   .sweep{
     position:absolute; top:8px; bottom:8px; left:8px;
     width:40px; border-radius:8px; pointer-events:none; z-index:5;
@@ -111,7 +111,7 @@
 <body><main id="app-root">
 <main aria-label="Star Hunting app" class="app">
 <div class="instructions">
-<strong>Instructions:</strong> Click on every â˜… star you see inside the grid.
+<strong>Instructions:</strong> Click on every Ã¢Ëœâ€¦ star you see inside the grid.
       Scan across the whole board until all stars are found. Try to avoid clicking empty squares.
       When you complete the grid, you can download your report or start a new session.
     </div>
@@ -143,8 +143,8 @@
 </select>
 <label for="sweepDir">Direction</label>
 <select id="sweepDir">
-<option selected="" value="rtl">Right â†’ Left</option>
-<option value="ltr">Left â†’ Right</option>
+<option selected="" value="rtl">Right Ã¢â€ â€™ Left</option>
+<option value="ltr">Left Ã¢â€ â€™ Right</option>
 </select>
 </div>
 <div aria-live="polite" class="stats" role="status">
@@ -160,7 +160,7 @@
 <div aria-label="Hunting grid" class="board" id="board" role="grid"></div>
 </section>
 <p class="footer">
-      Tip: navigate with <span class="kbd">Tab</span> + <span class="kbd">Enter</span>. Stars are always visible; tap all â˜…â€™s.
+      Tip: navigate with <span class="kbd">Tab</span> + <span class="kbd">Enter</span>. Stars are always visible; tap all Ã¢Ëœâ€¦Ã¢â‚¬â„¢s.
     </p>
 </main>
 <script>
@@ -219,7 +219,7 @@
     for(let i=0;i<COLS*ROWS;i++){
       const cell=document.createElement('button');
       cell.type='button'; cell.className='cell'; cell.dataset.index=i; cell.setAttribute('role','gridcell');
-      if(starSet.has(i)){ const span=document.createElement('span'); span.className='star'; span.textContent='â˜…'; cell.appendChild(span); }
+      if(starSet.has(i)){ const span=document.createElement('span'); span.className='star'; span.textContent='Ã¢Ëœâ€¦'; cell.appendChild(span); }
       cell.addEventListener('click', handleCellClick);
       cell.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); handleCellClick.call(cell,e); }});
       boardEl.appendChild(cell);

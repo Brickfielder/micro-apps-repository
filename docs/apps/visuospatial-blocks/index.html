@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Visuospatial Memory Trainer â€” Corsi Blocks</title>
+<title>Visuospatial Memory Trainer Ã¢â‚¬â€ Corsi Blocks</title>
 <style>
     :root {
       --bg: #f7f8fb;
@@ -88,8 +88,8 @@
 <div>
 <label>Grid size</label>
 <select id="gridSize">
-<option value="3">3 Ã— 3 (9 blocks)</option>
-<option value="4">4 Ã— 4 (16 blocks)</option>
+<option value="3">3 Ãƒâ€” 3 (9 blocks)</option>
+<option value="4">4 Ãƒâ€” 4 (16 blocks)</option>
 </select>
 </div>
 </div>
@@ -135,9 +135,9 @@
 <button class="ghost" id="demoBtn">Quick demo</button>
 </div>
 <div class="status" id="status">
-<span class="badge">Length: <strong id="lenBadge" style="margin-left:6px">â€”</strong></span>
-<span class="badge" id="trialBadge">Trial: â€”</span>
-<span class="badge success" id="bestSpan">Best span: â€”</span>
+<span class="badge">Length: <strong id="lenBadge" style="margin-left:6px">Ã¢â‚¬â€</strong></span>
+<span class="badge" id="trialBadge">Trial: Ã¢â‚¬â€</span>
+<span class="badge success" id="bestSpan">Best span: Ã¢â‚¬â€</span>
 <span class="badge" id="modeBadge">Mode: forward</span>
 </div>
 <h3 style="margin:16px 0 8px">Session log</h3>
@@ -154,7 +154,7 @@
 <!-- Countdown overlay -->
 <div aria-atomic="true" aria-live="assertive" class="countdown-overlay" id="countdown">
 <div class="countdown-bubble" role="status">
-<div class="countdown-label">Get readyâ€¦</div>
+<div class="countdown-label">Get readyÃ¢â‚¬Â¦</div>
 <div class="countdown-number" id="countdownNum">2</div>
 </div>
 <span class="sr-only" id="countdownSr"></span>
@@ -255,7 +255,7 @@
       for (let s = seconds; s >= 1; s--) {
         countdownNumEl.textContent = s;
         countdownSr.textContent = `Starting in ${s} second${s===1?'':'s'}`;
-        log(`Starting in ${s}â€¦`);
+        log(`Starting in ${s}Ã¢â‚¬Â¦`);
         await sleep(1000);
         if (!state.running) break; // if session ended
         while (state.paused) { await sleep(100); }
@@ -284,7 +284,7 @@
       }
       state.awaitingInput = true;
       state.inputStart = performance.now();
-      log('Your turnâ€¦');
+      log('Your turnÃ¢â‚¬Â¦');
     }
 
     async function runTrial() {
@@ -298,7 +298,7 @@
       log(`Presenting length ${state.seqLen} (trial ${state.trialAtLen+1})`);
 
       // NEW: countdown before the sequence is played
-      await showCountdown(2); // 2 â†’ 1
+      await showCountdown(2); // 2 Ã¢â€ â€™ 1
 
       await playSequence();
     }
@@ -331,7 +331,7 @@
       if (isCorrect) {
         state.bestSpan = Math.max(state.bestSpan, state.seqLen);
         expected.forEach(i => cells[i].classList.add('correct'));
-        log(`âœ… Correct at length ${state.seqLen}`);
+        log(`Ã¢Å“â€¦ Correct at length ${state.seqLen}`);
       } else {
         // highlight expected vs wrong clicks
         expected.forEach(i => cells[i].classList.add('highlight'));
@@ -339,7 +339,7 @@
           const c = cells[i];
           if (expected[idx] !== i) c.classList.add('wrong');
         });
-        log(`âŒ Wrong at length ${state.seqLen}`);
+        log(`Ã¢ÂÅ’ Wrong at length ${state.seqLen}`);
       }
       updateBadges();
 
@@ -408,7 +408,7 @@
 
       state.running = true; state.paused = false; controls.pauseBtn.disabled = false; controls.downloadBtn.disabled = true;
       controls.startBtn.disabled = true; logEl.textContent = '';
-      log(`Session ${state.sessionId} started (${state.mode}, ${state.gridN}Ã—${state.gridN}).`);
+      log(`Session ${state.sessionId} started (${state.mode}, ${state.gridN}Ãƒâ€”${state.gridN}).`);
 
       if (demo) { // quick 2 trials demo
         controls.startLen.value = 3; controls.maxLen.value = 4; controls.trialsPerLen.value = 1; controls.onMs.value = 600; controls.gapMs.value = 250;
@@ -419,7 +419,7 @@
 
     function endSession(reason='Session ended.'){
       state.running = false; state.awaitingInput = false; controls.pauseBtn.disabled = true; controls.downloadBtn.disabled = false; controls.startBtn.disabled = false;
-      log(`â€” ${reason} Best span: ${state.bestSpan}.`);
+      log(`Ã¢â‚¬â€ ${reason} Best span: ${state.bestSpan}.`);
     }
 
     function resetAll(){

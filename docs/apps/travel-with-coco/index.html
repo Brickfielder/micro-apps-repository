@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>Travel with Coco â€” Milestones v0.3</title>
+<title>Travel with Coco Ã¢â‚¬â€ Milestones v0.3</title>
 <style>
     :root{
       --bg:#f6f7fb; --card:#ffffff; --text:#111827; --muted:#6b7280;
@@ -56,23 +56,23 @@
 <body><main id="app-root">
 <header>
 <div class="wrap">
-<h1>ðŸŒ Travel with Coco <span class="muted">â€” Prototype v0.3</span></h1>
+<h1>Ã°Å¸Å’Â Travel with Coco <span class="muted">Ã¢â‚¬â€ Prototype v0.3</span></h1>
 <p class="sub">Plan a journey with your cheeky companion. Reach your destination city before you run out of resources.</p>
 <div aria-live="polite" class="dash">
-<div class="tile"><div class="label">ðŸ’° Money</div><div class="value" id="moneyVal">â€”</div></div>
-<div class="tile"><div class="label">â³ Time left (days)</div><div class="value" id="timeVal">â€”</div></div>
-<div class="tile"><div class="label">ðŸ”‹ Energy</div><div class="value" id="energyVal">â€”</div></div>
-<div class="tile"><div class="label">ðŸ¦ Cocoâ€™s Mood</div><div class="value" id="moodVal">â€”</div></div>
+<div class="tile"><div class="label">Ã°Å¸â€™Â° Money</div><div class="value" id="moneyVal">Ã¢â‚¬â€</div></div>
+<div class="tile"><div class="label">Ã¢ÂÂ³ Time left (days)</div><div class="value" id="timeVal">Ã¢â‚¬â€</div></div>
+<div class="tile"><div class="label">Ã°Å¸â€â€¹ Energy</div><div class="value" id="energyVal">Ã¢â‚¬â€</div></div>
+<div class="tile"><div class="label">Ã°Å¸ÂÂ¦ CocoÃ¢â‚¬â„¢s Mood</div><div class="value" id="moodVal">Ã¢â‚¬â€</div></div>
 </div>
 </div>
 </header>
 <main aria-live="polite" class="wrap" id="app"></main>
 <script>
     // ----------------------
-    // Game State v0.3 â€” Presets + CSV + Sleek UI
+    // Game State v0.3 Ã¢â‚¬â€ Presets + CSV + Sleek UI
     // ----------------------
     const ROUTE_PRESETS = {
-      'UK â†’ Italy (City Hop)': ['London','Paris','Milan','Florence','Rome'],
+      'UK Ã¢â€ â€™ Italy (City Hop)': ['London','Paris','Milan','Florence','Rome'],
       'Japan Golden Route': ['Tokyo','Hakone','Kyoto','Osaka'],
       'US West Coast': ['Seattle','Portland','San Francisco','Los Angeles','San Diego'],
       'Alps Highlights': ['Geneva','Chamonix','Aosta','Zermatt','St. Moritz']
@@ -81,7 +81,7 @@
     const game = {
       phase: 'start',
       day: 1,
-      routeCities: [...ROUTE_PRESETS['UK â†’ Italy (City Hop)']],
+      routeCities: [...ROUTE_PRESETS['UK Ã¢â€ â€™ Italy (City Hop)']],
       routeIndex: 0,
       money: 200,
       time: 5,
@@ -114,7 +114,7 @@
       const energy= document.getElementById('energyVal');
       const mood  = document.getElementById('moodVal');
       const set = (el,val)=>{ el.textContent=val; el.className='value'; if(+val<=0) el.classList.add('bad'); };
-      set(money, `Â£${game.money}`); set(time, `${game.time}`); set(energy, `${game.energy}`); set(mood, `${game.mood}`);
+      set(money, `Ã‚Â£${game.money}`); set(time, `${game.time}`); set(energy, `${game.energy}`); set(mood, `${game.mood}`);
       if(game.energy>=70) energy.classList.add('good'); else if(game.energy<=30) energy.classList.add('warn');
       if(game.money<=20) money.classList.add('warn'); if(game.time<=1) time.classList.add('warn');
       if(game.mood>=80) mood.classList.add('good'); else if(game.mood<20) mood.classList.add('warn');
@@ -125,9 +125,9 @@
       return `<div class="progress">${
         game.routeCities.map((c,i)=>{
           const cls = i<game.routeIndex? 'chip done' : (i===game.routeIndex? 'chip current':'chip');
-          const dot = i<game.routeIndex? 'âœ…' : (i===game.routeIndex? 'ðŸ”µ':'âšª');
+          const dot = i<game.routeIndex? 'Ã¢Å“â€¦' : (i===game.routeIndex? 'Ã°Å¸â€Âµ':'Ã¢Å¡Âª');
           return `<span class="${cls}">${dot} <span>${c}</span></span>`;
-        }).join('<span class="muted">â†’</span>')
+        }).join('<span class="muted">Ã¢â€ â€™</span>')
       }</div>`;
     }
 
@@ -143,48 +143,48 @@
       else if(r<sensibleP+whimsicalP+luckyP) type='lucky';
       else type='sabotage';
 
-      let advance=1, cost=0, energy=0, timeCost=1, detail='Coco has a planâ€¦';
-      if(type==='sensible'){ advance=1; cost=-50; energy=-8;  timeCost=1; detail='â€œLetâ€™s grab a cheap regional train.â€'; }
-      else if(type==='whimsical'){ advance=1; cost=-40; energy=-22; timeCost=2; detail='â€œRent a tandem bike across the hills!â€'; }
-      else if(type==='lucky'){ advance=2; cost=0;   energy=-8;  timeCost=1; detail='â€œFree carpool! We can skip a stop.â€'; }
-      else { advance=0; cost=-20; energy=-15; timeCost=1; detail='â€œQuick detour to see a giant spoon!â€ (doesnâ€™t advance)'; }
+      let advance=1, cost=0, energy=0, timeCost=1, detail='Coco has a planÃ¢â‚¬Â¦';
+      if(type==='sensible'){ advance=1; cost=-50; energy=-8;  timeCost=1; detail='Ã¢â‚¬Å“LetÃ¢â‚¬â„¢s grab a cheap regional train.Ã¢â‚¬Â'; }
+      else if(type==='whimsical'){ advance=1; cost=-40; energy=-22; timeCost=2; detail='Ã¢â‚¬Å“Rent a tandem bike across the hills!Ã¢â‚¬Â'; }
+      else if(type==='lucky'){ advance=2; cost=0;   energy=-8;  timeCost=1; detail='Ã¢â‚¬Å“Free carpool! We can skip a stop.Ã¢â‚¬Â'; }
+      else { advance=0; cost=-20; energy=-15; timeCost=1; detail='Ã¢â‚¬Å“Quick detour to see a giant spoon!Ã¢â‚¬Â (doesnÃ¢â‚¬â„¢t advance)'; }
       const target = nextCity(advance);
-      return { key:'coco', label:`Follow Coco â†’ ${target}`, detail, cost, energy, time:timeCost, advance, type };
+      return { key:'coco', label:`Follow Coco Ã¢â€ â€™ ${target}`, detail, cost, energy, time:timeCost, advance, type };
     }
 
     function baseTravelOptions(){
       const jump2 = Math.min(2, game.routeCities.length-1 - game.routeIndex);
       return [
-        { key:'flight', label:`âœˆï¸ Flight â†’ ${nextCity(jump2)}`, detail:'-Â£120, -20 energy, saves a day', cost:-120, energy:-20, time:0, advance:jump2 },
-        { key:'train',  label:`ðŸš† Train â†’ ${nextCity(1)}`,      detail:'-Â£70, -10 energy, 1 day',        cost:-70,  energy:-10, time:1, advance:1 },
-        { key:'bus',    label:`ðŸšŒ Bus â†’ ${nextCity(1)}`,        detail:'-Â£30, -15 energy, 1 day',        cost:-30,  energy:-15, time:1, advance:1 },
-        { key:'walk',   label:`ðŸš¶ Walk â†’ ${nextCity(1)}`,       detail:'Â£0, -25 energy, 2 days',         cost:0,    energy:-25, time:2, advance:1 },
+        { key:'flight', label:`Ã¢Å“Ë†Ã¯Â¸Â Flight Ã¢â€ â€™ ${nextCity(jump2)}`, detail:'-Ã‚Â£120, -20 energy, saves a day', cost:-120, energy:-20, time:0, advance:jump2 },
+        { key:'train',  label:`Ã°Å¸Å¡â€  Train Ã¢â€ â€™ ${nextCity(1)}`,      detail:'-Ã‚Â£70, -10 energy, 1 day',        cost:-70,  energy:-10, time:1, advance:1 },
+        { key:'bus',    label:`Ã°Å¸Å¡Å’ Bus Ã¢â€ â€™ ${nextCity(1)}`,        detail:'-Ã‚Â£30, -15 energy, 1 day',        cost:-30,  energy:-15, time:1, advance:1 },
+        { key:'walk',   label:`Ã°Å¸Å¡Â¶ Walk Ã¢â€ â€™ ${nextCity(1)}`,       detail:'Ã‚Â£0, -25 energy, 2 days',         cost:0,    energy:-25, time:2, advance:1 },
       ];
     }
 
     const stayOptions = [
-      { key:'hotel',  label:'ðŸ¨ Hotel',    cost:-80, energy:+30, mood:0,  detail:'-Â£80, +30 energy' },
-      { key:'hostel', label:'ðŸ›ï¸ Hostel',   cost:-40, energy:+20, mood:0,  detail:'-Â£40, +20 energy' },
-      { key:'camp',   label:'â›º Camping',  cost:-10, energy:+10, mood:-5, detail:'-Â£10, +10 energy, -5 mood' },
-      { key:'nosleep',label:'ðŸ˜µ No sleep', cost:0,   energy:-10, mood:-10,detail:'Â£0, -10 energy, -10 mood' },
+      { key:'hotel',  label:'Ã°Å¸ÂÂ¨ Hotel',    cost:-80, energy:+30, mood:0,  detail:'-Ã‚Â£80, +30 energy' },
+      { key:'hostel', label:'Ã°Å¸â€ºÂÃ¯Â¸Â Hostel',   cost:-40, energy:+20, mood:0,  detail:'-Ã‚Â£40, +20 energy' },
+      { key:'camp',   label:'Ã¢â€ºÂº Camping',  cost:-10, energy:+10, mood:-5, detail:'-Ã‚Â£10, +10 energy, -5 mood' },
+      { key:'nosleep',label:'Ã°Å¸ËœÂµ No sleep', cost:0,   energy:-10, mood:-10,detail:'Ã‚Â£0, -10 energy, -10 mood' },
     ];
 
     const foodOptions = [
-      { key:'restaurant', label:'ðŸ½ï¸ Restaurant', cost:-30, energy:+15, mood:+5, detail:'-Â£30, +15 energy, +5 mood' },
-      { key:'fast',       label:'ðŸ” Fast food',  cost:-15, energy:+10, mood:0,  detail:'-Â£15, +10 energy' },
-      { key:'snack',      label:'ðŸ¥¨ Snacks',     cost:-5,  energy:+5,  mood:0,  detail:'-Â£5, +5 energy' },
-      { key:'nomeal',     label:'ðŸš« No meal',    cost:0,   energy:-10, mood:-5, detail:'Â£0, -10 energy, -5 mood' },
+      { key:'restaurant', label:'Ã°Å¸ÂÂ½Ã¯Â¸Â Restaurant', cost:-30, energy:+15, mood:+5, detail:'-Ã‚Â£30, +15 energy, +5 mood' },
+      { key:'fast',       label:'Ã°Å¸Ââ€ Fast food',  cost:-15, energy:+10, mood:0,  detail:'-Ã‚Â£15, +10 energy' },
+      { key:'snack',      label:'Ã°Å¸Â¥Â¨ Snacks',     cost:-5,  energy:+5,  mood:0,  detail:'-Ã‚Â£5, +5 energy' },
+      { key:'nomeal',     label:'Ã°Å¸Å¡Â« No meal',    cost:0,   energy:-10, mood:-5, detail:'Ã‚Â£0, -10 energy, -5 mood' },
     ];
 
     // Random event
     function randomEvent(){
       if(!chance(0.2)) return null;
       const events = [
-        { label:'Lost item',      effect:()=>{ game.money=Math.max(0,game.money-20);         return 'You lost an item: -Â£20.'; } },
+        { label:'Lost item',      effect:()=>{ game.money=Math.max(0,game.money-20);         return 'You lost an item: -Ã‚Â£20.'; } },
         { label:'Friendly local', effect:()=>{ game.energy=clamp(game.energy+20,0,100);      return 'A friendly local hosted you: +20 energy.'; } },
         { label:'Illness',        effect:()=>{ game.energy=Math.max(0,game.energy-15);       return 'You felt unwell today: -15 energy.'; } },
-        { label:'Festival',       effect:()=>{ game.money=Math.max(0,game.money-15); game.mood=clamp(game.mood+10,0,100); return 'Festival day! -Â£15, +10 mood.'; } },
-        { label:'Scam',           effect:()=>{ game.money=Math.max(0,game.money-30);         return 'Oops, a travel scam: -Â£30.'; } },
+        { label:'Festival',       effect:()=>{ game.money=Math.max(0,game.money-15); game.mood=clamp(game.mood+10,0,100); return 'Festival day! -Ã‚Â£15, +10 mood.'; } },
+        { label:'Scam',           effect:()=>{ game.money=Math.max(0,game.money-30);         return 'Oops, a travel scam: -Ã‚Â£30.'; } },
         { label:'Shortcut',       effect:()=>{ game.time=Math.max(0,game.time+1);            return 'You discovered a shortcut: +1 day.'; } },
       ];
       return pick(events);
@@ -216,16 +216,16 @@
               <input id="routeStr" style="min-width:520px" value="${game.routeCities.join(', ')}" aria-label="Route cities">
             </label>
             <label>Days<br><input id="days" type="number" min="3" max="20" value="${game.time}" aria-label="Time in days"></label>
-            <label>Money (Â£)<br><input id="cash" type="number" min="50" max="1000" value="${game.money}" aria-label="Starting money"></label>
+            <label>Money (Ã‚Â£)<br><input id="cash" type="number" min="50" max="1000" value="${game.money}" aria-label="Starting money"></label>
           </div>
           <div class="toolbar">
-            <div class="muted">First city = start â€¢ Last city = destination</div>
+            <div class="muted">First city = start Ã¢â‚¬Â¢ Last city = destination</div>
             <div class="right"><button class="btn primary" id="startBtn">Start Game</button></div>
           </div>
         </div>
       `;
       const presetSel = document.getElementById('presetSel');
-      presetSel.value = 'UK â†’ Italy (City Hop)';
+      presetSel.value = 'UK Ã¢â€ â€™ Italy (City Hop)';
       presetSel.onchange = ()=>{
         const name = presetSel.value; game.routeCities = [...ROUTE_PRESETS[name]];
         document.getElementById('routeStr').value = game.routeCities.join(', ');
@@ -238,7 +238,7 @@
         game.money = parseInt(document.getElementById('cash').value)||200;
         game.energy = 100; game.mood = 50;
         game.phase='travel';
-        game.log = [{type:'start', msg:`Start at ${startCity()} â†’ ${destination()}`}];
+        game.log = [{type:'start', msg:`Start at ${startCity()} Ã¢â€ â€™ ${destination()}`}];
         updateDash();
         screenTravel();
       };
@@ -254,17 +254,17 @@
         <div class="card">
           <div class="toolbar">
             <div>${progressBar()}</div>
-            <div class="right"><button class="btn chip" id="btnExport">â¬‡ï¸ Download CSV</button></div>
+            <div class="right"><button class="btn chip" id="btnExport">Ã¢Â¬â€¡Ã¯Â¸Â Download CSV</button></div>
           </div>
-          <h2 style="margin-top:8px">Day ${game.day} â€” Travel choices</h2>
-          <p><strong>Current:</strong> ${currentCity()} â†’ <strong>Goal:</strong> ${destination()}</p>
+          <h2 style="margin-top:8px">Day ${game.day} Ã¢â‚¬â€ Travel choices</h2>
+          <p><strong>Current:</strong> ${currentCity()} Ã¢â€ â€™ <strong>Goal:</strong> ${destination()}</p>
 
           <!-- Coco FIRST -->
           <div class="choice" ${!coco?'aria-disabled="true"':''} style="border:2px solid #dbeafe;background:#eff6ff">
-            <div>ðŸ¦</div>
+            <div>Ã°Å¸ÂÂ¦</div>
             <div>
               <h4 style="margin:0 0 6px 0">Coco says:</h4>
-              <div>${coco ? coco.detail : '<em>Coco is sulkingâ€¦ no suggestions today.</em>'}</div>
+              <div>${coco ? coco.detail : '<em>Coco is sulkingÃ¢â‚¬Â¦ no suggestions today.</em>'}</div>
               ${coco ? html`<small class="muted">Effect if followed: ${fmtTravel(coco)}</small>` : ''}
               ${coco ? html`<div style="margin-top:8px" class="row"><button class="btn" id="btnCoco">${coco.label}</button></div>` : ''}
             </div>
@@ -283,7 +283,7 @@
         const div = document.createElement('div');
         div.className='choice';
         div.innerHTML = `
-          <div>ðŸ§­</div>
+          <div>Ã°Å¸Â§Â­</div>
           <div>
             <h4>${o.label}</h4>
             <div>${o.detail}</div>
@@ -302,8 +302,8 @@
     function fmtTravel(o){
       const toCity = nextCity(o.advance||1);
       const days = `${o.time} day${o.time!==1?'s':''}`;
-      const cost = `${o.cost<0?o.cost:'+'+o.cost}Â£`;
-      return `${cost}, ${o.energy} energy, ${days}, â†’ ${toCity}`;
+      const cost = `${o.cost<0?o.cost:'+'+o.cost}Ã‚Â£`;
+      return `${cost}, ${o.energy} energy, ${days}, Ã¢â€ â€™ ${toCity}`;
     }
 
     function pushCsvRow(phase, action, from, to){
@@ -323,7 +323,7 @@
       const newCity = currentCity();
 
       pushCsvRow('travel', (isCoco?`Coco: ${opt.label}`:opt.label), priorCity, newCity);
-      game.log.push({type:'travel', msg:`Day ${game.day}: ${isCoco?'Coco':'Player'} chose ${opt.label} (${fmtTravel(opt)}) â€” ${priorCity} â†’ ${newCity}`});
+      game.log.push({type:'travel', msg:`Day ${game.day}: ${isCoco?'Coco':'Player'} chose ${opt.label} (${fmtTravel(opt)}) Ã¢â‚¬â€ ${priorCity} Ã¢â€ â€™ ${newCity}`});
       updateDash();
       if(checkEnd()) return;
       game.phase='stay'; screenStay();
@@ -333,8 +333,8 @@
       if(checkEnd()) return;
       app.innerHTML = html`
         <div class="card">
-          <div class="toolbar"><div>${progressBar()}</div><div class="right"><button class="btn chip" id="btnExport">â¬‡ï¸ Download CSV</button></div></div>
-          <h2>Evening â€” Where will you stay?</h2>
+          <div class="toolbar"><div>${progressBar()}</div><div class="right"><button class="btn chip" id="btnExport">Ã¢Â¬â€¡Ã¯Â¸Â Download CSV</button></div></div>
+          <h2>Evening Ã¢â‚¬â€ Where will you stay?</h2>
           <div id="stayList"></div>
         </div>
       `;
@@ -344,7 +344,7 @@
         const div=document.createElement('div');
         div.className='choice';
         div.innerHTML = `
-          <div>ðŸ›Žï¸</div>
+          <div>Ã°Å¸â€ºÅ½Ã¯Â¸Â</div>
           <div>
             <h4>${s.label}</h4>
             <div>${s.detail}</div>
@@ -370,8 +370,8 @@
     function screenFood(){
       app.innerHTML = html`
         <div class="card">
-          <div class="toolbar"><div>${progressBar()}</div><div class="right"><button class="btn chip" id="btnExport">â¬‡ï¸ Download CSV</button></div></div>
-          <h2>Food â€” Refuel?</h2>
+          <div class="toolbar"><div>${progressBar()}</div><div class="right"><button class="btn chip" id="btnExport">Ã¢Â¬â€¡Ã¯Â¸Â Download CSV</button></div></div>
+          <h2>Food Ã¢â‚¬â€ Refuel?</h2>
           <div id="foodList"></div>
           <div class="row" style="margin-top:8px"><button class="btn ghost" id="skipFood">Skip food phase</button></div>
         </div>
@@ -382,7 +382,7 @@
         const div=document.createElement('div');
         div.className='choice';
         div.innerHTML = `
-          <div>ðŸ½ï¸</div>
+          <div>Ã°Å¸ÂÂ½Ã¯Â¸Â</div>
           <div>
             <h4>${f.label}</h4>
             <div>${f.detail}</div>
@@ -425,19 +425,19 @@
     function endGame(win, reason=''){
       game.phase='end';
       const score = (win?50:0) + game.money + game.energy + game.time + (game.mood>=80?10:0) - (game.mood<20?10:0);
-      const story = game.log.map(l=>`â€¢ ${l.msg}`).join('\n');
-      const routeStr = `${startCity()} â†’ ${destination()}`;
+      const story = game.log.map(l=>`Ã¢â‚¬Â¢ ${l.msg}`).join('\n');
+      const routeStr = `${startCity()} Ã¢â€ â€™ ${destination()}`;
       const arrived = game.routeIndex >= game.routeCities.length-1;
-      const title = win && arrived ? 'ðŸŽ‰ You arrived!' : (win ? 'ðŸŽ‰ Progress complete' : 'ðŸ’¥ Trip over');
+      const title = win && arrived ? 'Ã°Å¸Å½â€° You arrived!' : (win ? 'Ã°Å¸Å½â€° Progress complete' : 'Ã°Å¸â€™Â¥ Trip over');
       const summary = win && arrived ? 'Destination reached.' : (win ? 'Route milestones cleared.' : reason);
 
       app.innerHTML = html`
         <div class="card">
-          <div class="toolbar"><div>${progressBar()}</div><div class="right"><button class="btn chip" id="btnExport">â¬‡ï¸ Download CSV</button></div></div>
+          <div class="toolbar"><div>${progressBar()}</div><div class="right"><button class="btn chip" id="btnExport">Ã¢Â¬â€¡Ã¯Â¸Â Download CSV</button></div></div>
           <h2>${title}</h2>
           ${summary?html`<p class="muted">${summary}</p>`:''}
           <p><strong>Route:</strong> ${routeStr}</p>
-          <p><strong>Final resources:</strong> Â£${game.money}, ${game.time} day(s), ${game.energy} energy, mood ${game.mood}</p>
+          <p><strong>Final resources:</strong> Ã‚Â£${game.money}, ${game.time} day(s), ${game.energy} energy, mood ${game.mood}</p>
           <p><strong>Coco followed:</strong> ${game.followedCocoCount} time(s). Ignored: ${game.ignoredCocoCount}.</p>
           <p><strong>Score:</strong> ${score}</p>
           <details style="margin-top:8px"><summary>Trip Story (log)</summary><pre style="white-space:pre-wrap;background:#fafafa;border:1px solid var(--border);padding:10px;border-radius:12px">${story}</pre></details>

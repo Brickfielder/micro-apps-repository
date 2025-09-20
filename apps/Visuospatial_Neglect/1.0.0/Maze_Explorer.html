@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Maze Explorer — Anchor Latency, Metrics, Idle Timer</title>
+  <title>Maze Explorer Ã¢â‚¬â€ Anchor Latency, Metrics, Idle Timer</title>
   <style>
     :root{
       --green:#2E8B57;
@@ -51,26 +51,26 @@
   </style>
 </head>
 <body>
-  <h2>Maze Explorer — Start <em>bottom‑right</em>, Finish <em>top‑left</em></h2>
+  <h2>Maze Explorer Ã¢â‚¬â€ Start <em>bottomÃ¢â‚¬â€˜right</em>, Finish <em>topÃ¢â‚¬â€˜left</em></h2>
 
   <div id="rules">
-    <b>Task:</b> Find your way from the <u>bottom‑right</u> start square to the <u>top‑left</u> yellow goal.<br>
+    <b>Task:</b> Find your way from the <u>bottomÃ¢â‚¬â€˜right</u> start square to the <u>topÃ¢â‚¬â€˜left</u> yellow goal.<br>
     <b>Rules:</b> Swipe or use arrow buttons to move. Every <b>10 moves</b>, tap the <span style="color:#d62828"><b>red left anchor</b></span> before continuing.
-    If the <b>coach panel</b> appears on the right, you may be moving away—<b>tap the panel to close</b> and consider backtracking.<br>
-    <b>Timing:</b> The timer counts only <i>active time</i>. If there’s no move or anchor tap for <b>30 seconds</b>, timing pauses automatically and resumes on the next action.
+    If the <b>coach panel</b> appears on the right, you may be moving awayÃ¢â‚¬â€<b>tap the panel to close</b> and consider backtracking.<br>
+    <b>Timing:</b> The timer counts only <i>active time</i>. If thereÃ¢â‚¬â„¢s no move or anchor tap for <b>30 seconds</b>, timing pauses automatically and resumes on the next action.
   </div>
 
   <div id="toolbar">
     <label for="difficulty">Difficulty:</label>
     <select id="difficulty" aria-label="Select difficulty">
-      <option value="10">Easy (10×10)</option>
-      <option value="16">Medium (16×16)</option>
-      <option value="20">Hard (20×20)</option>
+      <option value="10">Easy (10Ãƒâ€”10)</option>
+      <option value="16">Medium (16Ãƒâ€”16)</option>
+      <option value="20">Hard (20Ãƒâ€”20)</option>
     </select>
   </div>
 
   <div class="wrap" id="wrap">
-    <div id="leftAnchor" title="Tap here to re‑anchor left"></div>
+    <div id="leftAnchor" title="Tap here to reÃ¢â‚¬â€˜anchor left"></div>
     <canvas id="mazeCanvas" width="520" height="520"></canvas>
     <div id="coach" role="alert">You might be moving away from the goal on the right. <b>Tap to close</b> and try backtracking.</div>
   </div>
@@ -87,7 +87,7 @@
 
   <div id="logBar">
     <button id="downloadBtn">Download session log (CSV)</button>
-    <span id="idleBadge">Paused — no activity</span>
+    <span id="idleBadge">Paused Ã¢â‚¬â€ no activity</span>
   </div>
 
   <div id="metrics">
@@ -557,7 +557,7 @@
   }
   difficultySel.addEventListener('change', applyDifficultyFromSelect);
 
-  // Handle "Try a new maze" click — keep current difficulty
+  // Handle "Try a new maze" click Ã¢â‚¬â€ keep current difficulty
   newMazeBtn.addEventListener('click', ()=>{
     newMaze(parseInt(difficultySel.value,10));
     newMazeBtn.style.display = 'none';
@@ -596,7 +596,7 @@
       console.log(`[Maze] Downloaded stats CSV with ${Math.max(0, lines.length-1)} rows.`);
     }catch(err){
       console.error('CSV download failed:', err);
-      alert('Sorry — couldn’t create the CSV. Check the console for details.');
+      alert('Sorry Ã¢â‚¬â€ couldnÃ¢â‚¬â„¢t create the CSV. Check the console for details.');
     }
   }
 
@@ -651,7 +651,7 @@
       alert('Session reset complete.');
     } catch (e) {
       console.error('Reset failed:', e);
-      alert('Sorry — could not reset. See console for details.');
+      alert('Sorry Ã¢â‚¬â€ could not reset. See console for details.');
     }
   }
 

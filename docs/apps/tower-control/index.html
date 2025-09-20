@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Tower Control â€” Executive Function Trainer</title>
+<title>Tower Control Ã¢â‚¬â€ Executive Function Trainer</title>
 <meta content="Manage changing protocols and prioritise actions under pressure to train working memory, cognitive flexibility, and inhibition." name="description"/>
 <style>
   /* ===== Micro Apps brand tokens (light first) ===== */
@@ -226,18 +226,18 @@
 <div class="wrap hero" role="banner">
 <div class="title">
 <h1 aria-label="Tower Control">Tower Control</h1>
-<p class="subtitle">Executive Function Trainer â€¢ Micro Rehab Apps</p>
+<p class="subtitle">Executive Function Trainer Ã¢â‚¬Â¢ Micro Rehab Apps</p>
 <div aria-hidden="true" class="badges">
-<span class="pill">ðŸ§  Working Memory</span>
-<span class="pill">ðŸ” Flexibility</span>
-<span class="pill">ðŸ›‘ Inhibition</span>
+<span class="pill">Ã°Å¸Â§Â  Working Memory</span>
+<span class="pill">Ã°Å¸â€Â Flexibility</span>
+<span class="pill">Ã°Å¸â€ºâ€˜ Inhibition</span>
 </div>
 </div>
 <div aria-label="Session controls" class="toolbar">
 <button aria-controls="main" class="btn primary" id="startBtn">Start mission</button>
 <button class="btn ghost" disabled="" id="pauseBtn">Pause</button>
-<button aria-label="Trigger emergency" class="btn danger" disabled="" id="emergencyBtn">ðŸš¨ Emergency</button>
-<button aria-label="Export CSV" class="btn" id="downloadBtn">ðŸ“Š Export data</button>
+<button aria-label="Trigger emergency" class="btn danger" disabled="" id="emergencyBtn">Ã°Å¸Å¡Â¨ Emergency</button>
+<button aria-label="Export CSV" class="btn" id="downloadBtn">Ã°Å¸â€œÅ  Export data</button>
 </div>
 </div>
 </header>
@@ -307,8 +307,8 @@
 <footer>
 <div class="footer-inner">
 <span>Executive Function Training</span>
-<span aria-hidden="true">â€¢</span>
-<span>Working Memory â€¢ Cognitive Flexibility â€¢ Inhibitory Control</span>
+<span aria-hidden="true">Ã¢â‚¬Â¢</span>
+<span>Working Memory Ã¢â‚¬Â¢ Cognitive Flexibility Ã¢â‚¬Â¢ Inhibitory Control</span>
 </div>
 </footer>
 </div>
@@ -620,7 +620,7 @@ function updateAircraftListDisplay(){
     const d=document.createElement('div');
     d.className=`aircraft-info ${a.id===gameState.selectedAircraft?'selected':''}`;
     d.innerHTML = `<strong>${a.emoji} ${a.type.toUpperCase()}</strong><br>
-                   <small>Status: ${a.status} â€¢ Time: ${Math.round(a.timeRemaining)}s</small>`;
+                   <small>Status: ${a.status} Ã¢â‚¬Â¢ Time: ${Math.round(a.timeRemaining)}s</small>`;
     d.onclick=()=>selectAircraft(a.id);
     elements.aircraftList.appendChild(d);
   });
@@ -650,20 +650,20 @@ function formatTime(s){
 function showResults(){
   const sr = gameState.completedTasks + gameState.failedTasks > 0
     ? Math.round((gameState.completedTasks/(gameState.completedTasks+gameState.failedTasks))*100) : 100;
-  elements.resultTitle.textContent = gameState.level>5 ? 'ðŸŽ‰ Mission Complete!' : 'â° Mission Ended';
+  elements.resultTitle.textContent = gameState.level>5 ? 'Ã°Å¸Å½â€° Mission Complete!' : 'Ã¢ÂÂ° Mission Ended';
   elements.resultMessage.innerHTML = `
-    <strong>ðŸŽ¯ Final Results:</strong><br><br>
+    <strong>Ã°Å¸Å½Â¯ Final Results:</strong><br><br>
     <div style="text-align:left;display:inline-block">
-      ðŸ“Š <strong>Level Reached:</strong> ${gameState.level}<br>
-      ðŸ† <strong>Total Score:</strong> ${gameState.score} points<br>
-      âœ… <strong>Success Rate:</strong> ${sr}%<br>
-      ðŸ“‹ <strong>Tasks Completed:</strong> ${gameState.completedTasks}
+      Ã°Å¸â€œÅ  <strong>Level Reached:</strong> ${gameState.level}<br>
+      Ã°Å¸Ââ€  <strong>Total Score:</strong> ${gameState.score} points<br>
+      Ã¢Å“â€¦ <strong>Success Rate:</strong> ${sr}%<br>
+      Ã°Å¸â€œâ€¹ <strong>Tasks Completed:</strong> ${gameState.completedTasks}
     </div>
     <div style="background:var(--surface);border:1px solid var(--line);padding:12px;border-radius:12px;margin-top:12px">
-      <strong>ðŸ§  Executive Skills Trained:</strong><br>
-      <small>â€¢ <strong>Working Memory:</strong> Track multiple aircraft & changing rules<br>
-      â€¢ <strong>Cognitive Flexibility:</strong> Adapt to protocol changes<br>
-      â€¢ <strong>Inhibitory Control:</strong> Follow rules under pressure</small>
+      <strong>Ã°Å¸Â§Â  Executive Skills Trained:</strong><br>
+      <small>Ã¢â‚¬Â¢ <strong>Working Memory:</strong> Track multiple aircraft & changing rules<br>
+      Ã¢â‚¬Â¢ <strong>Cognitive Flexibility:</strong> Adapt to protocol changes<br>
+      Ã¢â‚¬Â¢ <strong>Inhibitory Control:</strong> Follow rules under pressure</small>
     </div>`;
   elements.resultModal.style.display='flex';
 }
