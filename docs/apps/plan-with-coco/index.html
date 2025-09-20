@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>Plan with Coco — Scored Scenarios</title>
+<title>Plan with Coco â€” Scored Scenarios</title>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <style>
     :root{--bg:#f8fcff;--card:#fff;--text:#222;--muted:#6b7280;--pill:#eef2ff;--accent:#2563eb;}
@@ -31,7 +31,8 @@
     .rules li{margin-bottom:4px}
     .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 0.95rem;}
   </style>
-<meta content="Plan_with_Coco" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../shared/theme.css" rel="stylesheet"/><script defer="" src="../shared/frame.js"></script><script defer="" src="../shared/clinician_feedback.js"></script></head>
+<meta content="Plan_with_Coco" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../../../shared/theme.css" rel="stylesheet"/><script defer="" src="../../../shared/frame.js"></script><script defer="" src="../../../shared/clinician_feedback.js"></script>  <meta name="app-slug" content="plan-with-coco">
+</head>
 <body><main id="app-root">
 <div class="header">
 <svg aria-hidden="true" class="logo" viewbox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
@@ -41,21 +42,21 @@
 <polygon fill="#f59e0b" points="42,26 48,24 42,22"></polygon><!-- beak -->
 <path d="M14 30 C22 38, 34 40, 46 34" fill="none" stroke="#3b82f6" stroke-width="4"></path><!-- wing -->
 </svg>
-<div class="titleText">Plan with Coco — Scored Scenarios</div>
+<div class="titleText">Plan with Coco â€” Scored Scenarios</div>
 </div>
 <div class="box">
-<div class="title">🧠 Instructions</div>
+<div class="title">ðŸ§  Instructions</div>
 <div>
-      Choose a scenario, then plan together with <strong>Coco 🐦</strong>.<br/>
-      Each of you gets <strong>4 turns</strong> (total 8 accepted items). Some items are <em>plausible but not essential</em> — focus on what’s needed.
-      You can <strong>Accept</strong> or <strong>Reject</strong> Coco’s suggestions. Cover the scenario’s categories and earn extra points via bonus rules.
+      Choose a scenario, then plan together with <strong>Coco ðŸ¦</strong>.<br/>
+      Each of you gets <strong>4 turns</strong> (total 8 accepted items). Some items are <em>plausible but not essential</em> â€” focus on whatâ€™s needed.
+      You can <strong>Accept</strong> or <strong>Reject</strong> Cocoâ€™s suggestions. Cover the scenarioâ€™s categories and earn extra points via bonus rules.
     </div>
 <div class="mono">
 <strong>Scoring rubric:</strong><br/>
-      • +2 pts for each required category covered<br/>
-      • +1 pt for each satisfied <em>bonus rule</em><br/>
-      • −1 pt per non‑essential item accepted<br/>
-      • +2 pts “Perfect plan” bonus if all required categories are covered and 0 non‑essentials accepted
+      â€¢ +2 pts for each required category covered<br/>
+      â€¢ +1 pt for each satisfied <em>bonus rule</em><br/>
+      â€¢ âˆ’1 pt per nonâ€‘essential item accepted<br/>
+      â€¢ +2 pts â€œPerfect planâ€ bonus if all required categories are covered and 0 nonâ€‘essentials accepted
     </div>
 </div>
 <div class="box row">
@@ -83,49 +84,49 @@
 <strong>Scenario rules</strong>
 <ul class="rules" id="rulesList"></ul>
 </div>
-<div class="status hidden" id="progress">Turn <span id="turnNum">1</span> of 8 • Player turns left: <span id="pLeft">4</span> • Coco turns left: <span id="cLeft">4</span></div>
+<div class="status hidden" id="progress">Turn <span id="turnNum">1</span> of 8 â€¢ Player turns left: <span id="pLeft">4</span> â€¢ Coco turns left: <span id="cLeft">4</span></div>
 </div>
 <div class="grid">
 <div class="box">
-<div class="title">🧍 Your turn</div>
+<div class="title">ðŸ§ Your turn</div>
 <select id="playerChoice">
 <option value="">Choose an item</option>
 <!-- Food -->
-<option data-cat="food" value="Sandwiches">🥪 Sandwiches</option>
-<option data-cat="food" value="Fruit">🍉 Fruit</option>
-<option data-cat="food" value="Trail Mix">🥜 Trail Mix</option>
+<option data-cat="food" value="Sandwiches">ðŸ¥ª Sandwiches</option>
+<option data-cat="food" value="Fruit">ðŸ‰ Fruit</option>
+<option data-cat="food" value="Trail Mix">ðŸ¥œ Trail Mix</option>
 <!-- Drinks -->
-<option data-cat="drink" value="Water">💧 Water</option>
-<option data-cat="drink" value="Juice">🧃 Juice</option>
+<option data-cat="drink" value="Water">ðŸ’§ Water</option>
+<option data-cat="drink" value="Juice">ðŸ§ƒ Juice</option>
 <!-- Safety -->
-<option data-cat="safety" value="Sunscreen">🧴 Sunscreen</option>
-<option data-cat="safety" value="Umbrella">☂️ Umbrella</option>
-<option data-cat="safety" value="Map">🗺️ Map</option>
+<option data-cat="safety" value="Sunscreen">ðŸ§´ Sunscreen</option>
+<option data-cat="safety" value="Umbrella">â˜‚ï¸ Umbrella</option>
+<option data-cat="safety" value="Map">ðŸ—ºï¸ Map</option>
 <!-- Comfort -->
-<option data-cat="comfort" value="Blanket">🧺 Blanket</option>
-<option data-cat="comfort" value="Jacket">🧥 Jacket</option>
+<option data-cat="comfort" value="Blanket">ðŸ§º Blanket</option>
+<option data-cat="comfort" value="Jacket">ðŸ§¥ Jacket</option>
 <!-- Activity -->
-<option data-cat="activity" value="Kite">🪁 Kite</option>
-<option data-cat="activity" value="Frisbee">🥏 Frisbee</option>
+<option data-cat="activity" value="Kite">ðŸª Kite</option>
+<option data-cat="activity" value="Frisbee">ðŸ¥ Frisbee</option>
 <!-- Non-essentials (hidden) -->
-<option data-cat="?" value="Glitter">✨ Glitter</option>
-<option data-cat="?" value="Garlic">🧄 Garlic</option>
-<option data-cat="?" value="Alarm Clock">⏰ Alarm Clock</option>
-<option data-cat="?" value="Novelty Socks">🧦 Novelty Socks</option>
+<option data-cat="?" value="Glitter">âœ¨ Glitter</option>
+<option data-cat="?" value="Garlic">ðŸ§„ Garlic</option>
+<option data-cat="?" value="Alarm Clock">â° Alarm Clock</option>
+<option data-cat="?" value="Novelty Socks">ðŸ§¦ Novelty Socks</option>
 </select>
 <button id="playerBtn" onclick="playerTurn()">Add Item</button>
 </div>
 <div class="box">
-<div class="title">🐦 Coco</div>
-<div class="status" id="statusBubble">Coco is waiting for your pick…</div>
+<div class="title">ðŸ¦ Coco</div>
+<div class="status" id="statusBubble">Coco is waiting for your pickâ€¦</div>
 <div class="row hidden" id="cocoControls">
-<button class="secondary" onclick="acceptCocoItem()">✅ Accept</button>
-<button class="secondary" onclick="rejectCocoItem()">❌ Reject</button>
+<button class="secondary" onclick="acceptCocoItem()">âœ… Accept</button>
+<button class="secondary" onclick="rejectCocoItem()">âŒ Reject</button>
 </div>
 </div>
 </div>
 <div class="box">
-<div class="title">📝 Plan so far</div>
+<div class="title">ðŸ“ Plan so far</div>
 <ul id="planList"></ul>
 <div class="status" id="liveCats"></div>
 </div>
@@ -148,7 +149,7 @@
       needed: ["food","safety","comfort","activity"],
       rules: [
         {type:'bonusIfAll', cats:['safety','comfort'], points:1, desc:'Have both rain protection and warmth'},
-        {type:'bonusIf', cat:'drink', points:1, desc:'Don’t forget a drink even in the rain'}
+        {type:'bonusIf', cat:'drink', points:1, desc:'Donâ€™t forget a drink even in the rain'}
       ]
     },
     { goal: "Outdoor birthday party",
@@ -233,7 +234,7 @@
     { item:"Umbrella", cat:"safety", reason:"Backup for sudden showers." },
     { item:"Jacket", cat:"comfort", reason:"Evenings can turn chilly." },
     { item:"Map", cat:"safety", reason:"Helps if paths are closed." },
-    { item:"Kite", cat:"activity", reason:"If there’s a breeze." },
+    { item:"Kite", cat:"activity", reason:"If thereâ€™s a breeze." },
     // Non-essentials still plausible
     { item:"Garlic", cat:"?", reason:"Maybe keeps bugs away?" },
     { item:"Glitter", cat:"?", reason:"For extra festivity?" },
@@ -265,7 +266,7 @@
     document.getElementById("planList").innerHTML="";
     document.getElementById("results").classList.add("hidden");
     updateProgress();
-    document.getElementById("statusBubble").textContent="Coco is waiting for your pick…";
+    document.getElementById("statusBubble").textContent="Coco is waiting for your pickâ€¦";
     document.getElementById("cocoControls").classList.add("hidden");
     document.getElementById("progress").classList.remove("hidden");
     updateLiveCats();
@@ -287,7 +288,7 @@
     });
     const missing=(selectedScenario?.needed||[]).filter(c=>!pickedCats.has(c));
     const live=document.getElementById("liveCats");
-    live.innerHTML = missing.length===0 ? '<span class="ok">All required categories covered ✅</span>' :
+    live.innerHTML = missing.length===0 ? '<span class="ok">All required categories covered âœ…</span>' :
       '<span class="miss">Missing: '+missing.join(", ")+'</span>';
   }
 
@@ -302,7 +303,7 @@
     if(currentPhase!=="player"||!selectedScenario)return;
     const sel=document.getElementById("playerChoice"); const item=sel.value; if(!item)return;
     const cat=sel.options[sel.selectedIndex].dataset.cat||"?";
-    addPlanLine("🧍 You: "+item);
+    addPlanLine("ðŸ§ You: "+item);
     applyCat(cat);
     playerTurns--; acceptedCount++; sel.selectedIndex=0;
     updateProgress(); updateLiveCats();
@@ -313,27 +314,27 @@
   function cocoSuggest(){
     const pick=cocoItems[Math.floor(Math.random()*cocoItems.length)];
     cocoPick=pick;
-    const emotions=["🙂","😐","🤔"][Math.min(cocoRejections,2)];
-    document.getElementById("statusBubble").innerHTML=`${emotions} Coco suggests <strong>${pick.item}</strong><br><em>“${pick.reason}”</em>`;
+    const emotions=["ðŸ™‚","ðŸ˜","ðŸ¤”"][Math.min(cocoRejections,2)];
+    document.getElementById("statusBubble").innerHTML=`${emotions} Coco suggests <strong>${pick.item}</strong><br><em>â€œ${pick.reason}â€</em>`;
     document.getElementById("cocoControls").classList.remove("hidden");
   }
 
   function acceptCocoItem(){
     if(currentPhase!=="cocoSuggest"||cocoTurns<=0)return;
-    addPlanLine("🐦 Coco: "+cocoPick.item);
+    addPlanLine("ðŸ¦ Coco: "+cocoPick.item);
     applyCat(cocoPick.cat);
     cocoTurns--; acceptedCount++; cocoRejections=0;
     document.getElementById("cocoControls").classList.add("hidden");
     updateProgress(); updateLiveCats();
     if(acceptedCount>=totalTurns){endTask();return;}
     currentPhase="player";
-    document.getElementById("statusBubble").textContent="Your turn — pick an item.";
+    document.getElementById("statusBubble").textContent="Your turn â€” pick an item.";
   }
 
   function rejectCocoItem(){
     cocoRejections++;
-    let face=cocoRejections===1?"😕":cocoRejections===2?"😢":cocoRejections>=3?"😭":"🙂";
-    document.getElementById("statusBubble").innerHTML=`${face} Coco will try again…`;
+    let face=cocoRejections===1?"ðŸ˜•":cocoRejections===2?"ðŸ˜¢":cocoRejections>=3?"ðŸ˜­":"ðŸ™‚";
+    document.getElementById("statusBubble").innerHTML=`${face} Coco will try againâ€¦`;
     setTimeout(cocoSuggest,900);
   }
 
@@ -360,7 +361,7 @@
       }
     });
     // Penalty for non-essentials
-    if(nonEssentials>0){ score -= nonEssentials; detail.push(`−${nonEssentials} Non‑essential items`); }
+    if(nonEssentials>0){ score -= nonEssentials; detail.push(`âˆ’${nonEssentials} Nonâ€‘essential items`); }
     // Perfect plan bonus
     const allCovered = needed.every(c=>pickedCats.has(c));
     if(allCovered && nonEssentials===0){ score += 2; detail.push(`+2 Perfect plan bonus`); }
@@ -373,12 +374,12 @@
     const needed=selectedScenario.needed;
     const missed=needed.filter(c=>!pickedCats.has(c));
     const res=document.getElementById("results");
-    let html=`<div class="title">📊 Summary — ${selectedScenario.goal}</div>`;
-    html+= missed.length===0 ? '<p class="ok">All required categories covered ✅</p>'
+    let html=`<div class="title">ðŸ“Š Summary â€” ${selectedScenario.goal}</div>`;
+    html+= missed.length===0 ? '<p class="ok">All required categories covered âœ…</p>'
                              : `<p class="miss">Missing: ${missed.join(", ")}</p>`;
     html+= `<p class="title">Score: <strong>${score}</strong></p>`;
     html+= '<ul class="mono">' + detail.map(d=>`<li>${d}</li>`).join('') + '</ul>';
-    html+= '<button class="secondary" onclick="resetTask()">🔄 Restart same scenario</button>';
+    html+= '<button class="secondary" onclick="resetTask()">ðŸ”„ Restart same scenario</button>';
     res.innerHTML=html; res.classList.remove("hidden"); document.getElementById("statusBubble").textContent="Planning complete.";
   }
 </script>
@@ -394,3 +395,4 @@
 </div>
 </section></main></body>
 </html>
+

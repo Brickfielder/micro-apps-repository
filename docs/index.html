@@ -1,520 +1,86 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Micro Rehab Apps</title>
-<meta name="description" content="Browse lightweight cognitive rehab micro-apps: visuospatial, executive functioning, language, strategy training." />
-<style>
-  :root{
-    color-scheme: light dark;
-    --bg:#f7f8fb; --surface:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
-    --accent:#ff7a6e; --accent-600:#ff6254; --accent-700:#f24f40;
-    --pill:#f2f4f7; --radius:16px;
-    --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.08);
-    --maxw:1200px;
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Micro Apps — Gallery</title>
 
-    /* Neural background vars */
-    --bg-grad-1:#f7f8fb;
-    --bg-grad-2:#eef2f7;
-    --bg-grad-3:#e6f1ff;
-    --node-color: #3b82f6;        /* blue-500 */
-    --link-max-opacity: 0.35;     /* easy knob if links feel too strong */
-    --link-distance: 160;         /* link threshold distance in px */
-    --node-radius: 2.5;
-    --node-glow: 8;
-  }
+  <!-- Shared theme (relative to docs/) -->
+  <link rel="stylesheet" href="shared/theme.css" />
 
-  html,body{height:100%} *{box-sizing:border-box}
-
-  body{
-    margin:0;
-    font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,"Helvetica Neue",Arial;
-    color:var(--text);
-    /* Light, airy base gradient (canvas draws the neural web above this) */
-    background:
-      radial-gradient(circle at 20% 30%, var(--bg-grad-3), var(--bg-grad-1)),
-      radial-gradient(circle at 80% 70%, var(--bg-grad-2), transparent);
-    /* Removed the repeating lines background to avoid fighting with the network */
-  }
-
-  /* Keep the neural canvas behind everything but above the body bg */
-  #network{
-    position: fixed;
-    inset: 0;
-    z-index: 0;       /* Below content, above body background */
-    pointer-events: none;
-  }
-
-  /* Ensure page content sits above the canvas */
-  header, main, footer { position: relative; z-index: 1; }
-
-  /* Header / nav */
-  header{
-  position: sticky; top: 0; z-index: 50;
-  /* frosted glass + very soft tint that lets the network show through */
-  background: color-mix(in oklab, var(--surface) 75%, #e6f1ff 25%);
-  background: rgba(255,255,255,0.72);              /* fallback for older browsers */
-  backdrop-filter: saturate(120%) blur(10px);
-  -webkit-backdrop-filter: saturate(120%) blur(10px);
-  border-bottom: 1px solid color-mix(in oklab, var(--line), transparent 40%);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.06);
-  transition: background .25s ease, box-shadow .25s ease, border-color .25s ease;
-}
-/* Dark theme tint */
-html[data-theme="dark"] header{
-  background: color-mix(in oklab, #0e1424 70%, #274157 30%);
-  background: rgba(16,24,40,0.60);                 /* fallback */
-  border-bottom-color: color-mix(in oklab, #000 70%, transparent 40%);
-  box-shadow: 0 6px 24px rgba(0,0,0,0.35);
-}
-
-/* When page is scrolled, add a bit more opacity for legibility */
-header.scrolled{
-  background: color-mix(in oklab, var(--surface) 85%, #e6f1ff 15%);
-  background: rgba(255,255,255,0.88);
-  border-bottom-color: color-mix(in oklab, var(--line), transparent 20%);
-  box-shadow: 0 10px 28px rgba(0,0,0,0.10);
-}
-html[data-theme="dark"] header.scrolled{
-  background: color-mix(in oklab, #0e1424 82%, #274157 18%);
-  background: rgba(16,24,40,0.78);
-}
-  /* Hero */
-  .hero{
-    max-width:var(--maxw);
-    margin:0 auto;
-    padding:48px 16px 20px;
-    display:grid;
-    gap:16px;
-  }
-  .eyebrow{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--pill);
-           font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
-
-  h1{
-    margin:8px 0 4px;
-    font-size: clamp(32px, 6vw, 64px);
-    line-height: 1.05;
-    text-wrap: balance;
-  }
-
-  .sub{
-    color:var(--muted);
-    font-size:1.05rem;
-    line-height:1.55;
-    text-align:justify;
-    text-justify:inter-word;
-    hyphens:auto;
-    -webkit-hyphens:auto;
-    -ms-hyphens:auto;
-  }
-
-  /* Sections */
-  .section,.featured-wrap,.filters{max-width:var(--maxw);margin:6px auto 0;padding:4px 16px}
-  .strip{display:flex;gap:16px;overflow:auto;padding-bottom:10px;scroll-snap-type:x mandatory}
-  .feature-card{min-width:280px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;display:grid;gap:8px;scroll-snap-align:start}
-  .badge{display:inline-flex;gap:6px;padding:4px 10px;border-radius:999px;background:rgba(255,122,110,.12);color:#b42318;font-weight:600;font-size:12px}
-
-  .filters{position:sticky;top:64px;z-index:30;background:transparent;border-top:1px solid var(--line)}
-  .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-  .search{flex:1 1 260px;display:flex;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
-  .search input{border:0;outline:0;background:transparent;width:100%}
-  .chip{border:1px solid var(--line);background:var(--pill);padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:600}
-  .chip[aria-pressed="true"]{background:rgba(255,122,110,.14);border-color:var(--accent-600)}
-
-  .grid{display:grid;gap:16px;grid-template-columns:repeat(12,1fr)}
-  @media (max-width:1200px){.grid{grid-template-columns:repeat(8,1fr)}}
-  @media (max-width:840px){.grid{grid-template-columns:repeat(6,1fr)}}
-  @media (max-width:620px){.grid{grid-template-columns:repeat(4,1fr)}}
-  @media (max-width:420px){.grid{grid-template-columns:repeat(2,1fr)}}
-  .card{grid-column:span 4;display:grid;gap:10px;padding:14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
-  .thumb{height:120px;border-radius:12px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(255,122,110,.08),transparent);font-size:34px}
-  .desc{color:var(--muted);font-size:14px;line-height:1.4;margin:0}
-  .tag{background:var(--pill);border:1px solid var(--line);border-radius:999px;padding:4px 8px;font-size:12px;font-weight:600;margin-right:6px}
-  .open{margin-top:auto;display:inline-flex;gap:8px;text-decoration:none;font-weight:700;color:var(--accent-700)}
-
-  footer{margin-top:20px;border-top:1px solid var(--line);background:var(--surface)}
-  .foot{max-width:var(--maxw);margin:0 auto;padding:20px 16px;display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:16px}
-  .foot small{color:var(--muted)} @media (max-width:800px){.foot{grid-template-columns:1fr}}
-
-  /* Dark theme */
-  html[data-theme="dark"]{
-    --bg:#0b1220; --surface:#111827; --text:#f9fafb; --muted:#cbd5e1; --line:#1f2937; --pill:#0f172a;
-    --shadow:0 1px 2px rgba(0,0,0,.7),0 8px 24px rgba(0,0,0,.5);
-    --accent:#ff7a6e; --accent-600:#ff6254; --accent-700:#ff4b3a;
-
-    --bg-grad-1:#0b1220;
-    --bg-grad-2:#111827;
-    --bg-grad-3:#0f172a;
-    --node-color:#4dd0e1; /* lighter cyan on dark */
-    --link-max-opacity: 0.28;
-  }
-  html[data-theme="dark"] .badge{background:rgba(255,122,110,.18);color:#ffd0cb}
-  html[data-theme="dark"] .open{color:var(--accent-600)}
-
-  /* ===== NAV LAYOUT + LINK STYLES (you lost these) ===== */
-.nav{
-  display: grid;
-  grid-template-columns: 1fr auto 1fr; /* brand | nav | controls */
-  align-items: center;
-  gap: 12px;
-  max-width: var(--maxw);
-  margin: 0 auto;
-  padding: 14px 16px;
-}
-
-/* Brand (left) */
-.brand{
-  justify-self: flex-start;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-  color: inherit;
-}
-.logo{
-  width: 28px; height: 28px; border-radius: 8px;
-  background: linear-gradient(135deg,var(--accent),var(--accent-700));
-  box-shadow: 0 2px 8px rgba(242,79,64,.35);
-}
-
-/* Center nav links */
-nav a{
-  margin: 0 10px;
-  text-decoration: none;    /* removes underline */
-  color: inherit;           /* follows --text */
-  font-weight: 600;
-}
-nav{ justify-self: center; }
-
-/* Right-side buttons */
-.ghost,.cta{
-  border-radius: 12px; padding: 10px 14px; font-weight: 600; cursor: pointer;
-}
-.ghost{ background: transparent; border: 1px solid var(--line); }
-.ghost:focus-visible{ outline: 2px solid var(--accent-600); outline-offset: 2px; }
-.cta{ background: var(--accent); color: #fff; border: 0; box-shadow: 0 6px 16px rgba(242,79,64,.25); }
-
-/* Small screens: stack neatly */
-@media (max-width: 720px){
-  .nav{ grid-template-columns: 1fr auto; row-gap: 8px; }
-  nav{ grid-column: 1 / -1; justify-self: start; }
-}
-
-  /* Hero uses the same container width as the grid */
-  .hero{
-    max-width: var(--maxw);
-    margin: 0 auto;
-    padding-inline: 16px;
-  }
-
-  /* Fully justify the H1 and stretch the last line */
-  .hero h1{
-    text-wrap: pretty;
-    text-align: justify;
-    text-align-last: justify;
-    text-justify: inter-word;
-    hyphens: auto;
-  }
-  .hero h1::after{
-    content: "";
-    display: inline-block;
-    width: 100%;
-  }
-</style>
+  <style>
+    .gallery-wrap{max-width:1100px;margin:0 auto;padding:24px 20px 56px;}
+    .gallery-hero{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px;margin:8px 0 20px;}
+    .gallery-hero h1{font-size:clamp(1.6rem,2.5vw,2.2rem);margin:0 0 6px;}
+    .gallery-hero p{margin:0;color:var(--muted);font-size:var(--size-lead);}
+    .controls{display:flex;gap:10px;margin:16px 0;}
+    .controls input[type="search"]{flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit}
+    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}
+    .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:16px;text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:transform .06s ease, box-shadow .12s ease;min-height:160px}
+    .card:hover{transform:translateY(-1px)}
+    .card h3{margin:0 0 6px;font-size:1.1rem;display:flex;align-items:center;gap:.5rem}
+    .card p{margin:0;color:var(--muted);font-size:.95rem}
+    .empty{color:var(--muted);padding:16px;border:1px dashed var(--line);border-radius:12px;text-align:center}
+    .emoji{font-size:1.25rem;line-height:1}
+  </style>
 </head>
 <body>
-
-<!-- Glowing neural background canvas -->
-<canvas id="network" aria-hidden="true"></canvas>
-
-<header role="banner">
-  <div class="nav">
-    <a class="brand" href="#top" aria-label="Micro Rehab Apps home">
-      <span class="logo" aria-hidden="true"></span><span>Micro Rehab Apps</span>
-    </a>
-    <nav aria-label="Primary">
-      <a href="#apps">Apps</a>
-      <a href="#about">About</a>
-      <a href="#contact">Contact</a>
-    </nav>
-    <div style="justify-self:flex-end; display:flex; gap:8px;">
-      <button id="bgToggle" class="ghost" aria-pressed="true" title="Toggle animated background">Background: Animated</button>
-      <button id="themeToggle" class="ghost" aria-pressed="false" title="Toggle theme">Theme: Light</button>
-    </div>
-  </div>
-</header>
-
-<main id="top" role="main">
-  <section class="hero" aria-label="Intro">
-    <span class="eyebrow">Open micro-apps for cognitive rehab</span>
-    <h1>Prototype micro-apps for cognitive practice — test, refine, collaborate.</h1>
-    <p class="sub">These micro-apps are prototypes in active development. They have been tested primarily on desktop browsers, and some functions may not work as expected on tablets or mobile devices. If you encounter issues, or if you’d like to suggest improvements, please get in touch — your feedback directly shapes how these tools evolve.</p>
-    <div class="hero-actions" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-      <button class="cta" onclick="document.getElementById('apps').scrollIntoView({behavior:'smooth'})">Browse apps</button>
-      <button class="ghost" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">How it works</button>
-      <span class="meta" style="color:var(--muted)">• Neutral palette + coral accent • Accessible by default</span>
-    </div>
-  </section>
-
-  <!-- Featured (populated from JSON) -->
-  <section class="featured-wrap" aria-label="Featured">
-    <div id="featuredStrip" class="strip" role="list"></div>
-  </section>
-
-  <!-- Filters -->
-  <section class="filters" aria-label="Filters">
-    <div class="bar">
-      <div class="search" role="search">
-        <span aria-hidden="true">🔎</span>
-        <input id="q" type="search" placeholder="Search apps, tags, or features…" aria-label="Search apps"/>
+  <div class="gallery-wrap">
+    <header class="gallery-hero" aria-describedby="subtitle">
+      <h1>Micro Apps</h1>
+      <p id="subtitle">Consistent header, fonts, and clinician comments across apps.</p>
+      <div class="controls">
+        <input id="q" type="search" placeholder="Filter apps by name or description…" aria-label="Filter apps" />
       </div>
-      <div id="tagBar" class="chips" role="toolbar" aria-label="Filter by tag"></div>
-    </div>
-  </section>
+    </header>
 
-  <!-- Grid (populated from JSON) -->
-  <section id="apps" class="section" aria-labelledby="apps-h2">
-    <h2 id="apps-h2">All apps</h2>
-    <p id="how" class="lead">Tap a tag to filter. Multiple tags apply together (intersection). Type in the search box to search name/description/tags.</p>
-    <div id="grid" class="grid" role="list"></div>
-  </section>
-
-  <section id="about" class="section" aria-label="About">
-    <h2>How it works</h2>
-    <p class="lead"><code>index.html</code> fetches <code>catalog.json</code> (same folder) and renders the featured items and the grid. To add a tool, edit the JSON — no HTML changes needed.</p>
-  </section>
-
-  <section id="contact" class="section" aria-label="Contact">
-    <h2>Contact</h2>
-    <p class="lead">Questions or collaboration ideas? Email <a href="mailto:m.mion@nhs.net">m.mion@nhs.net</a>.</p>
-  </section>
-</main>
-
-<footer role="contentinfo">
-  <div class="foot">
-    <div>
-      <strong>Micro Rehab Apps</strong><br/>
-      <small>Open micro-apps for cognitive rehabilitation and research. Apache-2.0.</small>
-    </div>
-    <div>
-      <small>Repository</small><br/>
-      <a class="open" href="https://github.com/yourname/micro-apps">GitHub <span class="chev">›</span></a>
-    </div>
-    <div>
-      <small>Version</small><br/>
-      <small>v1.5 · Neural background</small>
-    </div>
+    <section class="cards" id="cards" aria-live="polite"></section>
+    <div id="empty" class="empty" hidden>No matches. Try a different search.</div>
   </div>
-</footer>
 
-<script>
-  /* ===== Theme toggle ===== */
-  (function(){
-    const root=document.documentElement,btn=document.getElementById('themeToggle'),key='mra-theme';
-    const saved=localStorage.getItem(key);
-    const set=(m)=>{root.setAttribute('data-theme',m);btn.textContent='Theme: '+(m==='dark'?'Dark':'Light');btn.setAttribute('aria-pressed',m==='dark')}
-    set(saved==='dark'?'dark':'light');
-    btn.addEventListener('click',()=>{ const next=root.getAttribute('data-theme')==='dark'?'light':'dark'; localStorage.setItem(key,next); set(next); });
-  })();
-// Strengthen header background once you scroll a bit
-(function(){
-  const h = document.querySelector('header');
-  const onScroll = () => h.classList.toggle('scrolled', window.scrollY > 8);
-  onScroll();
-  window.addEventListener('scroll', onScroll, {passive:true});
-})();
-  /* ===== Glowing neural background ===== */
-  (function(){
-    const canvas=document.getElementById('network');
-    const ctx=canvas.getContext('2d');
-    let w,h,particles=[], reqId=null, running=true;
+  <script>
+    const cardsEl = document.getElementById('cards');
+    const emptyEl = document.getElementById('empty');
+    const searchEl = document.getElementById('q');
 
-    function resize(){
-      w=canvas.width=window.innerWidth;
-      h=canvas.height=window.innerHeight;
-      initParticles();
-    }
-    window.addEventListener('resize',resize,{passive:true});
-
-    function initParticles(){
-      // density ~ 1 particle per ~30k px^2, capped for perf
-      const target = Math.min(120, Math.max(40, Math.round((w*h)/30000)));
-      particles.length=0;
-      for(let i=0;i<target;i++){
-        particles.push({
-          x:Math.random()*w,
-          y:Math.random()*h,
-          vx:(Math.random()-0.5)*0.4,
-          vy:(Math.random()-0.5)*0.4
-        });
-      }
+    /** Render a single card */
+    function cardTpl(item){
+      const emoji = item.emoji ? `<span class="emoji" aria-hidden="true">${item.emoji}</span>` : '';
+      const title = item.title || item.slug;
+      const desc  = item.description || '';
+      return `
+        <a class="card" href="apps/${item.slug}/" aria-label="${title}">
+          <h3>${emoji}<span>${title}</span></h3>
+          <p>${desc}</p>
+        </a>
+      `;
     }
 
-    function colorVars(){
-      // pull current CSS variables so theme switch updates canvas without reload
-      const cs=getComputedStyle(document.documentElement);
-      return {
-        node: cs.getPropertyValue('--node-color').trim() || '#3b82f6',
-        linkMax: parseFloat(cs.getPropertyValue('--link-max-opacity')) || 0.35,
-        linkDist: parseFloat(cs.getPropertyValue('--link-distance')) || 160,
-        r: parseFloat(cs.getPropertyValue('--node-radius')) || 2.5,
-        glow: parseFloat(cs.getPropertyValue('--node-glow')) || 8
-      };
-    }
-    let vars = colorVars();
-
-    // Update vars when theme changes
-    const mo=new MutationObserver(()=>{ vars=colorVars(); });
-    mo.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
-
-    function draw(){
-      if(!running){ return; }
-      ctx.clearRect(0,0,w,h);
-
-      // links
-      for(let i=0;i<particles.length;i++){
-        const p=particles[i];
-        for(let j=i+1;j<particles.length;j++){
-          const q=particles[j];
-          const dx=p.x-q.x, dy=p.y-q.y, dist=Math.hypot(dx,dy);
-          if(dist<vars.linkDist){
-            const alpha = Math.max(0, vars.linkMax - dist/(vars.linkDist*3));
-            ctx.strokeStyle=`rgba(${hex2rgb(vars.node)},${alpha})`;
-            ctx.lineWidth=1;
-            ctx.beginPath();
-            ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y);
-            ctx.stroke();
-          }
-        }
-      }
-      // nodes
-      for(const p of particles){
-        ctx.fillStyle=`rgba(${hex2rgb(vars.node)},0.85)`;
-        ctx.shadowBlur=vars.glow;
-        ctx.shadowColor=`rgba(${hex2rgb(vars.node)},0.7)`;
-        ctx.beginPath();
-        ctx.arc(p.x,p.y,vars.r,0,Math.PI*2);
-        ctx.fill();
-        ctx.shadowBlur=0;
-
-        // move
-        p.x+=p.vx; p.y+=p.vy;
-        if(p.x<0||p.x>w) p.vx*=-1;
-        if(p.y<0||p.y>h) p.vy*=-1;
-      }
-      reqId=requestAnimationFrame(draw);
+    /** Render list with optional filter */
+    function render(list, q=''){
+      const norm = q.trim().toLowerCase();
+      const filtered = !norm ? list : list.filter(i =>
+        (i.title||'').toLowerCase().includes(norm) ||
+        (i.description||'').toLowerCase().includes(norm) ||
+        (i.slug||'').toLowerCase().includes(norm)
+      );
+      cardsEl.innerHTML = filtered.map(cardTpl).join('');
+      emptyEl.hidden = filtered.length !== 0;
     }
 
-    function hex2rgb(hex){
-      const h=hex.replace('#','').trim();
-      const bigint=parseInt(h.length===3 ? h.split('').map(c=>c+c).join('') : h,16);
-      const r=(bigint>>16)&255, g=(bigint>>8)&255, b=bigint&255;
-      return `${r},${g},${b}`;
-    }
-
-    // Animation controls + toggle + reduced-motion
-    const bgKey='mra-bg-animated';
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const saved = localStorage.getItem(bgKey);
-    const wantAnim = saved ? saved==='true' : !prefersReduced;
-
-    const toggleBtn = document.getElementById('bgToggle');
-    function setAnim(on){
-      running = on;
-      toggleBtn.textContent = 'Background: ' + (on ? 'Animated' : 'Static');
-      toggleBtn.setAttribute('aria-pressed', String(on));
-      localStorage.setItem(bgKey, String(on));
-      if(on){
-        if(!reqId){ reqId=requestAnimationFrame(draw); }
-      }else{
-        if(reqId){ cancelAnimationFrame(reqId); reqId=null; }
-        ctx.clearRect(0,0,w,h); // keep the clean static gradient
-      }
-    }
-    toggleBtn.addEventListener('click', ()=> setAnim(!running));
-
-    // Kick off
-    resize();
-    setAnim(wantAnim);
-  })();
-
-  /* ===== App index logic (unchanged, just moved down) ===== */
-  const $ = (sel)=>document.querySelector(sel);
-  const grid = $('#grid'), strip = $('#featuredStrip'), q = $('#q'), tagBar = $('#tagBar');
-  let DATA = [], ACTIVE_TAGS = new Set(), CARD_INDEX = new Map(), ALL_TAGS = [];
-
-  function cardHTML(a){
-    const tagsHTML = a.tags.map(t=>`<span class="tag">${t}</span>`).join('');
-    return `<article class="card" role="listitem" data-tags='${JSON.stringify(a.tags)}'>
-      <div class="thumb" aria-hidden="true">${a.thumb||'🧩'}</div>
-      <h3>${a.name}</h3>
-      <p class="desc">${a.desc}</p>
-      <div class="tags">${tagsHTML}</div>
-      <a class="open" href="${a.path}">Open <span class="chev">›</span></a>
-    </article>`;
-  }
-
-  function featureHTML(a){
-    return `<article class="feature-card" role="listitem">
-      <span class="badge">${a.badge||'Featured'}</span>
-      <strong>${a.name}</strong>
-      <p class="desc">${a.desc}</p>
-      <a class="open" aria-label="Open ${a.name}" href="${a.path}">Open <span class="chev">›</span></a>
-    </article>`;
-  }
-
-  function buildIndex(){
-    CARD_INDEX.clear();
-    [...grid.children].forEach(card=>{
-      const text = (card.querySelector('h3')?.textContent||'') + ' ' +
-                   (card.querySelector('.desc')?.textContent||'') + ' ' +
-                   (JSON.parse(card.dataset.tags||'[]').join(' '));
-      CARD_INDEX.set(card, text.toLowerCase());
-    });
-  }
-
-  function applyFilters(){
-    const query = (q.value||'').toLowerCase().trim();
-    [...grid.children].forEach(card=>{
-      const tags = JSON.parse(card.dataset.tags||'[]');
-      const matchesTags = [...ACTIVE_TAGS].every(t=>tags.includes(t));
-      const matchesQuery = query ? CARD_INDEX.get(card).includes(query) : true;
-      card.style.display = (matchesTags && matchesQuery) ? 'grid' : 'none';
-    });
-  }
-
-  function renderTags(){
-    const uniq = [...new Set(ALL_TAGS)].sort();
-    tagBar.innerHTML = uniq.map(t=>`<button class="chip" data-tag="${t}" aria-pressed="false">${t}</button>`).join('');
-    tagBar.querySelectorAll('.chip').forEach(btn=>{
-      btn.addEventListener('click',()=>{
-        const t = btn.dataset.tag;
-        const on = btn.getAttribute('aria-pressed')==='true';
-        btn.setAttribute('aria-pressed', String(!on));
-        on ? ACTIVE_TAGS.delete(t) : ACTIVE_TAGS.add(t);
-        applyFilters();
+    /** Load catalog and init */
+    fetch('catalog.json')
+      .then(r => r.json())
+      .then(items => {
+        // basic sanity: require slug
+        const clean = items.filter(i => i && i.slug);
+        render(clean);
+        searchEl.addEventListener('input', () => render(clean, searchEl.value));
+      })
+      .catch(err => {
+        cardsEl.innerHTML = `<div class="empty">Could not load catalog.json</div>`;
+        console.warn('Catalog load failed', err);
       });
-      btn.addEventListener('keydown',e=>{ if(e.key===' '||e.key==='Enter'){e.preventDefault();btn.click();} });
-    });
-  }
-
-  fetch('catalog.json', {cache:'no-store'})
-    .then(r=>r.json())
-    .then(json=>{
-      DATA = json.apps;
-      strip.innerHTML = (json.featured||[]).map(name => {
-        const a = DATA.find(x=>x.name===name);
-        return a ? featureHTML(a) : '';
-      }).join('');
-      grid.innerHTML = DATA.map(a=>{ ALL_TAGS.push(...a.tags); return cardHTML(a); }).join('');
-      buildIndex(); renderTags();
-    })
-    .catch(err=>{
-      strip.innerHTML = `<div role="alert" class="feature-card">Failed to load catalog.json<br><small>${err}</small></div>`;
-    });
-
-  q.addEventListener('input', applyFilters);
-</script>
+  </script>
 </body>
 </html>

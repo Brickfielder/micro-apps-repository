@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>TaskFlow — Plan · Check · Feedback (Tap &amp; Drag)</title>
+<title>TaskFlow â€” Plan Â· Check Â· Feedback (Tap &amp; Drag)</title>
 <style>
 :root{
   --bg:#f7f9fc; 
@@ -106,18 +106,19 @@ footer{ color:#666; font-size:12px; margin:12px 0 30px }
 .toolbtn{ border:1px solid #c2cce7; background:#fff; border-radius:8px; padding:2px 8px; font-size:13px; }
 .modeChip{ font-size:12px; padding:4px 8px; border-radius:999px; background:#eef2fa; border:1px solid #c2cce7 }
 </style>
-<meta content="Taskflow" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../shared/theme.css" rel="stylesheet"/><script defer="" src="../shared/frame.js"></script><script defer="" src="../shared/clinician_feedback.js"></script></head>
+<meta content="Taskflow" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../../../shared/theme.css" rel="stylesheet"/><script defer="" src="../../../shared/frame.js"></script><script defer="" src="../../../shared/clinician_feedback.js"></script>  <meta name="app-slug" content="taskflow">
+</head>
 <body><main id="app-root">
 <header>
-<h1>TaskFlow — Plan · Check · Feedback</h1>
+<h1>TaskFlow â€” Plan Â· Check Â· Feedback</h1>
 <div class="sub">Mobile = tap to move &amp; reorder; Desktop = drag-and-drop. The left list locks when empty; review in the middle, then Confirm for feedback.</div>
 </header>
 <main>
 <div class="controls">
 <label>Scenario: 
       <select id="scenarioSelect">
-<option value="clinic">🏥 Clinic Day Planner</option>
-<option value="meal">🍝 Simple Meal + Child Pickup</option>
+<option value="clinic">ðŸ¥ Clinic Day Planner</option>
+<option value="meal">ðŸ Simple Meal + Child Pickup</option>
 </select>
 </label>
 <label>Difficulty:
@@ -126,7 +127,7 @@ footer{ color:#666; font-size:12px; margin:12px 0 30px }
 <option value="medium">Medium</option>
 </select>
 </label>
-<button class="primary" id="startBtn">Start New Trial ▶</button>
+<button class="primary" id="startBtn">Start New Trial â–¶</button>
 <button id="resetBtn">Reset</button>
 <button class="ghost" id="downloadBtn">Download CSV</button>
 <span class="sub" id="status"></span>
@@ -140,23 +141,23 @@ footer{ color:#666; font-size:12px; margin:12px 0 30px }
 <div class="grid" id="sections">
 <!-- 1) PLAN (source-only) -->
 <section aria-label="Planning board" class="panel" id="planPanel">
-<h2>1) Plan (choose your steps &amp; order) 🧠</h2>
-<div class="hint">Move each item into the middle list in the order you think is correct. On mobile, tap items. On desktop, drag using the ⋮ handle.</div>
+<h2>1) Plan (choose your steps &amp; order) ðŸ§ </h2>
+<div class="hint">Move each item into the middle list in the order you think is correct. On mobile, tap items. On desktop, drag using the â‹® handle.</div>
 <div aria-live="polite" class="list" id="planList"></div>
 <div class="soft" style="margin-top:6px">Tip: you can reorder later in the middle list before confirming</div>
 </section>
 <!-- 2) CHECK (review & adjust) -->
 <section aria-label="Check board" class="panel" id="checkPanel">
-<h2>2) Check &amp; adjust 🔍</h2>
-<div class="hint">When the left list empties, it will grey out. Reorder here until you’re happy, then Confirm.</div>
+<h2>2) Check &amp; adjust ðŸ”</h2>
+<div class="hint">When the left list empties, it will grey out. Reorder here until youâ€™re happy, then Confirm.</div>
 <div aria-live="polite" class="list" id="checkList"></div>
 <div style="display:flex; gap:10px; margin-top:10px">
-<button class="primary" disabled="" id="confirmBtn">Confirm Plan ✓</button>
+<button class="primary" disabled="" id="confirmBtn">Confirm Plan âœ“</button>
 </div>
 </section>
 <!-- 3) FEEDBACK -->
 <section aria-label="Feedback board" class="panel" id="feedbackPanel">
-<h2>3) Feedback — Alignment &amp; Reflection 🧾</h2>
+<h2>3) Feedback â€” Alignment &amp; Reflection ðŸ§¾</h2>
 <div class="split">
 <div>
 <div class="hint"><strong>Suggested sequence</strong></div>
@@ -172,21 +173,21 @@ footer{ color:#666; font-size:12px; margin:12px 0 30px }
 </section>
 </div>
 <footer>
-    Prototype for research/demonstration only — not a medical device. No data leaves your browser. ©
+    Prototype for research/demonstration only â€” not a medical device. No data leaves your browser. Â©
   </footer>
 </main>
 <script>
 /* ------------------ Scenario Briefings ------------------ */
 const BRIEFINGS = {
   meal: {
-    title: 'Scenario: 🍝 Simple Meal + Child Pickup',
+    title: 'Scenario: ðŸ Simple Meal + Child Pickup',
     body: `Briefing for the participant:<br>
     You are preparing an evening meal while also needing to pick up your child from nursery, which is only <strong>2 minutes away</strong>.
     The challenge is to organise the cooking so that the food is ready, the kitchen is safe, and you collect your child on time.
     Follow food-safety rules, manage timing, and make sure the kitchen is safe before leaving.`
   },
   clinic: {
-    title: 'Scenario: 🏥 Clinic Day Planner',
+    title: 'Scenario: ðŸ¥ Clinic Day Planner',
     body: `Briefing for the participant:<br>
     You have an outpatient appointment this afternoon. Plan the tasks to get there and back safely and efficiently:
     bring the right documents, travel to the hospital, check in and attend your appointment, handle any payments/validation,
@@ -199,28 +200,28 @@ const BRIEFINGS = {
 const SCENARIOS = {
   clinic: {
     name: "Clinic Day Planner",
-    emoji: "🏥",
+    emoji: "ðŸ¥",
     steps: {
       easy: [
-        {id:"bus_to_hospital", txt:"Take the bus to hospital", icon:"🚌"},
-        {id:"check_in", txt:"Check in at reception", icon:"🧾"},
-        {id:"see_doctor", txt:"See the doctor", icon:"👩‍⚕️"},
-        {id:"collect_rx", txt:"Collect prescription", icon:"💊"},
-        {id:"groceries", txt:"Buy quick groceries", icon:"🛒"},
-        {id:"bus_home", txt:"Bus back home", icon:"🏠"},
+        {id:"bus_to_hospital", txt:"Take the bus to hospital", icon:"ðŸšŒ"},
+        {id:"check_in", txt:"Check in at reception", icon:"ðŸ§¾"},
+        {id:"see_doctor", txt:"See the doctor", icon:"ðŸ‘©â€âš•ï¸"},
+        {id:"collect_rx", txt:"Collect prescription", icon:"ðŸ’Š"},
+        {id:"groceries", txt:"Buy quick groceries", icon:"ðŸ›’"},
+        {id:"bus_home", txt:"Bus back home", icon:"ðŸ "},
       ],
       medium: [
-        {id:"prepare_docs", txt:"Bring NHS number & appointment letter", icon:"📄"},
-        {id:"ready_travel", txt:"Charge phone / prepare travel card", icon:"🔋🎫"},
-        {id:"leave_home", txt:"Leave home in good time", icon:"🚪"},
-        {id:"bus_to_hospital", txt:"Take the bus to hospital", icon:"🚌"},
-        {id:"check_in", txt:"Check in at reception", icon:"🧾"},
-        {id:"wait_call", txt:"Wait to be called", icon:"🪑"},
-        {id:"see_doctor", txt:"See the doctor", icon:"👩‍⚕️"},
-        {id:"validate_pay", txt:"Validate ticket / pay as needed", icon:"🅿️"},
-        {id:"collect_rx", txt:"Collect prescription", icon:"💊"},
-        {id:"groceries", txt:"Buy quick groceries (optional)", icon:"🛒"},
-        {id:"bus_home", txt:"Bus back home", icon:"🏠"},
+        {id:"prepare_docs", txt:"Bring NHS number & appointment letter", icon:"ðŸ“„"},
+        {id:"ready_travel", txt:"Charge phone / prepare travel card", icon:"ðŸ”‹ðŸŽ«"},
+        {id:"leave_home", txt:"Leave home in good time", icon:"ðŸšª"},
+        {id:"bus_to_hospital", txt:"Take the bus to hospital", icon:"ðŸšŒ"},
+        {id:"check_in", txt:"Check in at reception", icon:"ðŸ§¾"},
+        {id:"wait_call", txt:"Wait to be called", icon:"ðŸª‘"},
+        {id:"see_doctor", txt:"See the doctor", icon:"ðŸ‘©â€âš•ï¸"},
+        {id:"validate_pay", txt:"Validate ticket / pay as needed", icon:"ðŸ…¿ï¸"},
+        {id:"collect_rx", txt:"Collect prescription", icon:"ðŸ’Š"},
+        {id:"groceries", txt:"Buy quick groceries (optional)", icon:"ðŸ›’"},
+        {id:"bus_home", txt:"Bus back home", icon:"ðŸ "},
       ]
     },
     ideal: {
@@ -231,28 +232,28 @@ const SCENARIOS = {
   },
   meal: {
     name: "Simple Meal + Child Pickup",
-    emoji: "🍝",
+    emoji: "ðŸ",
     steps: {
       easy: [
-        {id:"wash_hands", txt:"Wash hands", icon:"🧼"},
-        {id:"boil_pasta", txt:"Start pasta cooking", icon:"🍝"},
-        {id:"set_timer", txt:"Set timer", icon:"⏲️"},
-        {id:"switch_off", txt:"Switch hob off", icon:"🔥✖️"},
-        {id:"pickup_child", txt:"Pick up child (nursery 2 min away)", icon:"👶"},
-        {id:"enjoy_meal", txt:"Enjoy the meal at home", icon:"🏡🍽️"},
+        {id:"wash_hands", txt:"Wash hands", icon:"ðŸ§¼"},
+        {id:"boil_pasta", txt:"Start pasta cooking", icon:"ðŸ"},
+        {id:"set_timer", txt:"Set timer", icon:"â²ï¸"},
+        {id:"switch_off", txt:"Switch hob off", icon:"ðŸ”¥âœ–ï¸"},
+        {id:"pickup_child", txt:"Pick up child (nursery 2 min away)", icon:"ðŸ‘¶"},
+        {id:"enjoy_meal", txt:"Enjoy the meal at home", icon:"ðŸ¡ðŸ½ï¸"},
       ],
       medium: [
-        {id:"wash_hands", txt:"Wash hands", icon:"🧼"},
-        {id:"gather_items", txt:"Gather ingredients & equipment", icon:"🥕🍅🔪"},
-        {id:"boil_water", txt:"Boil water in a pot", icon:"💧🔥"},
-        {id:"prep_sauce", txt:"Prepare the simple sauce", icon:"🍅🧄"},
-        {id:"boil_pasta", txt:"Put pasta in boiling water", icon:"🍝"},
-        {id:"set_timer", txt:"Set a timer for the pasta", icon:"⏲️"},
-        {id:"lay_table", txt:"Lay the table", icon:"🍽️🧺"},
-        {id:"switch_off", txt:"Switch off the hob/stove", icon:"🔥✖️"},
-        {id:"pasta_to_table", txt:"Put the pasta on the table", icon:"🍲"},
-        {id:"pickup_child", txt:"Pick up child (nursery 2 min away)", icon:"👶"},
-        {id:"enjoy_meal", txt:"Enjoy the meal at home", icon:"🏡🍽️"},
+        {id:"wash_hands", txt:"Wash hands", icon:"ðŸ§¼"},
+        {id:"gather_items", txt:"Gather ingredients & equipment", icon:"ðŸ¥•ðŸ…ðŸ”ª"},
+        {id:"boil_water", txt:"Boil water in a pot", icon:"ðŸ’§ðŸ”¥"},
+        {id:"prep_sauce", txt:"Prepare the simple sauce", icon:"ðŸ…ðŸ§„"},
+        {id:"boil_pasta", txt:"Put pasta in boiling water", icon:"ðŸ"},
+        {id:"set_timer", txt:"Set a timer for the pasta", icon:"â²ï¸"},
+        {id:"lay_table", txt:"Lay the table", icon:"ðŸ½ï¸ðŸ§º"},
+        {id:"switch_off", txt:"Switch off the hob/stove", icon:"ðŸ”¥âœ–ï¸"},
+        {id:"pasta_to_table", txt:"Put the pasta on the table", icon:"ðŸ²"},
+        {id:"pickup_child", txt:"Pick up child (nursery 2 min away)", icon:"ðŸ‘¶"},
+        {id:"enjoy_meal", txt:"Enjoy the meal at home", icon:"ðŸ¡ðŸ½ï¸"},
       ]
     },
     ideal: {
@@ -287,7 +288,7 @@ function makePill(step){
   div.className = "pill";
   div.draggable = true;
   div.dataset.id = step.id;
-  div.innerHTML = `<span class="handle" aria-hidden="true">⋮⋮</span> <span>${step.icon}</span> <span>${step.txt}</span>`;
+  div.innerHTML = `<span class="handle" aria-hidden="true">â‹®â‹®</span> <span>${step.icon}</span> <span>${step.txt}</span>`;
   return div;
 }
 function shuffleArray(a){ const arr=a.slice(); for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
@@ -370,9 +371,9 @@ function checkTapHandler(e){
 function toggleToolbar(pill){
   if(pill.querySelector('.toolbar')){ removeToolbar(pill); return; }
   const tb = document.createElement('div'); tb.className='toolbar';
-  const up = document.createElement('button'); up.className='toolbtn'; up.textContent='↑'; up.title='Move up';
-  const down = document.createElement('button'); down.className='toolbtn'; down.textContent='↓'; down.title='Move down';
-  const back = document.createElement('button'); back.className='toolbtn'; back.textContent='↩'; back.title='Send back to Plan';
+  const up = document.createElement('button'); up.className='toolbtn'; up.textContent='â†‘'; up.title='Move up';
+  const down = document.createElement('button'); down.className='toolbtn'; down.textContent='â†“'; down.title='Move down';
+  const back = document.createElement('button'); back.className='toolbtn'; back.textContent='â†©'; back.title='Send back to Plan';
   tb.append(up,down,back); pill.appendChild(tb);
   up.addEventListener('click', (ev)=>{ ev.stopPropagation(); const prev = pill.previousElementSibling; if(prev) prev.before(pill); });
   down.addEventListener('click', (ev)=>{ ev.stopPropagation(); const next = pill.nextElementSibling; if(next) next.after(pill); });
@@ -396,7 +397,7 @@ function loadScenario(){
   addedOrder = [];
   el('confirmBtn').disabled = true;
   el('planList').classList.remove('inactive');
-  el('status').textContent = `Scenario: ${s.emoji} ${s.name} · ${currentDifficulty}`;
+  el('status').textContent = `Scenario: ${s.emoji} ${s.name} Â· ${currentDifficulty}`;
   wireInteractions();
   updateBriefing();
 }
@@ -445,7 +446,7 @@ function computeFeedback(){
   const refl = el('reflections'); clearNode(refl);
   const points = buildReflections(currentScenarioKey, currentDifficulty, suggested, checkOrder);
   if(points.length===0){
-    const p = document.createElement('p'); p.textContent = "🟦 Reflection: Compare your plan with the suggested one. Do the steps you have taken seem similar? If not - would you change anything, and if so, what and why?";
+    const p = document.createElement('p'); p.textContent = "ðŸŸ¦ Reflection: Compare your plan with the suggested one. Do the steps you have taken seem similar? If not - would you change anything, and if so, what and why?";
     refl.appendChild(p);
   } else {
     const grouped = groupReflections(points);
@@ -498,7 +499,7 @@ function buildReflections(sKey, diff, suggested, user){
       pts.push({cat:'Safety', msg:'Placing hot pasta safely on the table before leaving can help avoid leaving food unattended.'});
     }
     if(exists('boil_pasta') && exists('boil_water') && pos['boil_pasta'] < pos['boil_water']){
-      pts.push({cat:'Dependencies', msg:'Pasta usually goes in after the water is boiling — does your order account for that?'});
+      pts.push({cat:'Dependencies', msg:'Pasta usually goes in after the water is boiling â€” does your order account for that?'});
     }
     if(exists('prep_sauce') && exists('gather_items') && pos['prep_sauce'] < pos['gather_items']){
       pts.push({cat:'Dependencies', msg:'Prepping the sauce works best after gathering ingredients and equipment.'});
@@ -513,7 +514,7 @@ function buildReflections(sKey, diff, suggested, user){
       pts.push({cat:'Hygiene', msg:'Consider washing hands before handling food or equipment.'});
     }
     if(exists('enjoy_meal') && exists('pickup_child') && !before('pickup_child','enjoy_meal')){
-      pts.push({cat:'Flow', msg:'Enjoying the meal typically comes after the pickup — does your plan reflect that?'});
+      pts.push({cat:'Flow', msg:'Enjoying the meal typically comes after the pickup â€” does your plan reflect that?'});
     }
   }
 
@@ -546,7 +547,7 @@ function groupReflections(points){
   const map = new Map();
   for(const p of points){
     if(!map.has(p.cat)) map.set(p.cat, []);
-    map.get(p.cat).push('💡 ' + p.msg);
+    map.get(p.cat).push('ðŸ’¡ ' + p.msg);
   }
   const order = ['Safety','Hygiene','Timing','Dependencies','Preparation','Clinic flow','Logistics','Efficiency','Flow'];
   const out = [];
@@ -646,3 +647,4 @@ document.addEventListener('DOMContentLoaded', init);
 </div>
 </section></main></body>
 </html>
+

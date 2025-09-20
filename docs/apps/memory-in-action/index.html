@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Memory in Action — WhatsApp Scenarios (Progressive Cues + New Distractors)</title>
+<title>Memory in Action â€” WhatsApp Scenarios (Progressive Cues + New Distractors)</title>
 <meta content="light dark" name="color-scheme"/>
 <style>
   :root{
@@ -82,10 +82,11 @@
   .match-card{height:80px;border:1px solid var(--border);border-radius:12px;display:grid;place-items:center;background:var(--pill);cursor:pointer;font-weight:700}
   .match-card.revealed{background:#fff}
 </style>
-<meta content="memory_in_action" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../shared/theme.css" rel="stylesheet"/><script defer="" src="../shared/frame.js"></script><script defer="" src="../shared/clinician_feedback.js"></script></head>
+<meta content="memory_in_action" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../../../shared/theme.css" rel="stylesheet"/><script defer="" src="../../../shared/frame.js"></script><script defer="" src="../../../shared/clinician_feedback.js"></script>  <meta name="app-slug" content="memory-in-action">
+</head>
 <body><main id="app-root">
 <div class="wrap">
-<h1>Memory in Action — WhatsApp Scenarios</h1>
+<h1>Memory in Action â€” WhatsApp Scenarios</h1>
 <div class="sub">Watch and listen to a short conversation, complete a quick distractor task, then answer recall questions. Clear, playful, and aligned with the Micro Apps look.</div>
 <div class="grid">
 <div class="card">
@@ -100,7 +101,7 @@
 <option value="match">Matching Pairs</option>
 </select>
 <div class="row" style="margin-top:8px"><div style="flex:1">
-<div class="label">Voice</div><select id="voiceSel"><option>Loading voices…</option></select></div></div>
+<div class="label">Voice</div><select id="voiceSel"><option>Loading voicesâ€¦</option></select></div></div>
 <div class="row" style="margin-top:8px">
 <div style="flex:1"><div class="label">Rate</div><input id="voiceRate" max="1.2" min="0.7" step="0.05" type="range" value="0.95"/></div>
 <div style="flex:1"><div class="label">Pitch</div><input id="voicePitch" max="2" min="0.5" step="0.1" type="range" value="1"/></div>
@@ -113,23 +114,23 @@
 <button class="btn ghost" id="btnReset">Reset</button>
 </div>
 <div class="row" style="margin-top:8px"><button class="btn ghost" id="btnDemo">Quick demo</button><button class="btn ghost" id="btnDownload">Download CSV</button></div>
-<div style="margin-top:12px"><span class="stat" id="statLen">Length: 10 msgs</span><span class="stat" id="statScenario">Scenario: —</span></div>
+<div style="margin-top:12px"><span class="stat" id="statLen">Length: 10 msgs</span><span class="stat" id="statScenario">Scenario: â€”</span></div>
 <div style="margin-top:12px"><div class="label">Session log</div><div aria-live="polite" class="log" id="log"></div></div>
 </div>
 <div class="card">
 <div class="sectionTitle">Task area</div>
-<div class="pill">Strategy step → Conversation → <strong>Distractor</strong> → Recall</div>
+<div class="pill">Strategy step â†’ Conversation â†’ <strong>Distractor</strong> â†’ Recall</div>
 <section id="strategyCard" style="margin-top:12px">
 <div class="label">Choose your strategy</div>
 <div class="row" role="group">
-<button class="btn ghost" data-strategy="Notepad">📝 Notepad</button>
-<button class="btn ghost" data-strategy="Grouping">🧩 Grouping</button>
-<button class="btn ghost" data-strategy="Visualization">🎨 Visualization</button>
-<button class="btn ghost" data-strategy="Cued">🧠 Cued recognition</button>
-<button class="btn ghost" data-strategy="None">🙋 No strategy</button>
+<button class="btn ghost" data-strategy="Notepad">ðŸ“ Notepad</button>
+<button class="btn ghost" data-strategy="Grouping">ðŸ§© Grouping</button>
+<button class="btn ghost" data-strategy="Visualization">ðŸŽ¨ Visualization</button>
+<button class="btn ghost" data-strategy="Cued">ðŸ§  Cued recognition</button>
+<button class="btn ghost" data-strategy="None">ðŸ™‹ No strategy</button>
 </div>
 <div id="strategyInfo" style="margin-top:10px">
-<div class="pill">Tip: If you repeat the same strategy 3×, I’ll suggest variety.</div>
+<div class="pill">Tip: If you repeat the same strategy 3Ã—, Iâ€™ll suggest variety.</div>
 </div>
 </section>
 <section class="hidden" id="scenarioCard" style="margin-top:12px">
@@ -139,16 +140,16 @@
 <div class="chat" id="chat"></div>
 <div class="typing hidden" id="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
 </div>
-<div class="row" style="margin-top:8px;justify-content:flex-end"><button class="btn primary" disabled="" id="btnToDistractor">Continue → Distractor</button></div>
+<div class="row" style="margin-top:8px;justify-content:flex-end"><button class="btn primary" disabled="" id="btnToDistractor">Continue â†’ Distractor</button></div>
 </section>
 <!-- DISTRACTOR CARD -->
 <section class="hidden" id="distractorCard" style="margin-top:12px">
 <div class="label">Distractor task</div>
 <!-- Sliding Puzzle UI -->
 <div class="hidden" id="puzzleUI">
-<div class="label">Complete the sliding puzzle to continue (3×3, max 4×4).</div>
+<div class="label">Complete the sliding puzzle to continue (3Ã—3, max 4Ã—4).</div>
 <div class="row"><div><div class="puzzleWrap" id="puzzleGrid" style="grid-template-columns:repeat(3,72px)"></div><div class="pStatus muted" id="pStatus">Moves: 0</div>
-<div class="row" style="margin-top:8px"><button class="btn ghost" id="btnShuffle">Shuffle</button><button class="btn ghost" id="btnSize">Size: 3×3</button><button class="btn warn" id="btnSkip">Skip (after 20s)</button></div></div></div>
+<div class="row" style="margin-top:8px"><button class="btn ghost" id="btnShuffle">Shuffle</button><button class="btn ghost" id="btnSize">Size: 3Ã—3</button><button class="btn warn" id="btnSkip">Skip (after 20s)</button></div></div></div>
 </div>
 <!-- Stroop UI -->
 <div class="hidden" id="stroopUI">
@@ -166,8 +167,8 @@
 </section>
 <!-- RECALL -->
 <section class="hidden" id="recallCard" style="margin-top:12px">
-<div class="label">Recall — 5 Questions</div>
-<div class="muted">Answer freely. If stuck, click “Show hint”, then “More” for options.</div>
+<div class="label">Recall â€” 5 Questions</div>
+<div class="muted">Answer freely. If stuck, click â€œShow hintâ€, then â€œMoreâ€ for options.</div>
 <div id="recallInputs" style="margin-top:8px"></div>
 <div class="row" style="margin-top:10px"><button class="btn primary" id="btnCheck">Check answers</button></div>
 </section>
@@ -205,14 +206,14 @@
   let sessionLog=[];
   const STRATEGY_DETAILS={
     Notepad:{title:'Notepad',desc:'Write quick bullet points while the chat unfolds to anchor details (names, places, numbers). Keep it minimal so you still listen actively.',
-            examples:['“Luca – text at 12:00”','“Meet: library entrance”','“Buy: beans + plant”']},
+            examples:['â€œLuca â€“ text at 12:00â€','â€œMeet: library entranceâ€','â€œBuy: beans + plantâ€']},
     Grouping:{title:'Grouping',desc:'Actively organise information into meaningful clusters (people, places, times, tasks). This reduces load and boosts recall.',
             examples:['People: Anna, Luca','Places: library, market, pharmacy','Times: 10:00 market, 12:00 text']},
     Visualization:{title:'Visualization',desc:'Create a quick mental scene linking the items (method of loci or vivid imagery). Exaggerate colours, sizes, or actions.',
                   examples:['Picture the library doors with a coffee bean doormat','See rain on an umbrella with a pharmacy cross','Imagine texting Luca at a giant clock at 12']},
     Cued:{title:'Cued recognition',desc:'Plan to use progressive cues if free recall is hard: start with a semantic hint, then show options.',
-          examples:['First reveal a general hint','Then show multiple-choice options','Use cues after a brief free‑recall attempt']},
-    None:{title:'No strategy',desc:'Proceed without a compensatory strategy — useful as a baseline to compare performance.',examples:['—']}
+          examples:['First reveal a general hint','Then show multiple-choice options','Use cues after a brief freeâ€‘recall attempt']},
+    None:{title:'No strategy',desc:'Proceed without a compensatory strategy â€” useful as a baseline to compare performance.',examples:['â€”']}
   };
 
   /* Threads (unchanged content, cues only MC options) */
@@ -221,13 +222,13 @@
     { title:'Weekend plan',
       msgs:[
         {from:'Anna', text:'Hey! Free this Saturday?'},{from:'You', text:'Possibly. What\'s up?'},
-        {from:'Anna', text:'Street market in town — starts at 10.'},
+        {from:'Anna', text:'Street market in town â€” starts at 10.'},
         {from:'Anna', text:'I want to buy coffee beans and a small plant.'},
         {from:'You', text:'Sounds nice. Where do we meet?'},
         {from:'Anna', text:'Let\'s meet at the library entrance.'},
         {from:'Anna', text:'After the market I need the pharmacy.'},
         {from:'You', text:'Ok. Do I need to bring anything?'},
-        {from:'Anna', text:'If you can, bring an umbrella — forecast is light rain.'},
+        {from:'Anna', text:'If you can, bring an umbrella â€” forecast is light rain.'},
         {from:'Anna', text:'Oh, and I promised to text Luca at noon.'}
       ],
       qs:[
@@ -240,10 +241,10 @@
     },
     { title:'Travel update',
       msgs:[
-        {from:'Marco', text:'Train strike ended — services normal tomorrow.'},
+        {from:'Marco', text:'Train strike ended â€” services normal tomorrow.'},
         {from:'You', text:'Great. What time is our train?'},
         {from:'Marco', text:'9:40 from Platform 4.'},
-        {from:'Marco', text:'Bring ID — ticket is digital.'},
+        {from:'Marco', text:'Bring ID â€” ticket is digital.'},
         {from:'You', text:'Do we need seats reserved?'},
         {from:'Marco', text:'Yes, already done: Coach B, seats 12 and 13.'},
         {from:'Marco', text:'I\'ll grab snacks at the station.'},
@@ -252,7 +253,7 @@
         {from:'You', text:'Perfect, see you at the barriers.'}
       ],
       qs:[
-        {prompt:'What time is the train?', ans:['9:40','940','9 40'], hints:['Morning, in the nine o\'clock hour.','Not on the hour—twenty minutes to ten.'], cue:{ mc:['9:40','10:10','8:55','12:15']}},
+        {prompt:'What time is the train?', ans:['9:40','940','9 40'], hints:['Morning, in the nine o\'clock hour.','Not on the hourâ€”twenty minutes to ten.'], cue:{ mc:['9:40','10:10','8:55','12:15']}},
         {prompt:'Which platform?', ans:['4','platform 4'], hints:['A single digit, even number.','It\'s less than 5.'], cue:{ mc:['4','2','7','1']}},
         {prompt:'Which coach are the reserved seats in?', ans:['b','coach b'], hints:['A letter near the start of the alphabet.','It\'s the second letter.'], cue:{ mc:['Coach B','Coach A','Coach D','Coach F']}},
         {prompt:'Name one item to bring.', ans:['id','chargers','charger','light jacket','jacket'], hints:['Required for digital tickets.','Two letters commonly used for identity.'], cue:{ mc:['ID','Passport','Umbrella','Sunglasses']}},
@@ -285,8 +286,8 @@
         {from:'Organizer', text:'Registration opens at 8:30.'},
         {from:'You', text:'Where do I go first?'},
         {from:'Organizer', text:'Keynote in Hall A at 9:00.'},
-        {from:'Organizer', text:'Your poster session is 14:00–15:30 in Gallery 2.'},
-        {from:'You', text:'Wi‑Fi?'},
+        {from:'Organizer', text:'Your poster session is 14:00â€“15:30 in Gallery 2.'},
+        {from:'You', text:'Wiâ€‘Fi?'},
         {from:'Organizer', text:'Network: CONF2025, password: nexus.'},
         {from:'You', text:'Lunch?'},
         {from:'Organizer', text:'Vouchers at the foyer, vegetarian options available.'},
@@ -297,8 +298,8 @@
         {prompt:'When does registration open?', ans:['8:30','830','8 30'], hints:['In the eight o\'clock hour.','On the half hour.'], cue:{ mc:['8:30','9:00','7:45','10:00']}},
         {prompt:'Where is the keynote?', ans:['hall a','a'], hints:['A hall, not a gallery.','The primary hall with a single-letter label.'], cue:{ mc:['Hall A','Gallery 2','Hall C','Auditorium B']}},
         {prompt:'Poster session time?', ans:['14:00','1400','14 00','2pm','2:00'], hints:['Early afternoon.','Exactly on the hour at two p.m.'], cue:{ mc:['14:00','13:30','15:00','11:00']}},
-        {prompt:'Wi‑Fi password?', ans:['nexus'], hints:['A five-letter tech word.','Means a connection or link.'], cue:{ mc:['nexus','orion','vector','delta']}},
-        {prompt:'Reception location?', ans:['terrace','on the terrace'], hints:['An outdoor elevated area.','Open-air terrace.'], cue:{ mc:['Terrace','Foyer','Hall A','Café']}}
+        {prompt:'Wiâ€‘Fi password?', ans:['nexus'], hints:['A five-letter tech word.','Means a connection or link.'], cue:{ mc:['nexus','orion','vector','delta']}},
+        {prompt:'Reception location?', ans:['terrace','on the terrace'], hints:['An outdoor elevated area.','Open-air terrace.'], cue:{ mc:['Terrace','Foyer','Hall A','CafÃ©']}}
       ]
     }
   ];
@@ -348,7 +349,7 @@
   let firstPick=null, lock=false, pairsFound=0, mismatches=0;
   function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()* (i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
   function startMatching(){ firstPick=null; lock=false; pairsFound=0; mismatches=0; matchStatus.textContent='Pairs found: 0/6';
-    const syms=['🍎','🚗','🐶','🎵','🌟','📚']; const deck=shuffle([...syms,...syms]);
+    const syms=['ðŸŽ','ðŸš—','ðŸ¶','ðŸŽµ','ðŸŒŸ','ðŸ“š']; const deck=shuffle([...syms,...syms]);
     matchGrid.innerHTML=''; deck.forEach((sym,idx)=>{
       const card=document.createElement('div'); card.className='match-card'; card.dataset.sym=sym; card.dataset.idx=idx; card.textContent='?';
       card.onclick=()=>{
@@ -437,7 +438,7 @@ function grade(sc){ let correct=0,total=sc.qs.length,details=[]; Array.from(reca
 
   // Controls
   btnStart.onclick=()=>{ hide(strategyCard); show(scenarioCard); const idx=parseInt(scenarioSel.value,10) || 0; const sc=THREADS[idx]; startThread(sc); log('Session started.'); btnPause.disabled=false; };
-  $('#strategyCard').addEventListener('click',(e)=>{ const b=e.target.closest('button[data-strategy]'); if(!b) return; currentStrategy=maybeNudge(b.getAttribute('data-strategy')); const info=STRATEGY_DETAILS[currentStrategy]; if(info){ const ex=info.examples.map(x=>'• '+x).join('<br>'); $('#strategyInfo').innerHTML='<div class="pill">'+info.title+': '+info.desc+'</div>'+'<div class="tip" style="margin-top:6px"><strong>Examples</strong><br>'+ex+'</div>'; } log('Strategy: '+currentStrategy); });
+  $('#strategyCard').addEventListener('click',(e)=>{ const b=e.target.closest('button[data-strategy]'); if(!b) return; currentStrategy=maybeNudge(b.getAttribute('data-strategy')); const info=STRATEGY_DETAILS[currentStrategy]; if(info){ const ex=info.examples.map(x=>'â€¢ '+x).join('<br>'); $('#strategyInfo').innerHTML='<div class="pill">'+info.title+': '+info.desc+'</div>'+'<div class="tip" style="margin-top:6px"><strong>Examples</strong><br>'+ex+'</div>'; } log('Strategy: '+currentStrategy); });
   btnPause.onclick=()=>{ paused=!paused; btnPause.textContent=paused?'Resume':'Pause'; if(!paused) playNext(); };
   btnStopVoice.onclick=()=>stopSpeak();
   btnReset.onclick=()=>{ stopSpeak(); location.reload(); };
@@ -445,7 +446,7 @@ function grade(sc){ let correct=0,total=sc.qs.length,details=[]; Array.from(reca
   btnDemo.onclick=()=>{ scenarioSel.value='0'; $('#statScenario').textContent='Scenario: '+THREADS[0].title; };
   btnToDistractor.onclick=()=> showDistractor();
   btnShuffle && (btnShuffle.onclick=()=> shufflePuzzle());
-  btnSize && (btnSize.onclick=()=>{ puzzleSize = puzzleSize===3 ? 4 : 3; btnSize.textContent = 'Size: '+puzzleSize+'×'+puzzleSize; shufflePuzzle(); });
+  btnSize && (btnSize.onclick=()=>{ puzzleSize = puzzleSize===3 ? 4 : 3; btnSize.textContent = 'Size: '+puzzleSize+'Ã—'+puzzleSize; shufflePuzzle(); });
   btnSkip && (btnSkip.onclick=()=>{ if(btnSkip.disabled) return; log('Puzzle skipped.'); showRecall(); });
   btnCheck.onclick=()=>{
   const sc=THREADS[parseInt(scenarioSel.value,10)];
@@ -453,19 +454,19 @@ function grade(sc){ let correct=0,total=sc.qs.length,details=[]; Array.from(reca
   hide(recallCard);
   show(feedbackCard);
   const pct=Math.round((g.correct/g.total)*100);
-  let html='<div class="pill">Accuracy: '+g.correct+'/'+g.total+' ('+pct+'%) — Strategy: '+(currentStrategy||'—')+'</div>';
+  let html='<div class="pill">Accuracy: '+g.correct+'/'+g.total+' ('+pct+'%) â€” Strategy: '+(currentStrategy||'â€”')+'</div>';
   g.details.forEach((d, i)=>{
     const corr = (sc.qs[i].ans || []).join(' / ');
-    html+='<div style="margin-top:6px">'+(d.ok?'✅':'❌')+' <em>'+d.prompt+'</em> — <strong>'+d.text+'</strong>'+(d.ok?'':'<div class="muted" style="margin-top:2px">Correct: '+corr+'</div>')+'</div>';
+    html+='<div style="margin-top:6px">'+(d.ok?'âœ…':'âŒ')+' <em>'+d.prompt+'</em> â€” <strong>'+d.text+'</strong>'+(d.ok?'':'<div class="muted" style="margin-top:2px">Correct: '+corr+'</div>')+'</div>';
   });
   document.getElementById('feedbackZone').innerHTML=html;
   sessionLog.push({timestamp:new Date().toISOString(), scenario:sc.title, strategy:currentStrategy, correct:g.correct, total:g.total, percent:pct});
-  log('Recall checked — '+g.correct+'/'+g.total+'.');
+  log('Recall checked â€” '+g.correct+'/'+g.total+'.');
 };;
   btnRestart.onclick=()=>{ location.reload(); };
 
   // Init voices
-  function loadVoices(){ const voices=speechSynthesis.getVoices().sort((a,b)=>(a.lang+a.name).localeCompare(b.lang+b.name)); voiceSel.innerHTML=''; voices.forEach(v=>{ const o=document.createElement('option'); o.value=v.name; o.textContent=v.name+' — '+v.lang; voiceSel.appendChild(o); }); const target=['Google UK English Female','Microsoft Sonia Online (Natural) - English (Great Britain)','Google italiano']; const hit=voices.find(v=>target.includes(v.name)) || voices.find(v=> v.lang.startsWith(navigator.language||'en')); if(hit) voiceSel.value=hit.name; }
+  function loadVoices(){ const voices=speechSynthesis.getVoices().sort((a,b)=>(a.lang+a.name).localeCompare(b.lang+b.name)); voiceSel.innerHTML=''; voices.forEach(v=>{ const o=document.createElement('option'); o.value=v.name; o.textContent=v.name+' â€” '+v.lang; voiceSel.appendChild(o); }); const target=['Google UK English Female','Microsoft Sonia Online (Natural) - English (Great Britain)','Google italiano']; const hit=voices.find(v=>target.includes(v.name)) || voices.find(v=> v.lang.startsWith(navigator.language||'en')); if(hit) voiceSel.value=hit.name; }
   if('speechSynthesis' in window){ speechSynthesis.onvoiceschanged=loadVoices; setTimeout(loadVoices,100); }
 
   function renderScenarioStats(){ $('#statScenario').textContent='Scenario: '+THREADS[parseInt(scenarioSel.value,10)].title; }
@@ -493,3 +494,4 @@ function grade(sc){ let correct=0,total=sc.qs.length,details=[]; Array.from(reca
 </div>
 </section></main></body>
 </html>
+

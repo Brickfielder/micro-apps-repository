@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Audio Errand Planner — v0.3</title>
+<title>Audio Errand Planner â€” v0.3</title>
 <style>
   :root{
     --bg:#f4f6fb; --card:#ffffff; --ink:#1a1a1a; --muted:#555;
@@ -52,7 +52,8 @@
     clip:rect(0,0,0,0);white-space:nowrap;border:0}
   .disabled{opacity:.4;pointer-events:none}
 </style>
-<meta content="Audio_Errands" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../shared/theme.css" rel="stylesheet"/><script defer="" src="../shared/frame.js"></script><script defer="" src="../shared/clinician_feedback.js"></script></head>
+<meta content="Audio_Errands" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../../../shared/theme.css" rel="stylesheet"/><script defer="" src="../../../shared/frame.js"></script><script defer="" src="../../../shared/clinician_feedback.js"></script>  <meta name="app-slug" content="audio-errands">
+</head>
 <body><main id="app-root">
 <main aria-label="Audio Errand Planner" class="app" role="application">
 <header>
@@ -93,11 +94,11 @@
 <select aria-label="Voice" id="voiceSel"></select>
 <label for="rate">Rate:</label>
 <input id="rate" max="1.4" min="0.7" step="0.05" type="range" value="1"/>
-<button class="ghost" id="hearingTest" title="Play a short sample">Hearing check 🔊</button>
+<button class="ghost" id="hearingTest" title="Play a short sample">Hearing check ðŸ”Š</button>
 </div>
 <div class="row">
-<button class="primary" id="start">Start Trial ▶️</button>
-<button class="warn" id="stopSpeak">Stop Audio ⏹️</button>
+<button class="primary" id="start">Start Trial â–¶ï¸</button>
+<button class="warn" id="stopSpeak">Stop Audio â¹ï¸</button>
 <button class="ghost" id="reset">Reset</button>
 </div>
 </div>
@@ -112,7 +113,7 @@
 </div>
 </div>
 <div class="row" style="margin-top:12px">
-<button class="ok" id="submit">Submit ✅</button>
+<button class="ok" id="submit">Submit âœ…</button>
 <button class="ghost" id="clearSeq">Clear sequence</button>
 <div aria-live="polite" class="hint" id="feedback"></div>
 </div>
@@ -125,7 +126,7 @@
 <div>Time: <strong id="timer">00:00</strong></div>
 </div>
 <div style="margin:12px 0">
-<button class="ghost" id="downloadCsv">Download CSV ⬇️</button>
+<button class="ghost" id="downloadCsv">Download CSV â¬‡ï¸</button>
 </div>
 <div aria-label="Log" class="log" id="log"></div>
 </aside>
@@ -168,12 +169,12 @@
     if(!synth){els.audioStatus.textContent='Speech: unavailable'; els.audioDot.style.background='var(--err)'; return}
     const vs = synth.getVoices();
     if(vs && vs.length){els.audioStatus.textContent='Speech: ready'; els.audioDot.style.background='var(--ok)';}
-    else {els.audioStatus.textContent='Speech: loading voices…'; els.audioDot.style.background='var(--warn)';}
+    else {els.audioStatus.textContent='Speech: loading voicesâ€¦'; els.audioDot.style.background='var(--warn)';}
   }
   function populateVoices(){ if(!synth) return; const vs=synth.getVoices(); els.voiceSel.innerHTML='';
     vs.forEach((v,i)=>{
       const o=document.createElement('option');
-      o.value=i; o.textContent=`${v.name} — ${v.lang}${v.default?' (default)':''}`; els.voiceSel.appendChild(o);
+      o.value=i; o.textContent=`${v.name} â€” ${v.lang}${v.default?' (default)':''}`; els.voiceSel.appendChild(o);
     });
   }
   if(synth){
@@ -322,7 +323,7 @@
     };
     logs.push(row);
     els.log.textContent = [
-      `#${row.trial} — ${perfect? 'PERFECT ✅' : 'Partial'}; ${correctCount}/${groundTruth.length} in ${fmt(elapsed)}`,
+      `#${row.trial} â€” ${perfect? 'PERFECT âœ…' : 'Partial'}; ${correctCount}/${groundTruth.length} in ${fmt(elapsed)}`,
       `Truth: ${row.groundTruth}`,
       `You:   ${row.attempt}`,
       '',
@@ -386,3 +387,4 @@
 </div>
 </section></main></body>
 </html>
+

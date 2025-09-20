@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Errands Memory — Rehab Game</title>
+<title>Errands Memory â€” Rehab Game</title>
 <style>
     :root{
       --bg:#f8fafc;--card:#ffffff;--text:#0f172a;--muted:#64748b;--accent:#2563eb;--good:#10b981;--bad:#ef4444;--shadow:0 10px 30px rgba(2,6,23,.08);--radius:18px
@@ -49,10 +49,11 @@
     .countdown-label{font-size:14px;color:#d1d5db;margin-bottom:6px;letter-spacing:.02em}
     .countdown-number{font-size:clamp(38px,6vmin,72px);font-weight:900;letter-spacing:.02em}
   </style>
-<meta content="Errands-visual-memory" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../shared/theme.css" rel="stylesheet"/><script defer="" src="../shared/frame.js"></script><script defer="" src="../shared/clinician_feedback.js"></script></head>
+<meta content="Errands-visual-memory" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../../../shared/theme.css" rel="stylesheet"/><script defer="" src="../../../shared/frame.js"></script><script defer="" src="../../../shared/clinician_feedback.js"></script>  <meta name="app-slug" content="errands-visual-memory">
+</head>
 <body><main id="app-root">
 <header>
-<h1>Errands Memory — Rehab Game</h1>
+<h1>Errands Memory â€” Rehab Game</h1>
 <p class="lead">Watch a sequence of shops light up, then click them in the same order (or in reverse). Simple, playful, and closer to real life than abstract blocks.</p>
 </header>
 <main class="app">
@@ -117,9 +118,9 @@
 <button class="ghost" id="demoBtn">Quick demo</button>
 </div>
 <div class="status" id="status">
-<span class="badge">Length: <strong id="lenBadge" style="margin-left:6px">—</strong></span>
-<span class="badge" id="trialBadge">Trial: —</span>
-<span class="badge success" id="bestSpan">Best span: —</span>
+<span class="badge">Length: <strong id="lenBadge" style="margin-left:6px">â€”</strong></span>
+<span class="badge" id="trialBadge">Trial: â€”</span>
+<span class="badge success" id="bestSpan">Best span: â€”</span>
 </div>
 <h3 style="margin:16px 0 8px">Session log</h3>
 <div aria-live="polite" class="log" id="log"></div>
@@ -132,7 +133,7 @@
 <!-- Non-blocking countdown overlay inside the task area -->
 <div aria-atomic="true" aria-live="assertive" class="countdown-overlay" id="countdown">
 <div class="countdown-bubble" role="status">
-<div class="countdown-label">Get ready…</div>
+<div class="countdown-label">Get readyâ€¦</div>
 <div class="countdown-number" id="countdownNum">2</div>
 </div>
 </div>
@@ -141,24 +142,24 @@
 </section>
 </main>
 <script>
-    // Master list (up to 16 shops) — we slice from this based on the setting
+    // Master list (up to 16 shops) â€” we slice from this based on the setting
     const ALL_SHOPS = [
-      { key:'bakery', label:'Bakery', emoji:'🥖' },
-      { key:'pharmacy', label:'Pharmacy', emoji:'💊' },
-      { key:'supermarket', label:'Supermarket', emoji:'🛒' },
-      { key:'post', label:'Post Office', emoji:'📮' },
-      { key:'cafe', label:'Café', emoji:'☕' },
-      { key:'shoes', label:'Shoe Shop', emoji:'👟' },
-      { key:'books', label:'Bookshop', emoji:'📚' },
-      { key:'florist', label:'Florist', emoji:'🌸' },
-      { key:'butcher', label:'Butcher', emoji:'🥩' },
-      { key:'greengrocer', label:'Greengrocer', emoji:'🥦' },
-      { key:'fish', label:'Fishmonger', emoji:'🐟' },
-      { key:'hardware', label:'Hardware', emoji:'🛠️' },
-      { key:'electronics', label:'Electronics', emoji:'📱' },
-      { key:'bank', label:'Bank', emoji:'🏦' },
-      { key:'cinema', label:'Cinema', emoji:'🎬' },
-      { key:'toys', label:'Toy Shop', emoji:'🧸' },
+      { key:'bakery', label:'Bakery', emoji:'ðŸ¥–' },
+      { key:'pharmacy', label:'Pharmacy', emoji:'ðŸ’Š' },
+      { key:'supermarket', label:'Supermarket', emoji:'ðŸ›’' },
+      { key:'post', label:'Post Office', emoji:'ðŸ“®' },
+      { key:'cafe', label:'CafÃ©', emoji:'â˜•' },
+      { key:'shoes', label:'Shoe Shop', emoji:'ðŸ‘Ÿ' },
+      { key:'books', label:'Bookshop', emoji:'ðŸ“š' },
+      { key:'florist', label:'Florist', emoji:'ðŸŒ¸' },
+      { key:'butcher', label:'Butcher', emoji:'ðŸ¥©' },
+      { key:'greengrocer', label:'Greengrocer', emoji:'ðŸ¥¦' },
+      { key:'fish', label:'Fishmonger', emoji:'ðŸŸ' },
+      { key:'hardware', label:'Hardware', emoji:'ðŸ› ï¸' },
+      { key:'electronics', label:'Electronics', emoji:'ðŸ“±' },
+      { key:'bank', label:'Bank', emoji:'ðŸ¦' },
+      { key:'cinema', label:'Cinema', emoji:'ðŸŽ¬' },
+      { key:'toys', label:'Toy Shop', emoji:'ðŸ§¸' },
     ];
 
     // Active subset used in the current session
@@ -243,7 +244,7 @@
       }
       setShopsDisabled(false);
       state.awaiting=true; state.inputStart = performance.now();
-      log('Your turn… Click the shops in order.');
+      log('Your turnâ€¦ Click the shops in order.');
       ariaStatus.textContent = 'Your turn. Click shops in order.';
     }
 
@@ -276,11 +277,11 @@
       if (isCorrect){
         expected.forEach(i=>nodes[i].classList.add('correct'));
         state.bestSpan = Math.max(state.bestSpan, state.seqLen);
-        log(`✅ Correct at length ${state.seqLen}`);
+        log(`âœ… Correct at length ${state.seqLen}`);
       } else {
         expected.forEach(i=>nodes[i].classList.add('highlight'));
         state.input.forEach((i,ix)=>{ if (expected[ix]!==i) nodes[i].classList.add('wrong'); });
-        log(`❌ Wrong at length ${state.seqLen}`);
+        log(`âŒ Wrong at length ${state.seqLen}`);
       }
       updateBadges();
 
@@ -328,7 +329,7 @@
 
     function endSession(reason='Session ended.'){
       state.running=false; state.awaiting=false; controls.pauseBtn.disabled=true; controls.downloadBtn.disabled=false; controls.startBtn.disabled=false; setShopsDisabled(false);
-      log(`— ${reason} Best span: ${state.bestSpan}.`);
+      log(`â€” ${reason} Best span: ${state.bestSpan}.`);
     }
 
     function resetAll(){
@@ -377,3 +378,4 @@
 </div>
 </section></main></body>
 </html>
+

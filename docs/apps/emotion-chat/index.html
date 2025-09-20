@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Emotion Chat — Social Cognition Micro-App</title>
+<title>Emotion Chat â€” Social Cognition Micro-App</title>
 <meta content="WhatsApp-style scenarios to practice emotion recognition, theory of mind, and social reasoning." name="description"/>
 <style>
   /* ===================== Design tokens ===================== */
@@ -161,12 +161,13 @@
     *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important }
   }
 </style>
-<meta content="emotion_chat" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../shared/theme.css" rel="stylesheet"/><script defer="" src="../shared/frame.js"></script><script defer="" src="../shared/clinician_feedback.js"></script></head>
+<meta content="emotion_chat" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../../../shared/theme.css" rel="stylesheet"/><script defer="" src="../../../shared/frame.js"></script><script defer="" src="../../../shared/clinician_feedback.js"></script>  <meta name="app-slug" content="emotion-chat">
+</head>
 <body><main id="app-root">
 <header>
 <div class="wrap stack">
 <span class="chip">Prototype</span>
-<h1 class="brandtitle">Emotion Chat — <span class="accent" id="accentWord"></span></h1>
+<h1 class="brandtitle">Emotion Chat â€” <span class="accent" id="accentWord"></span></h1>
 <p class="sub">WhatsApp-style scenarios to practice emotion recognition, theory of mind, and social reasoning.</p>
 <div class="bar">
 <label>
@@ -206,15 +207,15 @@
 <section aria-labelledby="respTitle" class="card pad">
 <h2 id="respTitle">Your responses</h2>
 <div class="step" id="step1">
-<h3>Step 1 — Free choice</h3>
+<h3>Step 1 â€” Free choice</h3>
 <div class="row">
 <div>
 <label class="legend" for="freeA" id="labelA"></label>
-<textarea id="freeA" placeholder="Type one or more emotions…"></textarea>
+<textarea id="freeA" placeholder="Type one or more emotionsâ€¦"></textarea>
 </div>
 <div>
 <label class="legend" for="freeB" id="labelB"></label>
-<textarea id="freeB" placeholder="Type one or more emotions…"></textarea>
+<textarea id="freeB" placeholder="Type one or more emotionsâ€¦"></textarea>
 </div>
 </div>
 <div class="divider"></div>
@@ -222,7 +223,7 @@
 <span class="small" id="step1Hint">Finish the chat, then fill both boxes to proceed.</span>
 </div>
 <div class="step" hidden="" id="step2">
-<h3>Step 2 — Select emotions (choose all that apply)</h3>
+<h3>Step 2 â€” Select emotions (choose all that apply)</h3>
 <div class="row" style="grid-template-columns:1fr 1fr">
 <div>
 <div class="legend" id="pillTitleA"></div>
@@ -237,7 +238,7 @@
 <button class="primary" disabled="" id="submit">Show feedback</button>
 </div>
 <div class="step" hidden="" id="step3">
-<h3>Step 3 — Feedback</h3>
+<h3>Step 3 â€” Feedback</h3>
 <div class="feedback" id="fbA"></div>
 <div class="feedback" id="fbB"></div>
 <div class="kpi" id="kpi"></div>
@@ -260,108 +261,108 @@ const SCENARIOS = [
     messages:[
       {from:"A", text:"Hey, have you added your part to the doc yet?"},
       {from:"B", text:"Not yet, had a busy day. Will do later."},
-      {from:"A", text:"Okay, it’s just due tomorrow 😬"},
-      {from:"B", text:"I know, relax. I’ll get it done."},
+      {from:"A", text:"Okay, itâ€™s just due tomorrow ðŸ˜¬"},
+      {from:"B", text:"I know, relax. Iâ€™ll get it done."},
       {from:"A", text:"We still need to check references and format everything."},
-      {from:"B", text:"You always stress too much. It’ll be fine."},
-      {from:"A", text:"I’m not stressing, just making sure we don’t lose marks."},
-      {from:"B", text:"Well I said I’ll do it later. Can you chill?"},
-      {from:"A", text:"…"},
-      {from:"B", text:"Why the dots? 🙄"},
-      {from:"A", text:"Nothing. I’ll just finish it myself."},
+      {from:"B", text:"You always stress too much. Itâ€™ll be fine."},
+      {from:"A", text:"Iâ€™m not stressing, just making sure we donâ€™t lose marks."},
+      {from:"B", text:"Well I said Iâ€™ll do it later. Can you chill?"},
+      {from:"A", text:"â€¦"},
+      {from:"B", text:"Why the dots? ðŸ™„"},
+      {from:"A", text:"Nothing. Iâ€™ll just finish it myself."},
       {from:"B", text:"Suit yourself then."}
     ],
     correct:{ A:["Frustrated","Disappointed","Sad","Withdrawn"], B:["Irritated","Defensive"] },
     cues:{
-      A:"Frustration (“due tomorrow 😬”), disappointment (“I’ll finish it myself”), withdrawal (“…”).",
-      B:"Defensiveness (“You always stress too much”), irritation (🙄)."
+      A:"Frustration (â€œdue tomorrow ðŸ˜¬â€), disappointment (â€œIâ€™ll finish it myselfâ€), withdrawal (â€œâ€¦â€).",
+      B:"Defensiveness (â€œYou always stress too muchâ€), irritation (ðŸ™„)."
     }
   },
   { id:"B", title:"Missed Call", people:{A:"Maya", B:"Leo"},
     messages:[
-      {from:"A", text:"Tried calling you 3 times last night, where were you? 😕"},
+      {from:"A", text:"Tried calling you 3 times last night, where were you? ðŸ˜•"},
       {from:"B", text:"Sorry, phone was on silent."},
       {from:"A", text:"I was worried. Thought something happened."},
       {from:"B", text:"Nah, just needed some quiet time."},
       {from:"A", text:"Without telling me? We were supposed to chat."},
-      {from:"B", text:"Didn’t think it was a big deal."},
-      {from:"A", text:"Well it kind of was… I waited."},
+      {from:"B", text:"Didnâ€™t think it was a big deal."},
+      {from:"A", text:"Well it kind of wasâ€¦ I waited."},
       {from:"B", text:"You always overthink these things."},
       {from:"A", text:"Maybe. But it hurt a little."},
-      {from:"B", text:"I didn’t mean to. Just tired."},
-      {from:"A", text:"So… are we still talking tonight?"},
-      {from:"B", text:"Might be busy again. Don’t wait up."},
+      {from:"B", text:"I didnâ€™t mean to. Just tired."},
+      {from:"A", text:"Soâ€¦ are we still talking tonight?"},
+      {from:"B", text:"Might be busy again. Donâ€™t wait up."},
       {from:"A", text:"Oh. Okay then."}
     ],
     correct:{ A:["Anxious","Hurt","Disappointed"], B:["Distant","Defensive","Irritated"] },
     cues:{
-      A:"Anxiety (“worried”), hurt/disappointment (“I waited”, “hurt a little”).",
-      B:"Avoidance, defensiveness (“overthink”), distance (“Don’t wait up”)."
+      A:"Anxiety (â€œworriedâ€), hurt/disappointment (â€œI waitedâ€, â€œhurt a littleâ€).",
+      B:"Avoidance, defensiveness (â€œoverthinkâ€), distance (â€œDonâ€™t wait upâ€)."
     }
   },
   { id:"C", title:"Forgotten Favour", people:{A:"Liam", B:"Noah"},
     messages:[
       {from:"A", text:"Hey, did you manage to pick up my parcel?"},
-      {from:"B", text:"Ah, totally slipped my mind 😬 sorry."},
-      {from:"A", text:"That’s the third time you’ve forgotten…"},
-      {from:"B", text:"I’ve been super busy, cut me some slack."},
+      {from:"B", text:"Ah, totally slipped my mind ðŸ˜¬ sorry."},
+      {from:"A", text:"Thatâ€™s the third time youâ€™ve forgottenâ€¦"},
+      {from:"B", text:"Iâ€™ve been super busy, cut me some slack."},
       {from:"A", text:"I waited at home all afternoon."},
       {from:"B", text:"I said I was sorry. Do you want me to drive there now?"},
       {from:"A", text:"It closes in 10 minutes. Forget it."},
-      {from:"B", text:"Come on, don’t be dramatic."},
+      {from:"B", text:"Come on, donâ€™t be dramatic."},
       {from:"A", text:"Right."},
       {from:"B", text:"Seriously, what do you want me to do?"},
-      {from:"A", text:"Nothing. I’ll figure it out."},
+      {from:"A", text:"Nothing. Iâ€™ll figure it out."},
       {from:"B", text:"Fine then."}
     ],
     correct:{ A:["Frustrated","Resentful","Disappointed"], B:["Guilty","Defensive"] },
     cues:{
-      A:"“Third time…” = resentment; “Forget it” = disappointment.",
-      B:"“😬 sorry” = guilt; “cut me some slack” = defensive."
+      A:"â€œThird timeâ€¦â€ = resentment; â€œForget itâ€ = disappointment.",
+      B:"â€œðŸ˜¬ sorryâ€ = guilt; â€œcut me some slackâ€ = defensive."
     }
   },
   { id:"D", title:"Concert Ticket", people:{A:"Ella", B:"Sophie"},
     messages:[
-      {from:"A", text:"Guess what, I got tickets to the concert!! 🎶🔥"},
+      {from:"A", text:"Guess what, I got tickets to the concert!! ðŸŽ¶ðŸ”¥"},
       {from:"B", text:"No way, lucky you."},
-      {from:"A", text:"Front row seats too 😍 can’t wait."},
-      {from:"B", text:"Wow. Must’ve cost a fortune."},
+      {from:"A", text:"Front row seats too ðŸ˜ canâ€™t wait."},
+      {from:"B", text:"Wow. Mustâ€™ve cost a fortune."},
       {from:"A", text:"Worth every penny."},
-      {from:"B", text:"I tried but they were sold out…"},
+      {from:"B", text:"I tried but they were sold outâ€¦"},
       {from:"A", text:"I was online right when they went live."},
-      {from:"B", text:"Not all of us can sit refreshing a page all day 🙄."},
-      {from:"A", text:"Hey, sorry. Didn’t mean to rub it in."},
-      {from:"B", text:"No, it’s fine. Have fun."},
+      {from:"B", text:"Not all of us can sit refreshing a page all day ðŸ™„."},
+      {from:"A", text:"Hey, sorry. Didnâ€™t mean to rub it in."},
+      {from:"B", text:"No, itâ€™s fine. Have fun."},
       {from:"A", text:"Want me to record some clips for you?"},
-      {from:"B", text:"Don’t bother."},
-      {from:"A", text:"…"}
+      {from:"B", text:"Donâ€™t bother."},
+      {from:"A", text:"â€¦"}
     ],
     correct:{ A:["Excited","Guilty"], B:["Jealous","Irritated","Hurt","Envious"] },
     cues:{
-      A:"“Front row seats 😍” = excitement; apology hints guilt.",
-      B:"Dismissive lines + 🙄 + “Don’t bother” = envy, irritation, hurt."
+      A:"â€œFront row seats ðŸ˜â€ = excitement; apology hints guilt.",
+      B:"Dismissive lines + ðŸ™„ + â€œDonâ€™t botherâ€ = envy, irritation, hurt."
     }
   },
   { id:"E", title:"Lost Wallet", people:{A:"Nina", B:"Omar"},
     messages:[
-      {from:"A", text:"I just found your wallet by the café!"},
-      {from:"B", text:"No way—are you serious??"},
-      {from:"A", text:"Yep. Everything’s inside. I can drop it off now."},
-      {from:"B", text:"I’ve been searching for an hour. I thought it was gone forever."},
-      {from:"A", text:"I’m outside your building in 5."},
-      {from:"B", text:"You’re a lifesaver. I was panicking."},
+      {from:"A", text:"I just found your wallet by the cafÃ©!"},
+      {from:"B", text:"No wayâ€”are you serious??"},
+      {from:"A", text:"Yep. Everythingâ€™s inside. I can drop it off now."},
+      {from:"B", text:"Iâ€™ve been searching for an hour. I thought it was gone forever."},
+      {from:"A", text:"Iâ€™m outside your building in 5."},
+      {from:"B", text:"Youâ€™re a lifesaver. I was panicking."},
       {from:"A", text:"All good. See you in a bit."},
       {from:"B", text:"Thank you, really. I owe you one."},
-      {from:"A", text:"Don’t worry about it 😊"},
+      {from:"A", text:"Donâ€™t worry about it ðŸ˜Š"},
       {from:"B", text:"I can finally breathe."}
     ],
     correct:{ A:["Supportive","Calm","Content"], B:["Relieved","Grateful","Appreciative"] },
-    cues:{ A:"Practical reassurance + calm tone.", B:"Relief (“finally breathe”), gratitude (“owe you one”)." }
+    cues:{ A:"Practical reassurance + calm tone.", B:"Relief (â€œfinally breatheâ€), gratitude (â€œowe you oneâ€)." }
   },
   { id:"F", title:"Presentation Praise", people:{A:"Ava", B:"Ben"},
     messages:[
       {from:"A", text:"Your presentation was fantastic today!"},
-      {from:"B", text:"Oh—thanks! I’m glad it landed."},
+      {from:"B", text:"Ohâ€”thanks! Iâ€™m glad it landed."},
       {from:"A", text:"The Q&A was tough but you handled it."},
       {from:"B", text:"I did prepare for those."},
       {from:"A", text:"You should be proud."},
@@ -372,23 +373,23 @@ const SCENARIOS = [
       {from:"B", text:"Great idea!"}
     ],
     correct:{ A:["Supportive","Happy"], B:["Proud","Relieved","Happy"] },
-    cues:{ A:"Warm encouragement and affirmation.", B:"Acknowledges effort → pride; post-event easing → relief." }
+    cues:{ A:"Warm encouragement and affirmation.", B:"Acknowledges effort â†’ pride; post-event easing â†’ relief." }
   },
   { id:"G", title:"Awkward Joke", people:{A:"Chloe", B:"Dan"},
     messages:[
-      {from:"A", text:"About earlier… my joke wasn’t great."},
+      {from:"A", text:"About earlierâ€¦ my joke wasnâ€™t great."},
       {from:"B", text:"It caught people off guard."},
-      {from:"A", text:"I didn’t mean to upset anyone."},
+      {from:"A", text:"I didnâ€™t mean to upset anyone."},
       {from:"B", text:"Maybe just bad timing."},
       {from:"A", text:"I feel silly now."},
       {from:"B", text:"Happens to everyone."},
       {from:"A", text:"Should I apologise to Mira?"},
       {from:"B", text:"A quick message would help."},
-      {from:"A", text:"I’ll do that now."},
+      {from:"A", text:"Iâ€™ll do that now."},
       {from:"B", text:"Good call."}
     ],
     correct:{ A:["Embarrassed","Regretful","Anxious"], B:["Supportive","Concerned","Calm"] },
-    cues:{ A:"Admits mistake → embarrassment/regret.", B:"Gentle guidance; steady tone." }
+    cues:{ A:"Admits mistake â†’ embarrassment/regret.", B:"Gentle guidance; steady tone." }
   },
   { id:"H", title:"Flat Tyre", people:{A:"Priya", B:"Tom"},
     messages:[
@@ -396,21 +397,21 @@ const SCENARIOS = [
       {from:"B", text:"Are you safe? Hazards on?"},
       {from:"A", text:"Yeah, pulled over."},
       {from:"B", text:"I can come out with the pump."},
-      {from:"A", text:"That’d be amazing."},
+      {from:"A", text:"Thatâ€™d be amazing."},
       {from:"B", text:"Send me your location."},
       {from:"A", text:"Done."},
       {from:"B", text:"On my way. 15 mins."},
       {from:"A", text:"Thanks. I was a bit shaken."},
-      {from:"B", text:"You’ll be fine. We’ve got this."}
+      {from:"B", text:"Youâ€™ll be fine. Weâ€™ve got this."}
     ],
     correct:{ A:["Anxious","Relieved"], B:["Concerned","Supportive","Calm"] },
     cues:{ A:"Stress then relief when help is coming.", B:"Checks safety, offers concrete help." }
   },
   { id:"I", title:"Party Invite", people:{A:"Zoe", B:"Mark"},
     messages:[
-      {from:"A", text:"You coming to Jess’s party tonight?"},
+      {from:"A", text:"You coming to Jessâ€™s party tonight?"},
       {from:"B", text:"Maybe. Long week."},
-      {from:"A", text:"It’ll be fun—lots of people."},
+      {from:"A", text:"Itâ€™ll be funâ€”lots of people."},
       {from:"B", text:"Hmm."},
       {from:"A", text:"We could go for just an hour."},
       {from:"B", text:"I might skip this one."},
@@ -424,19 +425,19 @@ const SCENARIOS = [
   },
   { id:"J", title:"Unexpected Gift", people:{A:"Hana", B:"Luca"},
     messages:[
-      {from:"A", text:"Left something at your door 😊"},
+      {from:"A", text:"Left something at your door ðŸ˜Š"},
       {from:"B", text:"What? I just saw a box!"},
       {from:"A", text:"Open it!"},
-      {from:"B", text:"Whoa—my favourite tea."},
+      {from:"B", text:"Whoaâ€”my favourite tea."},
       {from:"A", text:"Figured you needed a pick-me-up."},
       {from:"B", text:"This made my day."},
       {from:"A", text:"Glad it helped."},
-      {from:"B", text:"I didn’t expect this at all."},
-      {from:"A", text:"You’ve been working so hard."},
-      {from:"B", text:"Thank you—really."}
+      {from:"B", text:"I didnâ€™t expect this at all."},
+      {from:"A", text:"Youâ€™ve been working so hard."},
+      {from:"B", text:"Thank youâ€”really."}
     ],
     correct:{ A:["Supportive","Happy"], B:["Surprised","Grateful","Appreciative"] },
-    cues:{ A:"Attuned generosity; upbeat tone.", B:"“Didn’t expect this” + thanks → surprise + gratitude." }
+    cues:{ A:"Attuned generosity; upbeat tone.", B:"â€œDidnâ€™t expect thisâ€ + thanks â†’ surprise + gratitude." }
   }
 ];
 
@@ -489,7 +490,7 @@ function loadScenario(id){
   clearInterval(timer); timer=null; clearChat(); step3.hidden=true;
   progressEl.textContent = `0 / ${current.messages.length}`;
   timerText.textContent = "";
-  chatTitle.textContent = `Chat — ${current.people.A} & ${current.people.B}`;
+  chatTitle.textContent = `Chat â€” ${current.people.A} & ${current.people.B}`;
   statusEl.textContent = "Ready";
   accentWord.textContent = current.title;
   setDisabled(playBtn,false); setDisabled(skipBtn,true); setDisabled(resetBtn,true);
@@ -558,7 +559,7 @@ function updateSubmitState(){
 function playChat(){
   if(!current) return;
   setDisabled(playBtn,true); setDisabled(skipBtn,false); setDisabled(resetBtn,false);
-  statusEl.textContent="Playing…"; startTime=Date.now(); startTick();
+  statusEl.textContent="Playingâ€¦"; startTime=Date.now(); startTick();
   timer=setInterval(()=>{
     if(idx>=current.messages.length){ finishChat(); return; }
     const m=current.messages[idx++]; addBubble(m.from,current.people[m.from],m.text);
@@ -568,7 +569,7 @@ function playChat(){
 }
 function finishChat(){
   clearInterval(timer); timer=null; setDisabled(skipBtn,true); endTime=Date.now(); stopTick();
-  statusEl.textContent="Chat complete — do Step 1"; revealed=true; updateProceedState();
+  statusEl.textContent="Chat complete â€” do Step 1"; revealed=true; updateProceedState();
 }
 function skipChat(){
   if(!current) return; if(!startTime){ startTime=Date.now(); startTick(); }
@@ -616,26 +617,26 @@ function computeFeedback(){
   fbA.innerHTML = `
     <strong>${current.people.A}</strong><br/>
     <span class="small">Correct:</span> ${corrA.join(", ")}<br/>
-    <span class="small">You selected:</span> ${selA.join(", ") || "—"}<br/>
+    <span class="small">You selected:</span> ${selA.join(", ") || "â€”"}<br/>
     <div class="small" style="margin-top:6px">${current.cues.A}</div>
     <div class="small" style="margin-top:6px;color:${aExtra.length?'#7f1d1d':'#065f46'}">
-      Hits: ${aHits.join(", ")||"—"} | Missed: ${aMiss.join(", ")||"—"} | Extra: ${aExtra.join(", ")||"—"}
+      Hits: ${aHits.join(", ")||"â€”"} | Missed: ${aMiss.join(", ")||"â€”"} | Extra: ${aExtra.join(", ")||"â€”"}
     </div>
   `;
   fbB.innerHTML = `
     <strong>${current.people.B}</strong><br/>
     <span class="small">Correct:</span> ${corrB.join(", ")}<br/>
-    <span class="small">You selected:</span> ${selB.join(", ") || "—"}<br/>
+    <span class="small">You selected:</span> ${selB.join(", ") || "â€”"}<br/>
     <div class="small" style="margin-top:6px">${current.cues.B}</div>
     <div class="small" style="margin-top:6px;color:${bExtra.length?'#7f1d1d':'#065f46'}">
-      Hits: ${bHits.join(", ")||"—"} | Missed: ${bMiss.join(", ")||"—"} | Extra: ${bExtra.join(", ")||"—"}
+      Hits: ${bHits.join(", ")||"â€”"} | Missed: ${bMiss.join(", ")||"â€”"} | Extra: ${bExtra.join(", ")||"â€”"}
     </div>
   `;
   kpi.innerHTML = `
-    <span class="tag ${aRec>=75?'good':'bad'}">${current.people.A} — Recall ${aRec}%</span>
-    <span class="tag ${aPrec>=75?'good':'bad'}">${current.people.A} — Precision ${aPrec}%</span>
-    <span class="tag ${bRec>=75?'good':'bad'}">${current.people.B} — Recall ${bRec}%</span>
-    <span class="tag ${bPrec>=75?'good':'bad'}">${current.people.B} — Precision ${bPrec}%</span>
+    <span class="tag ${aRec>=75?'good':'bad'}">${current.people.A} â€” Recall ${aRec}%</span>
+    <span class="tag ${aPrec>=75?'good':'bad'}">${current.people.A} â€” Precision ${aPrec}%</span>
+    <span class="tag ${bRec>=75?'good':'bad'}">${current.people.B} â€” Recall ${bRec}%</span>
+    <span class="tag ${bPrec>=75?'good':'bad'}">${current.people.B} â€” Precision ${bPrec}%</span>
   `;
   step3.hidden=false;
 
@@ -711,3 +712,4 @@ loadScenario(SCENARIOS[0].id);
 </div>
 </section></main></body>
 </html>
+

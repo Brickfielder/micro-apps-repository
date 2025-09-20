@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>Fluency Coach — Strategy-Led Verbal Fluency</title>
+<title>Fluency Coach â€” Strategy-Led Verbal Fluency</title>
 <style>
   :root{
     --bg:#f7f8fb; --card:#fff; --ink:#1f2937; --muted:#6b7280; --brand:#0a66c2; --good:#0f766e; --warn:#b45309; --bad:#b91c1c;
@@ -49,7 +49,8 @@
   .grp{background:#f9fafb;border:1px dashed #e5e7eb;border-radius:12px;padding:12px}
   .grp h4{margin:0 0 6px}
 </style>
-<meta content="Fluency_Coach" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../shared/theme.css" rel="stylesheet"/><script defer="" src="../shared/frame.js"></script><script defer="" src="../shared/clinician_feedback.js"></script></head>
+<meta content="Fluency_Coach" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../../../shared/theme.css" rel="stylesheet"/><script defer="" src="../../../shared/frame.js"></script><script defer="" src="../../../shared/clinician_feedback.js"></script>  <meta name="app-slug" content="fluency-coach">
+</head>
 <body><main id="app-root">
 <header>
 <h1>Fluency Coach</h1>
@@ -81,8 +82,8 @@
 </label>
 <label>Input
           <select id="inputMode">
-<option value="speech">🎤 Speech</option>
-<option value="manual">⌨️ Manual</option>
+<option value="speech">ðŸŽ¤ Speech</option>
+<option value="manual">âŒ¨ï¸ Manual</option>
 </select>
 </label>
 </div>
@@ -102,7 +103,7 @@
 <span class="tag rep">Repetitions: <span class="live" id="repCount">0</span></span>
 <span class="tag off">Off-target: <span class="live" id="offCount">0</span></span>
 </div>
-<div class="live">⏱️ <span id="timer">60</span>s</div>
+<div class="live">â±ï¸ <span id="timer">60</span>s</div>
 </div>
 <div class="flex" style="margin-top:8px">
 <button id="btnStart">Start</button>
@@ -111,11 +112,11 @@
 <button class="ghost" disabled="" id="btnExport">Download CSV</button>
 </div>
 <div class="flex" id="manualBox" style="display:none;margin-top:8px">
-<input id="manualInput" placeholder="Type a word and press Enter…" type="text"/>
+<input id="manualInput" placeholder="Type a word and press Enterâ€¦" type="text"/>
 <button class="secondary" id="btnAdd">Add</button>
 </div>
 <div class="small" style="margin-top:8px">
-        Tip: speak single words clearly (e.g., “dog”, “cat”). Multi-word items are allowed; you can approve flagged items.
+        Tip: speak single words clearly (e.g., â€œdogâ€, â€œcatâ€). Multi-word items are allowed; you can approve flagged items.
       </div>
 </div>
 <div class="card">
@@ -127,7 +128,7 @@
 </div>
 <div class="card">
 <h3>3) Session Notes</h3>
-<textarea id="notes" placeholder="Clinician notes (e.g., strategy use, cues, fatigue)…" rows="10" style="width:100%;border-radius:12px;border:1px solid #e5e7eb;padding:10px"></textarea>
+<textarea id="notes" placeholder="Clinician notes (e.g., strategy use, cues, fatigue)â€¦" rows="10" style="width:100%;border-radius:12px;border:1px solid #e5e7eb;padding:10px"></textarea>
 <div class="small" style="margin-top:8px">Overrides are logged in the CSV. You can approve items flagged as off-target/unknown.</div>
 </div>
 </div>
@@ -416,30 +417,30 @@ const TIPS = {
   animals: [
     "Chunk by *habitat*: land / air / water.",
     "Scan by *class*: mammals, birds, fish, reptiles, amphibians.",
-    "Use *size ladders*: tiny → huge (ant → whale).",
+    "Use *size ladders*: tiny â†’ huge (ant â†’ whale).",
     "Walk through *contexts*: farm, zoo, pet shop, safari.",
-    "Alphabet walk: A→Z (ant, bear, cat…)."
+    "Alphabet walk: Aâ†’Z (ant, bear, catâ€¦)."
   ],
   produce: [
     "Split fruits vs vegetables first.",
     "Group by *colour* (green, red, yellow).",
     "Group by *part*: leafy, root, seed/bean, fruiting.",
     "Walk a *supermarket aisle* in your mind.",
-    "Cooking lens: salad → roast/bake → spices."
+    "Cooking lens: salad â†’ roast/bake â†’ spices."
   ],
   tools: [
     "Divide by *task*: cutting, fastening, measuring, cleaning.",
     "Home rooms: kitchen, bathroom, shed, garage.",
     "Hand vs *power tools*.",
-    "Size sequence: pocket tools → large equipment.",
+    "Size sequence: pocket tools â†’ large equipment.",
     "Imagine a *DIY project* step-by-step."
   ],
   jobs: [
     "Group by *sector*: health, education, construction, arts.",
     "Split by *indoor/outdoor*; *uniformed/civilian*.",
     "Think by *places*: hospital, school, airport, court, cafe.",
-    "Training: apprentice → professional → specialist.",
-    "Alphabet walk or ‘day in a city’ scan."
+    "Training: apprentice â†’ professional â†’ specialist.",
+    "Alphabet walk or â€˜day in a cityâ€™ scan."
   ],
   transport: [
     "Surface vs *air vs water*.",
@@ -639,7 +640,7 @@ function renderItem(item, idx){
 }
 function statusLabel(item){
   const tags=[];
-  if(item.deleted){ return `<span class="small">—</span>`; }
+  if(item.deleted){ return `<span class="small">â€”</span>`; }
   if(item.repeat) tags.push(`<span class="tag rep">repeat</span>`);
   const off = (!item.onTarget && !item.overrideApproved);
   if(off) tags.push(`<span class="tag off">off-target</span>`);
@@ -675,7 +676,7 @@ function renderGroups(){
     div.className='grp';
     div.innerHTML = `<h4>${escapeHtml(groupTitle)}</h4>` + (words.length
       ? words.map(w=>`<span class="pill">${escapeHtml(w)}</span>`).join(' ')
-      : `<div class="small">—</div>`);
+      : `<div class="small">â€”</div>`);
     container.appendChild(div);
   }
 }
@@ -822,3 +823,4 @@ function resetSession(){
 </div>
 </section></main></body>
 </html>
+
