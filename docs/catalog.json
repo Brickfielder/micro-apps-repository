@@ -1,20 +1,128 @@
 [
-  {"slug":"audio-errands","title":"Audio Errands","description":"Auditory attention and following multi-step spoken instructions.","emoji":"🎧"},
-  {"slug":"barista-chaos","title":"Barista Chaos","description":"Prioritise and serve orders amid interruptions and changing rules.","emoji":"☕️"},
-  {"slug":"build-your-package","title":"Build Your Package","description":"Plan and sequence steps to assemble items under simple rules.","emoji":"📦"},
-  {"slug":"emergency-despatch","title":"Emergency Despatch","description":"Route selection and rapid decision-making with time pressure.","emoji":"🚑"},
-  {"slug":"emotion-chat","title":"Emotion Chat","description":"Recognise emotions and intentions in short chat-style vignettes.","emoji":"💬"},
-  {"slug":"errands-visual-memory","title":"Errands — Visual Memory","description":"Remember locations/objects while completing errands.","emoji":"🧠"},
-  {"slug":"fluency-coach","title":"Fluency Coach","description":"Word generation and category switching with gentle time cues.","emoji":"🗣️"},
-  {"slug":"maze-explorer","title":"Maze Explorer","description":"Spatial planning and working memory in grid-based mazes.","emoji":"🧭"},
-  {"slug":"memory-in-action","title":"Memory in Action","description":"Short-term recall inside simple task sequences.","emoji":"🧠"},
-  {"slug":"office-day","title":"Office Day","description":"Everyday multi-tasking across common office-style tasks.","emoji":"🖥️"},
-  {"slug":"plan-with-coco","title":"Plan with Coco","description":"Break goals into steps; schedule and reorder flexibly.","emoji":"🗓️"},
-  {"slug":"signal-master","title":"Signal Master","description":"Rapid signal detection and rule switching.","emoji":"🚦"},
-  {"slug":"star-hunt","title":"Star Hunt","description":"Visual search with distractors; speed–accuracy balancing.","emoji":"⭐️"},
-  {"slug":"taskflow","title":"Taskflow","description":"Build and follow procedural flows with checkpoints.","emoji":"🔁"},
-  {"slug":"tower-control","title":"Tower Control","description":"Stacking/ordering puzzle emphasising planning ahead.","emoji":"🏗️"},
-  {"slug":"travel-with-coco","title":"Travel with Coco","description":"Plan simple trips; juggle constraints and choices.","emoji":"✈️"},
-  {"slug":"visuospatial-blocks","title":"Visuospatial Blocks","description":"Recreate block patterns; spatial working memory.","emoji":"🧩"},
-  {"slug":"word-scavenger","title":"Word Scavenger","description":"Find words under constraints; phonemic/semantic fluency.","emoji":"🔤"}
+  {
+    "slug": "audio-errands",
+    "title": "Audio Errands",
+    "description": "Auditory attention and following multi-step spoken instructions.",
+    "emoji": "🎧",
+    "tags": ["attention", "executive"]
+  },
+  {
+    "slug": "barista-chaos",
+    "title": "Barista Chaos",
+    "description": "Prioritise and serve orders amid interruptions and changing rules.",
+    "emoji": "☕️",
+    "tags": ["executive", "attention"]
+  },
+  {
+    "slug": "build-your-package",
+    "title": "Build Your Package",
+    "description": "Plan and sequence steps to assemble items under simple rules.",
+    "emoji": "📦",
+    "tags": ["executive"]
+  },
+  {
+    "slug": "emergency-despatch",
+    "title": "Emergency Despatch",
+    "description": "Route selection and rapid decision-making with time pressure.",
+    "emoji": "🚑",
+    "tags": ["attention", "executive"]
+  },
+  {
+    "slug": "emotion-chat",
+    "title": "Emotion Chat",
+    "description": "Recognise emotions and intentions in short chat-style vignettes.",
+    "emoji": "💬",
+    "tags": ["social", "language"]
+  },
+  {
+    "slug": "errands-visual-memory",
+    "title": "Errands — Visual Memory",
+    "description": "Remember locations/objects while completing errands.",
+    "emoji": "🧠",
+    "tags": ["visuospatial", "memory"]
+  },
+  {
+    "slug": "fluency-coach",
+    "title": "Fluency Coach",
+    "description": "Word generation and category switching with gentle time cues.",
+    "emoji": "🗣️",
+    "tags": ["language", "executive"]
+  },
+  {
+    "slug": "maze-explorer",
+    "title": "Maze Explorer",
+    "description": "Spatial planning and working memory in grid-based mazes.",
+    "emoji": "🧭",
+    "tags": ["visuospatial", "executive", "memory"]
+  },
+  {
+    "slug": "memory-in-action",
+    "title": "Memory in Action",
+    "description": "Short-term recall inside simple task sequences.",
+    "emoji": "🧠",
+    "tags": ["memory", "executive"]
+  },
+  {
+    "slug": "office-day",
+    "title": "Office Day",
+    "description": "Everyday multi-tasking across common office-style tasks.",
+    "emoji": "🖥️",
+    "tags": ["executive", "attention"]
+  },
+  {
+    "slug": "plan-with-coco",
+    "title": "Plan with Coco",
+    "description": "Break goals into steps; schedule and reorder flexibly.",
+    "emoji": "🗓️",
+    "tags": ["executive"]
+  },
+  {
+    "slug": "signal-master",
+    "title": "Signal Master",
+    "description": "Rapid signal detection and rule switching.",
+    "emoji": "🚦",
+    "tags": ["attention"]
+  },
+  {
+    "slug": "star-hunt",
+    "title": "Star Hunt",
+    "description": "Visual search with distractors; speed–accuracy balancing.",
+    "emoji": "⭐️",
+    "tags": ["attention", "visuospatial"]
+  },
+  {
+    "slug": "taskflow",
+    "title": "Taskflow",
+    "description": "Build and follow procedural flows with checkpoints.",
+    "emoji": "🔁",
+    "tags": ["executive", "memory"]
+  },
+  {
+    "slug": "tower-control",
+    "title": "Tower Control",
+    "description": "Stacking/ordering puzzle emphasising planning ahead.",
+    "emoji": "🏗️",
+    "tags": ["executive", "visuospatial"]
+  },
+  {
+    "slug": "travel-with-coco",
+    "title": "Travel with Coco",
+    "description": "Plan simple trips; juggle constraints and choices.",
+    "emoji": "✈️",
+    "tags": ["executive"]
+  },
+  {
+    "slug": "visuospatial-blocks",
+    "title": "Visuospatial Blocks",
+    "description": "Recreate block patterns; spatial working memory.",
+    "emoji": "🧩",
+    "tags": ["visuospatial", "memory"]
+  },
+  {
+    "slug": "word-scavenger",
+    "title": "Word Scavenger",
+    "description": "Find words under constraints; phonemic/semantic fluency.",
+    "emoji": "🔤",
+    "tags": ["language", "executive"]
+  }
 ]
