@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -27,11 +27,12 @@
     .center{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
     @media (max-width:600px){header h1{font-size:22px}}
   </style>
-<meta content="Build_your_package" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../shared/theme.css" rel="stylesheet"/><script defer="" src="../shared/frame.js"></script><script defer="" src="../shared/clinician_feedback.js"></script></head>
+<meta content="Build_your_package" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../../../shared/theme.css" rel="stylesheet"/><script defer="" src="../../../shared/frame.js"></script><script defer="" src="../../../shared/clinician_feedback.js"></script>  <meta name="app-slug" content="build-your-package">
+</head>
 <body><main id="app-root">
 <header>
 <h1>Build your package</h1>
-<p>Select apps and download a single ZIP. This simple packager includes each app’s <code>index.html</code> only — reliable on GitHub Pages. (For full offline bundles we can add per‑app manifests later.)</p>
+<p>Select apps and download a single ZIP. This simple packager includes each appâ€™s <code>index.html</code> only â€” reliable on GitHub Pages. (For full offline bundles we can add perâ€‘app manifests later.)</p>
 </header>
 <main>
 <section class="panel">
@@ -114,7 +115,7 @@
           {name:"Barista Chaos", path:"/micro-apps-repository/Barista_Chaos/", tags:["Executive Functioning"]},
           {name:"Build your package", path:"/micro-apps-repository/Build_your_package/", tags:["Utility"]},
           {name:"Emergency despatch", path:"/micro-apps-repository/Emergency_despatch/", tags:["Executive Functioning","Visuospatial"]},
-          {name:"Errands — visual memory", path:"/micro-apps-repository/Errands-visual-memory/", tags:["Visuospatial","Executive Functioning"]},
+          {name:"Errands â€” visual memory", path:"/micro-apps-repository/Errands-visual-memory/", tags:["Visuospatial","Executive Functioning"]},
           {name:"Fluency Coach", path:"/micro-apps-repository/Fluency_Coach/", tags:["Language","Executive Functioning","Strategy Training"]},
           {name:"Office Day", path:"/micro-apps-repository/Office_Day/", tags:["Executive Functioning","Strategy Training"]},
           {name:"Plan with Coco", path:"/micro-apps-repository/Plan_with_Coco/", tags:["Executive Functioning","Language"]},
@@ -142,7 +143,7 @@
       const checks = [...APPS.querySelectorAll('input[type=checkbox]:checked')];
       if(!checks.length){ alert('Select at least one app'); return; }
       BTN_ZIP.disabled = true;
-      BAR.style.width = '0%'; STATUS.textContent = 'Fetching files…';
+      BAR.style.width = '0%'; STATUS.textContent = 'Fetching filesâ€¦';
 
       const zip = new JSZip();
       const total = checks.length;
@@ -160,10 +161,10 @@
           zip.file(dst + '.ERROR.txt', String(e));
         }
         BAR.style.width = Math.round(100 * i / total) + '%';
-        STATUS.textContent = `Added ${i}/${total} app pages…`;
+        STATUS.textContent = `Added ${i}/${total} app pagesâ€¦`;
       }
 
-      STATUS.textContent = failures ? `Packaging (${failures} failed fetches)…` : 'Packaging…';
+      STATUS.textContent = failures ? `Packaging (${failures} failed fetches)â€¦` : 'Packagingâ€¦';
       const blob = await zip.generateAsync({type:'blob'});
       const stamp = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
       saveAs(blob, 'micro-apps-basic-package_' + stamp + '.zip');
@@ -186,3 +187,4 @@
 </div>
 </section></main></body>
 </html>
+

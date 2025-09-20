@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Reminder Quest — Office Day — v1.4</title>
+<title>Reminder Quest â€” Office Day â€” v1.4</title>
 <style>
     :root{
       --bg:#f7f7fb;
@@ -88,12 +88,13 @@
       .grid3{grid-template-columns:1fr}
     }
   </style>
-<meta content="Office_Day" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../shared/theme.css" rel="stylesheet"/><script defer="" src="../shared/frame.js"></script><script defer="" src="../shared/clinician_feedback.js"></script></head>
+<meta content="Office_Day" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../../../shared/theme.css" rel="stylesheet"/><script defer="" src="../../../shared/frame.js"></script><script defer="" src="../../../shared/clinician_feedback.js"></script>  <meta name="app-slug" content="office-day">
+</head>
 <body><main id="app-root">
 <header aria-label="App header">
 <div class="row">
 <span aria-hidden="true" class="tag">Prototype</span>
-<h1>Reminder Quest — <span style="color:var(--primary)">Office Day</span></h1>
+<h1>Reminder Quest â€” <span style="color:var(--primary)">Office Day</span></h1>
 </div>
 <div class="controls">
 <button aria-label="Start a new round" id="startBtn">Start new round</button>
@@ -107,7 +108,7 @@
 <!-- LEFT COLUMN -->
 <div aria-labelledby="ongoingTitle" class="card">
 <div class="flex">
-<h2 id="ongoingTitle">Ongoing Task — Document Sorting</h2>
+<h2 id="ongoingTitle">Ongoing Task â€” Document Sorting</h2>
 <div class="row" style="gap:16px">
 <div aria-live="polite" class="timer" id="timer">03:00</div>
 <div aria-live="polite" class="timer small" id="timerElapsed">Elapsed 00:00</div>
@@ -118,7 +119,7 @@
 <div aria-label="Incoming documents" class="doc-stream" id="docStream" role="list"></div>
 <div class="divider"></div>
 <div aria-live="polite" class="phone">
-<div class="icon" id="phoneIcon" title="Phone status">📞</div>
+<div class="icon" id="phoneIcon" title="Phone status">ðŸ“ž</div>
 <div class="muted" id="phoneStatus">Phone is quiet.</div>
 <div class="btnrow" id="phoneButtons" style="display:none">
 <button aria-label="Answer phone" class="ghost" id="answerBtn">Answer</button>
@@ -173,7 +174,7 @@
 <ol>
 <li><strong>Start new round</strong> to see your briefing.</li>
 <li>Keep working: approve <em>green</em> docs, reject <em>red</em> docs.</li>
-<li><strong>Prospective memory:</strong> act at the right <strong>elapsed time</strong> (e.g., “Send report at 01:30”)
+<li><strong>Prospective memory:</strong> act at the right <strong>elapsed time</strong> (e.g., â€œSend report at 01:30â€)
             or in response to the right event (Answer only when the <strong>Manager</strong> calls).</li>
 <li>Top-right = <strong>remaining</strong>; small clock = <strong>elapsed</strong>.</li>
 <li>Scoring tracks correct recalls, misses, early/late actions, and mistakes. Difficulty adapts between rounds.</li>
@@ -190,7 +191,7 @@
 <p class="help">Changes are saved to this browser and apply to the <strong>next round</strong>. You can also lock values to prevent auto-adaptation.</p>
 <div class="grid3">
 <div class="formrow">
-<label for="timeWindow">± Time window (s)</label>
+<label for="timeWindow">Â± Time window (s)</label>
 <input id="timeWindow" max="15" min="1" step="1" type="range"/>
 <output id="timeWindowOut">6</output>
 </div>
@@ -399,7 +400,7 @@
       const arrTimes = [...times].sort((a,b)=>a-b);
       targetSendReportAt = arrTimes[0];
       const liT = document.createElement("li");
-      liT.textContent = `Send the report when ELAPSED time reaches ${fmt(targetSendReportAt)} (±${difficulty.timeWindow}s).`;
+      liT.textContent = `Send the report when ELAPSED time reaches ${fmt(targetSendReportAt)} (Â±${difficulty.timeWindow}s).`;
       $timeTasks.appendChild(liT);
 
       // Event-based tasks (answer only the Manager)
@@ -427,7 +428,7 @@
       $start.disabled = true;
       $docStream.innerHTML = "";
       logEl.textContent = "";
-      $brief.innerHTML = `<strong>Active:</strong> Send report at elapsed ${fmt(targetSendReportAt)} (±${difficulty.timeWindow}s). Answer only Manager.`;
+      $brief.innerHTML = `<strong>Active:</strong> Send report at elapsed ${fmt(targetSendReportAt)} (Â±${difficulty.timeWindow}s). Answer only Manager.`;
       log("Round started.");
       setStatsPills();
       updateTimerUI();
@@ -462,12 +463,12 @@
       const approve = doc.querySelector('[data-act="approve"]');
       const reject = doc.querySelector('[data-act="reject"]');
       approve.onclick = ()=>{
-        if(isGreen){ stats.docCorrect++; log(`Approved GREEN doc #${id} ✓`); }
+        if(isGreen){ stats.docCorrect++; log(`Approved GREEN doc #${id} âœ“`); }
         else { stats.docErrors++; log(`Error: approved RED doc #${id}`); }
         doc.remove(); setStatsPills();
       };
       reject.onclick = ()=>{
-        if(!isGreen){ stats.docCorrect++; log(`Rejected RED doc #${id} ✓`); }
+        if(!isGreen){ stats.docCorrect++; log(`Rejected RED doc #${id} âœ“`); }
         else { stats.docErrors++; log(`Error: rejected GREEN doc #${id}`); }
         doc.remove(); setStatsPills();
       };
@@ -511,7 +512,7 @@
       const t = round.elapsed;
       const diff = Math.abs(t - targetSendReportAt);
       if(diff <= difficulty.timeWindow){
-        stats.correctPM++; log(`Sent report at the right time ✓ (elapsed ${fmt(t)}; target ${fmt(targetSendReportAt)} ±${difficulty.timeWindow}s)`);
+        stats.correctPM++; log(`Sent report at the right time âœ“ (elapsed ${fmt(t)}; target ${fmt(targetSendReportAt)} Â±${difficulty.timeWindow}s)`);
       } else if (t < targetSendReportAt){
         stats.offTimePM++; log(`Sent report too early (elapsed ${fmt(t)}; target ${fmt(targetSendReportAt)}).`);
       } else {
@@ -524,7 +525,7 @@
     $answer.addEventListener("click", ()=>{
       if(!phoneRinging){ log("No call to answer."); return; }
       if(currentCaller === "Manager"){
-        stats.correctPhone++; log("Answered Manager ✓");
+        stats.correctPhone++; log("Answered Manager âœ“");
       } else {
         stats.phoneErrors++; log(`Error: answered ${currentCaller}.`);
       }
@@ -658,3 +659,4 @@
 </div>
 </section></main></body>
 </html>
+

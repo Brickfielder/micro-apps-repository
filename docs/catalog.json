@@ -1,133 +1,20 @@
-{
-  "featured": [
-    "TaskFlow Planner",
-    "Emergency Dispatch",
-    "Fluency Coach",
-    "Memory in Action"
-  ],
-  "apps": [
-    {
-      "name": "Star Hunt",
-      "path": "/micro-apps-repository/Star_Hunt/",
-      "tags": ["Visuospatial"],
-      "thumb": "⭐",
-      "desc": "Track stars and ignore distractors. Adjust difficulty via density and speed."
-    },
-    {
-      "name": "Visuo-Spatial Blocks",
-      "path": "/micro-apps-repository/Visuospatial_Blocks/",
-      "tags": ["Visuospatial", "Executive Functioning"],
-      "thumb": "🧊",
-      "desc": "Copy and manipulate patterns; practice chunking and sequence maintenance."
-    },
-    {
-      "name": "Maze Explorer",
-      "path": "/micro-apps-repository/maze-explorer/",
-      "tags": ["Visuospatial", "Executive Functioning"],
-      "thumb": "🗺️",
-      "desc": "Navigate mazes under time pressure; inhibit shortcuts that look right but aren’t."
-    },
-    {
-      "name": "Word Scavenger",
-      "path": "/micro-apps-repository/word-scavenger/",
-      "tags": ["Language"],
-      "thumb": "🔤",
-      "desc": "Name items by theme; tune difficulty via distractor density."
-    },
-    {
-      "name": "Fluency Coach",
-      "path": "/micro-apps-repository/Fluency_Coach/",
-      "tags": ["Language", "Executive Functioning", "Strategy Training"],
-      "thumb": "🎤",
-      "badge": "New",
-      "desc": "Guided verbal fluency with strategy prompts and end-of-round grouping feedback."
-    },
-    {
-      "name": "TaskFlow Planner",
-      "path": "/micro-apps-repository/Taskflow/",
-      "tags": ["Executive Functioning"],
-      "thumb": "🧩",
-      "desc": "Arrange, check, then reflect — promotes sequencing, monitoring, and error correction."
-    },
-    {
-      "name": "Plan with Coco",
-      "path": "/micro-apps-repository/Plan_with_Coco/",
-      "tags": ["Executive Functioning", "Strategy Training"],
-      "thumb": "🐦",
-      "desc": "Plan daily activities with Coco the bird. Combines executive functioning with prospective memory."
-    },
-    {
-      "name": "Travel with Coco",
-      "path": "/micro-apps-repository/travel_with_coco/",
-      "tags": ["Executive Functioning", "Strategy Training"],
-      "thumb": "🕊️",
-      "desc": "A cheeky road-trip simulator where your AI companion helps… or hilariously hinders… your journey."
-    },
-    {
-      "name": "Emergency Dispatch",
-      "path": "/micro-apps-repository/Emergency_despatch/",
-      "tags": ["Executive Functioning"],
-      "thumb": "🚑",
-      "desc": "Apply rules under time pressure; triage incidents; track errors."
-    },
-    {
-      "name": "Audio Errands",
-      "path": "/micro-apps-repository/Audio_Errands/",
-      "tags": ["Executive Functioning", "Strategy Training"],
-      "thumb": "🔊",
-      "desc": "Follow spoken multi-step instructions, then check what you did vs. what was requested."
-    },
-    {
-      "name": "Barista Chaos",
-      "path": "/micro-apps-repository/Barista_Chaos/",
-      "tags": ["Executive Functioning"],
-      "thumb": "☕",
-      "desc": "Rule-based drink making with distractors; practice inhibition and working memory."
-    },
-    {
-      "name": "Errands — Visual Memory",
-      "path": "/micro-apps-repository/Errands-visual-memory/",
-      "tags": ["Visuospatial", "Executive Functioning"],
-      "thumb": "🧠",
-      "desc": "Remember and place items in the right locations; trains spatial memory and planning."
-    },
-    {
-      "name": "Office Day",
-      "path": "/micro-apps-repository/Office_Day/",
-      "tags": ["Executive Functioning", "Strategy Training"],
-      "thumb": "🗂️",
-      "desc": "Handle interruptions while keeping to a plan. Practice cueing and prioritising."
-    },
-    {
-      "name": "Tower Control",
-      "path": "/micro-apps-repository/Tower_control/",
-      "tags": ["Executive Functioning", "Visuospatial"],
-      "thumb": "🛫",
-      "desc": "Deconflict routes and apply rules quickly and accurately."
-    },
-    {
-      "name": "Memory in Action",
-      "path": "/micro-apps-repository/memory_in_action/",
-      "tags": ["Executive Functioning", "Language", "Strategy Training"],
-      "thumb": "💬",
-      "badge": "New",
-      "desc": "WhatsApp-style conversational memory with TTS; 10-message study, a short distractor, then recall with progressive cues."
-    },
-    {
-      "name": "Emotion Chat",
-      "path": "/micro-apps-repository/emotion_chat/",
-      "tags": ["Social Cognition", "Executive Functioning", "Strategy Training"],
-      "thumb": "😊",
-      "badge": "New",
-      "desc": "Role-play a WhatsApp-style chat: identify emotions in context, select strategies, and get feedback with distractors."
-    },
-    {
-          "name": "Signal Master",
-      "path": "/micro-apps-repository/signal_master/",
-      "tags": ["Executive Functioning", "Strategy Training"],
-      "thumb": "🚆",
-      "badge": "New",
-      "desc": "A fast-paced game that trains attention and flexibility by challenging you to adapt to changing rules and signals."
-    }
-  ]
-}
+[
+  {"slug":"audio-errands","title":"Audio Errands","description":"Auditory attention and following multi-step spoken instructions.","emoji":"🎧"},
+  {"slug":"barista-chaos","title":"Barista Chaos","description":"Prioritise and serve orders amid interruptions and changing rules.","emoji":"☕️"},
+  {"slug":"build-your-package","title":"Build Your Package","description":"Plan and sequence steps to assemble items under simple rules.","emoji":"📦"},
+  {"slug":"emergency-despatch","title":"Emergency Despatch","description":"Route selection and rapid decision-making with time pressure.","emoji":"🚑"},
+  {"slug":"emotion-chat","title":"Emotion Chat","description":"Recognise emotions and intentions in short chat-style vignettes.","emoji":"💬"},
+  {"slug":"errands-visual-memory","title":"Errands — Visual Memory","description":"Remember locations/objects while completing errands.","emoji":"🧠"},
+  {"slug":"fluency-coach","title":"Fluency Coach","description":"Word generation and category switching with gentle time cues.","emoji":"🗣️"},
+  {"slug":"maze-explorer","title":"Maze Explorer","description":"Spatial planning and working memory in grid-based mazes.","emoji":"🧭"},
+  {"slug":"memory-in-action","title":"Memory in Action","description":"Short-term recall inside simple task sequences.","emoji":"🧠"},
+  {"slug":"office-day","title":"Office Day","description":"Everyday multi-tasking across common office-style tasks.","emoji":"🖥️"},
+  {"slug":"plan-with-coco","title":"Plan with Coco","description":"Break goals into steps; schedule and reorder flexibly.","emoji":"🗓️"},
+  {"slug":"signal-master","title":"Signal Master","description":"Rapid signal detection and rule switching.","emoji":"🚦"},
+  {"slug":"star-hunt","title":"Star Hunt","description":"Visual search with distractors; speed–accuracy balancing.","emoji":"⭐️"},
+  {"slug":"taskflow","title":"Taskflow","description":"Build and follow procedural flows with checkpoints.","emoji":"🔁"},
+  {"slug":"tower-control","title":"Tower Control","description":"Stacking/ordering puzzle emphasising planning ahead.","emoji":"🏗️"},
+  {"slug":"travel-with-coco","title":"Travel with Coco","description":"Plan simple trips; juggle constraints and choices.","emoji":"✈️"},
+  {"slug":"visuospatial-blocks","title":"Visuospatial Blocks","description":"Recreate block patterns; spatial working memory.","emoji":"🧩"},
+  {"slug":"word-scavenger","title":"Word Scavenger","description":"Find words under constraints; phonemic/semantic fluency.","emoji":"🔤"}
+]

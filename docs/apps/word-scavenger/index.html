@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Word Scavenge — USN rehab (updated)</title>
+<title>Word Scavenge â€” USN rehab (updated)</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
     @keyframes wiggle { 0%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} 100%{transform:translateX(0)} }
@@ -11,7 +11,8 @@
     .anchor-stripe { width: 44px; background: #ef4444; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; writing-mode: vertical-rl; text-orientation: mixed; user-select: none; }
     .anchor-stripe.sticky { position: sticky; top: 7rem; border-radius: 10px; box-shadow: 0 10px 20px rgba(0,0,0,.15); }
   </style>
-<meta content="word-scavenger" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../shared/theme.css" rel="stylesheet"/><script defer="" src="../shared/frame.js"></script><script defer="" src="../shared/clinician_feedback.js"></script></head>
+<meta content="word-scavenger" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../../../shared/theme.css" rel="stylesheet"/><script defer="" src="../../../shared/frame.js"></script><script defer="" src="../../../shared/clinician_feedback.js"></script>  <meta name="app-slug" content="word-scavenger">
+</head>
 <body class="min-h-screen bg-slate-50 text-slate-900"><main id="app-root">
 <header class="sticky top-0 z-10 bg-white/80 backdrop-blur border-b border-slate-200">
 <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
@@ -19,7 +20,7 @@
 <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white grid place-content-center font-bold">WS</div>
 <div>
 <div class="text-xl font-semibold">Word Scavenge</div>
-<div class="text-xs text-slate-500">Tap the <span class="text-red-600 font-semibold">left red anchor stripe</span>, then pick a left word → match on the right</div>
+<div class="text-xs text-slate-500">Tap the <span class="text-red-600 font-semibold">left red anchor stripe</span>, then pick a left word â†’ match on the right</div>
 </div>
 </div>
 <div class="flex items-center gap-2">
@@ -90,12 +91,12 @@
 <div class="anchor-stripe sticky" id="anchorBtn">ANCHOR</div>
 <!-- Left column -->
 <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-<div class="text-sm font-semibold mb-2">Left — start here</div>
+<div class="text-sm font-semibold mb-2">Left â€” start here</div>
 <div class="grid gap-2" id="leftList"></div>
 </div>
 <!-- Right column -->
 <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-<div class="text-sm font-semibold mb-2">Right — find the match</div>
+<div class="text-sm font-semibold mb-2">Right â€” find the match</div>
 <div class="grid gap-2" id="rightList"></div>
 </div>
 </section>
@@ -522,3 +523,4 @@
 </div>
 </section></main></body>
 </html>
+
