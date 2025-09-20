@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Barista Chaos â€” Micro Rehab App</title>
+<title>Barista Chaos Ã¢â‚¬â€ Micro Rehab App</title>
 <style>
     :root{
       --bg:#faf7f2;
@@ -65,14 +65,14 @@
 </head>
 <body><main id="app-root">
 <header>
-<h1><span class="cup">â˜•</span><span>Barista Chaos</span></h1>
+<h1><span class="cup">Ã¢Ëœâ€¢</span><span>Barista Chaos</span></h1>
 <div class="instructions">
 <strong>How it works</strong><br/>
       Build each order by adding items from the <em>Options</em> on the right into your <em>Preparation Tray</em>, then press <strong>Serve</strong>.
       <ul style="margin:8px 0 0 18px; padding:0">
 <li>Match the ticket chips (e.g., size, coffee, milk, sweetener, temp).</li>
-<li><strong>Rule 1 â€” Decaf bell:</strong> if the ticket shows <em>Decaf</em>, you must click <strong>ðŸ”” Ring Bell</strong> before serving. <em>Ringing the bell when there is no decaf is neutral (not an error).</em></li>
-<li><strong>Rule 2 â€” Extra-hot sleeve:</strong> if the ticket shows <em>Extra hot</em>, you must click <strong>ðŸ§» Add Sleeve</strong> before serving.</li>
+<li><strong>Rule 1 Ã¢â‚¬â€ Decaf bell:</strong> if the ticket shows <em>Decaf</em>, you must click <strong>Ã°Å¸â€â€ Ring Bell</strong> before serving. <em>Ringing the bell when there is no decaf is neutral (not an error).</em></li>
+<li><strong>Rule 2 Ã¢â‚¬â€ Extra-hot sleeve:</strong> if the ticket shows <em>Extra hot</em>, you must click <strong>Ã°Å¸Â§Â» Add Sleeve</strong> before serving.</li>
 <li><strong>Any-of requirement:</strong> when the ticket says <em>add honey or soy</em>, either one satisfies the ticket; choosing both is allowed and not penalized.</li>
 <li>Incidents happen often: sometimes sugar becomes <em>Honey</em>, or milk must be <em>Soy</em>. The ticket will update accordingly.</li>
 </ul>
@@ -87,16 +87,16 @@
 </div>
 <button class="btn primary" id="newOrderBtn">Start new order</button>
 <button class="btn" disabled="" id="serveBtn">Serve</button>
-<button class="btn" id="ringBtn" title="Ring for decaf">ðŸ”” Ring Bell</button>
-<button class="btn" id="sleeveBtn" title="Add sleeve for extra-hot">ðŸ§» Add Sleeve</button>
-<button class="btn" id="downloadBtn" title="Download CSV log">â¬‡ï¸ Download CSV</button>
+<button class="btn" id="ringBtn" title="Ring for decaf">Ã°Å¸â€â€ Ring Bell</button>
+<button class="btn" id="sleeveBtn" title="Add sleeve for extra-hot">Ã°Å¸Â§Â» Add Sleeve</button>
+<button class="btn" id="downloadBtn" title="Download CSV log">Ã¢Â¬â€¡Ã¯Â¸Â Download CSV</button>
 </div>
 </header>
 <main>
 <div class="layout">
 <section class="card order">
 <div class="statusbar">
-<div class="timer">Order <span id="orderNum">â€”</span> Â· â³ <span id="countdown">--:--</span></div>
+<div class="timer">Order <span id="orderNum">Ã¢â‚¬â€</span> Ã‚Â· Ã¢ÂÂ³ <span id="countdown">--:--</span></div>
 <div class="sign none" id="sign"><span id="signText">No incident</span></div>
 </div>
 <h2 style="margin:10px 0 8px;font-size:18px">Ticket</h2>
@@ -114,14 +114,14 @@
 <dialog id="incidentDlg">
 <div class="modal">
 <h3 id="incidentTitle">Incident</h3>
-<p id="incidentMsg">â€”</p>
+<p id="incidentMsg">Ã¢â‚¬â€</p>
 <div class="actions"><button class="btn" id="incidentClose">OK</button></div>
 </div>
 </dialog>
 <dialog id="resultDlg">
 <div class="modal">
 <h3 id="resultTitle">Result</h3>
-<p id="resultMsg">â€”</p>
+<p id="resultMsg">Ã¢â‚¬â€</p>
 <div class="actions"><button class="btn success" id="nextOrderBtn">OK</button></div>
 </div>
 </dialog>
@@ -136,28 +136,28 @@
 
     // ===== Options & rules =====
     const BASE_OPTIONS = [
-      {key:'size_s', label:'Small', emoji:'ðŸ¥›', group:'size'},
-      {key:'size_m', label:'Medium', emoji:'ðŸ¥¤', group:'size'},
-      {key:'size_l', label:'Large', emoji:'ðŸ§‹', group:'size'},
+      {key:'size_s', label:'Small', emoji:'Ã°Å¸Â¥â€º', group:'size'},
+      {key:'size_m', label:'Medium', emoji:'Ã°Å¸Â¥Â¤', group:'size'},
+      {key:'size_l', label:'Large', emoji:'Ã°Å¸Â§â€¹', group:'size'},
 
-      {key:'coffee_latte', label:'Latte', emoji:'â˜•', group:'coffee'},
-      {key:'coffee_capp', label:'Cappuccino', emoji:'ðŸ¶', group:'coffee'},
-      {key:'coffee_americano', label:'Americano', emoji:'ðŸ«˜', group:'coffee'},
+      {key:'coffee_latte', label:'Latte', emoji:'Ã¢Ëœâ€¢', group:'coffee'},
+      {key:'coffee_capp', label:'Cappuccino', emoji:'Ã°Å¸ÂÂ¶', group:'coffee'},
+      {key:'coffee_americano', label:'Americano', emoji:'Ã°Å¸Â«Ëœ', group:'coffee'},
 
-      {key:'milk_dairy', label:'Dairy milk', emoji:'ðŸ¥›', group:'milk'},
-      {key:'milk_oat', label:'Oat milk', emoji:'ðŸŒ¾', group:'milk'},
-      {key:'milk_almond', label:'Almond milk', emoji:'ðŸŒ°', group:'milk'},
-      {key:'milk_soy', label:'Soy milk', emoji:'ðŸ«˜', group:'milk'},
+      {key:'milk_dairy', label:'Dairy milk', emoji:'Ã°Å¸Â¥â€º', group:'milk'},
+      {key:'milk_oat', label:'Oat milk', emoji:'Ã°Å¸Å’Â¾', group:'milk'},
+      {key:'milk_almond', label:'Almond milk', emoji:'Ã°Å¸Å’Â°', group:'milk'},
+      {key:'milk_soy', label:'Soy milk', emoji:'Ã°Å¸Â«Ëœ', group:'milk'},
 
-      {key:'sweet_sugar', label:'Sugar', emoji:'ðŸ¬', group:'sweet'},
-      {key:'sweet_honey', label:'Honey', emoji:'ðŸ¯', group:'sweet'},
-      {key:'sweet_none', label:'No sweetener', emoji:'ðŸš«', group:'sweet'},
+      {key:'sweet_sugar', label:'Sugar', emoji:'Ã°Å¸ÂÂ¬', group:'sweet'},
+      {key:'sweet_honey', label:'Honey', emoji:'Ã°Å¸ÂÂ¯', group:'sweet'},
+      {key:'sweet_none', label:'No sweetener', emoji:'Ã°Å¸Å¡Â«', group:'sweet'},
 
-      {key:'temp_hot', label:'Hot', emoji:'ðŸ”¥', group:'temp'},
-      {key:'temp_iced', label:'Iced', emoji:'ðŸ§Š', group:'temp'},
+      {key:'temp_hot', label:'Hot', emoji:'Ã°Å¸â€Â¥', group:'temp'},
+      {key:'temp_iced', label:'Iced', emoji:'Ã°Å¸Â§Å ', group:'temp'},
 
-      {key:'flag_decaf', label:'Decaf', emoji:'ðŸŸ¤', group:'flag'},
-      {key:'flag_extrahot', label:'Extra hot', emoji:'ðŸ”¥ðŸ”¥', group:'flag'},
+      {key:'flag_decaf', label:'Decaf', emoji:'Ã°Å¸Å¸Â¤', group:'flag'},
+      {key:'flag_extrahot', label:'Extra hot', emoji:'Ã°Å¸â€Â¥Ã°Å¸â€Â¥', group:'flag'},
     ];
 
     let allOptions = [...BASE_OPTIONS];
@@ -364,7 +364,7 @@
           errors.push('Need at least one of: Honey OR Soy');
         } else {
           const both = ANY_OF.every(k => gotCore.includes(k));
-          if(both) notes.push('Both â€œhoneyâ€ and â€œsoyâ€ selected â€” allowed, not penalized.');
+          if(both) notes.push('Both Ã¢â‚¬Å“honeyÃ¢â‚¬Â and Ã¢â‚¬Å“soyÃ¢â‚¬Â selected Ã¢â‚¬â€ allowed, not penalized.');
         }
       }
 
@@ -378,11 +378,11 @@
           errors.push('Bell must be rung for decaf orders.');
         }
         if(!decafChosen && bellRang){
-          notes.push('Bell rung without decaf â€” neutral (not an error).');
+          notes.push('Bell rung without decaf Ã¢â‚¬â€ neutral (not an error).');
         }
       } else {
         if(bellRang){
-          notes.push('Bell rung â€” neutral (no decaf required).');
+          notes.push('Bell rung Ã¢â‚¬â€ neutral (no decaf required).');
         }
       }
 
@@ -412,7 +412,7 @@
       });
 
       const dlg = el('resultDlg');
-      el('resultTitle').textContent = passed ? 'âœ… Served!' : (timedOut ? 'â° Time up' : 'âš ï¸ Check again');
+      el('resultTitle').textContent = passed ? 'Ã¢Å“â€¦ Served!' : (timedOut ? 'Ã¢ÂÂ° Time up' : 'Ã¢Å¡Â Ã¯Â¸Â Check again');
       el('resultMsg').textContent = passed
         ? 'Perfect match within time.'
         : (errors.length ? errors.join(' | ') : (notes.length ? notes.join(' | ') : 'Order not correct.'));
@@ -440,7 +440,7 @@
     function init(){
       renderOptions();
       countdownEl.textContent = '--:--';
-      orderNum.textContent = 'â€”';
+      orderNum.textContent = 'Ã¢â‚¬â€';
     }
     init();
   </script>

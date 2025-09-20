@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Maze Explorer â€” Anchor Latency, Metrics, Idle Timer</title>
+<title>Maze Explorer Ã¢â‚¬â€ Anchor Latency, Metrics, Idle Timer</title>
 <style>
     :root{
       --green:#2E8B57;
@@ -52,40 +52,40 @@
 <meta content="maze-explorer" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../../../shared/theme.css" rel="stylesheet"/><script defer="" src="../../../shared/frame.js"></script><script defer="" src="../../../shared/clinician_feedback.js"></script>  <meta name="app-slug" content="maze-explorer">
 </head>
 <body><main id="app-root">
-<h2>Maze Explorer â€” Start <em>bottomâ€‘right</em>, Finish <em>topâ€‘left</em></h2>
+<h2>Maze Explorer Ã¢â‚¬â€ Start <em>bottomÃ¢â‚¬â€˜right</em>, Finish <em>topÃ¢â‚¬â€˜left</em></h2>
 <div id="rules">
-<b>Task:</b> Find your way from the <u>bottomâ€‘right</u> start square to the <u>topâ€‘left</u> yellow goal.<br/>
+<b>Task:</b> Find your way from the <u>bottomÃ¢â‚¬â€˜right</u> start square to the <u>topÃ¢â‚¬â€˜left</u> yellow goal.<br/>
 <b>Rules:</b> Swipe or use arrow buttons to move. Every <b>10 moves</b>, tap the <span style="color:#d62828"><b>red left anchor</b></span> before continuing.
-    If the <b>coach panel</b> appears on the right, you may be moving awayâ€”<b>tap the panel to close</b> and consider backtracking.<br/>
-<b>Timing:</b> The timer counts only <i>active time</i>. If thereâ€™s no move or anchor tap for <b>30 seconds</b>, timing pauses automatically and resumes on the next action.
+    If the <b>coach panel</b> appears on the right, you may be moving awayÃ¢â‚¬â€<b>tap the panel to close</b> and consider backtracking.<br/>
+<b>Timing:</b> The timer counts only <i>active time</i>. If thereÃ¢â‚¬â„¢s no move or anchor tap for <b>30 seconds</b>, timing pauses automatically and resumes on the next action.
   </div>
 <div id="toolbar">
 <label for="difficulty">Difficulty:</label>
 <select aria-label="Select difficulty" id="difficulty">
-<option value="10">Easy (10Ã—10)</option>
-<option value="16">Medium (16Ã—16)</option>
-<option value="20">Hard (20Ã—20)</option>
+<option value="10">Easy (10Ãƒâ€”10)</option>
+<option value="16">Medium (16Ãƒâ€”16)</option>
+<option value="20">Hard (20Ãƒâ€”20)</option>
 </select>
 </div>
 <div class="wrap" id="wrap">
-<div id="leftAnchor" title="Tap here to reâ€‘anchor left"></div>
+<div id="leftAnchor" title="Tap here to reÃ¢â‚¬â€˜anchor left"></div>
 <canvas height="520" id="mazeCanvas" width="520"></canvas>
 <div id="coach" role="alert">You might be moving away from the goal on the right. <b>Tap to close</b> and try backtracking.</div>
 </div>
 <div id="anchorTip">Touch the <b>red left anchor</b> to continue.</div>
 <div id="controls">
-<button aria-label="up" class="btn" id="up">â†‘</button>
-<button aria-label="left" class="btn" id="left">â†</button>
-<button aria-label="down" class="btn" id="down">â†“</button>
-<button aria-label="right" class="btn" id="right">â†’</button>
+<button aria-label="up" class="btn" id="up">Ã¢â€ â€˜</button>
+<button aria-label="left" class="btn" id="left">Ã¢â€ Â</button>
+<button aria-label="down" class="btn" id="down">Ã¢â€ â€œ</button>
+<button aria-label="right" class="btn" id="right">Ã¢â€ â€™</button>
 </div>
 <div id="statusBar"></div>
 <div id="logBar">
 <button id="downloadBtn">Download session log (CSV)</button>
-<span id="idleBadge">Paused â€” no activity</span>
+<span id="idleBadge">Paused Ã¢â‚¬â€ no activity</span>
 </div>
 <div id="metrics">
-    Completed mazes: <b><span id="mCompleted">0</span></b> Â |Â 
+    Completed mazes: <b><span id="mCompleted">0</span></b> Ã‚Â |Ã‚Â 
     Active time on this device: <b><span id="mActive">00:00:00</span></b>
 </div>
 <script>
@@ -550,7 +550,7 @@
   }
   difficultySel.addEventListener('change', applyDifficultyFromSelect);
 
-  // Handle "Try a new maze" click â€” keep current difficulty
+  // Handle "Try a new maze" click Ã¢â‚¬â€ keep current difficulty
   newMazeBtn.addEventListener('click', ()=>{
     newMaze(parseInt(difficultySel.value,10));
     newMazeBtn.style.display = 'none';
@@ -589,7 +589,7 @@
       console.log(`[Maze] Downloaded stats CSV with ${Math.max(0, lines.length-1)} rows.`);
     }catch(err){
       console.error('CSV download failed:', err);
-      alert('Sorry â€” couldnâ€™t create the CSV. Check the console for details.');
+      alert('Sorry Ã¢â‚¬â€ couldnÃ¢â‚¬â„¢t create the CSV. Check the console for details.');
     }
   }
 
@@ -644,7 +644,7 @@
       alert('Session reset complete.');
     } catch (e) {
       console.error('Reset failed:', e);
-      alert('Sorry â€” could not reset. See console for details.');
+      alert('Sorry Ã¢â‚¬â€ could not reset. See console for details.');
     }
   }
 
