@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Audio Errand Planner Ã¢â‚¬â€ v0.3</title>
+<title>Audio Errand Planner — v0.3</title>
 <style>
   :root{
     --bg:#f4f6fb; --card:#ffffff; --ink:#1a1a1a; --muted:#555;
@@ -94,11 +94,11 @@
 <select aria-label="Voice" id="voiceSel"></select>
 <label for="rate">Rate:</label>
 <input id="rate" max="1.4" min="0.7" step="0.05" type="range" value="1"/>
-<button class="ghost" id="hearingTest" title="Play a short sample">Hearing check Ã°Å¸â€Å </button>
+<button class="ghost" id="hearingTest" title="Play a short sample">Hearing check 🔊</button>
 </div>
 <div class="row">
-<button class="primary" id="start">Start Trial Ã¢â€“Â¶Ã¯Â¸Â</button>
-<button class="warn" id="stopSpeak">Stop Audio Ã¢ÂÂ¹Ã¯Â¸Â</button>
+<button class="primary" id="start">Start Trial ▶️</button>
+<button class="warn" id="stopSpeak">Stop Audio ⏹️</button>
 <button class="ghost" id="reset">Reset</button>
 </div>
 </div>
@@ -113,7 +113,7 @@
 </div>
 </div>
 <div class="row" style="margin-top:12px">
-<button class="ok" id="submit">Submit Ã¢Å“â€¦</button>
+<button class="ok" id="submit">Submit ✅</button>
 <button class="ghost" id="clearSeq">Clear sequence</button>
 <div aria-live="polite" class="hint" id="feedback"></div>
 </div>
@@ -126,7 +126,7 @@
 <div>Time: <strong id="timer">00:00</strong></div>
 </div>
 <div style="margin:12px 0">
-<button class="ghost" id="downloadCsv">Download CSV Ã¢Â¬â€¡Ã¯Â¸Â</button>
+<button class="ghost" id="downloadCsv">Download CSV ⬇️</button>
 </div>
 <div aria-label="Log" class="log" id="log"></div>
 </aside>
@@ -169,12 +169,12 @@
     if(!synth){els.audioStatus.textContent='Speech: unavailable'; els.audioDot.style.background='var(--err)'; return}
     const vs = synth.getVoices();
     if(vs && vs.length){els.audioStatus.textContent='Speech: ready'; els.audioDot.style.background='var(--ok)';}
-    else {els.audioStatus.textContent='Speech: loading voicesÃ¢â‚¬Â¦'; els.audioDot.style.background='var(--warn)';}
+    else {els.audioStatus.textContent='Speech: loading voices…'; els.audioDot.style.background='var(--warn)';}
   }
   function populateVoices(){ if(!synth) return; const vs=synth.getVoices(); els.voiceSel.innerHTML='';
     vs.forEach((v,i)=>{
       const o=document.createElement('option');
-      o.value=i; o.textContent=`${v.name} Ã¢â‚¬â€ ${v.lang}${v.default?' (default)':''}`; els.voiceSel.appendChild(o);
+      o.value=i; o.textContent=`${v.name} — ${v.lang}${v.default?' (default)':''}`; els.voiceSel.appendChild(o);
     });
   }
   if(synth){
@@ -323,7 +323,7 @@
     };
     logs.push(row);
     els.log.textContent = [
-      `#${row.trial} Ã¢â‚¬â€ ${perfect? 'PERFECT Ã¢Å“â€¦' : 'Partial'}; ${correctCount}/${groundTruth.length} in ${fmt(elapsed)}`,
+      `#${row.trial} — ${perfect? 'PERFECT ✅' : 'Partial'}; ${correctCount}/${groundTruth.length} in ${fmt(elapsed)}`,
       `Truth: ${row.groundTruth}`,
       `You:   ${row.attempt}`,
       '',

@@ -58,7 +58,7 @@
     const comment = getComment();
     const sep = lines[0].includes(";") && !lines[0].includes(",") ? ";" : ",";
 
-    // If thereâ€™s a header, extend it; else create header + move data to next line
+    // If there’s a header, extend it; else create header + move data to next line
     let header = lines[0].trim();
     let dataStartIndex = 1;
     if (!header || /[^A-Za-z0-9_;,\- ]/.test(header)) {
@@ -81,7 +81,7 @@
     return lines.join("\r\n");
   }
 
-  // Fetch blob url â†’ text
+  // Fetch blob url → text
   async function blobUrlToText(href) {
     const res = await fetch(href);
     const blob = await res.blob();

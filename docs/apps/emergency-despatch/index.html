@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Emergency Dispatch Ã¢â‚¬â€ Executive Function Trainer</title>
+<title>Emergency Dispatch — Executive Function Trainer</title>
 <meta content="Route the correct unit to each incident while following a single active restriction rule." name="description"/>
 <style>
   /* ===== Micro-Apps brand (light) ===== */
@@ -206,11 +206,11 @@
 <div class="section-title">Briefing</div>
 <div class="rule-card">
 <strong>Baseline</strong><br/>
-          Match <em>incident type</em> to the <em>correct unit</em>: Ã°Å¸Â©Âº Medical Ã¢â€ â€™ Ambulance Ã¢â‚¬Â¢ Ã°Å¸â€Â¥ Fire Ã¢â€ â€™ Fire Ã¢â‚¬Â¢ Ã°Å¸Å¡Â¨ Police Ã¢â€ â€™ Police.
+          Match <em>incident type</em> to the <em>correct unit</em>: 🩺 Medical → Ambulance • 🔥 Fire → Fire • 🚨 Police → Police.
         </div>
 <div class="rule-card active" id="activeRuleCard">
 <strong>Active Restriction (Single)</strong>
-<div id="activeRuleText" style="margin-top:6px; color:var(--muted);">Ã¢â‚¬â€</div>
+<div id="activeRuleText" style="margin-top:6px; color:var(--muted);">—</div>
 </div>
 <div class="rule-card">
 <strong>Session</strong>
@@ -226,7 +226,7 @@
 <div class="district s">SOUTH</div>
 <div class="district w">WEST</div>
 <div class="district e">EAST</div>
-<div class="compass">N Ã¢â‚¬Â¢ E Ã¢â‚¬Â¢ S Ã¢â‚¬Â¢ W</div>
+<div class="compass">N • E • S • W</div>
 <div id="mapLayer"></div>
 </section>
 <!-- Right: Incidents & Controls -->
@@ -240,19 +240,19 @@
 <div class="inc-list" id="incList"></div>
 <div class="section-title">Dispatch</div>
 <div class="controls">
-<button class="btn" disabled="" id="btnAmb">Ã°Å¸Å¡â€˜ Ambulance</button>
-<button class="btn" disabled="" id="btnFire">Ã°Å¸Å¡â€™ Fire</button>
-<button class="btn" disabled="" id="btnPol">Ã°Å¸Å¡â€œ Police</button>
-<button class="btn success" disabled="" id="btnHold">Ã¢ÂÂ³ Hold</button>
+<button class="btn" disabled="" id="btnAmb">🚑 Ambulance</button>
+<button class="btn" disabled="" id="btnFire">🚒 Fire</button>
+<button class="btn" disabled="" id="btnPol">🚓 Police</button>
+<button class="btn success" disabled="" id="btnHold">⏳ Hold</button>
 </div>
 <div style="margin-top:10px; font-size:12px; color:var(--muted)">
-<span class="badge">Executive Skills: Working Memory Ã¢â‚¬Â¢ Flexibility Ã¢â‚¬Â¢ Inhibition</span>
+<span class="badge">Executive Skills: Working Memory • Flexibility • Inhibition</span>
 </div>
 </section>
 </main>
 <footer>
-<span>Prototype Ã¢â‚¬â€ self-contained, no external libraries</span>
-<span>Ã¢â‚¬Â¢</span>
+<span>Prototype — self-contained, no external libraries</span>
+<span>•</span>
 <span>Made for cognitive rehab research</span>
 </footer>
 </div>
@@ -270,9 +270,9 @@
 <script>
   // ===== Types & Data =====
   const TYPES = {
-    med: {label:'Medical', icon:'Ã°Å¸Â©Âº', needs:'ambulance'},
-    fire:{label:'Fire',    icon:'Ã°Å¸â€Â¥', needs:'fire'},
-    pol: {label:'Police',  icon:'Ã°Å¸Å¡Â¨', needs:'police'}
+    med: {label:'Medical', icon:'🩺', needs:'ambulance'},
+    fire:{label:'Fire',    icon:'🔥', needs:'fire'},
+    pol: {label:'Police',  icon:'🚨', needs:'police'}
   };
 
   // Single-restriction pool (directional)
@@ -339,7 +339,7 @@
       r = pick(RESTRICTION_POOL);
     }
     S.restriction = r;
-    d.activeRuleText.textContent = `Ã°Å¸Å¡Â« No ${cap(r.unit)} in ${r.dir}`;
+    d.activeRuleText.textContent = `🚫 No ${cap(r.unit)} in ${r.dir}`;
   }
 
   function violatesRestriction(kind, inc){
@@ -535,7 +535,7 @@
           <strong>${inc.label}</strong>
           <span class="tag">Needs: ${TYPES[inc.type].needs}</span>
           <span class="tag">Zone: ${inc.zone}</span>
-          <div class="meta">TTL: ${inc.ttl}s Ã¢â‚¬Â¢ Status: ${inc.status}</div>
+          <div class="meta">TTL: ${inc.ttl}s • Status: ${inc.status}</div>
         </div>
         <div style="align-self:center; color:var(--muted); font-size:12px;">Select</div>`;
       row.addEventListener('click', ()=>selectIncident(inc.id));

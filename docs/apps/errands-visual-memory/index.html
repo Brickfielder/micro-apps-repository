@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Errands Memory Ã¢â‚¬â€ Rehab Game</title>
+<title>Errands Memory — Rehab Game</title>
 <style>
     :root{
       --bg:#f8fafc;--card:#ffffff;--text:#0f172a;--muted:#64748b;--accent:#2563eb;--good:#10b981;--bad:#ef4444;--shadow:0 10px 30px rgba(2,6,23,.08);--radius:18px
@@ -53,7 +53,7 @@
 </head>
 <body><main id="app-root">
 <header>
-<h1>Errands Memory Ã¢â‚¬â€ Rehab Game</h1>
+<h1>Errands Memory — Rehab Game</h1>
 <p class="lead">Watch a sequence of shops light up, then click them in the same order (or in reverse). Simple, playful, and closer to real life than abstract blocks.</p>
 </header>
 <main class="app">
@@ -118,9 +118,9 @@
 <button class="ghost" id="demoBtn">Quick demo</button>
 </div>
 <div class="status" id="status">
-<span class="badge">Length: <strong id="lenBadge" style="margin-left:6px">Ã¢â‚¬â€</strong></span>
-<span class="badge" id="trialBadge">Trial: Ã¢â‚¬â€</span>
-<span class="badge success" id="bestSpan">Best span: Ã¢â‚¬â€</span>
+<span class="badge">Length: <strong id="lenBadge" style="margin-left:6px">—</strong></span>
+<span class="badge" id="trialBadge">Trial: —</span>
+<span class="badge success" id="bestSpan">Best span: —</span>
 </div>
 <h3 style="margin:16px 0 8px">Session log</h3>
 <div aria-live="polite" class="log" id="log"></div>
@@ -133,7 +133,7 @@
 <!-- Non-blocking countdown overlay inside the task area -->
 <div aria-atomic="true" aria-live="assertive" class="countdown-overlay" id="countdown">
 <div class="countdown-bubble" role="status">
-<div class="countdown-label">Get readyÃ¢â‚¬Â¦</div>
+<div class="countdown-label">Get ready…</div>
 <div class="countdown-number" id="countdownNum">2</div>
 </div>
 </div>
@@ -142,24 +142,24 @@
 </section>
 </main>
 <script>
-    // Master list (up to 16 shops) Ã¢â‚¬â€ we slice from this based on the setting
+    // Master list (up to 16 shops) — we slice from this based on the setting
     const ALL_SHOPS = [
-      { key:'bakery', label:'Bakery', emoji:'Ã°Å¸Â¥â€“' },
-      { key:'pharmacy', label:'Pharmacy', emoji:'Ã°Å¸â€™Å ' },
-      { key:'supermarket', label:'Supermarket', emoji:'Ã°Å¸â€ºâ€™' },
-      { key:'post', label:'Post Office', emoji:'Ã°Å¸â€œÂ®' },
-      { key:'cafe', label:'CafÃƒÂ©', emoji:'Ã¢Ëœâ€¢' },
-      { key:'shoes', label:'Shoe Shop', emoji:'Ã°Å¸â€˜Å¸' },
-      { key:'books', label:'Bookshop', emoji:'Ã°Å¸â€œÅ¡' },
-      { key:'florist', label:'Florist', emoji:'Ã°Å¸Å’Â¸' },
-      { key:'butcher', label:'Butcher', emoji:'Ã°Å¸Â¥Â©' },
-      { key:'greengrocer', label:'Greengrocer', emoji:'Ã°Å¸Â¥Â¦' },
-      { key:'fish', label:'Fishmonger', emoji:'Ã°Å¸ÂÅ¸' },
-      { key:'hardware', label:'Hardware', emoji:'Ã°Å¸â€ºÂ Ã¯Â¸Â' },
-      { key:'electronics', label:'Electronics', emoji:'Ã°Å¸â€œÂ±' },
-      { key:'bank', label:'Bank', emoji:'Ã°Å¸ÂÂ¦' },
-      { key:'cinema', label:'Cinema', emoji:'Ã°Å¸Å½Â¬' },
-      { key:'toys', label:'Toy Shop', emoji:'Ã°Å¸Â§Â¸' },
+      { key:'bakery', label:'Bakery', emoji:'🥖' },
+      { key:'pharmacy', label:'Pharmacy', emoji:'💊' },
+      { key:'supermarket', label:'Supermarket', emoji:'🛒' },
+      { key:'post', label:'Post Office', emoji:'📮' },
+      { key:'cafe', label:'Café', emoji:'☕' },
+      { key:'shoes', label:'Shoe Shop', emoji:'👟' },
+      { key:'books', label:'Bookshop', emoji:'📚' },
+      { key:'florist', label:'Florist', emoji:'🌸' },
+      { key:'butcher', label:'Butcher', emoji:'🥩' },
+      { key:'greengrocer', label:'Greengrocer', emoji:'🥦' },
+      { key:'fish', label:'Fishmonger', emoji:'🐟' },
+      { key:'hardware', label:'Hardware', emoji:'🛠️' },
+      { key:'electronics', label:'Electronics', emoji:'📱' },
+      { key:'bank', label:'Bank', emoji:'🏦' },
+      { key:'cinema', label:'Cinema', emoji:'🎬' },
+      { key:'toys', label:'Toy Shop', emoji:'🧸' },
     ];
 
     // Active subset used in the current session
@@ -244,7 +244,7 @@
       }
       setShopsDisabled(false);
       state.awaiting=true; state.inputStart = performance.now();
-      log('Your turnÃ¢â‚¬Â¦ Click the shops in order.');
+      log('Your turn… Click the shops in order.');
       ariaStatus.textContent = 'Your turn. Click shops in order.';
     }
 
@@ -277,11 +277,11 @@
       if (isCorrect){
         expected.forEach(i=>nodes[i].classList.add('correct'));
         state.bestSpan = Math.max(state.bestSpan, state.seqLen);
-        log(`Ã¢Å“â€¦ Correct at length ${state.seqLen}`);
+        log(`✅ Correct at length ${state.seqLen}`);
       } else {
         expected.forEach(i=>nodes[i].classList.add('highlight'));
         state.input.forEach((i,ix)=>{ if (expected[ix]!==i) nodes[i].classList.add('wrong'); });
-        log(`Ã¢ÂÅ’ Wrong at length ${state.seqLen}`);
+        log(`❌ Wrong at length ${state.seqLen}`);
       }
       updateBadges();
 
@@ -329,7 +329,7 @@
 
     function endSession(reason='Session ended.'){
       state.running=false; state.awaiting=false; controls.pauseBtn.disabled=true; controls.downloadBtn.disabled=false; controls.startBtn.disabled=false; setShopsDisabled(false);
-      log(`Ã¢â‚¬â€ ${reason} Best span: ${state.bestSpan}.`);
+      log(`— ${reason} Best span: ${state.bestSpan}.`);
     }
 
     function resetAll(){
