@@ -8,7 +8,7 @@
   <style>
     :root{
       --bg:#f7f8fb; --surface:#fff; --text:#1f2937; --muted:#6b7280;
-      --line:#e5e7eb; --accent:#ff7a6e; --accent-600:#ff6254; --accent-700:#f24f40;
+      --line:#e5e7eb; --accent:#5b4bdf; --accent-600:#4a3fbe;
       --pill:#f2f4f7; --radius:16px;
       --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.08);
       --focus:#7dd3fc;
@@ -18,46 +18,89 @@
       --line:#233047; --pill:#16223a;
       --shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.45);
     }
+
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif;
-      background:var(--bg);color:var(--text);min-height:100vh;position:relative;z-index:0}
-    canvas#nodes{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1}
-    header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);
-      padding:12px 24px;display:flex;flex-direction:column;gap:12px}
-    .topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
-  .hero {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-width: 720px;
-  margin: 0 auto;        /* centers horizontally */
-  text-align: center;    /* centers text inside */
-}
-    .title{font-size:clamp(28px, 5vw, 42px);font-weight:600;margin:0;line-height:1.1}
-    .subtitle{font-size:clamp(16px, 2vw, 20px);color:var(--muted);margin:0;line-height:1.4}
-    .controls{display:flex;gap:8px}
-    .btn-toggle{border:none;background:var(--pill);padding:6px 12px;border-radius:999px;cursor:pointer}
-    .toolbar{display:grid;grid-template-columns:1fr auto auto;gap:10px}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif;
+      background:var(--bg); color:var(--text); min-height:100vh; position:relative; z-index:0
+    }
+    canvas#nodes{position:fixed; inset:0; width:100%; height:100%; z-index:-1}
+
+    /* Header + hero */
+    header{
+      position:sticky; top:0; z-index:5;
+      background: color-mix(in oklab, var(--bg) 92%, transparent);
+      backdrop-filter: saturate(1.1) blur(6px);
+      border-bottom:1px solid var(--line);
+      padding:16px 24px 10px;
+      display:flex; flex-direction:column; gap:14px;
+    }
+    .topbar{display:flex; align-items:flex-start; justify-content:space-between; gap:20px}
+    .hero{display:flex; flex-direction:column; gap:6px; max-width:720px; margin:0 auto; text-align:center}
+    .title{font-size:clamp(28px,5vw,42px); font-weight:600; margin:0; line-height:1.1}
+    .subtitle{font-size:clamp(16px,2vw,20px); color:var(--muted); margin:0; line-height:1.4}
+    .controls{display:flex; gap:8px}
+    .btn-toggle{border:none; background:var(--pill); padding:6px 12px; border-radius:999px; cursor:pointer}
+
+    /* Toolbar */
+    .toolbar{
+      display:grid; grid-template-columns:1fr auto auto; gap:10px;
+      background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:10px; box-shadow:var(--shadow);
+      max-width:1080px; margin:0 auto; width:100%;
+    }
     @media (max-width:860px){ .toolbar{ grid-template-columns:1fr; } }
-    .input,.select{font:inherit;border:1px solid var(--line);background:var(--surface);color:var(--text);
-      border-radius:12px;padding:10px 12px}
-    .chips{display:flex;flex-wrap:wrap;gap:8px;padding-top:6px}
-    .chip{font:inherit;border:1px solid transparent;background:var(--pill);
-      border-radius:12px;padding:6px 10px;cursor:pointer}
-    .chip[aria-pressed="true"]{background:var(--accent);color:white}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;padding:24px}
-    .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
-      box-shadow:var(--shadow);padding:16px;transition:.2s}
-    .card:hover{transform:translateY(-2px)}
-    .card h3{margin:0 0 8px;font-size:18px;display:flex;align-items:center;gap:8px}
-    .emoji{font-size:22px}
-    .card p{margin:0;color:var(--muted);font-size:14px}
-    .tagrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-    .tagpill{display:inline-flex;align-items:center;padding:4px 8px;
-      border-radius:999px;background:var(--pill);border:1px solid var(--line);
-      font-size:12px;color:var(--muted)}
-    [data-theme="dark"] .tagpill{border-color:rgba(255,255,255,.08)}
-    .empty{text-align:center;color:var(--muted);padding:48px 12px}
+    .input,.select{
+      font:inherit; border:1px solid var(--line); background:var(--surface); color:var(--text);
+      border-radius:12px; padding:10px 12px
+    }
+    .input{ box-shadow: inset 0 1px 0 rgba(16,24,40,.04) }
+    .select{ min-width:170px }
+
+    /* Chips */
+    .chips{display:flex; flex-wrap:wrap; gap:8px; padding-top:10px; max-width:1080px; margin:0 auto}
+    .chip{
+      font:inherit; border:1px solid transparent; background:var(--pill);
+      border-radius:12px; padding:6px 10px; cursor:pointer;
+      transition: transform .12s ease, background .12s ease
+    }
+    .chip:hover{ transform: translateY(-1px) }
+    .chip[aria-pressed="true"]{ background:var(--accent); color:#fff }
+
+    /* Results bar */
+    .results{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; padding: 8px 0 0; color: var(--muted); font-size: 14px;
+      max-width:1080px; margin:0 auto;
+    }
+
+    /* Grid & Cards */
+    .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:20px; padding: 20px 24px 32px; max-width:1200px; margin:0 auto}
+    .card{
+      position:relative; background:var(--surface); border:1px solid var(--line); border-radius:18px;
+      box-shadow:var(--shadow); padding:18px; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease
+    }
+    .card:hover{ transform: translateY(-3px); border-color: color-mix(in oklab, var(--accent) 30%, var(--line)) }
+    .card:focus-visible{ outline:3px solid var(--focus); outline-offset:3px }
+    .icondot{
+      width:36px; height:36px; border-radius:999px; display:inline-grid; place-items:center;
+      background: radial-gradient(70% 70% at 30% 30%, var(--accent) 0%, color-mix(in oklab, var(--accent) 40%, var(--surface)) 55%, var(--surface) 100%);
+      border: 1px solid color-mix(in oklab, var(--accent) 40%, var(--line));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
+    }
+    .emoji{ font-size:19px }
+    .card h3{ margin:0; display:flex; align-items:center; gap:10px; font-size:18px; letter-spacing:.2px }
+    .card h3 .ttl{ text-decoration:underline; text-decoration-thickness:2px; text-underline-offset:2px;
+      color: color-mix(in oklab, var(--accent) 55%, var(--text)) }
+    .card p{ margin:10px 0 8px; color:var(--muted) }
+    .card::after{ content:""; display:block; height:1px; background:var(--line); opacity:.6; margin:8px 0 10px; border-radius:1px }
+    .tagrow{ display:flex; flex-wrap:wrap; gap:6px; margin-top:0 }
+    .tagpill{ display:inline-flex; align-items:center; padding:4px 8px; border-radius:999px;
+      background: color-mix(in oklab, var(--pill) 70%, transparent);
+      border:1px solid color-mix(in oklab, var(--line) 70%, transparent);
+      font-size:12px; color:var(--muted); font-weight:500 }
+    [data-theme="dark"] .tagpill{ border-color:rgba(255,255,255,.08) }
+
+    .empty{text-align:center; color:var(--muted); padding:48px 12px}
   </style>
 </head>
 <body>
@@ -67,15 +110,14 @@
     <div class="topbar">
       <div class="hero">
         <h1 class="title">Cognitive Rehabilitation Micro-Apps</h1>
-        <p class="subtitle">
-          Interactive, lightweight tools to support assessment, practice, and research in cognitive rehabilitation.
-        </p>
+        <p class="subtitle">Interactive, lightweight tools to support assessment, practice, and research in cognitive rehabilitation.</p>
       </div>
       <div class="controls">
         <button id="themeToggle" class="btn-toggle" aria-label="Toggle dark mode">🌙</button>
         <button id="animToggle" class="btn-toggle" aria-label="Toggle background animation">🎞️</button>
       </div>
     </div>
+
     <form class="toolbar" role="search" onsubmit="event.preventDefault();">
       <input id="q" class="input" type="search" placeholder="Search apps…" autocomplete="off"/>
       <select id="sort" class="select" aria-label="Sort">
@@ -85,7 +127,12 @@
       </select>
       <button id="clear" type="button" class="btn-toggle">Clear</button>
     </form>
+
     <div class="chips" id="chips"></div>
+    <div class="results">
+      <div><span id="resultCount">0</span> apps</div>
+      <div id="activeFilters" aria-live="polite"></div>
+    </div>
   </header>
 
   <main>
@@ -133,67 +180,85 @@
     animBtn.onclick=()=> setAnim(!anim);
 
     // === Catalog + filters ===
-    const grid=document.getElementById('grid'),empty=document.getElementById('empty');
-    const input=document.getElementById('q'),sortSel=document.getElementById('sort'),clearBtn=document.getElementById('clear');
+    const grid=document.getElementById('grid'), empty=document.getElementById('empty');
+    const input=document.getElementById('q'), sortSel=document.getElementById('sort'), clearBtn=document.getElementById('clear');
     const chipsEl=document.getElementById('chips');
     const TAGS={"executive":"Executive","attention":"Attention","memory":"Memory","language":"Language","visuospatial":"Visuospatial","social":"Social cognition"};
 
-    let catalog=[],activeTags=new Set(),q='',sortBy='title-asc';
+    let catalog=[], activeTags=new Set(), q='', sortBy='title-asc';
 
     function buildChips(allTags){
       chipsEl.innerHTML='';
       for(const tag of allTags){
         const label=TAGS[tag]||tag;
         const b=document.createElement('button');
-        b.className='chip';b.type='button';b.setAttribute('aria-pressed','false');b.dataset.tag=tag;
+        b.className='chip'; b.type='button'; b.setAttribute('aria-pressed','false'); b.dataset.tag=tag;
         b.textContent=label;
-        b.addEventListener('click',()=>{const on=b.getAttribute('aria-pressed')==='true';
+        b.addEventListener('click',()=>{
+          const on=b.getAttribute('aria-pressed')==='true';
           b.setAttribute('aria-pressed',String(!on));
-          if(on)activeTags.delete(tag); else activeTags.add(tag);
-          render();});
+          if(on) activeTags.delete(tag); else activeTags.add(tag);
+          render();
+        });
         chipsEl.appendChild(b);
       }
     }
 
-    clearBtn.addEventListener('click',()=>{input.value='';q='';sortSel.value='title-asc';sortBy='title-asc';activeTags.clear();
-      document.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed','false'));render();});
-    input.addEventListener('input',()=>{q=input.value.trim().toLowerCase();render();});
-    sortSel.addEventListener('change',()=>{sortBy=sortSel.value;render();});
+    clearBtn.addEventListener('click',()=>{
+      input.value=''; q=''; sortSel.value='title-asc'; sortBy='title-asc'; activeTags.clear();
+      document.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed','false'));
+      render();
+    });
+    input.addEventListener('input',()=>{ q=input.value.trim().toLowerCase(); render(); });
+    sortSel.addEventListener('change',()=>{ sortBy=sortSel.value; render(); });
 
     function match(app){
-      const matchesText=!q||(app.title.toLowerCase().includes(q)||app.description.toLowerCase().includes(q));
-      const matchesTags=activeTags.size===0||[...activeTags].every(t=>app.tags?.includes(t));
-      return matchesText&&matchesTags;
+      const matchesText = !q || (app.title.toLowerCase().includes(q) || app.description.toLowerCase().includes(q));
+      const matchesTags = activeTags.size===0 || [...activeTags].every(t => app.tags?.includes(t));
+      return matchesText && matchesTags;
     }
     function sort(items){
-      if(sortBy==='title-asc')return items.sort((a,b)=>a.title.localeCompare(b.title));
-      if(sortBy==='title-desc')return items.sort((a,b)=>b.title.localeCompare(a.title));
-      if(sortBy==='slug-asc')return items.sort((a,b)=>b.slug.localeCompare(a.slug));
+      if(sortBy==='title-asc') return items.sort((a,b)=>a.title.localeCompare(b.title));
+      if(sortBy==='title-desc') return items.sort((a,b)=>b.title.localeCompare(a.title));
+      if(sortBy==='slug-asc') return items.sort((a,b)=>b.slug.localeCompare(a.slug)); // naive newest
       return items;
     }
+
     function cardTpl(item){
-      const emoji=item.emoji?`<span class="emoji">${item.emoji}</span>`:'';
-      const tagHtml=(item.tags||[]).map(t=>`<span class="tagpill">${TAGS[t]||t}</span>`).join('');
-      const tagsBlock=tagHtml?`<div class="tagrow">${tagHtml}</div>`:'';
-      return `<a class="card" href="apps/${item.slug}/">
-        <h3>${emoji}${item.title}</h3>
-        <p>${item.description}</p>
-        ${tagsBlock}
-      </a>`;
+      const icon = item.emoji ? `<span class="icondot"><span class="emoji">${item.emoji}</span></span>` : '';
+      const tags = (item.tags||[]).map(t=>`<span class="tagpill">${TAGS[t]||t}</span>`).join('');
+      const tagsBlock = tags ? `<div class="tagrow">${tags}</div>` : '';
+      return `
+        <a class="card" href="apps/${item.slug}/">
+          <h3>${icon}<span class="ttl">${item.title}</span></h3>
+          <p>${item.description}</p>
+          ${tagsBlock}
+        </a>
+      `;
     }
+
     function render(){
-      const filtered=sort(catalog.filter(match));
-      grid.innerHTML=filtered.map(cardTpl).join('');
-      empty.hidden=filtered.length!==0;
+      const filtered = sort(catalog.filter(match));
+      grid.innerHTML = filtered.map(cardTpl).join('');
+      empty.hidden = filtered.length !== 0;
+
+      const rc = document.getElementById('resultCount');
+      if (rc) rc.textContent = String(filtered.length);
+      const af = document.getElementById('activeFilters');
+      if (af) af.innerHTML = [...activeTags].map(t=>`<span class="tagpill">${TAGS[t]||t}</span>`).join('');
     }
 
     fetch('catalog.json?v='+Date.now())
       .then(r=>r.json())
       .then(data=>{
-        catalog=data;
-        const allTags=[...new Set(catalog.flatMap(app=>app.tags||[]))];
+        catalog = data;
+        const allTags = [...new Set(catalog.flatMap(app=>app.tags||[]))];
         buildChips(allTags);
         render();
+      })
+      .catch(e=>{
+        console.error(e);
+        empty.hidden=false; empty.textContent='Could not load catalog.';
       });
   </script>
 </body>
