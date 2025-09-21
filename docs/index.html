@@ -1,212 +1,224 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Cognitive Rehabilitation Micro-Apps</title>
-<meta name="description" content="Interactive, lightweight tools to support assessment, practice, and research in cognitive rehabilitation." />
-<link rel="preload" href="catalog.json" as="fetch" crossorigin="anonymous" />
-
 <style>
   :root{
-    color-scheme: light dark;
-    --bg:#f7f8fb; --surface:#ffffff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
-    --accent:#ff7a6e; --accent-600:#ff6254; --accent-700:#f24f40;
-    --pill:#f2f4f7; --radius:16px;
-    --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.08);
+    --bg:#f9fafb; --surface:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+    --accent:#ff7a6e; --pill:#f2f4f7; --radius:16px;
+    --shadow:0 2px 6px rgba(0,0,0,.08); --shadow-hover:0 10px 24px rgba(0,0,0,.12);
+    --header-h:84px; --maxw:1200px;
+    --drawer-collapsed:40px; --drawer-expanded:170px;
+    --slide-offset: calc(var(--drawer-expanded) - var(--drawer-collapsed));
   }
-  :root[data-theme="dark"]{
-    color-scheme: dark;
-    --bg:#0b1020; --surface:#121829; --text:#e8ecf2; --muted:#a1a9b8; --line:#22293a;
-    --pill:#1a2236; --accent:#ff7a6e; --accent-600:#ff7a6e; --accent-700:#ff7a6e;
-    --shadow:none;
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
+    color:var(--text);
+    background: var(--bg);
+    position: relative;
   }
 
-  html,body{ height:100%; margin:0; background:var(--bg); color:var(--text);
-    font-family: system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif; }
-  a{ color:inherit; text-decoration-thickness:.08em; text-underline-offset:.18em; }
+  /* Particle canvas */
+  #tsparticles {
+    position: fixed;
+    inset: 0;
+    z-index: -1; /* behind everything */
+  }
 
-  .site-header{ position:sticky; top:0; z-index:30; padding:.75rem 3rem;
-    backdrop-filter:saturate(180%) blur(8px); }
-  .hdr-title{ margin:0; text-align:center; line-height:1.1;
-    font-size:clamp(22px,5.5vw,36px); }
-  .hdr-menu{ position:absolute; right:.75rem; top:.5rem; width:40px; height:40px;
-    border-radius:999px; background:transparent; border:1px solid var(--line); color:var(--text); }
+  /* Header */
+  header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,0.8);backdrop-filter:blur(6px);box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .header-inner{max-width:var(--maxw);margin:0 auto;padding:1.25rem 1rem;text-align:center}
+  h1{margin:0;font-size:2.4rem;font-weight:800}
+  .subtitle{margin:0;color:var(--muted);font-size:1.05rem;line-height:1.5}
 
-  .hero-sub{ margin:.35rem auto 1rem; text-align:center; color:var(--muted);
-    max-width:42ch; font-size:clamp(14px,3.6vw,18px); }
+  /* Layout */
+  .wrap{max-width:var(--maxw);margin:1.25rem auto 3rem;padding:0 .5rem 0 0;display:grid;gap:1.5rem;
+        grid-template-columns: var(--drawer-collapsed) 1fr;align-items:start;}
+  .content{transition:margin-left .28s cubic-bezier(.22,.61,.36,1);}
+  .wrap:has(.sidebar:hover) .content{margin-left: var(--slide-offset);}
 
-  .container{ max-width:1000px; margin:0 auto; padding:0 1rem; }
-  .page{ min-height:100dvh; display:flex; flex-direction:column; }
-  .main{ flex:1; min-height:0; }
+  /* Sidebar */
+  .sidebar{
+    position:sticky;top:calc(var(--header-h) + 16px);
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);width:var(--drawer-collapsed);overflow:hidden;cursor:pointer;
+    transform:translateX(-10px);
+    transition: width .28s cubic-bezier(.22,.61,.36,1), transform .28s cubic-bezier(.22,.61,.36,1), box-shadow .28s ease;
+    padding:.75rem .75rem;
+  }
+  .sidebar:hover{width:var(--drawer-expanded);transform:translateX(0);box-shadow:var(--shadow-hover);}
+  .sidebar::before{content:"☰";display:block;text-align:center;line-height:20px;font-size:1.2rem;color:var(--muted);transition:opacity .18s ease;}
+  .sidebar:hover::before{opacity:0}
+  .side-inner{opacity:0;transition:opacity .2s ease;pointer-events:none}
+  .sidebar:hover .side-inner{opacity:1;pointer-events:auto}
+  .side-title{font-weight:700;margin:.25rem 0 .5rem}
+  .facet-group{display:flex;flex-direction:column;gap:.45rem}
+  .facet{display:flex;align-items:flex-start;gap:.45rem;font-size:.88rem;line-height:1.2;hyphens:auto;overflow-wrap:anywhere}
+  .facet input{margin-top:.05rem;margin-left:-2px;width:.95rem;height:.95rem}
+  .badge{margin-left:auto;background:#eef2f7;border-radius:9999px;padding:.1rem .45rem;font-size:.7rem;color:#334155}
 
-  #controls{ position:sticky; top:64px; z-index:20; background:var(--bg);
-    padding:.5rem 0 .75rem; border-bottom:1px solid var(--line); }
-  .controls-grid{ display:grid; grid-template-columns:1fr auto; gap:.5rem; }
-  .search{ flex:1; height:44px; border-radius:12px; border:1px solid var(--line);
-    padding:0 .75rem; background:var(--surface); color:var(--text); }
-  .btn{ height:44px; border-radius:12px; border:1px solid var(--line);
-    background:var(--surface); color:var(--text); padding:0 .9rem; }
-  .tags{ display:flex; gap:.5rem; overflow-x:auto; padding:.25rem 0; }
-  .tag{ display:inline-flex; align-items:center; border-radius:999px; padding:.3rem .7rem;
-    background:var(--pill); border:1px solid var(--line); white-space:nowrap; cursor:pointer; }
-  .tag[aria-pressed="true"]{ background:var(--accent); color:white; border-color:transparent; }
+  /* Cards */
+  .result-head{margin-bottom:.5rem}
+  .count{color:var(--muted);font-size:.95rem}
+  .grid{display:grid;gap:1rem}
+  @media(min-width:900px){.grid{grid-template-columns:repeat(2,1fr)}}
+  @media(min-width:1200px){.grid{grid-template-columns:repeat(3,1fr)}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+        padding:1rem;box-shadow:var(--shadow);transition:.2s}
+  .card:hover{transform:translateY(-3px);box-shadow:var(--shadow-hover)}
+  .title{font-weight:700;font-size:1.1rem;margin-bottom:.3rem;display:flex;align-items:center;gap:.5rem}
+  .desc{color:var(--muted);font-size:.9rem;margin-bottom:.7rem}
+  .tags{display:flex;gap:.4rem;flex-wrap:wrap}
+  .tag{background:var(--pill);padding:.25rem .6rem;border-radius:9999px;font-size:.75rem}
 
-  .count{ color:var(--muted); font-size:.95rem; margin:.5rem 0 0; }
-
-  #cardList{ padding:.75rem 0 2.5rem; }
-  .card{ background:var(--surface); border:1px solid var(--line); border-radius:20px;
-    box-shadow:var(--shadow); padding:1rem; margin:.6rem 0; }
-  .card h3{ margin:.1rem 0 .3rem; font-size:1.1rem; line-height:1.2; }
-  .card p{ margin:.25rem 0 .6rem; color:var(--muted); }
-  .pillrow{ display:flex; gap:.35rem; flex-wrap:wrap; }
-  .pill{ font-size:.85rem; padding:.25rem .55rem; border-radius:999px; background:var(--pill);
-    border:1px solid var(--line); }
-
-  dialog.sheet{ border:0; padding:0; width:min(520px,92vw); border-radius:16px; }
-  .sheet::backdrop{ background:rgba(0,0,0,.35); }
-  .sheet-body{ padding:1rem 1rem 1.25rem; background:var(--surface); color:var(--text);
-    border:1px solid var(--line); border-radius:16px; }
-  .sheet h2{ margin:.25rem 0 1rem; font-size:1.1rem; }
-  .sheet fieldset{ border:1px solid var(--line); border-radius:12px; padding:.75rem; }
-  .sheet label{ display:block; padding:.25rem 0; }
-  .sheet-actions{ display:flex; justify-content:flex-end; gap:.5rem; margin-top:1rem; }
+  /* Mobile */
+  @media(max-width:820px){
+    .wrap{grid-template-columns:1fr;padding:0 1rem}
+    .content{margin-left:0 !important}
+    .sidebar{position:fixed;inset:auto 0 0 0;top:auto;height:70vh;border-radius:0;border:none;
+             width:100%;transform:translateY(100%);transition:transform .25s ease}
+    .sidebar.open{transform:translateY(0%)}
+    .sidebar::before{display:none}
+    .side-inner{opacity:1;pointer-events:auto}
+    .filters-toggle{display:flex}
+  }
+  .filters-toggle{display:none;position:sticky;top:calc(var(--header-h) + 8px);z-index:50}
+  .btn{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:.6rem .9rem;cursor:pointer}
+  .btn-primary{background:var(--accent);border:none;color:#fff;font-weight:600}
 </style>
 </head>
 <body>
-  <header class="site-header">
-    <h1 class="hdr-title">Cognitive Rehabilitation Micro-Apps</h1>
-    <button class="hdr-menu" aria-label="Open settings" aria-haspopup="dialog">⋮</button>
-  </header>
+<!-- Particle canvas -->
+<div id="tsparticles"></div>
 
-  <p class="hero-sub container">
-    Interactive, lightweight tools to support assessment, practice, and research in cognitive rehabilitation.
-  </p>
+<header>
+  <div class="header-inner">
+    <h1>Cognitive Rehabilitation Micro-Apps</h1>
+    <p class="subtitle">Interactive, lightweight tools to support assessment, practice, and research in cognitive rehabilitation.</p>
+  </div>
+</header>
 
-  <div class="page">
-    <main class="main container" id="appRoot">
-      <section id="controls" aria-label="Search and filters">
-        <div class="controls-grid">
-          <input id="q" class="search" type="search" placeholder="Search apps…" autocomplete="off" />
-          <button id="clear" class="btn" type="button">Clear</button>
-          <div id="tagbar" class="tags" aria-label="Tags"></div>
-        </div>
-        <div id="count" class="count" role="status" aria-live="polite"></div>
-      </section>
-
-      <section id="cardList" aria-live="polite"></section>
-    </main>
+<main class="wrap">
+  <div class="filters-toggle">
+    <button class="btn btn-primary" id="openFilters" aria-controls="filters" aria-expanded="false">Filters</button>
   </div>
 
-  <dialog id="settingsSheet" class="sheet">
-    <form method="dialog" class="sheet-body">
-      <h2>Settings</h2>
-      <fieldset>
-        <legend>Theme</legend>
-        <label><input type="radio" name="theme" value="auto"> System (auto)</label>
-        <label><input type="radio" name="theme" value="light"> Light</label>
-        <label><input type="radio" name="theme" value="dark"> Dark</label>
-      </fieldset>
-      <div class="sheet-actions">
-        <button value="cancel">Close</button>
-      </div>
-    </form>
-  </dialog>
+  <aside id="filters" class="sidebar" aria-label="Filters">
+    <div class="side-inner">
+      <div class="side-title">Domains</div>
+      <label class="facet"><input type="checkbox" class="facet-input" value="Attention">Attention <span class="badge" data-count="Attention">0</span></label>
+      <label class="facet"><input type="checkbox" class="facet-input" value="Executive">Executive <span class="badge" data-count="Executive">0</span></label>
+      <label class="facet"><input type="checkbox" class="facet-input" value="Language">Language <span class="badge" data-count="Language">0</span></label>
+      <label class="facet"><input type="checkbox" class="facet-input" value="Memory">Memory <span class="badge" data-count="Memory">0</span></label>
+      <label class="facet"><input type="checkbox" class="facet-input" value="Social cognition">Social cognition <span class="badge" data-count="Social cognition">0</span></label>
+      <label class="facet"><input type="checkbox" class="facet-input" value="Visuospatial">Visuo&shy;spatial <span class="badge" data-count="Visuospatial">0</span></label>
+      <div style="margin-top:.5rem"><span id="reset" class="tag" role="button" tabindex="0">Reset</span></div>
+    </div>
+  </aside>
 
-  <script>
-  // ===== Theme (Settings sheet) =====
-  (function(){
-    const root = document.documentElement;
-    const SHEET = document.getElementById('settingsSheet');
-    const menuBtn = document.querySelector('.hdr-menu');
-    const saved = localStorage.getItem('theme');
-    if (saved && saved !== 'auto') root.setAttribute('data-theme', saved);
+  <section class="content">
+    <div class="result-head"><span id="count">0</span> apps</div>
+    <div id="grid" class="grid"></div>
+  </section>
+</main>
 
-    menuBtn.addEventListener('click', () => {
-      const current = localStorage.getItem('theme') || 'auto';
-      SHEET.querySelectorAll('input[name="theme"]').forEach(r => r.checked = (r.value === current));
-      SHEET.showModal();
+<!-- tsParticles -->
+<script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+<script>
+  // Particle background config
+  tsParticles.load("tsparticles", {
+    background: { color: "#f9fafb" },
+    particles: {
+      number: { value: 60, density: { enable: true, value_area: 800 } },
+      color: { value: "#94a3b8" },
+      shape: { type: "circle" },
+      opacity: { value: 0.5 },
+      size: { value: 2 },
+      line_linked: { enable: true, distance: 120, color: "#cbd5e1", opacity: 0.4, width: 1 },
+      move: { enable: true, speed: 1.2, direction: "none", outModes: { default: "bounce" } }
+    },
+    interactivity: {
+      detectsOn: "canvas",
+      events: { onhover: { enable: true, mode: "grab" }, resize: true },
+      modes: { grab: { distance: 140, line_linked: { opacity: 0.7 } } }
+    },
+    retina_detect: true
+  });
+
+  // Load catalog
+  const grid = document.getElementById('grid');
+  const facetInputs = Array.from(document.querySelectorAll('.facet-input'));
+  const countEl = document.getElementById('count');
+  const resetBtn = document.getElementById('reset');
+  let cards = [];
+
+  async function loadCatalog(){
+    const res = await fetch('catalog.json');
+    const catalog = await res.json();
+    cards = catalog.map(app => {
+      const card = document.createElement('article');
+      card.className = 'card';
+      card.dataset.tags = guessTags(app.title, app.slug);
+      card.innerHTML = `
+        <div class="title">${app.emoji} ${app.title}</div>
+        <p class="desc">${app.description}</p>
+        <div class="tags">${renderTags(card.dataset.tags)}</div>
+      `;
+      return card;
     });
-    SHEET.addEventListener('change', (e) => {
-      if (e.target.name === 'theme'){
-        const v = e.target.value;
-        if (v === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', v);
-        localStorage.setItem('theme', v);
-      }
-    });
-  })();
+    grid.replaceChildren(...cards);
+    filter();
+  }
 
-  // ===== Catalog rendering (links point to ./apps/<slug>.html) =====
-  (async function(){
-    const tagNameMap = {
-      attention:"Attention", executive:"Executive",
-      language:"Language", visuospatial:"Visuospatial",
-      memory:"Memory", social:"Social cognition"
-    };
+  function renderTags(tagString){
+    return tagString.split(',').map(t=>`<span class="tag">${t.trim()}</span>`).join('');
+  }
 
-    const catalog = await fetch('catalog.json').then(r => r.json());
+  function guessTags(title, slug){
+    const t = title.toLowerCase()+" "+slug;
+    const tags = [];
+    if(/attention|signal|barista|audio/.test(t)) tags.push("Attention");
+    if(/executive|plan|task|tower|office|control|barista|package|taskflow/.test(t)) tags.push("Executive");
+    if(/language|word|fluency|chat/.test(t)) tags.push("Language");
+    if(/memory|maze|blocks|recall/.test(t)) tags.push("Memory");
+    if(/social|emotion/.test(t)) tags.push("Social cognition");
+    if(/visuo|spatial|maze|blocks|star/.test(t)) tags.push("Visuospatial");
+    return tags.join(', ');
+  }
 
-    const q = document.getElementById('q');
-    const clearBtn = document.getElementById('clear');
-    const tagbar = document.getElementById('tagbar');
-    const countEl = document.getElementById('count');
-    const list = document.getElementById('cardList');
-
-    const active = new Set();
-    const allTags = Array.from(new Set(catalog.flatMap(a => a.tags))).sort();
-    allTags.forEach(t => {
-      const b = document.createElement('button');
-      b.type = 'button'; b.className = 'tag'; b.textContent = tagNameMap[t] || t;
-      b.setAttribute('aria-pressed','false'); b.dataset.tag = t;
-      b.addEventListener('click', () => {
-        const on = b.getAttribute('aria-pressed') === 'true';
-        b.setAttribute('aria-pressed', String(!on));
-        !on ? active.add(t) : active.delete(t);
-        render();
+  function updateFacetCounts(visibleCards){
+    const counts={};
+    visibleCards.forEach(card=>{
+      card.dataset.tags.split(',').map(s=>s.trim()).forEach(t=>{
+        counts[t]=(counts[t]||0)+1;
       });
-      tagbar.appendChild(b);
     });
-
-    clearBtn.addEventListener('click', () => {
-      q.value = ''; active.clear();
-      tagbar.querySelectorAll('.tag').forEach(el => el.setAttribute('aria-pressed','false'));
-      render();
+    document.querySelectorAll('[data-count]').forEach(el=>{
+      el.textContent = counts[el.getAttribute('data-count')] || 0;
     });
-    q.addEventListener('input', render);
+  }
 
-    function filter(){
-      const term = q.value.trim().toLowerCase();
-      return catalog.filter(app => {
-        const matchesText = !term || (
-          app.title.toLowerCase().includes(term) ||
-          app.description.toLowerCase().includes(term) ||
-          app.tags.some(t => (tagNameMap[t]||t).toLowerCase().includes(term))
-        );
-        const matchesTags = active.size === 0 || app.tags.some(t => active.has(t));
-        return matchesText && matchesTags;
-      });
-    }
+  function filter(){
+    const active = facetInputs.filter(x=>x.checked).map(x=>x.value);
+    let visible=0;
+    cards.forEach(card=>{
+      const tags = card.dataset.tags.split(',').map(s=>s.trim());
+      const show = active.length ? active.every(f=>tags.includes(f)) : true;
+      card.style.display = show ? '' : 'none';
+      if(show) visible++;
+    });
+    countEl.textContent = visible;
+    updateFacetCounts(cards.filter(c=>c.style.display!=='none'));
+  }
 
-    function render(){
-      const rows = filter();
-      countEl.textContent = `${rows.length} app${rows.length===1?'':'s'}`;
-      list.innerHTML = '';
-      rows.forEach(app => {
-        const card = document.createElement('article');
-        card.className = 'card';
-        card.innerHTML = `
-          <h3><a href="./apps/${app.slug}/">${app.emoji} ${app.title}</a></h3>
-          <p>${app.description}</p>
-          <div class="pillrow">
-            ${app.tags.map(t => `<span class="pill">${tagNameMap[t]||t}</span>`).join('')}
-          </div>
-        `;
-        list.appendChild(card);
-      });
-    }
-
-    render();
-  })();
-  </script>
+  facetInputs.forEach(f=>f.addEventListener('change',filter));
+  resetBtn.addEventListener('click',()=>{facetInputs.forEach(x=>x.checked=false);filter();});
+  resetBtn.addEventListener('keydown', e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();resetBtn.click();}});
+  loadCatalog();
+</script>
 </body>
 </html>
