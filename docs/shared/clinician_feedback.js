@@ -1,4 +1,8 @@
-/* clinician_feedback.js — style-free UI + CSV augmentation */
+/* ==========================================================================
+   clinician_feedback.js — v2 resilient
+   - Injects a clinician note card (styled by theme.css)
+   - Appends `clinician_comment` column into exported CSVs
+   ========================================================================== */
 
 (function () {
   // ---- UI: ensure a comment box exists at the end of #app-root ----
@@ -9,7 +13,6 @@
     const section = document.createElement("section");
     section.id = "clinician-notes";
     section.className = "note-card";
-
     section.innerHTML = `
       <label for="clinician-comment">Clinician comments (optional)</label>
       <textarea id="clinician-comment" rows="4"
@@ -111,7 +114,7 @@
     }
   }, true);
 
-  // Fallback API for programmatic CSV strings
+  // Fallback API
   window.__augmentCSV = augmentCSVText;
 
   // Init
