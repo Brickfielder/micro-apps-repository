@@ -195,7 +195,7 @@
         const card = document.createElement('article');
         card.className = 'card';
         card.innerHTML = `
-          <h3><a href="./apps/${app.slug}.html">${app.emoji} ${app.title}</a></h3>
+          <h3><a href="./apps/${app.slug}/">${app.emoji} ${app.title}</a></h3>
           <p>${app.description}</p>
           <div class="pillrow">
             ${app.tags.map(t => `<span class="pill">${tagNameMap[t]||t}</span>`).join('')}
