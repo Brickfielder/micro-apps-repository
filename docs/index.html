@@ -1,265 +1,244 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="auto">
+<html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Cognitive Rehabilitation Micro-Apps</title>
-  <meta name="description" content="Interactive, lightweight tools to support assessment, practice, and research in cognitive rehabilitation.">
-  <style>
-    :root{
-      --bg:#f7f8fb; --surface:#fff; --text:#1f2937; --muted:#6b7280;
-      --line:#e5e7eb; --accent:#5b4bdf; --accent-600:#4a3fbe;
-      --pill:#f2f4f7; --radius:16px;
-      --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.08);
-      --focus:#7dd3fc;
-    }
-    [data-theme="dark"]{
-      --bg:#0b1020; --surface:#0f172a; --text:#e5e7eb; --muted:#9aa5b1;
-      --line:#233047; --pill:#16223a;
-      --shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.45);
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cognitive Rehabilitation Micro-Apps</title>
+<meta name="description" content="Interactive, lightweight tools to support assessment, practice, and research in cognitive rehabilitation." />
+<link rel="preload" href="catalog.json" as="fetch" crossorigin="anonymous" />
 
-    *{box-sizing:border-box}
-    body{
-      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,sans-serif;
-      background:var(--bg); color:var(--text); min-height:100vh; position:relative; z-index:0
-    }
-    canvas#nodes{position:fixed; inset:0; width:100%; height:100%; z-index:-1}
+<style>
+  /* ===== Design tokens ===== */
+  :root{
+    color-scheme: light dark;
+    --bg:#f7f8fb; --surface:#ffffff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+    --accent:#ff7a6e; --accent-600:#ff6254; --accent-700:#f24f40;
+    --pill:#f2f4f7; --radius:16px;
+    --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.08);
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --bg:#0b1020; --surface:#121829; --text:#e8ecf2; --muted:#a1a9b8; --line:#22293a;
+    --pill:#1a2236; --accent:#ff7a6e; --accent-600:#ff7a6e; --accent-700:#ff7a6e;
+    --shadow:none;
+  }
 
-    /* Header + hero */
-    header{
-      position:sticky; top:0; z-index:5;
-      background: color-mix(in oklab, var(--bg) 92%, transparent);
-      backdrop-filter: saturate(1.1) blur(6px);
-      border-bottom:1px solid var(--line);
-      padding:16px 24px 10px;
-      display:flex; flex-direction:column; gap:14px;
-    }
-    .topbar{display:flex; align-items:flex-start; justify-content:space-between; gap:20px}
-    .hero{display:flex; flex-direction:column; gap:6px; max-width:720px; margin:0 auto; text-align:center}
-    .title{font-size:clamp(28px,5vw,42px); font-weight:600; margin:0; line-height:1.1}
-    .subtitle{font-size:clamp(16px,2vw,20px); color:var(--muted); margin:0; line-height:1.4}
-    .controls{display:flex; gap:8px}
-    .btn-toggle{border:none; background:var(--pill); padding:6px 12px; border-radius:999px; cursor:pointer}
+  /* ===== Base ===== */
+  html,body{ height:100%; margin:0; background:var(--bg); color:var(--text);
+    font-family: system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif; }
+  a{ color:inherit; text-decoration-thickness: .08em; text-underline-offset: .18em; }
 
-    /* Toolbar */
-    .toolbar{
-      display:grid; grid-template-columns:1fr auto auto; gap:10px;
-      background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:10px; box-shadow:var(--shadow);
-      max-width:1080px; margin:0 auto; width:100%;
-    }
-    @media (max-width:860px){ .toolbar{ grid-template-columns:1fr; } }
-    .input,.select{
-      font:inherit; border:1px solid var(--line); background:var(--surface); color:var(--text);
-      border-radius:12px; padding:10px 12px
-    }
-    .input{ box-shadow: inset 0 1px 0 rgba(16,24,40,.04) }
-    .select{ min-width:170px }
+  /* ===== Header (title centered; tiny menu for settings) ===== */
+  .site-header{ position:sticky; top:0; z-index:30; padding:.75rem 3rem;
+    backdrop-filter:saturate(180%) blur(8px); }
+  .hdr-title{ margin:0; text-align:center; line-height:1.1;
+    font-size:clamp(22px,5.5vw,36px); }
+  .hdr-menu{ position:absolute; right:.75rem; top:.5rem; width:40px; height:40px;
+    border-radius:999px; background:transparent; border:1px solid var(--line); color:var(--text); }
 
-    /* Chips */
-    .chips{display:flex; flex-wrap:wrap; gap:8px; padding-top:10px; max-width:1080px; margin:0 auto}
-    .chip{
-      font:inherit; border:1px solid transparent; background:var(--pill);
-      border-radius:12px; padding:6px 10px; cursor:pointer;
-      transition: transform .12s ease, background .12s ease
-    }
-    .chip:hover{ transform: translateY(-1px) }
-    .chip[aria-pressed="true"]{ background:var(--accent); color:#fff }
+  .hero-sub{ margin:.35rem auto 1rem; text-align:center; color:var(--muted);
+    max-width:42ch; font-size:clamp(14px,3.6vw,18px); }
 
-    /* Results bar */
-    .results{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:12px; padding: 8px 0 0; color: var(--muted); font-size: 14px;
-      max-width:1080px; margin:0 auto;
-    }
+  /* ===== Layout ===== */
+  .container{ max-width:1000px; margin:0 auto; padding:0 1rem; }
+  .page{ min-height:100dvh; display:flex; flex-direction:column; }
+  .main{ flex:1; min-height:0; }
 
-    /* Grid & Cards */
-    .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:20px; padding: 20px 24px 32px; max-width:1200px; margin:0 auto}
-    .card{
-      position:relative; background:var(--surface); border:1px solid var(--line); border-radius:18px;
-      box-shadow:var(--shadow); padding:18px; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease
-    }
-    .card:hover{ transform: translateY(-3px); border-color: color-mix(in oklab, var(--accent) 30%, var(--line)) }
-    .card:focus-visible{ outline:3px solid var(--focus); outline-offset:3px }
-    .icondot{
-      width:36px; height:36px; border-radius:999px; display:inline-grid; place-items:center;
-      background: radial-gradient(70% 70% at 30% 30%, var(--accent) 0%, color-mix(in oklab, var(--accent) 40%, var(--surface)) 55%, var(--surface) 100%);
-      border: 1px solid color-mix(in oklab, var(--accent) 40%, var(--line));
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
-    }
-    .emoji{ font-size:19px }
-    .card h3{ margin:0; display:flex; align-items:center; gap:10px; font-size:18px; letter-spacing:.2px }
-    .card h3 .ttl{ text-decoration:underline; text-decoration-thickness:2px; text-underline-offset:2px;
-      color: color-mix(in oklab, var(--accent) 55%, var(--text)) }
-    .card p{ margin:10px 0 8px; color:var(--muted) }
-    .card::after{ content:""; display:block; height:1px; background:var(--line); opacity:.6; margin:8px 0 10px; border-radius:1px }
-    .tagrow{ display:flex; flex-wrap:wrap; gap:6px; margin-top:0 }
-    .tagpill{ display:inline-flex; align-items:center; padding:4px 8px; border-radius:999px;
-      background: color-mix(in oklab, var(--pill) 70%, transparent);
-      border:1px solid color-mix(in oklab, var(--line) 70%, transparent);
-      font-size:12px; color:var(--muted); font-weight:500 }
-    [data-theme="dark"] .tagpill{ border-color:rgba(255,255,255,.08) }
+  /* ===== Controls ===== */
+  #controls{ position:sticky; top:64px; z-index:20; background:var(--bg);
+    padding:.5rem 0 .75rem; border-bottom:1px solid var(--line); }
+  .controls-grid{ display:grid; grid-template-columns:1fr; gap:.5rem; }
+  .row{ display:flex; gap:.5rem; align-items:center; }
+  .search{ flex:1; height:44px; border-radius:12px; border:1px solid var(--line);
+    padding:0 .75rem; background:var(--surface); color:var(--text); }
+  .select{ height:44px; border-radius:12px; border:1px solid var(--line);
+    padding:0 .6rem; background:var(--surface); color:var(--text); }
+  .btn{ height:44px; border-radius:12px; border:1px solid var(--line);
+    background:var(--surface); color:var(--text); padding:0 .9rem; }
+  .tags{ display:flex; gap:.5rem; overflow-x:auto; padding:.25rem 0; }
+  .tag{ display:inline-flex; align-items:center; border-radius:999px; padding:.3rem .7rem;
+    background:var(--pill); border:1px solid var(--line); white-space:nowrap; cursor:pointer; }
+  .tag[aria-pressed="true"]{ background:var(--accent); color:white; border-color:transparent; }
 
-    .empty{text-align:center; color:var(--muted); padding:48px 12px}
-  </style>
+  .count{ color:var(--muted); font-size:.95rem; margin:.5rem 0 0; }
+
+  /* ===== Cards ===== */
+  #cardList{ padding: .75rem 0 2.5rem; }
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:20px;
+    box-shadow:var(--shadow); padding:1rem; margin:.6rem 0; }
+  .card h3{ margin:.1rem 0 .3rem; font-size:1.1rem; line-height:1.2; }
+  .card p{ margin:.25rem 0 .6rem; color:var(--muted); }
+  .pillrow{ display:flex; gap:.35rem; flex-wrap:wrap; }
+  .pill{ font-size:.85rem; padding:.25rem .55rem; border-radius:999px; background:var(--pill);
+    border:1px solid var(--line); }
+
+  /* ===== Settings sheet ===== */
+  dialog.sheet{ border:0; padding:0; width:min(520px,92vw); border-radius:16px; }
+  .sheet::backdrop{ background:rgba(0,0,0,.35); }
+  .sheet-body{ padding:1rem 1rem 1.25rem; background:var(--surface); color:var(--text);
+    border:1px solid var(--line); border-radius:16px; }
+  .sheet h2{ margin:.25rem 0 1rem; font-size:1.1rem; }
+  .sheet fieldset{ border:1px solid var(--line); border-radius:12px; padding:.75rem; }
+  .sheet label{ display:block; padding:.25rem 0; }
+  .sheet-actions{ display:flex; justify-content:flex-end; gap:.5rem; margin-top:1rem; }
+
+  @media (min-width: 600px){
+    .controls-grid{ grid-template-columns:1fr auto auto; align-items:center; }
+    .tags{ grid-column: 1 / -1; }
+  }
+</style>
 </head>
 <body>
-  <canvas id="nodes"></canvas>
-
-  <header>
-    <div class="topbar">
-      <div class="hero">
-        <h1 class="title">Cognitive Rehabilitation Micro-Apps</h1>
-        <p class="subtitle">Interactive, lightweight tools to support assessment, practice, and research in cognitive rehabilitation.</p>
-      </div>
-      <div class="controls">
-        <button id="themeToggle" class="btn-toggle" aria-label="Toggle dark mode">🌙</button>
-        <button id="animToggle" class="btn-toggle" aria-label="Toggle background animation">🎞️</button>
-      </div>
-    </div>
-
-    <form class="toolbar" role="search" onsubmit="event.preventDefault();">
-      <input id="q" class="input" type="search" placeholder="Search apps…" autocomplete="off"/>
-      <select id="sort" class="select" aria-label="Sort">
-        <option value="title-asc">Sort: A → Z</option>
-        <option value="title-desc">Sort: Z → A</option>
-        <option value="slug-asc">Sort: Newest</option>
-      </select>
-      <button id="clear" type="button" class="btn-toggle">Clear</button>
-    </form>
-
-    <div class="chips" id="chips"></div>
-    <div class="results">
-      <div><span id="resultCount">0</span> apps</div>
-      <div id="activeFilters" aria-live="polite"></div>
-    </div>
+  <header class="site-header">
+    <h1 class="hdr-title">Cognitive Rehabilitation Micro-Apps</h1>
+    <button class="hdr-menu" aria-label="Open settings" aria-haspopup="dialog">⋮</button>
   </header>
 
-  <main>
-    <section id="grid" class="grid" aria-live="polite"></section>
-    <div id="empty" class="empty" hidden>No results found.</div>
-  </main>
+  <p class="hero-sub container">
+    Interactive, lightweight tools to support assessment, practice, and research in cognitive rehabilitation.
+  </p>
+
+  <div class="page">
+    <main class="main container" id="appRoot">
+      <section id="controls" aria-label="Search and filters">
+        <div class="controls-grid">
+          <div class="row">
+            <input id="q" class="search" type="search" placeholder="Search apps…" autocomplete="off" />
+          </div>
+          <select id="sort" class="select" aria-label="Sort apps">
+            <option value="az">Sort: A → Z</option>
+            <option value="za">Sort: Z → A</option>
+          </select>
+          <button id="clear" class="btn" type="button">Clear</button>
+          <div id="tagbar" class="tags" aria-label="Tags"></div>
+        </div>
+        <div id="count" class="count" role="status" aria-live="polite"></div>
+      </section>
+
+      <section id="cardList" aria-live="polite"></section>
+    </main>
+  </div>
+
+  <!-- Settings sheet -->
+  <dialog id="settingsSheet" class="sheet">
+    <form method="dialog" class="sheet-body">
+      <h2>Settings</h2>
+      <fieldset>
+        <legend>Theme</legend>
+        <label><input type="radio" name="theme" value="auto"> System (auto)</label>
+        <label><input type="radio" name="theme" value="light"> Light</label>
+        <label><input type="radio" name="theme" value="dark"> Dark</label>
+      </fieldset>
+      <div class="sheet-actions">
+        <button value="cancel">Close</button>
+      </div>
+    </form>
+  </dialog>
 
   <script>
-    // === Theme toggle ===
-    const root=document.documentElement, themeBtn=document.getElementById('themeToggle');
-    function setTheme(t){root.setAttribute('data-theme',t);localStorage.setItem('theme',t);
-      themeBtn.textContent=(t==='dark')?'☀️':'🌙';}
-    const savedTheme=localStorage.getItem('theme');
-    if(savedTheme){setTheme(savedTheme);}else{setTheme(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');}
-    themeBtn.onclick=()=> setTheme(root.getAttribute('data-theme')==='dark'?'light':'dark');
+  // ===== Theme (no header toggle) =====
+  (function(){
+    const root = document.documentElement;
+    const SHEET = document.getElementById('settingsSheet');
+    const menuBtn = document.querySelector('.hdr-menu');
+    const saved = localStorage.getItem('theme');
+    if (saved && saved !== 'auto') root.setAttribute('data-theme', saved);
 
-    // === Animation toggle + brain nodes ===
-    const canvas=document.getElementById('nodes'),ctx=canvas.getContext('2d');
-    let W,H,nodes=[],anim=true;
-    function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
-    window.addEventListener('resize',resize);resize();
-    const NUM=40;
-    for(let i=0;i<NUM;i++){nodes.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.6,vy:(Math.random()-.5)*.6});}
-    function step(){
-      if(!anim) return;
-      ctx.clearRect(0,0,W,H);
-      ctx.strokeStyle=getComputedStyle(root).getPropertyValue('--line');
-      for(let i=0;i<NUM;i++){
-        const a=nodes[i];a.x+=a.vx;a.y+=a.vy;
-        if(a.x<0||a.x>W) a.vx*=-1; if(a.y<0||a.y>H) a.vy*=-1;
-        ctx.beginPath();ctx.arc(a.x,a.y,2,0,Math.PI*2);
-        ctx.fillStyle=getComputedStyle(root).getPropertyValue('--accent');ctx.fill();
-        for(let j=i+1;j<NUM;j++){const b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);
-          if(d<140){ctx.globalAlpha=1-d/140;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.globalAlpha=1;}}
+    menuBtn.addEventListener('click', () => {
+      const current = localStorage.getItem('theme') || 'auto';
+      SHEET.querySelectorAll('input[name="theme"]').forEach(r => r.checked = (r.value === current));
+      SHEET.showModal();
+    });
+    SHEET.addEventListener('change', (e) => {
+      if (e.target.name === 'theme'){
+        const v = e.target.value;
+        if (v === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', v);
+        localStorage.setItem('theme', v);
       }
-      requestAnimationFrame(step);
-    }
-    const animBtn=document.getElementById('animToggle');
-    function setAnim(on){anim=on;localStorage.setItem('anim',on?'on':'off');
-      animBtn.textContent=on?'🎞️':'⏸️';
-      if(on) requestAnimationFrame(step); else ctx.clearRect(0,0,W,H);}
-    const savedAnim=localStorage.getItem('anim');
-    const prefersReduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if(savedAnim){setAnim(savedAnim==='on');}else{setAnim(!prefersReduced);}
-    animBtn.onclick=()=> setAnim(!anim);
+    });
+  })();
 
-    // === Catalog + filters ===
-    const grid=document.getElementById('grid'), empty=document.getElementById('empty');
-    const input=document.getElementById('q'), sortSel=document.getElementById('sort'), clearBtn=document.getElementById('clear');
-    const chipsEl=document.getElementById('chips');
-    const TAGS={"executive":"Executive","attention":"Attention","memory":"Memory","language":"Language","visuospatial":"Visuospatial","social":"Social cognition"};
+  // ===== Catalog-driven rendering =====
+  (async function(){
+    const tagNameMap = {
+      attention:"Attention", executive:"Executive",
+      language:"Language", visuospatial:"Visuospatial",
+      memory:"Memory", social:"Social cognition"
+    };
 
-    let catalog=[], activeTags=new Set(), q='', sortBy='title-asc';
+    const catalog = await fetch('catalog.json').then(r => r.json());
 
-    function buildChips(allTags){
-      chipsEl.innerHTML='';
-      for(const tag of allTags){
-        const label=TAGS[tag]||tag;
-        const b=document.createElement('button');
-        b.className='chip'; b.type='button'; b.setAttribute('aria-pressed','false'); b.dataset.tag=tag;
-        b.textContent=label;
-        b.addEventListener('click',()=>{
-          const on=b.getAttribute('aria-pressed')==='true';
-          b.setAttribute('aria-pressed',String(!on));
-          if(on) activeTags.delete(tag); else activeTags.add(tag);
-          render();
-        });
-        chipsEl.appendChild(b);
-      }
-    }
+    // DOM refs
+    const q = document.getElementById('q');
+    const sortSel = document.getElementById('sort');
+    const clearBtn = document.getElementById('clear');
+    const tagbar = document.getElementById('tagbar');
+    const countEl = document.getElementById('count');
+    const list = document.getElementById('cardList');
 
-    clearBtn.addEventListener('click',()=>{
-      input.value=''; q=''; sortSel.value='title-asc'; sortBy='title-asc'; activeTags.clear();
-      document.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed','false'));
+    // Build tag chips from catalog
+    const allTags = Array.from(new Set(catalog.flatMap(a => a.tags))).sort();
+    const active = new Set();
+    allTags.forEach(t => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'tag'; b.textContent = tagNameMap[t] || t;
+      b.setAttribute('aria-pressed','false'); b.dataset.tag = t;
+      b.addEventListener('click', () => {
+        const on = b.getAttribute('aria-pressed') === 'true';
+        b.setAttribute('aria-pressed', String(!on));
+        !on ? active.add(t) : active.delete(t);
+        render();
+      });
+      tagbar.appendChild(b);
+    });
+
+    clearBtn.addEventListener('click', () => {
+      q.value = ''; sortSel.value = 'az'; active.clear();
+      tagbar.querySelectorAll('.tag').forEach(el => el.setAttribute('aria-pressed','false'));
       render();
     });
-    input.addEventListener('input',()=>{ q=input.value.trim().toLowerCase(); render(); });
-    sortSel.addEventListener('change',()=>{ sortBy=sortSel.value; render(); });
+    q.addEventListener('input', render);
+    sortSel.addEventListener('change', render);
 
-    function match(app){
-      const matchesText = !q || (app.title.toLowerCase().includes(q) || app.description.toLowerCase().includes(q));
-      const matchesTags = activeTags.size===0 || [...activeTags].every(t => app.tags?.includes(t));
-      return matchesText && matchesTags;
-    }
-    function sort(items){
-      if(sortBy==='title-asc') return items.sort((a,b)=>a.title.localeCompare(b.title));
-      if(sortBy==='title-desc') return items.sort((a,b)=>b.title.localeCompare(a.title));
-      if(sortBy==='slug-asc') return items.sort((a,b)=>b.slug.localeCompare(a.slug)); // naive newest
-      return items;
-    }
+    function filterAndSort(){
+      const term = q.value.trim().toLowerCase();
+      let rows = catalog.filter(app => {
+        const matchesText = !term || (
+          app.title.toLowerCase().includes(term) ||
+          app.description.toLowerCase().includes(term) ||
+          app.tags.some(t => (tagNameMap[t]||t).toLowerCase().includes(term))
+        );
+        const matchesTags = active.size === 0 || app.tags.some(t => active.has(t));
+        return matchesText && matchesTags;
+      });
 
-    function cardTpl(item){
-      const icon = item.emoji ? `<span class="icondot"><span class="emoji">${item.emoji}</span></span>` : '';
-      const tags = (item.tags||[]).map(t=>`<span class="tagpill">${TAGS[t]||t}</span>`).join('');
-      const tagsBlock = tags ? `<div class="tagrow">${tags}</div>` : '';
-      return `
-        <a class="card" href="apps/${item.slug}/">
-          <h3>${icon}<span class="ttl">${item.title}</span></h3>
-          <p>${item.description}</p>
-          ${tagsBlock}
-        </a>
-      `;
+      rows.sort((a,b) => sortSel.value === 'az'
+        ? a.title.localeCompare(b.title)
+        : b.title.localeCompare(a.title)
+      );
+      return rows;
     }
 
     function render(){
-      const filtered = sort(catalog.filter(match));
-      grid.innerHTML = filtered.map(cardTpl).join('');
-      empty.hidden = filtered.length !== 0;
-
-      const rc = document.getElementById('resultCount');
-      if (rc) rc.textContent = String(filtered.length);
-      const af = document.getElementById('activeFilters');
-      if (af) af.innerHTML = [...activeTags].map(t=>`<span class="tagpill">${TAGS[t]||t}</span>`).join('');
+      const rows = filterAndSort();
+      countEl.textContent = `${rows.length} app${rows.length===1?'':'s'}`;
+      list.innerHTML = '';
+      rows.forEach(app => {
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.innerHTML = `
+          <h3><a href="./${app.slug}/">${app.emoji} ${app.title}</a></h3>
+          <p>${app.description}</p>
+          <div class="pillrow">
+            ${app.tags.map(t => `<span class="pill">${tagNameMap[t]||t}</span>`).join('')}
+          </div>
+        `;
+        list.appendChild(card);
+      });
     }
 
-    fetch('catalog.json?v='+Date.now())
-      .then(r=>r.json())
-      .then(data=>{
-        catalog = data;
-        const allTags = [...new Set(catalog.flatMap(app=>app.tags||[]))];
-        buildChips(allTags);
-        render();
-      })
-      .catch(e=>{
-        console.error(e);
-        empty.hidden=false; empty.textContent='Could not load catalog.';
-      });
+    render();
+  })();
   </script>
 </body>
 </html>
