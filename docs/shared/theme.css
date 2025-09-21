@@ -1,24 +1,25 @@
-/* Shared theme for Micro Apps Repository
- * Defines design tokens for colors, typography, spacing, and components.
- * This file should be referenced by every app via:
- *   <link rel="stylesheet" href="/shared/theme.css">
- */
+/* ==========================================================================
+   Micro Apps Repository — Shared Theme (v2, bold/dense ready)
+   Usage:
+     <link rel="stylesheet" href="/micro-apps-repository/docs/shared/theme.css">
+     <meta name="theme" content="bold dense">  (optional toggles)
+   ========================================================================== */
 
-/* Establish root variables for both light and dark themes. */
+/* ===== Base tokens (light) ===== */
 :root{
   color-scheme: light dark;
 
-  /* Palette: light theme */
+  /* Palette */
   --bg: #f7f8fb;
   --surface: #ffffff;
-  --text: #1f2937;       /* slate-800 */
-  --muted: #6b7280;      /* slate-500 */
-  --line: #e5e7eb;       /* slate-200 */
-  --accent: #ff7a6e;     /* soft coral */
+  --text: #1f2937;        /* slate-800 */
+  --muted: #6b7280;       /* slate-500 */
+  --line: #e5e7eb;        /* slate-200 */
+  --accent: #ff7a6e;      /* soft coral */
   --accent-600: #ff6254;
   --accent-700: #f24f40;
 
-  /* Typography scale */
+  /* Type scale & layout */
   --font: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell,
           Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji",
           "Segoe UI Emoji", "Segoe UI Symbol";
@@ -28,11 +29,12 @@
   --maxw: 1100px;
   --pad: 20px;
 
-  /* Radius and shadow */
+  /* Radius & elevation */
   --radius: 16px;
   --shadow: 0 1px 2px rgba(16,24,40,.06), 0 8px 24px rgba(16,24,40,.08);
 }
 
+/* ===== Dark mode adjustments ===== */
 @media (prefers-color-scheme: dark){
   :root{
     --bg: #0f172a;
@@ -40,10 +42,26 @@
     --text: #f9fafb;
     --muted: #9ca3af;
     --line: #1f2937;
-    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.6);
+    --shadow: 0 1px 2px rgba(0,0,0,.40), 0 10px 26px rgba(0,0,0,.60);
   }
 }
 
+/* ===== Bold & Dense toggles (opt-in) =====
+   Enable with <meta name="theme" content="bold dense"> or body classes */
+body.brand-bold{
+  --accent: #ff4d3d;      /* brighter coral */
+  --accent-600: #ef3b2a;
+  --accent-700: #d72f20;
+  --shadow: 0 2px 6px rgba(16,24,40,.10), 0 18px 40px rgba(16,24,40,.18);
+  --size-hero: clamp(2rem, 3vw + 1rem, 3rem);
+  --size-lead: clamp(1.05rem, .8vw + .95rem, 1.35rem);
+}
+body.dense{
+  --pad: 16px;
+  --maxw: 1200px;
+}
+
+/* ===== Resets / base ===== */
 *{ box-sizing: border-box; }
 html, body{ height:100%; }
 body{
@@ -55,14 +73,14 @@ body{
   line-height: 1.6;
 }
 
-/* Wrapper for all apps */
+/* ===== App wrapper ===== */
 .app-wrap{
   max-width: var(--maxw);
   margin: 0 auto;
   padding: calc(var(--pad) * 1.2) var(--pad);
 }
 
-/* Standard hero section injected by frame.js */
+/* ===== Hero (injected by frame.js) ===== */
 .app-hero{
   background: var(--surface);
   border: 1px solid var(--line);
@@ -70,19 +88,34 @@ body{
   box-shadow: var(--shadow);
   padding: clamp(18px, 2.5vw, 28px);
   margin: clamp(12px, 1.5vw, 18px) 0 24px;
+  text-align: center;
 }
 .app-hero h1{
   font-size: var(--size-hero);
   margin: 0 0 .35em;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
 }
-.app-hero p.lead{
+.app-hero .lead{
   font-size: var(--size-lead);
   color: var(--muted);
-  margin: 0;
+  max-width: 70ch;
+  margin: 0.25rem auto 0;
 }
 
-/* Default container for an app's UI */
+/* Optional gradient accent when brand-bold is on and .hero-accent is present */
+body.brand-bold .app-hero.hero-accent{
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--accent), white 85%),
+      color-mix(in oklab, var(--accent), white 92%)
+    ),
+    var(--surface);
+  border-color: color-mix(in oklab, var(--accent), var(--line) 86%);
+}
+
+/* ===== App surface ===== */
 #app-root{
   background: var(--surface);
   border: 1px solid var(--line);
@@ -92,26 +125,100 @@ body{
   min-height: 40vh;
 }
 
+/* Vertical rhythm inside app root */
+#app-root > * + * { margin-top: clamp(12px, 1.2vw, 18px); }
+body.dense #app-root > * + * { margin-top: clamp(10px, 1vw, 14px); }
+
+/* ===== Controls ===== */
+.button, button, input[type=button], input[type=submit]{
+  appearance:none;
+  border:1px solid var(--line);
+  background: var(--surface);
+  padding: .65rem 1rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  font: inherit;
+  color: var(--text);
+  cursor:pointer;
+  transition: transform .06s ease, background .15s ease, border-color .15s ease;
+}
+.button:hover, button:hover, input[type=submit]:hover{
+  background: color-mix(in oklab, var(--surface), var(--line) 12%);
+}
+.button:active, button:focus:active{ transform: translateY(1px); }
+
+.button.primary{
+  background: var(--accent);
+  border-color: var(--accent-600);
+  color: #fff;
+}
+.button.primary:hover{ background: var(--accent-600); }
+body.brand-bold .button.primary{ transition: transform .08s ease; }
+body.brand-bold .button.primary:hover{ transform: translateY(-1px); }
+
+/* Inputs */
+input[type=text], input[type=number], input[type=email], textarea, select{
+  width:100%;
+  max-width:100%;
+  padding:.6rem .75rem;
+  border-radius:10px;
+  border:1px solid var(--line);
+  background:var(--surface);
+  color:var(--text);
+  font:inherit;
+}
+label{ font-weight:600; display:block; margin-bottom:.35rem; }
+
+/* ===== Utilities ===== */
+.pill{
+  display:inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #f2f4f7;
+  color: #334155;
+  font-size: .85rem;
+  font-weight: 500;
+  margin-right: 8px;
+}
+@media (prefers-color-scheme: dark){
+  .pill{ background: #1f2937; color: #e5e7eb; }
+}
+.helper{ color: var(--muted); font-size:.95rem; }
+
+/* Simple grid helpers */
+.grid{ display:grid; gap: clamp(12px,1.2vw,18px); }
+.grid.cols-2{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+.grid.cols-3{ grid-template-columns: repeat(3, minmax(0,1fr)); }
+@media (max-width: 860px){
+  .grid.cols-3{ grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 640px){
+  .grid.cols-2, .grid.cols-3{ grid-template-columns: 1fr; }
+}
+
+/* Toolbar (optional) */
+.toolbar{
+  display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:center;
+  padding:10px;
+  background:var(--surface); border:1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+}
+body.brand-bold .toolbar{
+  border-color: color-mix(in oklab, var(--accent), var(--line) 82%);
+}
+
+/* Clinician notes card hook (if clinician_feedback.js is used) */
+.note-card{
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
 /* Focus outline for accessibility */
 :focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
   border-radius: 6px;
-}
-
-/* Utility pill component used for tags or metadata */
-.pill{
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: #f2f4f7;
-  color: #334155;
-  font-size: .85rem;
-  margin-right: 8px;
-}
-@media (prefers-color-scheme: dark){
-  .pill{
-    background: #1f2937;
-    color: #e5e7eb;
-  }
 }
