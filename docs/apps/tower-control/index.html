@@ -11,60 +11,45 @@
   <meta name="app-slug" content="tower-control" />
   <!-- Optional: <meta name="theme" content="bold dense"> -->
 
-  <!-- ABSOLUTE paths so it works from /apps/...  -->
-  <!-- Fallback theme.css in case frame.js fails -->
+  <!-- Absolute paths to work from /apps/...  -->
   <link rel="stylesheet" href="/micro-apps-repository/docs/shared/theme.css" />
-
-  <!-- frame.js will also ensure theme.css (tries /shared/ and /docs/shared/) and inject hero -->
   <script defer src="/micro-apps-repository/docs/shared/frame.js"></script>
 
   <style>
-    /* Minimal safety net if theme didn't load yet */
     html,body{margin:0}
+    /* Safety net if theme is late */
     body{
       font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,"Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
-      background:#0f172a; color:#f9fafb; line-height:1.6;
+      background: var(--bg,#0f172a); color: var(--text,#f9fafb); line-height:1.6;
     }
 
     :root { --radar-h: 260px; }
 
-    /* ===== Base layout (phones) ===== */
-    .app {
-      max-width: 560px;
-      margin: 0 auto;
-      display: grid;
-      gap: clamp(12px, 1.2vw, 18px);
-    }
+    .app { max-width: 560px; margin: 0 auto; display: grid; gap: clamp(12px,1.2vw,18px); }
 
-    /* Panels (kept local so app is readable even w/o theme) */
     .panel {
-      background: #111827;
-      border: 1px solid #1f2937;
+      background: var(--surface,#111827);
+      border: 1px solid var(--line,#1f2937);
       border-radius: 16px;
-      box-shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.6);
-      padding: clamp(16px, 2vw, 24px);
+      box-shadow: var(--shadow, 0 1px 2px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.6));
+      padding: clamp(16px,2vw,24px);
     }
 
-    /* Radar */
     .radar {
-      position: relative;
-      height: var(--radar-h);
-      border-radius: 16px;
-      overflow: hidden;
-      isolation: isolate;
+      position: relative; height: var(--radar-h);
+      border-radius: 16px; overflow: hidden; isolation: isolate;
       background-image:
-        radial-gradient(circle at 50% 50%, transparent 0 1px, #111827 1px 8%, transparent 8%),
-        radial-gradient(circle at 50% 50%, transparent 0 1px, #111827 1px 16%, transparent 16%),
-        radial-gradient(circle at 50% 50%, transparent 0 1px, #111827 1px 24%, transparent 24%),
-        radial-gradient(circle at 50% 50%, #1f2937 0, #1f2937 1px, transparent 1px);
-      background-size: 100% 100%;
-      background-color: #111827;
+        radial-gradient(circle at 50% 50%, transparent 0 1px, var(--surface,#111827) 1px 8%, transparent 8%),
+        radial-gradient(circle at 50% 50%, transparent 0 1px, var(--surface,#111827) 1px 16%, transparent 16%),
+        radial-gradient(circle at 50% 50%, transparent 0 1px, var(--surface,#111827) 1px 24%, transparent 24%),
+        radial-gradient(circle at 50% 50%, var(--line,#1f2937) 0, var(--line,#1f2937) 1px, transparent 1px);
+      background-size: 100% 100%; background-color: var(--surface,#111827);
     }
     .radar::before, .radar::after { content:""; position:absolute; inset:0; pointer-events:none; }
     .radar::before {
       background:
-        linear-gradient(#1f2937, #1f2937) 50% 0/1px 100% no-repeat,
-        linear-gradient(#1f2937, #1f2937) 0 50%/100% 1px no-repeat;
+        linear-gradient(var(--line,#1f2937), var(--line,#1f2937)) 50% 0/1px 100% no-repeat,
+        linear-gradient(var(--line,#1f2937), var(--line,#1f2937)) 0 50%/100% 1px no-repeat;
       opacity:.6;
     }
     @media (prefers-reduced-motion: no-preference){
@@ -77,112 +62,184 @@
     }
 
     .plane {
-      position: absolute;
-      translate: -50% -50%;
-      font-size: 1.6rem;
-      line-height: 1;
+      position:absolute; translate:-50% -50%;
+      width:28px; height:28px; line-height:0;
+      color:#60a5fa; /* default */
       filter: drop-shadow(0 1px 1px rgba(0,0,0,.35));
+      cursor: pointer;
     }
-    .plane[data-color="green"]  { color: #16a34a; }
-    .plane[data-color="blue"]   { color: #60a5fa; }
-    .plane[data-color="yellow"] { color: #f59e0b; }
+    .plane svg { width:100%; height:100%; display:block; }
+    .plane[data-color="green"]  { color:#16a34a; }
+    .plane[data-color="blue"]   { color:#3b82f6; }
+    .plane[data-color="yellow"] { color:#f59e0b; }
 
-    /* Small key/value helper for Status */
-    .kv{ display:grid; grid-template-columns: auto 1fr; gap:.25rem .75rem; }
-    .kv dt{ color: #9ca3af; }
-    .kv dd{ margin:0; }
+    .plane.selected::after{
+      content:""; position:absolute; inset:-8px; border-radius:999px;
+      border:2px solid var(--accent,#ff7a6e);
+      box-shadow:0 0 0 2px rgba(255,122,110,.25);
+    }
 
-    /* Controls: theme buttons if loaded, else fallback */
-    .controls { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: clamp(10px, 1vw, 14px); }
+    .kv{ display:grid; grid-template-columns:auto 1fr; gap:.25rem .75rem; }
+    .kv dt{ color: var(--muted,#9ca3af); } .kv dd{ margin:0; }
+
+    .controls { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: clamp(10px,1vw,14px); }
     .button, button {
-      appearance:none; border:1px solid #1f2937; background:#111827; color:#f9fafb;
-      padding:.7rem 1rem; border-radius:12px; box-shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.6);
+      appearance:none; border:1px solid var(--line,#1f2937); background:var(--surface,#111827); color:var(--text,#f9fafb);
+      padding:.7rem 1rem; border-radius:12px; box-shadow: var(--shadow, 0 1px 2px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.6));
       font: inherit; cursor:pointer;
     }
-    .button.primary, button.button-primary { background:#ff7a6e; border-color:#ff6254; color:#fff; }
-    .button.primary:hover, button.button-primary:hover { background:#ff6254; }
+    .button.primary, button.button-primary { background:var(--accent,#ff7a6e); border-color:var(--accent-600,#ff6254); color:#fff; }
+    .button.primary:hover, button.button-primary:hover { background:var(--accent-600,#ff6254); }
 
-    /* ===== Tablet ===== */
-    @media (min-width: 768px){
+    @media (min-width:768px){
       .app { max-width: 720px; }
       :root { --radar-h: 340px; }
       .controls { grid-template-columns: repeat(4, minmax(0,1fr)); }
     }
-
-    /* ===== Laptop / Wide ===== */
-    @media (min-width: 1024px){
+    @media (min-width:1024px){
       .app {
         max-width: 1000px;
-        grid-template-areas:
-          "radar side"
-          "controls controls";
-        grid-template-columns: 2fr 1fr;
-        align-items: start;
+        grid-template-areas: "radar side" "controls controls";
+        grid-template-columns: 2fr 1fr; align-items:start;
       }
-      .radar       { grid-area: radar; }
-      #side-stack  { grid-area: side;  display: grid; gap: clamp(12px, 1.2vw, 18px); }
-      .controls    { grid-area: controls; }
+      .radar{ grid-area:radar; } #side-stack{ grid-area:side; display:grid; gap:clamp(12px,1.2vw,18px); } .controls{ grid-area:controls; }
       :root { --radar-h: 420px; }
     }
-
     @media (max-width:360px){ :root{ --radar-h: 220px; } }
   </style>
 </head>
 <body>
-  <!-- frame.js will wrap this in .app-wrap and inject the hero above it -->
   <div id="app-root">
-    <main class="app" data-app-title="Tower Control" data-app-tags="executive, attention" data-app-version="responsive-2">
+    <main class="app" data-app-title="Tower Control" data-app-tags="executive, attention" data-app-version="responsive-3">
 
-      <section class="panel radar" aria-label="Radar display" role="img">
-        <!-- Static demo positions; your logic can update them -->
-        <div class="plane" data-color="green"  style="left:24%; top:28%" aria-label="green aircraft">✈️</div>
-        <div class="plane" data-color="blue"   style="left:76%; top:62%" aria-label="blue aircraft">✈️</div>
-        <div class="plane" data-color="yellow" style="left:40%; top:70%" aria-label="yellow aircraft">✈️</div>
+      <section class="panel radar" id="radar" aria-label="Radar display" role="img">
+        <!-- planes injected by JS -->
       </section>
 
       <div id="side-stack">
         <section class="panel" id="task-panel" aria-labelledby="task-h">
           <h2 id="task-h">Task Queue</h2>
-          <p id="task-text">Land blue, hold at waypoint 4, redirect yellow.</p>
+          <p id="task-text">Select a plane, then choose an action.</p>
         </section>
 
         <section class="panel" id="status-panel" aria-labelledby="status-h">
           <h2 id="status-h">Status</h2>
           <dl class="kv">
-            <dt>Success rate</dt><dd><span id="succ">73%</span></dd>
-            <dt>Completed</dt><dd><span id="done">11</span></dd>
-            <dt>Failed</dt><dd><span id="fail">4</span></dd>
+            <dt>Success rate</dt><dd><span id="succ">0%</span></dd>
+            <dt>Completed</dt><dd><span id="done">0</span></dd>
+            <dt>Failed</dt><dd><span id="fail">0</span></dd>
           </dl>
         </section>
       </div>
 
       <section class="panel controls" aria-label="Actions">
-        <button type="button" class="button primary" data-action="clear"    aria-label="Clear for approach">CLEAR</button>
-        <button type="button" class="button primary" data-action="land"     aria-label="Authorize landing">LAND</button>
-        <button type="button" class="button primary" data-action="hold"     aria-label="Hold pattern">HOLD</button>
-        <button type="button" class="button primary" data-action="redirect" aria-label="Redirect to alternate">REDIRECT</button>
+        <button type="button" class="button primary" data-action="clear">CLEAR</button>
+        <button type="button" class="button primary" data-action="land">LAND</button>
+        <button type="button" class="button primary" data-action="hold">HOLD</button>
+        <button type="button" class="button primary" data-action="redirect">REDIRECT</button>
       </section>
 
     </main>
   </div>
 
   <script>
-    // Forward taps/clicks to app logic (non-blocking)
-    (function(){
-      const root = document.querySelector('.controls');
-      root.addEventListener('click', (e) => {
-        const b = e.target.closest('button[data-action]');
-        if (!b) return;
-        const action = b.dataset.action;
-        if (window.app && typeof window.app.handleAction === 'function') {
-          window.app.handleAction(action);
-        } else if (window.frame && typeof window.frame.toast === 'function') {
-          window.frame.toast(`Action: ${action}`);
-        } else {
-          console.log('Action:', action);
-        }
-      });
-    })();
+  // --- tiny app controller (demo rules) ---
+  (function(){
+    const radar = document.getElementById('radar');
+    const doneEl = document.getElementById('done');
+    const failEl = document.getElementById('fail');
+    const succEl = document.getElementById('succ');
+    const taskEl = document.getElementById('task-text');
+
+    const PLANE_SVG = `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor"
+          d="M20.5 13.5l-7.7-2.2 3.7-8.1c.2-.5-.2-1.2-.8-1.2-.3 0-.5.1-.7.3L8.2 8.3 3.3 6.9 2 8.2l4.4 3.1-2.2 4.8-1.8.6-.4 1.1 2.7-.3 1.1-1.6 4.4-1.5 4.9 3.4c.2.2.5.3.7.3.6 0 1-.7.8-1.2l-2.2-5 7.7-2.2c.3-.1.5-.3.5-.6 0-.2-.2-.5-.5-.6z"/>
+      </svg>`;
+
+    // Demo dataset
+    const planes = [
+      { id:'g1', color:'green',  x:24, y:28, state:'air' },
+      { id:'b1', color:'blue',   x:76, y:62, state:'air' },
+      { id:'y1', color:'yellow', x:40, y:70, state:'air' },
+    ];
+    let selected = null;
+    let completed = 0;
+    let failed = 0;
+
+    function renderPlanes(){
+      radar.innerHTML = '';
+      for(const p of planes){
+        if(p.state === 'done' || p.state === 'fail') continue;
+        const d = document.createElement('div');
+        d.className = 'plane';
+        d.dataset.id = p.id;
+        d.dataset.color = p.color;
+        d.style.left = p.x + '%';
+        d.style.top  = p.y + '%';
+        if(selected && selected.id === p.id) d.classList.add('selected');
+        d.innerHTML = PLANE_SVG;
+        d.title = `${p.color} aircraft`;
+        d.addEventListener('click', ()=>selectPlane(p.id));
+        radar.appendChild(d);
+      }
+    }
+
+    function selectPlane(id){
+      selected = planes.find(p => p.id === id);
+      taskEl.textContent = selected
+        ? `Selected ${selected.color}. Choose an action.`
+        : 'Select a plane, then choose an action.';
+      renderPlanes();
+    }
+
+    function updateStatus(){
+      doneEl.textContent = completed;
+      failEl.textContent = failed;
+      const total = completed + failed;
+      succEl.textContent = total ? Math.round((completed/total)*100) + '%' : '0%';
+    }
+
+    function handleAction(action){
+      if(!selected){ toast('Select a plane first'); return; }
+      // super-simple demo rule: land only blue; hold only yellow; redirect only green; clear = any
+      const ok =
+        (action==='land'     && selected.color==='blue') ||
+        (action==='hold'     && selected.color==='yellow') ||
+        (action==='redirect' && selected.color==='green') ||
+        (action==='clear');
+
+      if(ok){
+        selected.state = 'done'; completed++;
+        toast(`✓ ${action.toUpperCase()} accepted for ${selected.color}`);
+      }else{
+        selected.state = 'fail'; failed++;
+        toast(`✕ ${action.toUpperCase()} not allowed for ${selected.color}`);
+      }
+      selected = null;
+      updateStatus(); renderPlanes();
+      taskEl.textContent = 'Select a plane, then choose an action.';
+    }
+
+    function toast(msg){
+      if(window.frame && typeof window.frame.toast === 'function') window.frame.toast(msg);
+      else console.log(msg);
+    }
+
+    // Wire buttons
+    document.querySelector('.controls').addEventListener('click', (e)=>{
+      const b = e.target.closest('button[data-action]');
+      if(!b) return;
+      handleAction(b.dataset.action);
+    });
+
+    // Expose for future integration
+    window.app = { handleAction, selectPlane };
+
+    // init
+    updateStatus();
+    renderPlanes();
+  })();
   </script>
 </body>
 </html>
