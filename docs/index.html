@@ -194,7 +194,7 @@
       cards = catalog.map(app => {
         const card = document.createElement('a');
         card.className = 'card';
-        card.href = `apps/${app.slug}.html`;   // apps live under docs/apps/
+        card.href = `apps/${app.slug}/`;   // apps live under docs/apps/
         card.dataset.tags = guessTags(app.title, app.slug);
         card.innerHTML = `
           <div class="title">${app.emoji} ${app.title}</div>
