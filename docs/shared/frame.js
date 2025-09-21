@@ -1,6 +1,6 @@
 /* ==========================================================================
-   Micro Apps Repository — Frame (v2)
-   - Ensures shared CSS is loaded
+   Micro Apps Repository — Frame (v3 resilient)
+   - Ensures shared CSS is loaded (tries /shared/ and /docs/shared/)
    - Optional bold/dense theming via <meta name="theme" content="bold dense">
    - Reads title/desc from catalog.json using <meta name="app-slug">,
      with page-level overrides <meta name="app-title"> / <meta name="app-desc">
@@ -11,7 +11,6 @@
   // --- Base path detection: assume /<user>.github.io/<repo>/...
   function getBasePath() {
     const parts = (window.location.pathname || "/").split("/").filter(Boolean);
-    // e.g. /micro-apps-repository/emotion_chat/ -> repo is parts[0]
     return parts.length ? `/${parts[0]}` : "";
   }
   const BASE = getBasePath();
@@ -25,35 +24,43 @@
     if (raw.includes("dense")) document.body.classList.add("dense");
   })();
 
-  // --- Ensure shared CSS is present
+  // --- Ensure shared CSS is present (try both possible paths)
   function ensureAssets() {
-    const cssHref = `${BASE}/docs/shared/theme.css`;
-    if (!document.querySelector(`link[rel="stylesheet"][href="${cssHref}"]`)) {
+    const tried = new Set();
+
+    function addCSS(href){
+      if (tried.has(href)) return;
+      tried.add(href);
       const link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = cssHref;
+      link.href = href;
       document.head.appendChild(link);
     }
+
+    addCSS(`${BASE}/shared/theme.css`);
+    addCSS(`${BASE}/docs/shared/theme.css`);
   }
 
-  // --- Load catalog (best-effort)
+  // --- Load catalog.json (try both locations)
   async function loadCatalog() {
-    try {
-      const res = await fetch(`${BASE}/docs/catalog.json`, { cache: "no-store" });
-      if (res.ok) return await res.json();
-    } catch (e) {
-      console.warn("Could not load catalog.json", e);
+    for (const path of [
+      `${BASE}/shared/catalog.json`,
+      `${BASE}/docs/catalog.json`
+    ]) {
+      try {
+        const res = await fetch(path, { cache: "no-store" });
+        if (res.ok) return await res.json();
+      } catch {}
     }
     return null;
   }
 
-  // --- Prepare metadata (slug → title/desc, with overrides)
+  // --- Prepare metadata
   async function loadMeta() {
     const meta = {};
     const slugTag = document.querySelector('meta[name="app-slug"]');
     if (slugTag) meta.slug = slugTag.content;
 
-    // Pull from catalog if possible
     if (meta.slug) {
       const catalog = await loadCatalog();
       if (Array.isArray(catalog)) {
@@ -65,7 +72,6 @@
       }
     }
 
-    // Page-level overrides
     const titleTag = document.querySelector('meta[name="app-title"]');
     const descTag  = document.querySelector('meta[name="app-desc"]');
     if (titleTag) meta.title = titleTag.content;
@@ -79,7 +85,6 @@
     const root = document.getElementById("app-root") || document.body;
     if (!root) return;
 
-    // Ensure .app-wrap wrapper exists
     let wrap = root.closest(".app-wrap");
     if (!wrap) {
       wrap = document.createElement("div");
@@ -88,28 +93,23 @@
         root.parentNode.insertBefore(wrap, root);
         wrap.appendChild(root);
       } else {
-        // As a fallback, append to body
         document.body.appendChild(wrap);
         wrap.appendChild(root);
       }
     }
 
-    // If a hero already exists, don't duplicate
-    const existingHero = wrap.querySelector(".app-hero");
-    if (existingHero) return;
-
-    const hero = document.createElement("header");
-    hero.className = "app-hero hero-accent"; // gradient kicks in when brand-bold is active
-    hero.innerHTML = `
-      <h1>${metaInfo.title || ""}</h1>
-      <p class="lead">${metaInfo.desc || ""}</p>
-    `;
-    wrap.insertBefore(hero, root);
+    if (!wrap.querySelector(".app-hero")) {
+      const hero = document.createElement("header");
+      hero.className = "app-hero hero-accent";
+      hero.innerHTML = `
+        <h1>${metaInfo.title || ""}</h1>
+        <p class="lead">${metaInfo.desc || ""}</p>
+      `;
+      wrap.insertBefore(hero, root);
+    }
   }
 
   // --- Init
   ensureAssets();
-  loadMeta().then(meta => {
-    placeHeroAndWrap(meta);
-  });
+  loadMeta().then(meta => { placeHeroAndWrap(meta); });
 })();
