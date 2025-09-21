@@ -6,24 +6,29 @@
   <meta name="color-scheme" content="light dark" />
   <meta name="theme-color" content="#111827" />
 
-  <title>Tower Control — Mobile</title>
-  <meta name="description" content="Mobile-adapted sketch of the Tower Control micro-app. Uses shared theme and frame." />
-
-  <!-- Frame metadata so frame.js can read catalog and inject hero -->
+  <title>Tower Control — Responsive</title>
+  <meta name="description" content="Responsive sketch of the Tower Control micro-app. Uses shared theme and frame." />
   <meta name="app-slug" content="tower-control" />
-  <!-- Optional theme toggles: <meta name="theme" content="bold dense"> -->
-  <!-- Optional overrides:
-  <meta name="app-title" content="Tower Control" />
-  <meta name="app-desc" content="Handle aircraft according to active protocols. Mobile sketch." />
-  -->
+  <!-- Optional: <meta name="theme" content="bold dense"> -->
 
-  <!-- Shared frame bootstraps theme.css and hero -->
-  <script defer src="../shared/frame.js"></script>
+  <!-- ABSOLUTE paths so it works from /apps/...  -->
+  <!-- Fallback theme.css in case frame.js fails -->
+  <link rel="stylesheet" href="/micro-apps-repository/docs/shared/theme.css" />
+
+  <!-- frame.js will also ensure theme.css (tries /shared/ and /docs/shared/) and inject hero -->
+  <script defer src="/micro-apps-repository/docs/shared/frame.js"></script>
 
   <style>
+    /* Minimal safety net if theme didn't load yet */
+    html,body{margin:0}
+    body{
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,"Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+      background:#0f172a; color:#f9fafb; line-height:1.6;
+    }
+
     :root { --radar-h: 260px; }
 
-    /* App layout inside #app-root */
+    /* ===== Base layout (phones) ===== */
     .app {
       max-width: 560px;
       margin: 0 auto;
@@ -31,12 +36,12 @@
       gap: clamp(12px, 1.2vw, 18px);
     }
 
-    /* Simple panel card (can be moved to theme later) */
+    /* Panels (kept local so app is readable even w/o theme) */
     .panel {
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.6);
       padding: clamp(16px, 2vw, 24px);
     }
 
@@ -44,27 +49,27 @@
     .radar {
       position: relative;
       height: var(--radar-h);
-      border-radius: var(--radius);
+      border-radius: 16px;
       overflow: hidden;
       isolation: isolate;
       background-image:
-        radial-gradient(circle at 50% 50%, transparent 0 1px, var(--surface) 1px 8%, transparent 8%),
-        radial-gradient(circle at 50% 50%, transparent 0 1px, var(--surface) 1px 16%, transparent 16%),
-        radial-gradient(circle at 50% 50%, transparent 0 1px, var(--surface) 1px 24%, transparent 24%),
-        radial-gradient(circle at 50% 50%, var(--line) 0, var(--line) 1px, transparent 1px);
+        radial-gradient(circle at 50% 50%, transparent 0 1px, #111827 1px 8%, transparent 8%),
+        radial-gradient(circle at 50% 50%, transparent 0 1px, #111827 1px 16%, transparent 16%),
+        radial-gradient(circle at 50% 50%, transparent 0 1px, #111827 1px 24%, transparent 24%),
+        radial-gradient(circle at 50% 50%, #1f2937 0, #1f2937 1px, transparent 1px);
       background-size: 100% 100%;
-      background-color: var(--surface);
+      background-color: #111827;
     }
     .radar::before, .radar::after { content:""; position:absolute; inset:0; pointer-events:none; }
     .radar::before {
       background:
-        linear-gradient(var(--line), var(--line)) 50% 0/1px 100% no-repeat,
-        linear-gradient(var(--line), var(--line)) 0 50%/100% 1px no-repeat;
+        linear-gradient(#1f2937, #1f2937) 50% 0/1px 100% no-repeat,
+        linear-gradient(#1f2937, #1f2937) 0 50%/100% 1px no-repeat;
       opacity:.6;
     }
     @media (prefers-reduced-motion: no-preference){
       .radar::after{
-        background: conic-gradient(from 0turn, color-mix(in lab, var(--accent), transparent 90%) 0turn, transparent .15turn);
+        background: conic-gradient(from 0turn, rgba(255,122,110,.12) 0turn, transparent .15turn);
         mix-blend-mode: plus-lighter;
         animation: sweep 3.6s linear infinite;
       }
@@ -74,23 +79,59 @@
     .plane {
       position: absolute;
       translate: -50% -50%;
-      font-size: 1.4rem;
+      font-size: 1.6rem;
       line-height: 1;
-      filter: drop-shadow(0 1px 1px rgba(0,0,0,.25));
+      filter: drop-shadow(0 1px 1px rgba(0,0,0,.35));
     }
     .plane[data-color="green"]  { color: #16a34a; }
-    .plane[data-color="blue"]   { color: #2563eb; }
-    .plane[data-color="yellow"] { color: #ca8a04; }
+    .plane[data-color="blue"]   { color: #60a5fa; }
+    .plane[data-color="yellow"] { color: #f59e0b; }
 
-    /* Controls layout: use theme grid helpers + theme buttons */
-    .controls { }
+    /* Small key/value helper for Status */
+    .kv{ display:grid; grid-template-columns: auto 1fr; gap:.25rem .75rem; }
+    .kv dt{ color: #9ca3af; }
+    .kv dd{ margin:0; }
+
+    /* Controls: theme buttons if loaded, else fallback */
+    .controls { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: clamp(10px, 1vw, 14px); }
+    .button, button {
+      appearance:none; border:1px solid #1f2937; background:#111827; color:#f9fafb;
+      padding:.7rem 1rem; border-radius:12px; box-shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 26px rgba(0,0,0,.6);
+      font: inherit; cursor:pointer;
+    }
+    .button.primary, button.button-primary { background:#ff7a6e; border-color:#ff6254; color:#fff; }
+    .button.primary:hover, button.button-primary:hover { background:#ff6254; }
+
+    /* ===== Tablet ===== */
+    @media (min-width: 768px){
+      .app { max-width: 720px; }
+      :root { --radar-h: 340px; }
+      .controls { grid-template-columns: repeat(4, minmax(0,1fr)); }
+    }
+
+    /* ===== Laptop / Wide ===== */
+    @media (min-width: 1024px){
+      .app {
+        max-width: 1000px;
+        grid-template-areas:
+          "radar side"
+          "controls controls";
+        grid-template-columns: 2fr 1fr;
+        align-items: start;
+      }
+      .radar       { grid-area: radar; }
+      #side-stack  { grid-area: side;  display: grid; gap: clamp(12px, 1.2vw, 18px); }
+      .controls    { grid-area: controls; }
+      :root { --radar-h: 420px; }
+    }
+
     @media (max-width:360px){ :root{ --radar-h: 220px; } }
   </style>
 </head>
 <body>
-  <!-- frame.js will wrap this in .app-wrap and inject the .app-hero above it -->
+  <!-- frame.js will wrap this in .app-wrap and inject the hero above it -->
   <div id="app-root">
-    <main class="app" data-app-title="Tower Control" data-app-tags="executive, attention" data-app-version="mobile-1">
+    <main class="app" data-app-title="Tower Control" data-app-tags="executive, attention" data-app-version="responsive-2">
 
       <section class="panel radar" aria-label="Radar display" role="img">
         <!-- Static demo positions; your logic can update them -->
@@ -99,21 +140,23 @@
         <div class="plane" data-color="yellow" style="left:40%; top:70%" aria-label="yellow aircraft">✈️</div>
       </section>
 
-      <section class="panel" id="task-panel" aria-labelledby="task-h">
-        <h2 id="task-h">Task Queue</h2>
-        <p id="task-text">Land blue, hold at waypoint 4, redirect yellow.</p>
-      </section>
+      <div id="side-stack">
+        <section class="panel" id="task-panel" aria-labelledby="task-h">
+          <h2 id="task-h">Task Queue</h2>
+          <p id="task-text">Land blue, hold at waypoint 4, redirect yellow.</p>
+        </section>
 
-      <section class="panel" id="status-panel" aria-labelledby="status-h">
-        <h2 id="status-h">Status</h2>
-        <dl class="kv">
-          <dt>Success rate</dt><dd><span id="succ">73%</span></dd>
-          <dt>Completed</dt><dd><span id="done">11</span></dd>
-          <dt>Failed</dt><dd><span id="fail">4</span></dd>
-        </dl>
-      </section>
+        <section class="panel" id="status-panel" aria-labelledby="status-h">
+          <h2 id="status-h">Status</h2>
+          <dl class="kv">
+            <dt>Success rate</dt><dd><span id="succ">73%</span></dd>
+            <dt>Completed</dt><dd><span id="done">11</span></dd>
+            <dt>Failed</dt><dd><span id="fail">4</span></dd>
+          </dl>
+        </section>
+      </div>
 
-      <section class="panel grid cols-2 controls" aria-label="Actions">
+      <section class="panel controls" aria-label="Actions">
         <button type="button" class="button primary" data-action="clear"    aria-label="Clear for approach">CLEAR</button>
         <button type="button" class="button primary" data-action="land"     aria-label="Authorize landing">LAND</button>
         <button type="button" class="button primary" data-action="hold"     aria-label="Hold pattern">HOLD</button>
@@ -124,7 +167,7 @@
   </div>
 
   <script>
-    // Minimal wiring: forward button taps to your app logic if present
+    // Forward taps/clicks to app logic (non-blocking)
     (function(){
       const root = document.querySelector('.controls');
       root.addEventListener('click', (e) => {
@@ -143,4 +186,3 @@
   </script>
 </body>
 </html>
-```0
