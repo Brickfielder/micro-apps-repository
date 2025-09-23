@@ -1,74 +1,71 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Audio Errand Planner — v0.3</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Audio Errands</title>
 
-  <!-- Identify the app for the shared frame (pulls title/desc from catalog.json) -->
-  <meta name="app-slug" content="audio-errands" />
-  <!-- Opt into the bolder visual preset -->
-  <meta name="theme" content="bold dense" />
-
-  <!-- Shared assets (single, correct paths) -->
-  <link rel="stylesheet" href="../shared/theme.css" />
+  <!-- Shared assets (AGENT.md requirements) -->
+  <link rel="stylesheet" href="../shared/theme.css"/>
+  <meta name="theme" content="bold dense"/>
+  <meta name="app-slug" content="audio-errands"/>
   <script defer src="../shared/frame.js"></script>
   <script defer src="../shared/clinician_feedback.js"></script>
-  <!-- App-specific styles (scoped to #app-root to avoid conflicts) -->
+
+  <!-- App-scoped styles (safe: all under #app-root) -->
   <style>
-    #app-root .grid{ display:grid; grid-template-columns: 1fr 320px; gap:16px; }
-    @media (max-width:900px){ #app-root .grid{ grid-template-columns: 1fr; } }
+    #app-root .status{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+    #app-root .status .dot{width:10px;height:10px;border-radius:50%;background:var(--muted)}
+    #app-root .hint{color:var(--muted);font-size:14px}
 
-    #app-root .status{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-    #app-root .status .dot{ width:10px; height:10px; border-radius:50%; }
+    #app-root .layout{display:grid;grid-template-columns:1fr 320px;gap:16px}
+    @media (max-width:900px){#app-root .layout{grid-template-columns:1fr}}
 
-    /* Boards for drag and drop */
-    #app-root .boards{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
-    @media (max-width:700px){ #app-root .boards{ grid-template-columns:1fr; } }
-    #app-root .board{ min-height:120px; padding:12px; border-radius:12px; border:1px dashed var(--line); background: color-mix(in oklab, var(--surface), var(--bg) 6%); }
-    #app-root .board h3{ margin:0 0 8px; font-size:14px; color:var(--muted); }
-    #app-root .board .drop{ min-height:52px; display:flex; gap:8px; flex-wrap:wrap; }
+    #app-root .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px}
+    #app-root .card h2{margin:0 0 8px;font-size:18px}
 
-    /* Pills + DnD */
-    #app-root .pill{ display:inline-flex; gap:8px; align-items:center; user-select:none; }
-    #app-root .pill[data-draggable="true"]{ cursor:grab; }
-    #app-root .pill.dragging{ opacity:.6; }
-    #app-root .disabled{ opacity:.4; pointer-events:none; }
+    #app-root .controls{display:grid;gap:12px;margin:8px 0 12px}
+    #app-root .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    #app-root label{font-size:14px;color:var(--muted)}
 
-    /* Right-side card + log */
-    #app-root .card{ background:var(--surface); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); padding:16px; }
-    #app-root .card h2{ margin:0 0 8px; font-size:18px; }
-    #app-root .log{ font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12px; white-space:pre-wrap;
-                    background: color-mix(in oklab, var(--surface), var(--bg) 6%); border:1px solid var(--line);
-                    border-radius:12px; padding:10px; max-height:200px; overflow:auto; }
+    #app-root .boards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+    @media (max-width:700px){#app-root .boards{grid-template-columns:1fr}}
+    #app-root .board{min-height:120px;padding:12px;border-radius:12px;border:1px dashed var(--line);
+      background: color-mix(in oklab, var(--surface), var(--bg) 6%)}
+    #app-root .board h3{margin:0 0 8px;font-size:14px;color:var(--muted)}
+    #app-root .drop{min-height:52px;display:flex;gap:8px;flex-wrap:wrap}
 
-    /* Overlay countdown */
-    #app-root .overlay{ position:fixed; inset:0; display:none; place-items:center; background:#0009; backdrop-filter:blur(2px); z-index:20; }
-    #app-root .overlay.show{ display:grid; }
-    #app-root .count{ font-size:clamp(48px,8vw,96px); font-weight:700; color:#e5edff; }
-    #app-root .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    #app-root .pill{display:inline-flex;gap:8px;align-items:center;user-select:none;padding:6px 10px;border-radius:999px;
+      border:1px solid var(--line);background:var(--surface)}
+    #app-root .pill[draggable="true"]{cursor:grab}
+    #app-root .pill.dragging{opacity:.6}
+    #app-root .disabled{opacity:.4;pointer-events:none}
 
-    /* Simple control rows */
-    #app-root .controls{ display:grid; gap:12px; }
-    #app-root .row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-    #app-root label{ font-size:14px; color:var(--muted); }
+    #app-root .log{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;white-space:pre-wrap;
+      background: color-mix(in oklab, var(--surface), var(--bg) 6%);border:1px solid var(--line);
+      border-radius:12px;padding:10px;max-height:220px;overflow:auto}
+
+    #app-root .overlay{position:fixed;inset:0;display:none;place-items:center;background:#0009;backdrop-filter:blur(2px);z-index:20}
+    #app-root .overlay.show{display:grid}
+    #app-root .count{font-size:clamp(48px,8vw,96px);font-weight:700;color:#e5edff}
+    #app-root .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   </style>
 </head>
 <body>
   <main id="app-root">
-    <!-- Frame.js will inject the hero header above this container -->
+    <!-- frame.js injects the hero above -->
 
-    <!-- Status row -->
+    <!-- Status -->
     <div class="status" aria-live="polite">
-      <span class="dot" id="audioDot" style="background:var(--err)"></span>
-      <span id="audioStatus">Speech: not ready</span>
+      <span class="dot" id="audioDot"></span>
+      <span id="audioStatus">Speech: initializing…</span>
     </div>
 
-    <div class="grid">
-      <!-- Left: Main card -->
+    <div class="layout">
+      <!-- Left: main -->
       <section class="card" aria-labelledby="briefingTitle">
         <h2 id="briefingTitle">Briefing</h2>
-        <p class="hint">Listen carefully. You'll hear a list of errands in order. When playback ends, drag the items into the correct sequence and submit.</p>
+        <p class="hint">Listen to the errands in order. When playback ends, arrange the items to match the same order, then submit.</p>
 
         <div class="controls">
           <div class="row">
@@ -87,7 +84,7 @@
               <option value="random">Random</option>
             </select>
 
-            <label for="distractors">Distractor items shown:</label>
+            <label for="distractors">Distractors shown:</label>
             <select id="distractors" aria-label="Distractors">
               <option value="0" selected>0</option>
               <option value="2">2</option>
@@ -100,18 +97,17 @@
             <select id="voiceSel" aria-label="Voice"></select>
 
             <label for="rate">Rate:</label>
-            <input id="rate" type="range" min="0.7" max="1.4" step="0.05" value="1" />
-            <button id="hearingTest" class="ghost" title="Play a short sample">Hearing check 🔊</button>
+            <input id="rate" type="range" min="0.7" max="1.4" step="0.05" value="1"/>
+            <button id="hearingTest" class="button">Hearing check 🔊</button>
           </div>
 
           <div class="row">
-            <button id="start" class="primary">Start Trial ▶️</button>
-            <button id="stopSpeak" class="warn">Stop Audio ⏹️</button>
-            <button id="reset" class="ghost">Reset</button>
+            <button id="start" class="button primary">Start trial ▶️</button>
+            <button id="stopSpeak" class="button warn">Stop audio ⏹️</button>
+            <button id="reset" class="button">Reset</button>
           </div>
         </div>
 
-        <!-- Boards -->
         <div class="boards">
           <div class="board">
             <h3>Available items</h3>
@@ -124,13 +120,13 @@
         </div>
 
         <div class="row" style="margin-top:12px">
-          <button id="submit" class="ok">Submit ✅</button>
-          <button id="clearSeq" class="ghost">Clear sequence</button>
+          <button id="submit" class="button ok">Submit ✅</button>
+          <button id="clearSeq" class="button">Clear sequence</button>
           <div id="feedback" class="hint" aria-live="polite"></div>
         </div>
       </section>
 
-      <!-- Right: Session card -->
+      <!-- Right: session -->
       <aside class="card" aria-labelledby="sessionTitle">
         <h2 id="sessionTitle">Session</h2>
         <div class="row">
@@ -139,70 +135,91 @@
           <div>Time: <strong id="timer">00:00</strong></div>
         </div>
         <div style="margin:12px 0">
-          <button id="downloadCsv" class="ghost">Download CSV ⬇️</button>
+          <button id="downloadCsv" class="button">Download CSV ⬇️</button>
         </div>
         <div id="log" class="log" aria-label="Log"></div>
       </aside>
     </div>
 
-    <!-- Countdown overlay -->
+    <!-- Countdown -->
     <div id="overlay" class="overlay" aria-hidden="true">
       <div id="count" class="count">3</div>
       <span id="overlaySr" class="sr-only">Trial starts soon</span>
     </div>
   </main>
 
-  <!-- App logic (unchanged except CSV augmentation line) -->
   <script>
   (function(){
-    // ====== Data ======
-    const MASTER= [
+    // ----- Constants & State -----
+    const MASTER = [
       'Bakery','Post office','Pharmacy','Supermarket','Library','Bank','Hardware store',
       'Butcher','Greengrocer','Stationery shop','Dry cleaner','Pet shop','Newsagent',
       'Clinic','School','Gym','Cafe','Florist','Electronics store','Bookshop'
     ];
-
-    let currentList=[], groundTruth=[], distractorPool=[],
-        trial=0, score=0, t0=null, tick=null, logs=[];
+    let groundTruth = [], distractorPool = [], trial = 0, score = 0, t0 = null, tick = null, logs = [];
 
     const els = {
       audioDot: document.getElementById('audioDot'),
       audioStatus: document.getElementById('audioStatus'),
-      voiceSel: document.getElementById('voiceSel'), rate: document.getElementById('rate'),
+      voiceSel: document.getElementById('voiceSel'),
+      rate: document.getElementById('rate'),
       hearing: document.getElementById('hearingTest'),
-      diff: document.getElementById('difficulty'), intr: document.getElementById('interrupts'), dist: document.getElementById('distractors'),
-      start: document.getElementById('start'), stopSpeak: document.getElementById('stopSpeak'), reset: document.getElementById('reset'),
-      pool: document.getElementById('pool'), seq: document.getElementById('sequence'),
-      submit: document.getElementById('submit'), clearSeq: document.getElementById('clearSeq'),
+      diff: document.getElementById('difficulty'),
+      intr: document.getElementById('interrupts'),
+      dist: document.getElementById('distractors'),
+      start: document.getElementById('start'),
+      stopSpeak: document.getElementById('stopSpeak'),
+      reset: document.getElementById('reset'),
+      pool: document.getElementById('pool'),
+      seq: document.getElementById('sequence'),
+      submit: document.getElementById('submit'),
+      clearSeq: document.getElementById('clearSeq'),
       feedback: document.getElementById('feedback'),
-      trialNum: document.getElementById('trialNum'), score: document.getElementById('score'), timer: document.getElementById('timer'),
+      trialNum: document.getElementById('trialNum'),
+      score: document.getElementById('score'),
+      timer: document.getElementById('timer'),
       log: document.getElementById('log'),
-      overlay: document.getElementById('overlay'), count: document.getElementById('count')
+      overlay: document.getElementById('overlay'),
+      count: document.getElementById('count')
     };
 
-    // ====== Speech ======
+    // ----- Speech Synthesis -----
     const synth = 'speechSynthesis' in window ? window.speechSynthesis : null;
-    function updateSpeechStatus(){
-      if(!synth){els.audioStatus.textContent='Speech: unavailable'; els.audioDot.style.background='var(--err)'; return}
-      const vs = synth.getVoices();
-      if(vs && vs.length){els.audioStatus.textContent='Speech: ready'; els.audioDot.style.background='var(--ok)';}
-      else {els.audioStatus.textContent='Speech: loading voices…'; els.audioDot.style.background='var(--warn)';}
+
+    function setDot(colorVar){
+      // Prefer common tokens; fallback to muted
+      const c = getComputedStyle(document.documentElement).getPropertyValue(colorVar) || getComputedStyle(document.documentElement).getPropertyValue('--muted');
+      els.audioDot.style.background = c || '#999';
     }
-    function populateVoices(){ if(!synth) return; const vs=synth.getVoices(); els.voiceSel.innerHTML='';
+
+    function updateSpeechStatus(){
+      if(!synth){ els.audioStatus.textContent = 'Speech: unavailable'; setDot('--danger'); return; }
+      const vs = synth.getVoices();
+      if(vs && vs.length){ els.audioStatus.textContent = 'Speech: ready'; setDot('--success'); }
+      else { els.audioStatus.textContent = 'Speech: loading voices…'; setDot('--warning'); }
+    }
+
+    function populateVoices(){
+      if(!synth) return;
+      const vs = synth.getVoices();
+      els.voiceSel.innerHTML = '';
       vs.forEach((v,i)=>{
-        const o=document.createElement('option');
-        o.value=i; o.textContent=\`\${v.name} — \${v.lang}\${v.default?' (default)':''}\`; els.voiceSel.appendChild(o);
+        const o = document.createElement('option');
+        o.value = i;
+        o.textContent = `${v.name} — ${v.lang}${v.default?' (default)':''}`;
+        els.voiceSel.appendChild(o);
       });
     }
+
     if(synth){
       function refreshVoices(attempt=0){
         populateVoices();
         updateSpeechStatus();
-        if(!synth.getVoices().length && attempt < 8){
+        if(!synth.getVoices().length && attempt < 10){
           setTimeout(()=>refreshVoices(attempt+1), 200);
         }
       }
-      window.speechSynthesis.onvoiceschanged = ()=>{ refreshVoices(); };
+      synth.onvoiceschanged = ()=>refreshVoices();
       refreshVoices();
     } else { updateSpeechStatus(); }
 
@@ -211,77 +228,68 @@
       return new Promise(res=>{
         if(!queue) synth.cancel();
         const u = new SpeechSynthesisUtterance(text);
-        const vs=synth.getVoices();
-        const idx=parseInt(els.voiceSel.value||0,10);
+        const vs = synth.getVoices();
+        const idx = parseInt(els.voiceSel.value||0,10);
         if(vs[idx]) u.voice = vs[idx];
         u.rate = parseFloat(els.rate.value||1);
-        u.onend=()=>res();
+        u.onend = ()=>res();
         synth.speak(u);
       });
     }
 
-    // ====== UI helpers ======
-    function h(tag, attrs={}, children=[]) {
-      const el = document.createElement(tag);
-      for (const [k,v] of Object.entries(attrs)) {
-        if(k==='_text') el.textContent=v;
-        else if(k.startsWith('on')) el.addEventListener(k.slice(2), v);
-        else el.setAttribute(k, v);
-      }
-      children.forEach(c=> el.appendChild(c));
-      return el;
-    }
-    function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a}
-    function sample(arr,n){return shuffle(arr.slice()).slice(0,n)}
-    function timeNow(){return new Date().toISOString()}
-    function fmt(ms){const s=Math.floor(ms/1000), m=Math.floor(s/60), r=s%60;return \`\${String(m).padStart(2,'0')}:\${String(r).padStart(2,'0')}\`}
+    // ----- Helpers -----
+    const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+    const sample=(arr,n)=>shuffle(arr.slice()).slice(0,n);
+    const timeNow=()=>new Date().toISOString();
+    const fmt=ms=>{const s=Math.floor(ms/1000), m=Math.floor(s/60), r=s%60; return `${String(m).padStart(2,'0')}:${String(r).padStart(2,'0')}`};
 
-    function startTimer(){t0=performance.now(); tick = setInterval(()=>{els.timer.textContent=fmt(performance.now()-t0)}, 200)}
-    function stopTimer(){if(tick){clearInterval(tick); tick=null}}
+    function startTimer(){ t0=performance.now(); tick=setInterval(()=>{ els.timer.textContent=fmt(performance.now()-t0); }, 200); }
+    function stopTimer(){ if(tick){ clearInterval(tick); tick=null; } }
 
-    function clearBoards(){els.pool.innerHTML=''; els.seq.innerHTML='';}
+    function clearBoards(){ els.pool.innerHTML=''; els.seq.innerHTML=''; }
+    function disableBoards(disabled){ [els.pool,els.seq].forEach(z=> z.classList.toggle('disabled', !!disabled)); }
 
     function mkPill(label){
-      return h('div',{class:'pill', draggable:'true', 'data-draggable':'true', 'data-item':label, _text:label});
+      const d = document.createElement('div');
+      d.className = 'pill';
+      d.setAttribute('draggable','true');
+      d.setAttribute('data-item', label);
+      d.textContent = label;
+      return d;
     }
 
-    function disableBoards(disabled){
-      [els.pool,els.seq].forEach(z=>{
-        if(disabled) z.classList.add('disabled'); else z.classList.remove('disabled');
-      });
-    }
-
-    function makeDnD(container){
+    // Drag & drop (reorder by pointer position)
+    (function makeDnD(){
       let dragging=null;
-      container.addEventListener('dragstart', e=>{
+      document.addEventListener('dragstart', e=>{
+        const t=e.target.closest('.pill'); if(!t) return;
         if(els.pool.classList.contains('disabled')){ e.preventDefault(); return; }
-        const t=e.target.closest('.pill'); if(!t) return; dragging=t; t.classList.add('dragging'); e.dataTransfer.effectAllowed='move';
+        dragging=t; t.classList.add('dragging'); e.dataTransfer.effectAllowed='move';
       });
-      container.addEventListener('dragend', ()=>{ if(dragging){ dragging.classList.remove('dragging'); dragging=null; }});
+      document.addEventListener('dragend', ()=>{ if(dragging){ dragging.classList.remove('dragging'); dragging=null; }});
       [els.pool, els.seq].forEach(zone=>{
         zone.addEventListener('dragover', e=>{
           if(zone.classList.contains('disabled')) return;
-          e.preventDefault(); const after = getAfter(zone,e.clientX,e.clientY); const d = document.querySelector('.pill.dragging'); if(!d) return;
+          e.preventDefault();
+          const after = getAfter(zone, e.clientY);
+          const d = document.querySelector('.pill.dragging'); if(!d) return;
           after ? zone.insertBefore(d, after) : zone.appendChild(d);
         });
       });
-    }
-    function getAfter(container,x,y){
-      const els2=[...container.querySelectorAll('.pill:not(.dragging)')];
-      return els2.reduce((closest,child)=>{
-        const box=child.getBoundingClientRect();
-        const offset = y - box.top - box.height/2;
-        if(offset<0 && offset>closest.offset) return {offset, element:child};
-        else return closest;
-      }, {offset:Number.NEGATIVE_INFINITY}).element;
-    }
+      function getAfter(container, y){
+        const els2=[...container.querySelectorAll('.pill:not(.dragging)')];
+        return els2.reduce((closest,child)=>{
+          const box=child.getBoundingClientRect();
+          const offset = y - (box.top + box.height/2);
+          return (offset<0 && offset>closest.offset) ? {offset, element:child} : closest;
+        }, {offset:-Infinity}).element;
+      }
+    })();
 
-    makeDnD(document);
-
-    // ====== Trial flow ======
+    // ----- Trial flow -----
     async function runCountdown(n=3){
       els.overlay.classList.add('show'); els.overlay.setAttribute('aria-hidden','false');
-      for(let i=n;i>0;i--){els.count.textContent=i; await new Promise(r=>setTimeout(r,750));}
+      for(let i=n;i>0;i--){ els.count.textContent=i; await new Promise(r=>setTimeout(r,750)); }
       els.overlay.classList.remove('show'); els.overlay.setAttribute('aria-hidden','true');
     }
 
@@ -291,10 +299,7 @@
       const dnum = parseInt(els.dist.value,10);
       const leftovers = MASTER.filter(x=>!groundTruth.includes(x));
       distractorPool = sample(leftovers, dnum);
-
-      currentList = shuffle([...groundTruth, ...distractorPool]);
-
-      // UI
+      const currentList = shuffle([...groundTruth, ...distractorPool]);
       clearBoards();
       currentList.forEach(item=> els.pool.appendChild(mkPill(item)));
     }
@@ -302,49 +307,36 @@
     async function playSequence(){
       if(synth){ await speak('Listen carefully to the list of errands in order.'); }
       for(let i=0;i<groundTruth.length;i++){
-        if(synth){ await speak(\`\${i+1}. \${groundTruth[i]}\`,{queue:true}); }
-        if(els.intr.value!=='none' && Math.random()< (els.intr.value==='one'? (i===Math.floor(groundTruth.length/2)?1:0): 0.35)){
-          await speak('Attention: remember to focus.',{queue:true});
+        if(synth){ await speak(`${i+1}. ${groundTruth[i]}`, {queue:true}); }
+        if(els.intr.value!=='none' && Math.random() < (els.intr.value==='one' ? (i===Math.floor(groundTruth.length/2)?1:0) : 0.35)){
+          if(synth) await speak('Attention: remember to focus.', {queue:true});
         }
       }
-      if(synth){ await speak('Now arrange the items in the same order, then press submit.',{queue:true}); }
-      // Unlock arranging only after entire sequence is delivered
-      disableBoards(false);
+      if(synth){ await speak('Now arrange the items in the same order, then press submit.', {queue:true}); }
+      disableBoards(false); // unlock after full playback
     }
 
-    function startTrial(){
-      trial++; els.trialNum.textContent=trial; els.feedback.textContent='';
-      buildTrial();
-      // lock boards until playback completes
-      disableBoards(true);
-      runCountdown(3).then(async()=>{
-        startTimer();
-        await playSequence();
-      });
-    }
-
-    function readSeq(container){
-      return [...container.querySelectorAll('.pill')].map(p=>p.getAttribute('data-item'));
-    }
+    function readSeq(container){ return [...container.querySelectorAll('.pill')].map(p=>p.getAttribute('data-item')); }
 
     function grade(){
       const attempt = readSeq(els.seq);
       if(attempt.length!==groundTruth.length){
         els.feedback.textContent = 'Sequence incomplete: drag all required items, then submit.'; return;
       }
-      const correctPositions = attempt.map((x,i)=> x===groundTruth[i]);
-      const correctCount = correctPositions.filter(Boolean).length;
+      const correctCount = attempt.reduce((acc,x,i)=> acc + (x===groundTruth[i]?1:0), 0);
       const perfect = correctCount===groundTruth.length;
-      const elapsed = t0? Math.round(performance.now()-t0): null;
+      const elapsed = t0? Math.round(performance.now()-t0) : null;
 
       if(perfect){ score+=1; els.score.textContent=score; }
       stopTimer();
 
       const row = {
-        ts: timeNow(), trial, n: groundTruth.length, distractors: distractorPool.length,
-        perfect, correctCount, elapsedMs: elapsed, groundTruth: groundTruth.join('|'), attempt: attempt.join('|')
+        ts: timeNow(), trial,
+        n: groundTruth.length, distractors: distractorPool.length,
+        perfect, correctCount, elapsedMs: elapsed,
+        groundTruth: groundTruth.join('|'), attempt: attempt.join('|')
       };
-      logs.push(row);
+      logs.unshift(row); // newest first
       els.log.textContent = [
         `#${row.trial} — ${perfect? 'PERFECT ✅' : 'Partial'}; ${correctCount}/${groundTruth.length} in ${fmt(elapsed)}`,
         `Truth: ${row.groundTruth}`,
@@ -359,7 +351,7 @@
     function resetAll(){
       if(synth) synth.cancel();
       stopTimer(); t0=null; els.timer.textContent='00:00';
-      groundTruth=[]; currentList=[]; distractorPool=[]; clearBoards();
+      groundTruth=[]; distractorPool=[]; clearBoards();
       els.feedback.textContent=''; disableBoards(false);
     }
 
@@ -370,36 +362,58 @@
       return head+'\n'+body;
     }
 
-    // ====== Wiring ======
-    els.start.addEventListener('click', ()=>{ resetAll(); startTrial(); });
-    els.stopSpeak.addEventListener('click', ()=>{ if(synth) synth.cancel(); });
-    els.reset.addEventListener('click', ()=>{ resetAll(); });
-    els.submit.addEventListener('click', grade);
-    els.clearSeq.addEventListener('click', ()=>{ if(els.seq.classList.contains('disabled')) return; els.seq.innerHTML=''; });
-    els.pool.addEventListener('click', e=>{ if(els.pool.classList.contains('disabled')) return; const p=e.target.closest('.pill'); if(!p) return; els.seq.appendChild(p); });
-    els.seq.addEventListener('click', e=>{ if(els.seq.classList.contains('disabled')) return; const p=e.target.closest('.pill'); if(!p) return; els.pool.appendChild(p); });
-    els.hearing.addEventListener('click', ()=>{ if(synth) speak('This is a short audio check. One, two, three.'); });
-    document.addEventListener('visibilitychange', ()=>{ if(document.hidden && synth) synth.cancel(); });
+    // ----- Wiring -----
+    els.start.addEventListener('click', async ()=>{
+      resetAll();
+      trial += 1; els.trialNum.textContent = trial;
+      els.feedback.textContent = '';
+      buildTrial();
+      disableBoards(true);
+      await runCountdown(3);
+      startTimer();
+      await playSequence();
+    });
 
-    // CSV download (ensures clinician_comment is appended)
+    els.stopSpeak.addEventListener('click', ()=>{ if(synth) synth.cancel(); });
+    els.reset.addEventListener('click', resetAll);
+    els.submit.addEventListener('click', grade);
+    els.clearSeq.addEventListener('click', ()=>{ if(!els.seq.classList.contains('disabled')) els.seq.innerHTML=''; });
+
+    // Click-to-move as alternative to drag
+    els.pool.addEventListener('click', e=>{
+      if(els.pool.classList.contains('disabled')) return;
+      const p = e.target.closest('.pill'); if(!p) return;
+      els.seq.appendChild(p);
+    });
+    els.seq.addEventListener('click', e=>{
+      if(els.seq.classList.contains('disabled')) return;
+      const p = e.target.closest('.pill'); if(!p) return;
+      els.pool.appendChild(p);
+    });
+
+    // Keyboard move support
+    document.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter' && e.target.classList?.contains('pill')){
+        if(els.seq.classList.contains('disabled') || els.pool.classList.contains('disabled')) return;
+        const p=e.target; const inSeq = p.parentElement===els.seq; (inSeq?els.pool:els.seq).appendChild(p);
+      }
+    });
+
+    // CSV download (augmented by clinician_feedback.js if present)
     document.getElementById('downloadCsv').addEventListener('click', ()=>{
       if(!logs.length){ alert('No data yet. Run at least one trial.'); return; }
       const csv = (window.__augmentCSV ? window.__augmentCSV(toCsv(logs)) : toCsv(logs));
       const blob = new Blob([csv], {type:'text/csv'});
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href=url; a.download=`audio-errand-planner_logs_${Date.now()}.csv`;
-      // programmatic click (not intercepted), so augmentation above is crucial
-      a.click(); URL.revokeObjectURL(url);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `audio-errands_logs_${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
     });
 
-    // Keyboard support for moving focus pills between boards
-    document.addEventListener('keydown', (e)=>{
-      if(e.key==='Enter' && e.target.classList?.contains('pill')){
-        if(els.seq.classList.contains('disabled') || els.pool.classList.contains('disabled')) return;
-        const p=e.target;
-        const inSeq = p.parentElement===els.seq; (inSeq?els.pool:els.seq).appendChild(p);
-      }
-    });
+    // Be polite if tab becomes hidden
+    document.addEventListener('visibilitychange', ()=>{ if(document.hidden && synth) synth.cancel(); });
   })();
   </script>
 </body>
