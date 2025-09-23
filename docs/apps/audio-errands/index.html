@@ -5,17 +5,20 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Audio Errands</title>
 
-  <!-- Shared assets (AGENT.md requirements) -->
+  <!-- Shared assets -->
   <link rel="stylesheet" href="../shared/theme.css"/>
   <meta name="theme" content="bold dense"/>
   <meta name="app-slug" content="audio-errands"/>
   <script defer src="../shared/frame.js"></script>
   <script defer src="../shared/clinician_feedback.js"></script>
 
-  <!-- App-scoped styles (safe: all under #app-root) -->
   <style>
+    /* Quick visual sanity: if you see this tiny gray bar, the page CSS is at least parsed.
+       If buttons still look default, theme.css likely didn't load. */
+    #load-check {font:12px/1.4 system-ui; color:#555; margin:6px 0}
+
     #app-root .status{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
-    #app-root .status .dot{width:10px;height:10px;border-radius:50%;background:var(--muted)}
+    #app-root .status .dot{width:10px;height:10px;border-radius:50%}
     #app-root .hint{color:var(--muted);font-size:14px}
 
     #app-root .layout{display:grid;grid-template-columns:1fr 320px;gap:16px}
@@ -49,16 +52,24 @@
     #app-root .overlay.show{display:grid}
     #app-root .count{font-size:clamp(48px,8vw,96px);font-weight:700;color:#e5edff}
     #app-root .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+    /* Clinician notes card (local fallback) */
+    #app-root .note-card{margin-top:16px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+    #app-root .note-card textarea{width:100%;min-height:70px;border:1px solid var(--line);border-radius:8px;padding:8px}
   </style>
 </head>
 <body>
+  <div id="load-check">Loading…</div>
   <main id="app-root">
-    <!-- frame.js injects the hero above -->
+    <!-- frame.js injects hero above -->
 
-    <!-- Status -->
+    <!-- Status chips show whether assets loaded -->
     <div class="status" aria-live="polite">
-      <span class="dot" id="audioDot"></span>
+      <span class="dot" id="audioDot" style="background:#999"></span>
       <span id="audioStatus">Speech: initializing…</span>
+      <span id="themeStatus" class="hint">theme: ?</span>
+      <span id="frameStatus" class="hint">frame: ?</span>
+      <span id="clinStatus" class="hint">clinician: ?</span>
     </div>
 
     <div class="layout">
@@ -93,11 +104,11 @@
           </div>
 
           <div class="row">
-            <label for="voiceSel">Voice:</label>
+            <label for="voiceSel">Voice (en-GB only):</label>
             <select id="voiceSel" aria-label="Voice"></select>
 
             <label for="rate">Rate:</label>
-            <input id="rate" type="range" min="0.7" max="1.4" step="0.05" value="1"/>
+            <input id="rate" type="range" min="0.9" max="1.2" step="0.05" value="1"/>
             <button id="hearingTest" class="button">Hearing check 🔊</button>
           </div>
 
@@ -123,6 +134,12 @@
           <button id="submit" class="button ok">Submit ✅</button>
           <button id="clearSeq" class="button">Clear sequence</button>
           <div id="feedback" class="hint" aria-live="polite"></div>
+        </div>
+
+        <!-- Local clinician notes (shows even if external script doesn't) -->
+        <div class="note-card">
+          <label for="clinNote"><strong>Clinician notes</strong></label>
+          <textarea id="clinNote" placeholder="Observations about strategy, distractibility, supports needed…"></textarea>
         </div>
       </section>
 
@@ -150,6 +167,13 @@
 
   <script>
   (function(){
+    // --- Loader diagnostics (helps you verify the theme/frame/clin scripts actually loaded)
+    const byVar = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+    document.getElementById('themeStatus').textContent = 'theme: ' + (byVar('--text') ? 'ok' : 'MISSING');
+    document.getElementById('frameStatus').textContent = 'frame: ' + (window.__frameReady ? 'ok' : 'pending');
+    document.getElementById('clinStatus').textContent  = 'clinician: ' + (window.__augmentCSV ? 'ok' : 'fallback');
+    document.getElementById('load-check').textContent = 'Loaded';
+
     // ----- Constants & State -----
     const MASTER = [
       'Bakery','Post office','Pharmacy','Supermarket','Library','Bank','Hardware store',
@@ -180,28 +204,30 @@
       timer: document.getElementById('timer'),
       log: document.getElementById('log'),
       overlay: document.getElementById('overlay'),
-      count: document.getElementById('count')
+      count: document.getElementById('count'),
+      clinNote: document.getElementById('clinNote')
     };
 
-    // ----- Speech Synthesis -----
+    // ----- Status dot helpers (tokens fallback-safe)
+    function setDot(color){
+      // Try CSS variable names first, else assume direct color value
+      const val = color.startsWith('--') ? (getComputedStyle(document.documentElement).getPropertyValue(color) || '#999') : color;
+      els.audioDot.style.background = val.trim() || '#999';
+    }
+
+    // ----- Speech Synthesis (en-GB only, with graceful fallback) -----
     const synth = 'speechSynthesis' in window ? window.speechSynthesis : null;
-
-    function setDot(colorVar){
-      // Prefer common tokens; fallback to muted
-      const c = getComputedStyle(document.documentElement).getPropertyValue(colorVar) || getComputedStyle(document.documentElement).getPropertyValue('--muted');
-      els.audioDot.style.background = c || '#999';
-    }
-
-    function updateSpeechStatus(){
-      if(!synth){ els.audioStatus.textContent = 'Speech: unavailable'; setDot('--danger'); return; }
+    function enGbVoices(){
+      if(!synth) return [];
       const vs = synth.getVoices();
-      if(vs && vs.length){ els.audioStatus.textContent = 'Speech: ready'; setDot('--success'); }
-      else { els.audioStatus.textContent = 'Speech: loading voices…'; setDot('--warning'); }
+      const gb = vs.filter(v => /en-GB/i.test(v.lang));
+      if(gb.length) return gb;
+      const en = vs.filter(v => /^en-/i.test(v.lang));
+      return en.length ? en : vs;
     }
-
     function populateVoices(){
       if(!synth) return;
-      const vs = synth.getVoices();
+      const vs = enGbVoices();
       els.voiceSel.innerHTML = '';
       vs.forEach((v,i)=>{
         const o = document.createElement('option');
@@ -210,14 +236,22 @@
         els.voiceSel.appendChild(o);
       });
     }
-
+    function updateSpeechStatus(){
+      if(!synth){ els.audioStatus.textContent = 'Speech: unavailable'; setDot('--danger'); return; }
+      const vs = synth.getVoices();
+      if(vs && vs.length){
+        populateVoices();
+        els.audioStatus.textContent = 'Speech: ready (en-GB filtered)';
+        setDot('--success');
+      } else {
+        els.audioStatus.textContent = 'Speech: loading voices…';
+        setDot('--warning');
+      }
+    }
     if(synth){
       function refreshVoices(attempt=0){
-        populateVoices();
         updateSpeechStatus();
-        if(!synth.getVoices().length && attempt < 10){
-          setTimeout(()=>refreshVoices(attempt+1), 200);
-        }
+        if(!synth.getVoices().length && attempt < 10){ setTimeout(()=>refreshVoices(attempt+1), 200); }
       }
       synth.onvoiceschanged = ()=>refreshVoices();
       refreshVoices();
@@ -227,14 +261,25 @@
       if(!synth) return Promise.resolve();
       return new Promise(res=>{
         if(!queue) synth.cancel();
+        const list = enGbVoices();
         const u = new SpeechSynthesisUtterance(text);
-        const vs = synth.getVoices();
-        const idx = parseInt(els.voiceSel.value||0,10);
-        if(vs[idx]) u.voice = vs[idx];
+        const idx = Math.min(parseInt(els.voiceSel.value||0,10), Math.max(0, list.length-1));
+        if(list[idx]) u.voice = list[idx];
         u.rate = parseFloat(els.rate.value||1);
         u.onend = ()=>res();
         synth.speak(u);
       });
+    }
+
+    // WebAudio beep (mobile-proof hearing check fallback)
+    function beep(){
+      try{
+        const ctx = new (window.AudioContext||window.webkitAudioContext)();
+        const o = ctx.createOscillator(); const g = ctx.createGain();
+        o.type = 'sine'; o.frequency.value = 880; g.gain.value = 0.1;
+        o.connect(g); g.connect(ctx.destination); o.start();
+        setTimeout(()=>{ o.stop(); ctx.close(); }, 250);
+      }catch(e){}
     }
 
     // ----- Helpers -----
@@ -245,7 +290,6 @@
 
     function startTimer(){ t0=performance.now(); tick=setInterval(()=>{ els.timer.textContent=fmt(performance.now()-t0); }, 200); }
     function stopTimer(){ if(tick){ clearInterval(tick); tick=null; } }
-
     function clearBoards(){ els.pool.innerHTML=''; els.seq.innerHTML=''; }
     function disableBoards(disabled){ [els.pool,els.seq].forEach(z=> z.classList.toggle('disabled', !!disabled)); }
 
@@ -254,11 +298,12 @@
       d.className = 'pill';
       d.setAttribute('draggable','true');
       d.setAttribute('data-item', label);
+      d.tabIndex = 0; // keyboard access
       d.textContent = label;
       return d;
     }
 
-    // Drag & drop (reorder by pointer position)
+    // Drag & drop
     (function makeDnD(){
       let dragging=null;
       document.addEventListener('dragstart', e=>{
@@ -331,16 +376,18 @@
       stopTimer();
 
       const row = {
-        ts: timeNow(), trial,
+        ts: new Date().toISOString(), trial,
         n: groundTruth.length, distractors: distractorPool.length,
         perfect, correctCount, elapsedMs: elapsed,
-        groundTruth: groundTruth.join('|'), attempt: attempt.join('|')
+        groundTruth: groundTruth.join('|'), attempt: attempt.join('|'),
+        clinician_comment: (els.clinNote?.value || '').replaceAll('\n',' ')
       };
-      logs.unshift(row); // newest first
+      logs.unshift(row);
       els.log.textContent = [
         `#${row.trial} — ${perfect? 'PERFECT ✅' : 'Partial'}; ${correctCount}/${groundTruth.length} in ${fmt(elapsed)}`,
         `Truth: ${row.groundTruth}`,
         `You:   ${row.attempt}`,
+        row.clinician_comment ? `Note:  ${row.clinician_comment}` : '',
         '',
         ...els.log.textContent.split('\n')
       ].join('\n');
@@ -356,9 +403,9 @@
     }
 
     function toCsv(rows){
-      const cols = ['ts','trial','n','distractors','perfect','correctCount','elapsedMs','groundTruth','attempt'];
+      const cols = ['ts','trial','n','distractors','perfect','correctCount','elapsedMs','groundTruth','attempt','clinician_comment'];
       const head = cols.join(',');
-      const body = rows.map(r=> cols.map(k=>`"${String(r[k]).replaceAll('"','""')}"`).join(',')).join('\n');
+      const body = rows.map(r=> cols.map(k=>`"${String(r[k]??'').replaceAll('"','""')}"`).join(',')).join('\n');
       return head+'\n'+body;
     }
 
@@ -399,22 +446,5 @@
       }
     });
 
-    // CSV download (augmented by clinician_feedback.js if present)
-    document.getElementById('downloadCsv').addEventListener('click', ()=>{
-      if(!logs.length){ alert('No data yet. Run at least one trial.'); return; }
-      const csv = (window.__augmentCSV ? window.__augmentCSV(toCsv(logs)) : toCsv(logs));
-      const blob = new Blob([csv], {type:'text/csv'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `audio-errands_logs_${Date.now()}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-
-    // Be polite if tab becomes hidden
-    document.addEventListener('visibilitychange', ()=>{ if(document.hidden && synth) synth.cancel(); });
-  })();
-  </script>
-</body>
-</html>
+    // Hearing check (speech + beep fallback)
+    els.hearing.addEv
