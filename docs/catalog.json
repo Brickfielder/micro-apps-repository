@@ -1,11 +1,11 @@
 [
   {
-    "slug": "audio-errands",
-    "title": "Audio Errands",
-    "description": "Auditory attention and following multi-step spoken instructions.",
-    "emoji": "🎧",
-    "tags": ["attention", "executive"]
-  },
+  "slug": "audio-errands",
+  "title": "Audio Errand Planner",
+  "description": "Practice auditory attention and sequencing by recalling errands in the correct order.",
+  "emoji": "🎧",
+  "tags": ["attention", "executive"]
+},
   {
     "slug": "barista-chaos",
     "title": "Barista Chaos",
