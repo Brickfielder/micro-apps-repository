@@ -3,46 +3,25 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Audio Errand Planner — v0.32</title>
+  <title>Audio Errand Planner — v0.33</title>
 
-  <!-- Identify the app for the shared frame -->
+  <!-- Frame header: pulls title/description from catalog.json via this slug -->
+  <meta name="app-slug" content="audio-errands" />
   <meta name="theme" content="bold dense" />
 
-  <!-- Shared assets (GitHub Pages: docs/ is part of the public path) -->
-<link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3">
-<script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
-<script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
+  <!-- Shared assets published from repo/docs/ as site root (no /docs in URL) -->
+  <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3">
+  <script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
+  <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
+
   <style>
     :root{ --ok:#12b886; --warn:#f59f00; --err:#e03131; }
-
-    /* ===== Top hero banner (pink/orange box) ===== */
-    .hero-strip{
-      margin: 12px auto 8px;
-      max-width: min(1100px, 92vw);
-      background: #fde6e1;              /* soft peach */
-      border: 1px solid #f5c7ba;
-      border-radius: 14px;
-      box-shadow: 0 2px 6px rgba(0,0,0,.06) inset, 0 1px 2px rgba(0,0,0,.05);
-      padding: 14px 18px;
-    }
-    .hero-text{ text-align:center; }
-    .hero-text h1{
-      margin: 0;
-      font-size: clamp(20px, 2.2vw, 28px);
-      font-weight: 700;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      letter-spacing: .2px;
-    }
-    .hero-text p{
-      margin: 6px 0 0;
-      font-size: clamp(14px, 1.4vw, 16px);
-      font-weight: 400;
-      color: var(--muted, #475467);
-    }
+    /* space below injected header */
+    .frame-hero + #app-root{ margin-top: 12px; }
 
     /* ===== Layout ===== */
     #app-root .grid{ display:grid; grid-template-columns: 1fr 320px; gap:16px; max-width:min(1100px, 92vw); margin:0 auto; }
-    @media (max-width:900px){ #app-root .grid{ grid-template-columns: 1fr; } }
+    @media (max-width:900px){ #app-root .grid{ grid-template-columns:1fr; } }
 
     #app-root .status{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; max-width:min(1100px, 92vw); margin:8px auto; }
     #app-root .status .dot{ width:10px; height:10px; border-radius:50%; background:var(--err); }
@@ -76,13 +55,7 @@
   </style>
 </head>
 <body>
-  <!-- Top pink/orange banner -->
-  <div class="hero-strip">
-    <div class="hero-text">
-      <h1>Audio Errand Planner</h1>
-      <p>Practice auditory attention and sequencing by recalling errands in the correct order.</p>
-    </div>
-  </div>
+  <!-- NOTE: no manual hero strip; frame.js injects the header based on catalog.json -->
 
   <div id="app-root">
     <!-- Status row -->
@@ -123,7 +96,6 @@
           </div>
 
           <div class="row">
-            <!-- Hidden by CSS, still present for compatibility -->
             <label for="voiceSel" style="display:none">Voice:</label>
             <select id="voiceSel" aria-label="Voice" style="display:none"></select>
 
@@ -180,7 +152,7 @@
     </div>
   </div>
 
-  <!-- App logic -->
+  <!-- App logic (unchanged from your working version) -->
   <script>
   (function(){
     // ====== Data ======
@@ -212,7 +184,7 @@
     const synth = 'speechSynthesis' in window ? window.speechSynthesis : null;
     const PREFERRED_VOICE = /libby/i; // Microsoft Libby Online (Natural) — en-GB
     let abortSpeech = false;
-    let speakingToken = 0; // invalidates in-flight speak() calls
+    let speakingToken = 0;
 
     function updateSpeechStatus(msg){
       if(!synth){ els.audioStatus.textContent='Speech: unavailable'; els.audioDot.style.background='var(--err)'; return; }
@@ -221,13 +193,11 @@
       if(vs && vs.length){ els.audioStatus.textContent='Speech: ready'; els.audioDot.style.background='var(--ok)'; }
       else { els.audioStatus.textContent='Speech: loading voices…'; els.audioDot.style.background='var(--warn)'; }
     }
-
     function chooseVoice(vs){
       const libby = vs.find(v => PREFERRED_VOICE.test(v.name));
       if (libby) return libby;
       return vs.find(v => /en-GB/i.test(v.lang)) || vs.find(v => v.default) || vs[0] || null;
     }
-
     function populateVoices(){
       if(!synth) return;
       const vs = synth.getVoices();
@@ -237,11 +207,10 @@
         const o=document.createElement('option');
         o.value='0'; o.textContent=`${v.name} — ${v.lang}`;
         els.voiceSel.appendChild(o);
-        els.voiceSel.disabled = true; // locked to one
+        els.voiceSel.disabled = true;
       }
       updateSpeechStatus();
     }
-
     async function waitForVoices(maxTries=12, delayMs=250){
       if(!synth) return false;
       for(let i=0;i<maxTries;i++){
@@ -251,7 +220,6 @@
       }
       return false;
     }
-
     if(synth){
       synth.addEventListener && synth.addEventListener('voiceschanged', populateVoices);
       populateVoices();
@@ -262,8 +230,7 @@
 
     function cancelAllSpeech(){
       abortSpeech = true;
-      speakingToken++; // invalidate any in-flight speak()
-
+      speakingToken++;
       if (synth){
         try { synth.cancel(); } catch {}
         try { synth.pause(); synth.resume(); } catch {}
@@ -273,18 +240,16 @@
           else { try { synth.cancel(); } catch {} }
         }, 80);
       }
-
       disableBoards(false);
       try { stopTimer(); } catch {}
       try { els.overlay.classList.remove('show'); els.overlay.setAttribute('aria-hidden','true'); } catch {}
     }
     function resetAbort(){ abortSpeech = false; }
 
-    // Speak with token + timeout so it always resolves
     function speak(text, {queue=false, timeoutMs=8000}={}){
       if(!synth) return Promise.resolve();
       if(abortSpeech) return Promise.resolve();
-      const myToken = ++speakingToken; // unique to this call
+      const myToken = ++speakingToken;
       return new Promise(res=>{
         if(!queue) { try{ synth.cancel(); }catch{} }
         const u = new SpeechSynthesisUtterance(text);
@@ -355,7 +320,6 @@
       for(let i=n;i>0;i--){ if(abortSpeech) break; els.count.textContent=i; await new Promise(r=>setTimeout(r,750));}
       els.overlay.classList.remove('show'); els.overlay.setAttribute('aria-hidden','true');
     }
-
     function buildTrial(){
       const n = parseInt(els.diff.value,10);
       groundTruth = sample(MASTER, n);
@@ -366,7 +330,6 @@
       clearBoards();
       currentList.forEach(item=> els.pool.appendChild(mkPill(item)));
     }
-
     async function playSequence(){
       try{
         if(synth && !abortSpeech){ await speak('Listen carefully to the list of errands in order.', {timeoutMs:5000}); }
@@ -383,7 +346,6 @@
         disableBoards(false);
       }
     }
-
     function startTrial(){
       resetAbort();
       trial++; els.trialNum.textContent=trial; els.feedback.textContent='';
@@ -395,9 +357,7 @@
         await playSequence();
       });
     }
-
     function readSeq(container){ return [...container.querySelectorAll('.pill')].map(p=>p.getAttribute('data-item')); }
-
     function grade(){
       const attempt = readSeq(els.seq);
       if(attempt.length!==groundTruth.length){
@@ -425,14 +385,12 @@
 
       els.feedback.textContent = perfect ? 'Great! Exact match. Start another trial when ready.' : 'Not quite. You can adjust and resubmit or start a new trial.';
     }
-
     function resetAll(){
       cancelAllSpeech();
       stopTimer(); t0=null; els.timer.textContent='00:00';
       groundTruth=[]; currentList=[]; distractorPool=[]; clearBoards();
       els.feedback.textContent=''; disableBoards(false);
     }
-
     function toCsv(rows){
       const cols = ['ts','trial','n','distractors','perfect','correctCount','elapsedMs','groundTruth','attempt'];
       const head = cols.join(',');
@@ -460,7 +418,6 @@
       a.click(); URL.revokeObjectURL(url);
     });
 
-    // Keyboard support
     document.addEventListener('keydown', (e)=>{
       if(e.key==='Enter' && e.target.classList?.contains('pill')){
         if(els.seq.classList.contains('disabled') || els.pool.classList.contains('disabled')) return;
