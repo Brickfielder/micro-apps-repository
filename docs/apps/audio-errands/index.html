@@ -14,6 +14,21 @@
 <script defer src="/micro-apps-repository/docs/shared/clinician_feedback.js?v=1"></script>
 
   <style>
+    .hero-text {
+  text-align: center;
+  padding: 1rem 0;
+}
+.hero-text h1 {
+  margin: 0;
+  font-size: clamp(20px, 2.2vw, 28px);
+  font-weight: 700;
+}
+.hero-text p {
+  margin: 0.25rem 0 0;
+  font-size: clamp(14px, 1.4vw, 16px);
+  font-weight: 400;
+  color: var(--muted, #475467);
+}
     :root{ --ok:#12b886; --warn:#f59f00; --err:#e03131; }
     #app-root .grid{ display:grid; grid-template-columns: 1fr 320px; gap:16px; }
     @media (max-width:900px){ #app-root .grid{ grid-template-columns: 1fr; } }
@@ -55,7 +70,10 @@
       <span class="dot" id="audioDot" style="background:var(--err)"></span>
       <span id="audioStatus">Speech: not ready</span>
     </div>
-
+<div class="hero-text">
+  <h1>Audio Errand Planner</h1>
+  <p>Practice auditory attention and sequencing by recalling errands in the correct order.</p>
+</div>
     <div class="grid">
       <section class="card" aria-labelledby="briefingTitle">
         <h2 id="briefingTitle">Briefing</h2>
