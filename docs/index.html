@@ -4,53 +4,55 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Cognitive Rehabilitation Micro-Apps</title>
-<script>
-  /* ==== Catalog → clickable cards (docs/apps/*.html) ==== */
-  const grid = document.getElementById('grid');
-
-  function getBasePath(){
-    const parts = (location.pathname || "/").split("/").filter(Boolean);
-    // e.g. /micro-apps-repository
-    return parts.length ? `/${parts[0]}` : "";
+<style>
+  :root{
+    --bg:#f9fafb; --surface:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+    --accent:#ff7a6e; --pill:#f2f4f7; --radius:16px;
+    --shadow:0 2px 6px rgba(0,0,0,.08); --shadow-hover:0 10px 24px rgba(0,0,0,.12);
+    --header-h:84px; --maxw:1200px;
   }
-  const BASE = getBasePath();
-
-  async function loadJson(paths){
-    for (const p of paths){
-      try{
-        const r = await fetch(p, { cache: 'no-store' });
-        if (r.ok) return await r.json();
-      }catch(e){}
-    }
-    throw new Error('catalog.json not found in expected locations');
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
+    color:var(--text);
+    background: var(--bg);
+    position: relative;
   }
 
-  (async () => {
-    const catalog = await loadJson([
-      `${BASE}/catalog.json`,
-      `${BASE}/docs/catalog.json`,
-      `${BASE}/shared/catalog.json`
-    ]);
+  /* Particle canvas behind everything (optional flair) */
+  #tsparticles { position: fixed; inset: 0; z-index: -1; }
 
-    const cards = catalog.map(app => {
-      const a = document.createElement('a');
-      a.className = 'card';
-      // ✅ point to docs/apps/<slug>.html
-      a.href = `${BASE}/docs/apps/${app.slug}.html`;
-      a.innerHTML = `
-        <div class="title">${app.emoji ?? '🧩'} ${app.title}</div>
-        <p class="desc">${app.description ?? ''}</p>
-        ${Array.isArray(app.tags) ? `<div class="tags">${app.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>` : ''}
-      `;
-      return a;
-    });
+  /* Header */
+  header{
+    position:sticky; top:0; z-index:10;
+    background:rgba(255,255,255,0.85); backdrop-filter:blur(6px);
+    box-shadow:0 1px 3px rgba(0,0,0,.05)
+  }
+  .header-inner{max-width:var(--maxw);margin:0 auto;padding:1.25rem 1rem;text-align:center}
+  h1{margin:0;font-size:2.4rem;font-weight:800}
+  .subtitle{margin:0;color:var(--muted);font-size:1.05rem;line-height:1.5}
 
-    grid.replaceChildren(...cards);
-  })().catch(err => {
-    console.error(err);
-    grid.innerHTML = `<p class="desc">Could not load catalog. Check that <code>catalog.json</code> exists.</p>`;
-  });
-</script>
+  /* Layout */
+  main{ max-width:var(--maxw); margin:1.5rem auto 3rem; padding:0 1rem; }
+
+  /* Grid */
+  .grid{ display:grid; gap:1rem }
+  @media(min-width:900px){ .grid{ grid-template-columns:repeat(2,1fr) } }
+  @media(min-width:1200px){ .grid{ grid-template-columns:repeat(3,1fr) } }
+
+  /* Card */
+  .card{
+    display:block; text-decoration:none; color:inherit;
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:1rem; box-shadow:var(--shadow); transition:.2s;
+  }
+  .card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-hover) }
+  .title{ font-weight:700; font-size:1.1rem; margin-bottom:.3rem; display:flex; align-items:center; gap:.5rem }
+  .desc{ color:var(--muted); font-size:.9rem; margin-bottom:.7rem }
+  .tags{ display:flex; gap:.4rem; flex-wrap:wrap }
+  .tag{ background:var(--pill); padding:.25rem .6rem; border-radius:9999px; font-size:.75rem }
+</style>
 </head>
 <body>
 <!-- Particle background -->
@@ -64,66 +66,109 @@
 </header>
 
 <main>
-  <div id="grid" class="grid"></div>
+  <div id="grid" class="grid" aria-live="polite"></div>
 </main>
 
-<!-- tsParticles -->
+<!-- tsParticles (optional) -->
 <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
 <script>
-  /* ==== Particle network background ==== */
+  /* ==== Particle network background (toggle off by commenting this block) ==== */
   tsParticles.load("tsparticles", {
     background: { color: "#f9fafb" },
     particles: {
       number: { value: 60, density: { enable: true, value_area: 800 } },
-      color: { value: "#94a3b8" },
-      shape: { type: "circle" },
-      opacity: { value: 0.5 },
-      size: { value: 2 },
+      color: { value: "#94a3b8" }, shape: { type: "circle" }, opacity: { value: 0.5 }, size: { value: 2 },
       line_linked: { enable: true, distance: 120, color: "#cbd5e1", opacity: 0.4, width: 1 },
-      move: { enable: true, speed: 1.2, direction: "none", outModes: { default: "bounce" } }
+      move: { enable: true, speed: 1.2, outModes: { default: "bounce" } }
     },
-    interactivity: {
-      detectsOn: "canvas",
-      events: { onhover: { enable: true, mode: "grab" }, resize: true },
-      modes: { grab: { distance: 140, line_linked: { opacity: 0.7 } } }
-    },
+    interactivity: { events: { onhover: { enable: true, mode: "grab" }, resize: true },
+      modes: { grab: { distance: 140, line_linked: { opacity: 0.7 } } } },
     retina_detect: true
   });
 
-  /* ==== Catalog → clickable cards ==== */
+  /* ==== Helpers ==== */
   const grid = document.getElementById('grid');
 
+  // Detect repo base for GitHub Pages (e.g., "/micro-apps-repository")
   function getBasePath(){
     const parts = (location.pathname || "/").split("/").filter(Boolean);
     return parts.length ? `/${parts[0]}` : "";
   }
   const BASE = getBasePath();
 
+  // Try multiple locations for catalog.json depending on how the site is served
   async function loadCatalog(){
-    try{
-      const res = await fetch(`${BASE}/catalog.json`, { cache: 'no-store' });
-      const catalog = await res.json();
-
-      const cards = catalog.map(app => {
-        const card = document.createElement('a');
-        card.className = 'card';
-        card.href = `${BASE}/apps/${app.slug}.html`;
-        card.innerHTML = `
-          <div class="title">${app.emoji} ${app.title}</div>
-          <p class="desc">${app.description}</p>
-          ${app.tags ? `<div class="tags">${app.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>` : ''}
-        `;
-        return card;
-      });
-
-      grid.replaceChildren(...cards);
-    }catch(err){
-      console.error('Failed to load catalog.json', err);
-      grid.innerHTML = `<p class="desc">Could not load catalog. Make sure <code>catalog.json</code> is in the right folder.</p>`;
+    const candidates = [
+      `${BASE}/catalog.json`,          // if /docs is the Pages root (common)
+      `${BASE}/docs/catalog.json`,     // if repo root is the Pages root
+      `${BASE}/shared/catalog.json`    // fallback if you parked it under /shared
+    ];
+    for (const url of candidates){
+      try {
+        const r = await fetch(url, { cache: 'no-store' });
+        if (r.ok) return await r.json();
+      } catch(_) {}
     }
+    throw new Error('catalog.json not found in expected locations');
   }
 
-  loadCatalog();
+  // Resolve an app URL by trying both ".html" file and folder/index.html variants.
+  async function resolveAppUrl(slug){
+    const candidates = [
+      `${BASE}/apps/${slug}.html`,
+      `${BASE}/apps/${slug}/index.html`,
+      `${BASE}/apps/${slug}/`,
+      // fallbacks in case your Pages root is not /docs
+      `${BASE}/docs/apps/${slug}.html`,
+      `${BASE}/docs/apps/${slug}/index.html`,
+      `${BASE}/docs/apps/${slug}/`,
+    ];
+    for (const url of candidates){
+      try {
+        const r = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+        if (r.ok) return url;
+      } catch(_) {}
+    }
+    // If nothing verified, still return the most likely shape to avoid a dead click
+    return `${BASE}/apps/${slug}.html`;
+  }
+
+  // Click handler that resolves URL at click time (prevents 404s)
+  grid.addEventListener('click', async (e) => {
+    const a = e.target.closest('a.card');
+    if (!a) return;
+    e.preventDefault();
+    const slug = a.getAttribute('data-slug');
+    const url = await resolveAppUrl(slug);
+    location.href = url;
+  });
+
+  /* ==== Build tiles ==== */
+  (async () => {
+    let catalog = await loadCatalog();
+    if (!Array.isArray(catalog)) catalog = [];
+
+    // Create cards; href is provisional, but we resolve at click time.
+    const cards = catalog.map(app => {
+      const a = document.createElement('a');
+      a.className = 'card';
+      a.setAttribute('data-slug', app.slug);
+      a.href = `${BASE}/apps/${app.slug}.html`;
+      a.innerHTML = `
+        <div class="title">${app.emoji ?? '🧩'} ${app.title ?? app.slug}</div>
+        <p class="desc">${app.description ?? ''}</p>
+        ${Array.isArray(app.tags) && app.tags.length
+          ? `<div class="tags">${app.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`
+          : '' }
+      `;
+      return a;
+    });
+
+    grid.replaceChildren(...cards);
+  })().catch(err => {
+    console.error(err);
+    grid.innerHTML = `<p class="desc">Could not load <code>catalog.json</code>. Please place it at <code>/docs/catalog.json</code> (if Pages source is “docs”) or at the site root.</p>`;
+  });
 </script>
 </body>
 </html>
