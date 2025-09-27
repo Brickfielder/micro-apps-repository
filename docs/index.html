@@ -4,56 +4,53 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Cognitive Rehabilitation Micro-Apps</title>
-<style>
-  :root{
-    --bg:#f9fafb; --surface:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
-    --accent:#ff7a6e; --pill:#f2f4f7; --radius:16px;
-    --shadow:0 2px 6px rgba(0,0,0,.08); --shadow-hover:0 10px 24px rgba(0,0,0,.12);
-    --header-h:84px; --maxw:1200px;
+<script>
+  /* ==== Catalog → clickable cards (docs/apps/*.html) ==== */
+  const grid = document.getElementById('grid');
+
+  function getBasePath(){
+    const parts = (location.pathname || "/").split("/").filter(Boolean);
+    // e.g. /micro-apps-repository
+    return parts.length ? `/${parts[0]}` : "";
   }
-  *{box-sizing:border-box}
-  html,body{margin:0;height:100%}
-  body{
-    font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
-    color:var(--text);
-    background: var(--bg);
-    position: relative;
+  const BASE = getBasePath();
+
+  async function loadJson(paths){
+    for (const p of paths){
+      try{
+        const r = await fetch(p, { cache: 'no-store' });
+        if (r.ok) return await r.json();
+      }catch(e){}
+    }
+    throw new Error('catalog.json not found in expected locations');
   }
 
-  /* Particle canvas behind everything */
-  #tsparticles { position: fixed; inset: 0; z-index: -1; }
+  (async () => {
+    const catalog = await loadJson([
+      `${BASE}/catalog.json`,
+      `${BASE}/docs/catalog.json`,
+      `${BASE}/shared/catalog.json`
+    ]);
 
-  /* Header */
-  header{
-    position:sticky; top:0; z-index:10;
-    background:rgba(255,255,255,0.85); backdrop-filter:blur(6px);
-    box-shadow:0 1px 3px rgba(0,0,0,.05)
-  }
-  .header-inner{max-width:var(--maxw);margin:0 auto;padding:1.25rem 1rem;text-align:center}
-  h1{margin:0;font-size:2.4rem;font-weight:800}
-  .subtitle{margin:0;color:var(--muted);font-size:1.05rem;line-height:1.5}
+    const cards = catalog.map(app => {
+      const a = document.createElement('a');
+      a.className = 'card';
+      // ✅ point to docs/apps/<slug>.html
+      a.href = `${BASE}/docs/apps/${app.slug}.html`;
+      a.innerHTML = `
+        <div class="title">${app.emoji ?? '🧩'} ${app.title}</div>
+        <p class="desc">${app.description ?? ''}</p>
+        ${Array.isArray(app.tags) ? `<div class="tags">${app.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>` : ''}
+      `;
+      return a;
+    });
 
-  /* Layout */
-  main{ max-width:var(--maxw); margin:1.5rem auto 3rem; padding:0 1rem; }
-
-  /* Cards grid */
-  .grid{ display:grid; gap:1rem }
-  @media(min-width:900px){ .grid{ grid-template-columns:repeat(2,1fr) } }
-  @media(min-width:1200px){ .grid{ grid-template-columns:repeat(3,1fr) } }
-
-  /* Card */
-  .card{
-    display:block;
-    text-decoration:none; color:inherit;
-    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
-    padding:1rem; box-shadow:var(--shadow); transition:.2s;
-  }
-  .card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-hover) }
-  .title{ font-weight:700; font-size:1.1rem; margin-bottom:.3rem; display:flex; align-items:center; gap:.5rem }
-  .desc{ color:var(--muted); font-size:.9rem; margin-bottom:.7rem }
-  .tags{ display:flex; gap:.4rem; flex-wrap:wrap }
-  .tag{ background:var(--pill); padding:.25rem .6rem; border-radius:9999px; font-size:.75rem }
-</style>
+    grid.replaceChildren(...cards);
+  })().catch(err => {
+    console.error(err);
+    grid.innerHTML = `<p class="desc">Could not load catalog. Check that <code>catalog.json</code> exists.</p>`;
+  });
+</script>
 </head>
 <body>
 <!-- Particle background -->
