@@ -3,20 +3,17 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-
   <title>Barista Chaos — Micro Rehab App</title>
 
-  <!-- Tell the shared frame what to show in the banner -->
+  <!-- Frame hero/banner (reads these) -->
   <meta name="app-slug" content="barista-chaos">
   <meta name="app-title" content="Barista Chaos">
-  <meta name="app-desc" content="Prioritise and serve orders amid interruptions and changing rules.">
-  <!-- Optional theme toggles used by frame.js / theme.css -->
-  <meta name="theme" content="bold">
+  <meta name="app-desc" content="Prioritise and serve orders amid interruptions and changing rules. Build the ticket, handle incidents, and apply house rules under time pressure.">
 
-  <!-- Load the shared frame; it will auto-load shared/theme.css from /shared/ or /docs/shared/ -->
-  <script defer src="/micro-apps-repository/docs/shared/frame.js"></script>
-  <!-- Inject clinician notes card and CSV augmenter -->
-  <script defer src="/micro-apps-repository/docs/shared/clinician_feedback.js"></script>
+  <!-- Shared theme + frame + clinician hooks (relative to docs/apps/) -->
+  <link rel="stylesheet" href="../shared/theme.css?v=1">
+  <script defer src="../shared/frame.js?v=1"></script>
+  <script defer src="../shared/clinician_feedback.js?v=1"></script>
 
   <style>
     :root{
@@ -32,139 +29,144 @@
       --shadow:0 10px 30px rgba(0,0,0,.07);
       --radius:14px;
     }
-    html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,"Noto Sans",Arial,sans-serif;}
+    html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Inter,"Noto Sans",Arial,sans-serif;}
+    main{max-width:1100px;margin:18px auto;padding:0 16px}
 
-    /* Collapsible instructions & commands */
-    details.card{
-      background:var(--card); border:1px solid #e5e7eb; border-radius:var(--radius);
-      box-shadow:var(--shadow); padding:12px 14px;
-    }
-    details.card > summary{
-      cursor:pointer; font-weight:700; list-style:none; display:flex; align-items:center; gap:.5rem;
-    }
-    details.card > summary::marker{ display:none; }
-    details.card[open] > summary{ margin-bottom:10px; }
-    .helper{ color:var(--muted); font-size:.95rem; margin: 0 0 6px; }
+    /* Collapsible instruction/controls panel */
+    details.panel{background:var(--card);border:1px solid #e5e7eb;border-radius:var(--radius);box-shadow:var(--shadow);padding:10px 12px;}
+    details.panel > summary{cursor:pointer;font-weight:700;list-style:none;outline:none}
+    details.panel > summary::-webkit-details-marker{display:none}
+    details.panel[open]{padding-bottom:14px}
+    .instructions{font-size:14px;line-height:1.45;color:var(--ink);margin:8px 0 10px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px}
 
-    /* Control bar */
-    .toolbar{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
-    .btn{border:1px solid #e5e7eb;background:var(--card); padding:10px 14px;border-radius:999px; box-shadow: var(--shadow); cursor:pointer; font-weight:600}
-    .btn[disabled]{opacity:.5; cursor:not-allowed}
-    .btn.primary{background:var(--accent); color:white; border-color: transparent}
-    .btn.success{background:var(--success); color:white; border-color: transparent}
-    .btn.warn{background:var(--warning); color:black; border-color: transparent}
+    .btn{border:1px solid #e5e7eb;background:var(--card);padding:10px 14px;border-radius:999px;box-shadow:var(--shadow);cursor:pointer;font-weight:600}
+    .btn[disabled]{opacity:.5;cursor:not-allowed}
+    .btn.primary{background:var(--accent);color:white;border-color:transparent}
+    .btn.success{background:var(--success);color:white;border-color:transparent}
+    .btn.warn{background:var(--warning);color:black;border-color:transparent}
 
-    .seg{display:flex; background:var(--pill); border-radius:999px; padding:4px; gap:4px; box-shadow: var(--shadow)}
+    .seg{display:flex;background:var(--pill);border-radius:999px;padding:4px;gap:4px;box-shadow:var(--shadow)}
     .seg button{border:none;background:transparent;padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:600;color:var(--muted)}
-    .seg button.active{background:white; color:var(--ink); box-shadow: var(--shadow)}
+    .seg button.active{background:white;color:var(--ink);box-shadow:var(--shadow)}
 
-    /* App surface */
-    #app-root{ padding:0; } /* shared/theme.css adds the card surface; we remove double padding */
-    .inner{max-width:1100px; margin:16px auto; padding:0 16px}
+    .layout{display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px}
+    @media(min-width:900px){.layout{grid-template-columns:1.1fr .9fr}}
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
 
-    .layout{display:grid; grid-template-columns: 1fr; gap:16px}
-    @media(min-width:900px){.layout{grid-template-columns: 1.1fr .9fr}}
-
-    .card{background:var(--card); border-radius:var(--radius); box-shadow: var(--shadow); padding:16px; border:1px solid #e5e7eb}
-    .statusbar{display:grid; grid-template-columns: 1fr auto; gap:16px; align-items:center}
-    .timer{font-weight:700; font-variant-numeric: tabular-nums}
-    .sign{justify-self:end; padding:8px 14px; border-radius:999px; font-weight:700; color:white; box-shadow:0 8px 24px rgba(0,0,0,.2); display:flex; align-items:center; gap:8px}
+    .statusbar{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center}
+    .timer{font-weight:700;font-variant-numeric:tabular-nums}
+    .sign{justify-self:end;padding:8px 14px;border-radius:999px;font-weight:700;color:white;box-shadow:0 8px 24px rgba(0,0,0,.2);display:flex;align-items:center;gap:8px}
     .sign.none{background:linear-gradient(120deg,#10b981,#34d399)}
     .sign.plant{background:linear-gradient(120deg,#3b82f6,#06b6d4)}
     .sign.sugar{background:linear-gradient(120deg,#f97316,#f59e0b)}
 
-    .order .ticket{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
-    .chip{display:inline-flex; align-items:center; gap:6px; background:var(--pill); border-radius:999px; padding:8px 12px; border:1px solid #e5e7eb; font-weight:600}
+    .order .ticket{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .chip{display:inline-flex;align-items:center;gap:6px;background:var(--pill);border-radius:999px;padding:8px 12px;border:1px solid #e5e7eb;font-weight:600}
 
-    .tray{min-height:90px; border:2px dashed #d1d5db; border-radius:var(--radius); padding:12px; display:flex; flex-wrap:wrap; gap:8px; align-items:center}
-    .pill{user-select:none; background:white; border-radius:999px; padding:10px 14px; border:1px solid #e5e7eb; display:inline-flex; align-items:center; gap:8px; box-shadow: var(--shadow); cursor:pointer}
+    .tray{min-height:90px;border:2px dashed #d1d5db;border-radius:var(--radius);padding:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .pill{user-select:none;background:white;border-radius:999px;padding:10px 14px;border:1px solid #e5e7eb;display:inline-flex;align-items:center;gap:8px;box-shadow:var(--shadow);cursor:pointer}
     .pill .emoji{font-size:18px}
 
-    .grid{display:grid; grid-template-columns: repeat(2, 1fr); gap:10px}
-    @media(min-width:700px){.grid{grid-template-columns: repeat(3, 1fr)}}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    @media(min-width:700px){.grid{grid-template-columns:repeat(3,1fr)}}
 
-    dialog{border:none; border-radius:16px; padding:0; box-shadow:0 30px 70px rgba(0,0,0,.3)}
-    .modal{padding:18px; max-width:520px}
+    dialog{border:none;border-radius:16px;padding:0;box-shadow:0 30px 70px rgba(0,0,0,.3)}
+    .modal{padding:18px;max-width:520px}
     .modal h3{margin:0 0 8px}
-    .modal p{margin:0 0 12px; color:var(--muted)}
-    .modal .actions{display:flex; gap:8px; justify-content:flex-end}
-    .kudos{color:var(--success); font-weight:700}
+    .modal p{margin:0 0 12px;color:var(--muted)}
+    .modal .actions{display:flex;gap:8px;justify-content:flex-end}
+    .kudos{color:var(--success);font-weight:700}
+
+    /* Clinician notes box */
+    #clinician-notes .hint{margin:8px 0 0;color:var(--muted);font-size:.9rem}
   </style>
 </head>
+
 <body>
-
-  <!-- The shared frame will wrap this in .app-wrap and inject a banner with title/description above -->
+  <!-- frame.js will inject the banner above and wrap #app-root -->
   <main id="app-root">
-    <div class="inner">
 
-      <!-- Collapsible: Instructions & Commands -->
-      <details class="card" open>
-        <summary>Instructions & Commands</summary>
-        <p class="helper">
-          Build each order by adding items from <em>Options</em> into your <em>Preparation Tray</em>, then press <strong>Serve</strong>.
-        </p>
-        <ul class="helper" style="margin:0 0 10px 18px">
-          <li>Match the ticket chips (size, coffee, milk, sweetener, temperature).</li>
-          <li><strong>Rule — Decaf bell:</strong> if the ticket shows <em>Decaf</em>, click <strong>🔔 Ring Bell</strong> before serving (ringing with no decaf is neutral).</li>
-          <li><strong>Rule — Extra-hot sleeve:</strong> if the ticket shows <em>Extra hot</em>, click <strong>🧻 Add Sleeve</strong> before serving.</li>
-          <li><strong>Any-of requirement:</strong> when the ticket says <em>add honey or soy</em>, either one satisfies the ticket; both are allowed.</li>
-          <li>Incidents happen: sometimes sugar becomes <em>Honey</em>, or milk must be <em>Soy</em>. The ticket updates accordingly.</li>
+    <!-- Collapsible: Instructions + Commands -->
+    <details class="panel" open>
+      <summary>Instructions & Controls</summary>
+
+      <div class="instructions">
+        <strong>How it works</strong><br/>
+        Build each order by adding items from the <em>Options</em> on the right into your <em>Preparation Tray</em>, then press <strong>Serve</strong>.
+        <ul style="margin:8px 0 0 18px;padding:0">
+          <li>Match the ticket chips (e.g., size, coffee, milk, sweetener, temp).</li>
+          <li><strong>Rule 1 — Decaf bell:</strong> if the ticket shows <em>Decaf</em>, click <strong>🔔 Ring Bell</strong> before serving. Ringing when not decaf is neutral.</li>
+          <li><strong>Rule 2 — Extra-hot sleeve:</strong> if the ticket shows <em>Extra hot</em>, click <strong>🧻 Add Sleeve</strong> before serving.</li>
+          <li><strong>Any-of requirement:</strong> when the ticket says <em>add honey or soy</em>, either one satisfies the ticket; both is allowed.</li>
+          <li>Incidents happen (e.g., sugar → honey, milk → soy). The ticket updates accordingly.</li>
         </ul>
-
-        <div class="toolbar" style="margin-top:8px">
-          <div aria-label="Countdown" class="seg" role="group">
-            <button class="active" data-timer="90" type="button">90s</button>
-            <button data-timer="60" type="button">60s</button>
-            <button data-timer="45" type="button">45s</button>
-            <button data-timer="30" type="button">30s</button>
-            <button data-timer="15" type="button">15s</button>
-          </div>
-          <button class="btn primary" id="newOrderBtn" type="button">Start new order</button>
-          <button class="btn" id="serveBtn" type="button" disabled>Serve</button>
-          <button class="btn" id="ringBtn" type="button" title="Ring for decaf">🔔 Ring Bell</button>
-          <button class="btn" id="sleeveBtn" type="button" title="Add sleeve for extra-hot">🧻 Add Sleeve</button>
-          <button class="btn" id="downloadBtn" type="button" title="Download CSV log">⬇️ Download CSV</button>
-        </div>
-      </details>
-
-      <div class="layout">
-        <section class="card order">
-          <div class="statusbar">
-            <div class="timer">Order <span id="orderNum">—</span> · ⏳ <span id="countdown">--:--</span></div>
-            <div class="sign none" id="sign"><span id="signText">No incident</span></div>
-          </div>
-
-          <h2 style="margin:10px 0 8px;font-size:18px">Ticket</h2>
-          <div class="ticket" id="ticket"></div>
-
-          <h3 style="margin:16px 0 8px;font-size:16px">Preparation tray</h3>
-          <div class="tray" id="tray"></div>
-          <p id="feedback" style="margin:10px 0 0; color:var(--muted)">Add items to match the ticket, then press <strong>Serve</strong>.</p>
-        </section>
-
-        <aside class="card">
-          <h2 style="margin:0 0 8px;font-size:18px">Options</h2>
-          <div class="grid" id="options"></div>
-        </aside>
       </div>
+
+      <div class="controls">
+        <div class="seg" role="group" aria-label="Countdown">
+          <button class="active" data-timer="90">90s</button>
+          <button data-timer="60">60s</button>
+          <button data-timer="45">45s</button>
+          <button data-timer="30">30s</button>
+          <button data-timer="15">15s</button>
+        </div>
+        <button class="btn primary" id="newOrderBtn">Start new order</button>
+        <button class="btn" id="serveBtn" disabled>Serve</button>
+        <button class="btn" id="ringBtn" title="Ring for decaf">🔔 Ring Bell</button>
+        <button class="btn" id="sleeveBtn" title="Add sleeve for extra-hot">🧻 Add Sleeve</button>
+        <button class="btn" id="downloadBtn" title="Download CSV log">⬇️ Download CSV</button>
+      </div>
+    </details>
+
+    <!-- Main game area -->
+    <div class="layout">
+      <section class="card order">
+        <div class="statusbar">
+          <div class="timer">Order <span id="orderNum">—</span> · ⏳ <span id="countdown">--:--</span></div>
+          <div class="sign none" id="sign"><span id="signText">No incident</span></div>
+        </div>
+
+        <h2 style="margin:10px 0 8px;font-size:18px">Ticket</h2>
+        <div class="ticket" id="ticket"></div>
+
+        <h3 style="margin:16px 0 8px;font-size:16px">Preparation tray</h3>
+        <div class="tray" id="tray"></div>
+        <p id="feedback" style="margin:10px 0 0;color:var(--muted)">
+          Add items to match the ticket, then press <strong>Serve</strong>.
+        </p>
+      </section>
+
+      <aside class="card">
+        <h2 style="margin:0 0 8px;font-size:18px">Options</h2>
+        <div class="grid" id="options"></div>
+      </aside>
     </div>
+
+    <!-- Modals -->
+    <dialog id="incidentDlg">
+      <div class="modal">
+        <h3 id="incidentTitle">Incident</h3>
+        <p id="incidentMsg">—</p>
+        <div class="actions"><button class="btn" id="incidentClose">OK</button></div>
+      </div>
+    </dialog>
+
+    <dialog id="resultDlg">
+      <div class="modal">
+        <h3 id="resultTitle">Result</h3>
+        <p id="resultMsg">—</p>
+        <div class="actions"><button class="btn success" id="nextOrderBtn">OK</button></div>
+      </div>
+    </dialog>
+
+    <!-- Clinician notes -->
+    <section id="clinician-notes" class="card" style="margin-top:16px">
+      <label for="clinician-comment" style="display:block;font-weight:600;margin-bottom:8px;">Clinician comments (optional)</label>
+      <textarea id="clinician-comment" rows="4" placeholder="Enter any notes relevant to this session..." style="width:100%;padding:10px;border-radius:8px;border:1px solid #e5e7eb;font:inherit;resize:vertical;"></textarea>
+      <p class="hint">This note will be added as <code>clinician_comment</code> in the exported CSV.</p>
+    </section>
   </main>
-
-  <dialog id="incidentDlg">
-    <div class="modal">
-      <h3 id="incidentTitle">Incident</h3>
-      <p id="incidentMsg">—</p>
-      <div class="actions"><button class="btn" id="incidentClose" type="button">OK</button></div>
-    </div>
-  </dialog>
-
-  <dialog id="resultDlg">
-    <div class="modal">
-      <h3 id="resultTitle">Result</h3>
-      <p id="resultMsg">—</p>
-      <div class="actions"><button class="btn success" id="nextOrderBtn" type="button">OK</button></div>
-    </div>
-  </dialog>
 
   <script>
     // ===== State: timer + logging =====
@@ -444,12 +446,16 @@
 
       const passed = !timedOut && errors.length===0;
 
+      // Pull clinician comment (if any) for CSV
+      const clinician_comment = (document.getElementById('clinician-comment')?.value || '').replace(/\r?\n/g,' ');
+
       logs.push({
         order: orderCount,
         duration_s: Math.round(secs),
         timed_out: timedOut,
         correct: passed,
-        errors: errors.join(' | ')
+        errors: errors.join(' | '),
+        clinician_comment
       });
 
       const dlg = el('resultDlg');
@@ -465,8 +471,12 @@
 
     // ===== CSV download =====
     function downloadCSV(){
-      const headers = ['order','duration_s','timed_out','correct','errors'];
-      const rows = logs.map(r=> headers.map(h=> String(r[h] ?? '')).join(','));
+      const headers = ['order','duration_s','timed_out','correct','errors','clinician_comment'];
+      const rows = logs.map(r=> headers.map(h=>{
+        const val = String(r[h] ?? '');
+        // escape commas/quotes/newlines for CSV
+        return /[",\n]/.test(val) ? `"${val.replace(/"/g,'""')}"` : val;
+      }).join(','));
       const csv = [headers.join(','), ...rows].join('\n');
       const blob = new Blob([csv], {type:'text/csv'});
       const url = URL.createObjectURL(blob);
@@ -480,8 +490,8 @@
     // ===== Init =====
     function init(){
       renderOptions();
-      countdownEl.textContent = '--:--';
-      orderNum.textContent = '—';
+      document.getElementById('countdown').textContent = '--:--';
+      document.getElementById('orderNum').textContent = '—';
     }
     init();
   </script>
