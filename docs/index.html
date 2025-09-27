@@ -10,8 +10,6 @@
     --accent:#ff7a6e; --pill:#f2f4f7; --radius:16px;
     --shadow:0 2px 6px rgba(0,0,0,.08); --shadow-hover:0 10px 24px rgba(0,0,0,.12);
     --header-h:84px; --maxw:1200px;
-    --drawer-collapsed:40px; --drawer-expanded:170px;
-    --slide-offset: calc(var(--drawer-expanded) - var(--drawer-collapsed));
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
@@ -36,55 +34,14 @@
   .subtitle{margin:0;color:var(--muted);font-size:1.05rem;line-height:1.5}
 
   /* Layout */
-  .wrap{
-    max-width:var(--maxw); margin:1.25rem auto 3rem; padding:0 .5rem 0 0;
-    display:grid; gap:1.5rem;
-    grid-template-columns: var(--drawer-collapsed) 1fr; align-items:start;
-  }
-  .content{ transition: margin-left .28s cubic-bezier(.22,.61,.36,1); }
-  .wrap:has(.sidebar:hover) .content{ margin-left: var(--slide-offset); }
+  main{ max-width:var(--maxw); margin:1.5rem auto 3rem; padding:0 1rem; }
 
-  /* Sidebar */
-  .sidebar{
-    position:sticky; top:calc(var(--header-h) + 16px);
-    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
-    box-shadow:var(--shadow);
-    width:var(--drawer-collapsed); overflow:hidden; cursor:pointer;
-    transform:translateX(-10px);
-    transition: width .28s cubic-bezier(.22,.61,.36,1),
-                transform .28s cubic-bezier(.22,.61,.36,1),
-                box-shadow .28s ease;
-    padding:.75rem .75rem;
-  }
-  .sidebar:hover{ width:var(--drawer-expanded); transform:translateX(0); box-shadow:var(--shadow-hover); }
-  .sidebar::before{
-    content:"☰"; display:block; text-align:center; line-height:20px; font-size:1.2rem; color:var(--muted);
-    transition:opacity .18s ease;
-  }
-  .sidebar:hover::before{ opacity:0 }
-  .side-inner{ opacity:0; transition:opacity .2s ease; pointer-events:none }
-  .sidebar:hover .side-inner{ opacity:1; pointer-events:auto }
-
-  .side-title{ font-weight:700; margin:.25rem 0 .5rem }
-  .facet-group{ display:flex; flex-direction:column; gap:.45rem }
-  .facet{
-    display:flex; align-items:flex-start; gap:.45rem; font-size:.88rem; line-height:1.2;
-    hyphens:auto; overflow-wrap:anywhere;
-  }
-  .facet input{ margin-top:.05rem; margin-left:-2px; width:.95rem; height:.95rem }
-  .badge{
-    margin-left:auto; background:#eef2f7; border-radius:9999px; padding:.1rem .45rem;
-    font-size:.7rem; color:#334155
-  }
-
-  /* Cards */
-  .result-head{ margin-bottom:.5rem }
-  .count{ color:var(--muted); font-size:.95rem }
+  /* Cards grid */
   .grid{ display:grid; gap:1rem }
   @media(min-width:900px){ .grid{ grid-template-columns:repeat(2,1fr) } }
   @media(min-width:1200px){ .grid{ grid-template-columns:repeat(3,1fr) } }
 
-  /* anchor cards */
+  /* Card */
   .card{
     display:block;
     text-decoration:none; color:inherit;
@@ -96,24 +53,6 @@
   .desc{ color:var(--muted); font-size:.9rem; margin-bottom:.7rem }
   .tags{ display:flex; gap:.4rem; flex-wrap:wrap }
   .tag{ background:var(--pill); padding:.25rem .6rem; border-radius:9999px; font-size:.75rem }
-
-  /* Mobile bottom sheet */
-  @media(max-width:820px){
-    .wrap{ grid-template-columns:1fr; padding:0 1rem }
-    .content{ margin-left:0 !important }
-    .sidebar{
-      position:fixed; inset:auto 0 0 0; top:auto; height:70vh;
-      border-radius:0; border:none; width:100%;
-      transform:translateY(100%); transition:transform .25s ease;
-    }
-    .sidebar.open{ transform:translateY(0%) }
-    .sidebar::before{ display:none }
-    .side-inner{ opacity:1; pointer-events:auto }
-    .filters-toggle{ display:flex }
-  }
-  .filters-toggle{ display:none; position:sticky; top:calc(var(--header-h) + 8px); z-index:50 }
-  .btn{ border:1px solid var(--line); background:var(--surface); border-radius:12px; padding:.6rem .9rem; cursor:pointer }
-  .btn-primary{ background:var(--accent); border:none; color:#fff; font-weight:600 }
 </style>
 </head>
 <body>
@@ -127,33 +66,8 @@
   </div>
 </header>
 
-<main class="wrap">
-  <!-- Mobile Filters button -->
-  <div class="filters-toggle">
-    <button class="btn btn-primary" id="openFilters" aria-controls="filters" aria-expanded="false">Filters</button>
-  </div>
-
-  <!-- Sidebar / Drawer -->
-  <aside id="filters" class="sidebar" aria-label="Filters">
-    <div class="side-inner">
-      <div class="side-title">Domains</div>
-      <div class="facet-group">
-        <label class="facet"><input type="checkbox" class="facet-input" value="Attention">Attention <span class="badge" data-count="Attention">0</span></label>
-        <label class="facet"><input type="checkbox" class="facet-input" value="Executive">Executive <span class="badge" data-count="Executive">0</span></label>
-        <label class="facet"><input type="checkbox" class="facet-input" value="Language">Language <span class="badge" data-count="Language">0</span></label>
-        <label class="facet"><input type="checkbox" class="facet-input" value="Memory">Memory <span class="badge" data-count="Memory">0</span></label>
-        <label class="facet"><input type="checkbox" class="facet-input" value="Social cognition">Social cognition <span class="badge" data-count="Social cognition">0</span></label>
-        <label class="facet"><input type="checkbox" class="facet-input" value="Visuospatial">Visuo&shy;spatial <span class="badge" data-count="Visuospatial">0</span></label>
-      </div>
-      <div style="margin-top:.5rem"><span id="reset" class="tag" role="button" tabindex="0">Reset</span></div>
-    </div>
-  </aside>
-
-  <!-- Content -->
-  <section class="content">
-    <div class="result-head"><span id="count">0</span> apps</div>
-    <div id="grid" class="grid"></div>
-  </section>
+<main>
+  <div id="grid" class="grid"></div>
 </main>
 
 <!-- tsParticles -->
@@ -181,92 +95,36 @@
 
   /* ==== Catalog → clickable cards ==== */
   const grid = document.getElementById('grid');
-  const facetInputs = Array.from(document.querySelectorAll('.facet-input'));
-  const countEl = document.getElementById('count');
-  const resetBtn = document.getElementById('reset');
-  let cards = [];
+
+  function getBasePath(){
+    const parts = (location.pathname || "/").split("/").filter(Boolean);
+    return parts.length ? `/${parts[0]}` : "";
+  }
+  const BASE = getBasePath();
 
   async function loadCatalog(){
     try{
-      const res = await fetch('catalog.json', { cache: 'no-store' });
+      const res = await fetch(`${BASE}/catalog.json`, { cache: 'no-store' });
       const catalog = await res.json();
 
-      cards = catalog.map(app => {
+      const cards = catalog.map(app => {
         const card = document.createElement('a');
         card.className = 'card';
-        card.href = `apps/${app.slug}/`;   // apps live under docs/apps/
-        card.dataset.tags = guessTags(app.title, app.slug);
+        card.href = `${BASE}/apps/${app.slug}.html`;
         card.innerHTML = `
           <div class="title">${app.emoji} ${app.title}</div>
           <p class="desc">${app.description}</p>
-          <div class="tags">${renderTags(card.dataset.tags)}</div>
+          ${app.tags ? `<div class="tags">${app.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>` : ''}
         `;
         return card;
       });
 
       grid.replaceChildren(...cards);
-      filter();
     }catch(err){
       console.error('Failed to load catalog.json', err);
-      grid.innerHTML = `<p class="desc">Could not load catalog. Make sure <code>catalog.json</code> is in the same folder as this page.</p>`;
+      grid.innerHTML = `<p class="desc">Could not load catalog. Make sure <code>catalog.json</code> is in the right folder.</p>`;
     }
   }
-
-  function renderTags(tagString){
-    return tagString.split(',').map(t=>`<span class="tag">${t.trim()}</span>`).join('');
-  }
-
-  // Heuristic tags based on title/slug keywords.
-  function guessTags(title, slug){
-    const t = (title + " " + slug).toLowerCase();
-    const tags = [];
-    if(/attention|signal|barista|audio|despatch/.test(t)) tags.push("Attention");
-    if(/executive|plan|task|tower|office|control|barista|package|taskflow|despatch/.test(t)) tags.push("Executive");
-    if(/language|word|fluency|chat/.test(t)) tags.push("Language");
-    if(/memory|maze|blocks|recall/.test(t)) tags.push("Memory");
-    if(/social|emotion/.test(t)) tags.push("Social cognition");
-    if(/visuo|spatial|maze|blocks|star/.test(t)) tags.push("Visuospatial");
-    return tags.join(', ');
-  }
-
-  function updateFacetCounts(visibleCards){
-    const counts = {};
-    visibleCards.forEach(card=>{
-      (card.dataset.tags||'').split(',').map(s=>s.trim()).filter(Boolean).forEach(t=>{
-        counts[t]=(counts[t]||0)+1;
-      });
-    });
-    document.querySelectorAll('[data-count]').forEach(el=>{
-      el.textContent = counts[el.getAttribute('data-count')] || 0;
-    });
-  }
-
-  function filter(){
-    const active = facetInputs.filter(x=>x.checked).map(x=>x.value);
-    let visible = 0;
-    cards.forEach(card=>{
-      const tags = (card.dataset.tags||'').split(',').map(s=>s.trim());
-      const show = active.length ? active.every(f=>tags.includes(f)) : true;
-      card.style.display = show ? '' : 'none';
-      if(show) visible++;
-    });
-    countEl.textContent = visible;
-    updateFacetCounts(cards.filter(c=>c.style.display!=='none'));
-  }
-
-  facetInputs.forEach(f=>f.addEventListener('change', filter));
-  resetBtn.addEventListener('click', ()=>{ facetInputs.forEach(x=>x.checked=false); filter(); });
-  resetBtn.addEventListener('keydown', e=>{
-    if(e.key==='Enter' || e.key===' '){ e.preventDefault(); resetBtn.click(); }
-  });
-
-  // Mobile bottom sheet toggle
-  const openFilters = document.getElementById('openFilters');
-  const sidebar = document.getElementById('filters');
-  openFilters?.addEventListener('click', ()=>{
-    sidebar.classList.toggle('open');
-    openFilters.setAttribute('aria-expanded', sidebar.classList.contains('open'));
-  });
 
   loadCatalog();
 </script>
