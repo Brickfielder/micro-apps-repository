@@ -83,7 +83,7 @@ body{
 /* ===== Hero (injected by frame.js) ===== */
 .app-hero {
   text-align: center;
-  padding: 20px;        /* ↓ reduced */
+  padding: 15px;        /* ↓ reduced */
   background: #ffffff;
   border-left: 6px solid #0ea5e9;
   border-radius: 12px;
