@@ -35,15 +35,17 @@
       border-left:5px solid var(--green);
     }
     .wrap{
-      position:relative;
-      display:flex; align-items:flex-start; gap:12px;
-      flex-wrap:wrap; /* stack on narrow */
-    }
-    #leftAnchor{
-      width:20px; height:520px; background:var(--anchor); border-radius:4px;
-      box-shadow:inset 0 0 0 3px rgba(0,0,0,0.08);
-      touch-action:manipulation; user-select:none;
-    }
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  /* Center the red anchor + canvas block */
+  justify-content: center;        /* ⟵ key line */
+  margin: 12px auto 0;            /* auto side margins to center the block */
+  width: fit-content;              /* shrink-wrap to content */
+  max-width: 100%;                 /* don’t overflow on small screens */
+}
     #leftAnchor.flash{ animation: flash 0.5s ease-in-out 3; }
     @keyframes flash { 50%{ filter:brightness(1.4);} }
 
