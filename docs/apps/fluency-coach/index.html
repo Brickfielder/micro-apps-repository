@@ -141,6 +141,8 @@
     </div>
 
     <script>
+      var interimBuf = '';
+      var interimTimer = null;
       /* Basic lexicon skeleton. You can expand these sets later. */
       var BASE = {
         animals: new Set(["dog","cat","horse","cow","sheep","goat","lion","tiger","bear","eagle","shark","whale","fish","bird"]),
@@ -158,7 +160,6 @@
         transport: new Set(["van","lorry","taxi","scooter","motorcycle","kayak","yacht","glider","rocket"]),
         emotions: new Set(["content","relieved","furious","worried","relaxed","serene","ashamed","guilty"])
       };
-
       /* Heuristic broadening */
       function heuristicOnTarget(cat, key, raw){
         if(cat==='animals'   && /(fish|bird|whale|shark|eagle|hawk|owl|deer|wolf|bear|lion|tiger|dog|cat|horse)\b/.test(key)) return true;
@@ -262,73 +263,81 @@
         if(remaining <= 0){ stopSession(); }
       }
 
-      function startRecog(){
-        if(!hasWebkitSR) return;
-        if(recogActive) return;
+    function startRecog(){
+  if(!hasWebkitSR) return;
+  if(recogActive) return;
 
-        var SR = window.webkitSpeechRecognition;
-        recog = new SR();
-        recog.lang = 'en-GB';
-        recog.interimResults = true;
-        recog.continuous = true;
+  var SR = window.webkitSpeechRecognition;
+  recog = new SR();
+  recog.lang = 'en-GB';
+  recog.interimResults = true;
+  recog.continuous = true;
+  recog.maxAlternatives = 1;
 
-        recog.onstart = function(){ setMic('ok', 'Mic: listening'); els.interim.style.display = 'block'; };
-        recog.onaudiostart = function(){ setMic('ok', 'Mic: audio detected'); };
-        recog.onsoundstart = function(){ setMic('ok', 'Mic: sound detected'); };
-        recog.onsoundend = function(){ setMic('warn', 'Mic: sound ended'); };
-        recog.onaudioend = function(){ setMic('warn', 'Mic: audio ended'); };
-        recog.onspeechend = function(){ setMic('warn', 'Mic: speech ended'); };
+  recog.onstart = function(){ setMic('ok', 'Mic: listening'); els.interim.style.display = 'block'; };
+  recog.onaudiostart = function(){ setMic('ok', 'Mic: audio detected'); };
+  recog.onsoundstart = function(){ setMic('ok', 'Mic: sound detected'); };
 
-        recog.onresult = function(e){
-          var interimText = '';
-          for(var i=e.resultIndex;i<e.results.length;i++){
-            var res = e.results[i];
-            var txt = res[0].transcript;
-            if(res.isFinal){
-              if(txt && txt.trim()){ handleInput(txt); }
-            }else{
-              interimText += txt + ' ';
-            }
-          }
-          if(interimText){
-            els.interim.textContent = interimText.trim();
-          }else{
-            els.interim.textContent = '';
-          }
-        };
-
-        recog.onerror = function(ev){
-          console.warn('Speech error:', ev && ev.error);
-          if(ev && (ev.error === 'no-speech' || ev.error === 'audio-capture')){
-            setMic('warn', 'Mic: no speech or no audio capture');
-          }else if(ev && (ev.error === 'not-allowed' || ev.error === 'service-not-allowed')){
-            setMic('bad', 'Mic: permission blocked');
-            alert('Microphone permission blocked. Allow mic access and press Start again.');
-          }else if(ev && ev.error === 'aborted'){
-            setMic('warn', 'Mic: aborted');
-          }else{
-            setMic('warn', 'Mic: error');
-          }
-        };
-
-        recog.onend = function(){
-          // Auto-restart while session is active and not paused
-          if(!paused && remaining > 0){
-            try{ recog.start(); recogActive = true; }catch(e){}
-          }else{
-            recogActive = false;
-          }
-        };
-
-        try{
-          recog.start();
-          recogActive = true;
-        }catch(e){
-          // Start called twice raises an error in some versions
-          console.warn('Start error:', e);
-        }
+  recog.onresult = function(e){
+    var interimText = '';
+    for(var i=e.resultIndex;i<e.results.length;i++){
+      var res = e.results[i];
+      var txt = (res[0] && res[0].transcript) ? res[0].transcript : '';
+      if(res.isFinal){
+        commitInterim();                 // flush any pending interim first
+        if(txt && /\w/.test(txt)){ handleInput(txt); }
+      }else{
+        interimText += txt + ' ';
       }
+    }
+    // show interim and schedule a debounce commit (helps when finals never arrive)
+    interimBuf = interimText.trim();
+    els.interim.textContent = interimBuf;
+    if(interimTimer){ clearTimeout(interimTimer); }
+    if(interimBuf){
+      interimTimer = setTimeout(function(){ commitInterim(); }, 800);
+    }
+  };
 
+  // If Chrome fires speech end without a final result, commit whatever we have
+  recog.onspeechend = function(){ commitInterim(); setMic('warn', 'Mic: speech ended'); };
+  recog.onsoundend  = function(){ /* keep alive; auto-restart in onend */ };
+  recog.onaudioend  = function(){ /* keep alive */ };
+
+  recog.onerror = function(ev){
+    console.warn('Speech error:', ev && ev.error);
+    if(ev && (ev.error === 'no-speech' || ev.error === 'audio-capture')){
+      setMic('warn', 'Mic: no speech or no audio capture');
+    }else if(ev && (ev.error === 'not-allowed' || ev.error === 'service-not-allowed')){
+      setMic('bad', 'Mic: permission blocked');
+      alert('Microphone permission blocked. Allow mic access and press Start again.');
+    }else if(ev && ev.error === 'aborted'){
+      setMic('warn', 'Mic: aborted');
+    }else{
+      setMic('warn', 'Mic: error');
+    }
+  };
+
+  // While the timer is running, keep restarting the stream
+  recog.onend = function(){
+    if(!paused && remaining > 0){
+      try{ recog.start(); recogActive = true; }catch(e){}
+    }else{
+      recogActive = false;
+    }
+  };
+
+  try{ recog.start(); recogActive = true; }catch(e){ console.warn('Start error:', e); }
+}
+function commitInterim(){
+  if(interimTimer){ clearTimeout(interimTimer); interimTimer = null; }
+  var text = interimBuf;
+  interimBuf = '';
+  if(text && /\w/.test(text)){
+    handleInput(text);
+  }
+  els.interim.textContent = '';
+}
       function setMic(kind, text){
         els.micStatus.style.display = 'block';
         els.micStatus.classList.remove('ok','warn','bad');
