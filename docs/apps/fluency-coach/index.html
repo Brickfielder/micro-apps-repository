@@ -339,11 +339,15 @@
       }
 
       /* Input and scoring */
-      function norm(w){
-        return String(w||'').toLowerCase()
-          .replace(/[^a-zA-Z\\u00C0-\\u024F\\s\\-']/g,'')
-          .trim().replace(/\\s+/g,' ')
-          .replace(/'s\\b/,'').replace(/s\\b/,'');
+   function norm(w){
+  return String(w || '')
+    .toLowerCase()
+    // keep letters (ASCII + Latin-1/Extended), spaces, apostrophe, hyphen
+    .replace(/[^a-zA-Z\u00C0-\u024F\s'-]/g, '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .replace(/'s\b/, '')
+    .replace(/s\b/, ''); // simple singularize
       }
       function splitWords(text){
         var parts = text.split(/[\\n,;]+/).map(function(s){return s.trim();}).filter(Boolean);
