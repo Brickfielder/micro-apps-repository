@@ -14,10 +14,13 @@
   <!-- Opt-in styling toggles used across Barista/Audio Errands -->
   <meta name="theme" content="bold dense">
 
-   <!-- Shared assets published from repo/docs/ as site root (no /docs in URL) -->
-<link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3">
-<script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
-<script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
+  <!-- Shared assets (redundant but resilient; frame.js will also ensure CSS) -->
+  <link rel="stylesheet" href="/shared/theme.css">
+  <link rel="stylesheet" href="/docs/shared/theme.css">
+  <script defer src="/shared/frame.js"></script>
+  <script defer src="/docs/shared/frame.js"></script>
+  <script defer src="/shared/clinician_feedback.js"></script>
+  <script defer src="/docs/shared/clinician_feedback.js"></script>
 
   <style>
     /* ===== App-local styles: minimal, lean on shared theme ===== */
