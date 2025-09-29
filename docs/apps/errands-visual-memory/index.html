@@ -6,28 +6,23 @@
 
   <title>Errands Memory — Rehab Game</title>
 
-  <!-- Shared assets published from repo/docs/ as site root (no /docs in URL) -->
+  <!-- Shared assets from repo/docs/ published at site root -->
   <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3">
   <script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
   <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
 
   <!-- Frame metadata -->
   <meta name="app-slug" content="errands-visual-memory">
-  <!-- Optional override (remove if pulling from catalog.json) -->
   <meta name="app-title" content="Errands Memory — Rehab Game">
   <meta name="app-desc" content="Watch a sequence of shops light up, then click them in the same order (or in reverse). Simple, playful, and closer to real life than abstract blocks.">
-  <!-- Optional bolder look -->
   <meta name="theme" content="bold">
+
   <style>
-    /* ===== App-specific minimal CSS (theme handles the rest) ===== */
+    /* App-specific minimal CSS (theme handles the rest) */
     .toolbar{ justify-content:flex-start; }
     .status{ display:flex; gap:8px; flex-wrap:wrap; }
     .pill.good{ background:#ecfdf5; color:#065f46; }
-    .log{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      font-size:12px; background:#0b1220; color:#d1e5ff; border-radius:12px; padding:12px;
-      max-height:220px; overflow:auto; white-space:pre-wrap;
-    }
+
     .street-wrap{ position:relative; display:flex; align-items:center; justify-content:center; min-height:360px; }
     .street{ display:flex; gap:16px; flex-wrap:wrap; justify-content:center; }
     .shop{
@@ -56,10 +51,9 @@
 </head>
 <body>
 
-  <!-- The shared frame will inject the hero above and wrap this in .app-wrap -->
   <main id="app-root">
     <section class="grid cols-2">
-      <!-- ===== Left: Controls & status ===== -->
+      <!-- Left: Controls & status -->
       <div>
         <div class="toolbar" role="group" aria-label="Session controls">
           <button id="startBtn" class="button primary">Start session</button>
@@ -120,14 +114,9 @@
           <span class="pill" id="trialBadge">Trial: —</span>
           <span class="pill good" id="bestSpan">Best span: —</span>
         </div>
-
-        <div>
-          <h3 style="margin:16px 0 8px">Session log</h3>
-          <div id="log" class="log" aria-live="polite"></div>
-        </div>
       </div>
 
-      <!-- ===== Right: Task area ===== -->
+      <!-- Right: Task area -->
       <div>
         <h2 style="margin:0 0 8px">Task area</h2>
         <p class="helper" style="margin-top:0">
@@ -138,7 +127,6 @@
         <div class="street-wrap">
           <div id="street" class="street" role="application" aria-label="Street of shops"></div>
 
-          <!-- Non-blocking countdown overlay -->
           <div id="countdown" class="countdown-overlay" aria-live="assertive" aria-atomic="true">
             <div class="countdown-bubble" role="status">
               <div class="countdown-label">Get ready…</div>
@@ -149,11 +137,11 @@
         </div>
       </div>
     </section>
-    <!-- Clinician notes card will be injected automatically by clinician_feedback.js -->
+    <!-- Clinician notes card injected automatically by clinician_feedback.js -->
   </main>
 
   <script>
-    // ===== Data / elements =====
+    // ===== Data =====
     const ALL_SHOPS = [
       { key:'bakery', label:'Bakery', emoji:'🥖' },
       { key:'pharmacy', label:'Pharmacy', emoji:'💊' },
@@ -174,11 +162,11 @@
     ];
     let shops = [];
 
+    // ===== Elements =====
     const $ = s=>document.querySelector(s);
     const $$ = s=>Array.from(document.querySelectorAll(s));
 
     const streetEl = $('#street');
-    const logEl = $('#log');
     const ariaStatus = $('#ariaStatus');
     const countdownEl = $('#countdown');
     const countdownNumEl = $('#countdownNum');
@@ -205,6 +193,7 @@
       bestSpan: $('#bestSpan'),
     };
 
+    // ===== State =====
     let state = {
       running:false, paused:false, awaiting:false,
       seqLen:3, trialAtLen:0, failsAtLen:0, bestSpan:0,
@@ -221,7 +210,7 @@
         const btn = document.createElement('button');
         btn.className = 'shop';
         btn.setAttribute('data-idx', idx);
-        btn.setAttribute('aria-label', `${s.label}`);
+        btn.setAttribute('aria-label', s.label);
         btn.innerHTML = `<div class="emoji">${s.emoji}</div><div class="label">${s.label}</div>`;
         btn.addEventListener('click', onShopClick);
         streetEl.appendChild(btn);
@@ -235,12 +224,6 @@
     }
 
     function setShopsDisabled(v){ $$('.shop').forEach(b=>b.classList.toggle('disabled', v)); }
-
-    function log(line){
-      const ts = new Date().toLocaleTimeString();
-      logEl.textContent += `[${ts}] ${line}\n`;
-      logEl.scrollTop = logEl.scrollHeight;
-    }
 
     function updateBadges(){
       status.lenBadge.textContent = state.seqLen;
@@ -279,7 +262,6 @@
       }
       setShopsDisabled(false);
       state.awaiting=true; state.inputStart = performance.now();
-      log('Your turn… Click the shops in order.');
       ariaStatus.textContent = 'Your turn. Click shops in order.';
     }
 
@@ -287,7 +269,6 @@
       $$('.shop').forEach(n=>n.classList.remove('highlight','correct','wrong'));
       updateBadges();
       state.sequence = sampleSequence(state.seqLen, shops.length);
-      log(`Presenting length ${state.seqLen} (trial ${state.trialAtLen+1})`);
       await showCountdown(2);
       await playSequence();
     }
@@ -312,14 +293,13 @@
       if (isCorrect){
         expected.forEach(i=>nodes[i].classList.add('correct'));
         state.bestSpan = Math.max(state.bestSpan, state.seqLen);
-        log(`✅ Correct at length ${state.seqLen}`);
       } else {
         expected.forEach(i=>nodes[i].classList.add('highlight'));
         state.input.forEach((i,ix)=>{ if (expected[ix]!==i) nodes[i].classList.add('wrong'); });
-        log(`❌ Wrong at length ${state.seqLen}`);
       }
       updateBadges();
 
+      // Row for CSV
       const row = {
         sessionId: state.sessionId,
         timestamp: new Date().toISOString(),
@@ -336,6 +316,7 @@
       };
       state.sessionRows.push(row);
 
+      // Progression / stopping rules
       const failCap = parseInt(controls.failRule.value,10);
       if (isCorrect){
         state.trialAtLen += 1; state.failsAtLen = 0;
@@ -357,8 +338,8 @@
       state.seqLen = parseInt(controls.startLen.value,10);
       state.trialAtLen = 0; state.failsAtLen = 0; state.bestSpan = 0; state.sessionRows = [];
       state.running = true; state.paused=false;
-      controls.pauseBtn.disabled=false; controls.downloadBtn.disabled=true; controls.startBtn.disabled=true; logEl.textContent='';
-      log(`Session ${state.sessionId} started (${state.mode}).`);
+      controls.pauseBtn.disabled=false; controls.downloadBtn.disabled=true; controls.startBtn.disabled=true;
+
       if (demo){
         controls.mode.value='forward'; state.mode='forward';
         controls.startLen.value=3; controls.maxLen.value=4; controls.trialsPerLen.value=1;
@@ -367,26 +348,24 @@
       runTrial();
     }
 
-    function endSession(reason='Session ended.'){
+    function endSession(){
       state.running=false; state.awaiting=false;
       controls.pauseBtn.disabled=true; controls.downloadBtn.disabled=false; controls.startBtn.disabled=false;
       setShopsDisabled(false);
-      log(`— ${reason} Best span: ${state.bestSpan}.`);
     }
 
     function resetAll(){
-      state.running=false; state.awaiting=false; state.sessionRows=[]; logEl.textContent='';
+      state.running=false; state.awaiting=false; state.sessionRows=[];
       controls.pauseBtn.disabled=true; controls.downloadBtn.disabled=true; controls.startBtn.disabled=false;
       state.bestSpan=0; state.seqLen=parseInt(controls.startLen.value,10); state.trialAtLen=0; state.failsAtLen=0;
       $$('.shop').forEach(n=>n.classList.remove('highlight','correct','wrong','disabled'));
-      updateBadges(); log('Reset. Configure settings and press Start session.');
+      updateBadges();
     }
 
     function togglePause(){
       if(!state.running) return;
-      state.paused=!state.paused;
-      controls.pauseBtn.textContent = state.paused? 'Resume':'Pause';
-      log(state.paused? 'Paused.':'Resumed.');
+      state.paused = !state.paused;
+      controls.pauseBtn.textContent = state.paused ? 'Resume' : 'Pause';
     }
 
     function toCSV(rows){
@@ -399,7 +378,7 @@
       return lines.join('\n');
     }
 
-    // Attach the <a download> to the DOM so clinician_feedback.js can augment CSV with clinician_comment
+    // DOM-attached anchor so clinician_feedback.js can augment the CSV before save
     function downloadCSV(){
       if(!state.sessionRows.length){ alert('No data to download yet.'); return; }
       const csv=toCSV(state.sessionRows);
@@ -410,23 +389,19 @@
       a.download=fn;
       a.style.display='none';
       document.body.appendChild(a);
-      // First click is intercepted by clinician_feedback.js, which augments then re-clicks
-      a.click();
-      // Clean up shortly after
+      a.click(); // clinician_feedback.js intercepts, augments, and re-clicks
       setTimeout(()=>{
         URL.revokeObjectURL(a.href);
         a.remove();
       }, 1500);
     }
 
-    // Wire up controls
+    // Wire up
     controls.startBtn.addEventListener('click',()=>startSession(false));
     controls.demoBtn.addEventListener('click',()=>startSession(true));
     controls.resetBtn.addEventListener('click',resetAll);
     controls.pauseBtn.addEventListener('click',togglePause);
     controls.downloadBtn.addEventListener('click',downloadCSV);
-
-    // Rebuild street when shop count changes (only when idle)
     if (controls.shopCount){
       controls.shopCount.addEventListener('change', ()=>{ if (!state.running){ initStreet(); } });
     }
@@ -434,7 +409,6 @@
     // Init
     initStreet();
     updateBadges();
-    log('Ready. Choose settings and press Start session.');
   </script>
 </body>
 </html>
