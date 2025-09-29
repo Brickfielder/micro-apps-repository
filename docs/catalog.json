@@ -14,13 +14,6 @@
     "tags": ["executive", "attention"]
   },
   {
-    "slug": "build-your-package",
-    "title": "Build Your Package",
-    "description": "Plan and sequence steps to assemble items under simple rules.",
-    "emoji": "📦",
-    "tags": ["executive"]
-  },
-  {
     "slug": "emergency-despatch",
     "title": "Emergency Despatch",
     "description": "Route selection and rapid decision-making with time pressure.",
