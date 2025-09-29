@@ -1,148 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Errands Memory — Rehab Game</title>
-<style>
-    :root{
-      --bg:#f8fafc;--card:#ffffff;--text:#0f172a;--muted:#64748b;--accent:#2563eb;--good:#10b981;--bad:#ef4444;--shadow:0 10px 30px rgba(2,6,23,.08);--radius:18px
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+  <title>Errands Memory — Rehab Game</title>
+
+  <!-- Shared assets published from repo/docs/ as site root (no /docs in URL) -->
+  <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3">
+  <script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
+  <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
+
+  <!-- Frame metadata -->
+  <meta name="app-slug" content="errands-visual-memory">
+  <!-- Optional override (remove if pulling from catalog.json) -->
+  <meta name="app-title" content="Errands Memory — Rehab Game">
+  <meta name="app-desc" content="Watch a sequence of shops light up, then click them in the same order (or in reverse). Simple, playful, and closer to real life than abstract blocks.">
+  <!-- Optional bolder look -->
+  <meta name="theme" content="bold">
+  <style>
+    /* ===== App-specific minimal CSS (theme handles the rest) ===== */
+    .toolbar{ justify-content:flex-start; }
+    .status{ display:flex; gap:8px; flex-wrap:wrap; }
+    .pill.good{ background:#ecfdf5; color:#065f46; }
+    .log{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size:12px; background:#0b1220; color:#d1e5ff; border-radius:12px; padding:12px;
+      max-height:220px; overflow:auto; white-space:pre-wrap;
     }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;color:var(--text);background:var(--bg)}
-    header{max-width:1100px;margin:22px auto 0;padding:0 16px}
-    h1{margin:0 0 6px;font-weight:800;letter-spacing:-.02em}
-    p.lead{margin:0;color:var(--muted)}
-    .app{max-width:1100px;margin:16px auto 48px;padding:0 16px;display:grid;grid-template-columns:360px 1fr;gap:16px}
-    @media (max-width:900px){.app{grid-template-columns:1fr}}
-    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
-    .status{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-    .badge{display:inline-flex;align-items:center;gap:6px;background:#eef2ff;color:#1e3a8a;padding:6px 10px;border-radius:999px;font-weight:700;font-size:13px}
-    .badge.success{background:#ecfdf5;color:#065f46}
-    .controls .row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
-    .controls label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
-    .controls input[type=number],.controls select{width:100%;padding:10px 12px;border:1px solid #e5e7eb;border-radius:10px;font-size:14px}
-    .buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    button{appearance:none;border:none;padding:10px 14px;border-radius:12px;background:var(--text);color:#fff;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(15,23,42,.15)}
-    button.secondary{background:#334155}
-    button.ghost{background:#eef2ff;color:#1e3a8a}
-    button:disabled{opacity:.5;cursor:not-allowed}
+    .street-wrap{ position:relative; display:flex; align-items:center; justify-content:center; min-height:360px; }
+    .street{ display:flex; gap:16px; flex-wrap:wrap; justify-content:center; }
+    .shop{
+      width:clamp(96px,18vw,128px); aspect-ratio:1/1.05; border-radius:16px;
+      background:#f1f5f9; border:2px solid #e2e8f0;
+      box-shadow: inset 0 -6px 10px rgba(0,0,0,.04);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:10px; transition:transform .08s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+    .shop .emoji{ font-size:42px; line-height:1; margin-bottom:8px; }
+    .shop .label{ font-weight:800; letter-spacing:.2px; }
+    .shop:active{ transform:scale(.98); }
+    .shop.disabled{ pointer-events:none; opacity:.6; }
+    .shop.highlight{ border-color:var(--accent); box-shadow:0 0 0 6px color-mix(in oklab, var(--accent), white 82%), inset 0 -6px 10px rgba(0,0,0,.04); }
+    .shop.correct{ border-color:#10b981; box-shadow:0 0 0 6px rgba(16,185,129,.18); }
+    .shop.wrong{ border-color:#ef4444; box-shadow:0 0 0 6px rgba(239,68,68,.18); }
 
-    .street-wrap{position:relative;display:flex;align-items:center;justify-content:center;min-height:360px}
-    .street{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
-    .shop{width:clamp(96px,18vw,128px);aspect-ratio:1/1.05;border-radius:16px;background:#f1f5f9;border:2px solid #e2e8f0;box-shadow:inset 0 -6px 10px rgba(0,0,0,.04);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;transition:transform .08s ease, box-shadow .2s ease, border-color .2s ease}
-    .shop .emoji{font-size:42px;line-height:1;margin-bottom:8px}
-    .shop .label{font-weight:800;letter-spacing:.2px;color:#000}
-    .shop:active{transform:scale(.98)}
-    .shop.disabled{pointer-events:none;opacity:.6}
-    .shop.highlight{border-color:var(--accent);box-shadow:0 0 0 6px rgba(37,99,235,.15), inset 0 -6px 10px rgba(0,0,0,.04)}
-    .shop.correct{border-color:var(--good);box-shadow:0 0 0 6px rgba(16,185,129,.18)}
-    .shop.wrong{border-color:var(--bad);box-shadow:0 0 0 6px rgba(239,68,68,.18)}
+    .countdown-overlay{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; pointer-events:none; }
+    .countdown-overlay.active{ display:flex; }
+    .countdown-bubble{ background:rgba(17,24,39,.85); color:#fff; padding:26px 34px; border-radius:18px; box-shadow:var(--shadow); text-align:center }
+    .countdown-label{ font-size:14px; color:#d1d5db; margin-bottom:6px; letter-spacing:.02em }
+    .countdown-number{ font-size:clamp(38px,6vmin,72px); font-weight:900; letter-spacing:.02em }
 
-    .log{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;font-size:12px;background:#0b1220;color:#d1e5ff;border-radius:12px;padding:12px;max-height:220px;overflow:auto;white-space:pre-wrap}
-    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-
-    /* Countdown overlay (non-breaking) */
-    .countdown-overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;pointer-events:none}
-    .countdown-overlay.active{display:flex}
-    .countdown-bubble{background:rgba(17,24,39,.85);color:#fff;padding:26px 34px;border-radius:18px;box-shadow:var(--shadow);text-align:center}
-    .countdown-label{font-size:14px;color:#d1d5db;margin-bottom:6px;letter-spacing:.02em}
-    .countdown-number{font-size:clamp(38px,6vmin,72px);font-weight:900;letter-spacing:.02em}
+    .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0 }
   </style>
-<meta content="Errands-visual-memory" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../../../shared/theme.css" rel="stylesheet"/><script defer="" src="../../../shared/frame.js"></script><script defer="" src="../../../shared/clinician_feedback.js"></script>  <meta name="app-slug" content="errands-visual-memory">
 </head>
-<body><main id="app-root">
-<header>
-<h1>Errands Memory — Rehab Game</h1>
-<p class="lead">Watch a sequence of shops light up, then click them in the same order (or in reverse). Simple, playful, and closer to real life than abstract blocks.</p>
-</header>
-<main class="app">
-<section class="card controls">
-<h2 style="margin:0 0 12px">Settings</h2>
-<div class="row">
-<div>
-<label>Mode</label>
-<select id="mode">
-<option value="forward">Forward (standard)</option>
-<option value="backward">Backward (reverse order)</option>
-</select>
-</div>
-<div>
-<label>Start sequence length</label>
-<input id="startLen" max="8" min="2" type="number" value="3"/>
-</div>
-</div>
-<div class="row">
-<div>
-<label>Max sequence length</label>
-<input id="maxLen" max="12" min="3" type="number" value="8"/>
-</div>
-<div>
-<label>Shops shown</label>
-<select id="shopCount">
-<option selected="" value="8">8</option>
-<option value="12">12</option>
-<option value="16">16</option>
-</select>
-</div>
-</div>
-<div class="row">
-<div>
-<label>Stimulus ON (ms)</label>
-<input id="onMs" max="2000" min="200" step="50" type="number" value="700"/>
-</div>
-<div>
-<label>Gap (ms)</label>
-<input id="gapMs" max="1500" min="50" step="50" type="number" value="350"/>
-</div>
-</div>
-<div class="row">
-<div>
-<label>Trials per length</label>
-<input id="trialsPerLen" max="5" min="1" type="number" value="1"/>
-</div>
-<div>
-<label>Fail rule</label>
-<select id="failRule">
-<option value="2">Stop after 2 fails at same length</option>
-<option value="1">Stop after 1 fail at same length</option>
-<option value="3">Stop after 3 fails at same length</option>
-</select>
-</div>
-</div>
-<div class="buttons">
-<button id="startBtn">Start session</button>
-<button class="secondary" disabled="" id="pauseBtn">Pause</button>
-<button class="ghost" id="resetBtn">Reset</button>
-<button class="secondary" disabled="" id="downloadBtn">Download CSV</button>
-<button class="ghost" id="demoBtn">Quick demo</button>
-</div>
-<div class="status" id="status">
-<span class="badge">Length: <strong id="lenBadge" style="margin-left:6px">—</strong></span>
-<span class="badge" id="trialBadge">Trial: —</span>
-<span class="badge success" id="bestSpan">Best span: —</span>
-</div>
-<h3 style="margin:16px 0 8px">Session log</h3>
-<div aria-live="polite" class="log" id="log"></div>
-</section>
-<section class="card">
-<h2 style="margin:0 0 8px">Task area</h2>
-<p style="margin-top:0;color:var(--muted)">Focus on the shops. They will light up in order. Watch carefully, then click them in the same order (or in reverse if Backward mode is selected).</p>
-<div class="street-wrap">
-<div aria-label="Street of shops" class="street" id="street" role="application"></div>
-<!-- Non-blocking countdown overlay inside the task area -->
-<div aria-atomic="true" aria-live="assertive" class="countdown-overlay" id="countdown">
-<div class="countdown-bubble" role="status">
-<div class="countdown-label">Get ready…</div>
-<div class="countdown-number" id="countdownNum">2</div>
-</div>
-</div>
-<span class="sr-only" id="ariaStatus"></span>
-</div>
-</section>
-</main>
-<script>
-    // Master list (up to 16 shops) — we slice from this based on the setting
+<body>
+
+  <!-- The shared frame will inject the hero above and wrap this in .app-wrap -->
+  <main id="app-root">
+    <section class="grid cols-2">
+      <!-- ===== Left: Controls & status ===== -->
+      <div>
+        <div class="toolbar" role="group" aria-label="Session controls">
+          <button id="startBtn" class="button primary">Start session</button>
+          <button id="pauseBtn" class="button" disabled>Pause</button>
+          <button id="resetBtn" class="button">Reset</button>
+          <button id="downloadBtn" class="button" disabled>Download CSV</button>
+          <button id="demoBtn" class="button">Quick demo</button>
+        </div>
+
+        <div class="grid cols-2" style="margin-top:12px">
+          <div>
+            <label for="mode">Mode</label>
+            <select id="mode">
+              <option value="forward">Forward (standard)</option>
+              <option value="backward">Backward (reverse order)</option>
+            </select>
+          </div>
+          <div>
+            <label for="shopCount">Shops shown</label>
+            <select id="shopCount">
+              <option value="8" selected>8</option>
+              <option value="12">12</option>
+              <option value="16">16</option>
+            </select>
+          </div>
+          <div>
+            <label for="startLen">Start sequence length</label>
+            <input id="startLen" type="number" min="2" max="8" value="3">
+          </div>
+          <div>
+            <label for="maxLen">Max sequence length</label>
+            <input id="maxLen" type="number" min="3" max="12" value="8">
+          </div>
+          <div>
+            <label for="onMs">Stimulus ON (ms)</label>
+            <input id="onMs" type="number" min="200" max="2000" step="50" value="700">
+          </div>
+          <div>
+            <label for="gapMs">Gap (ms)</label>
+            <input id="gapMs" type="number" min="50" max="1500" step="50" value="350">
+          </div>
+          <div>
+            <label for="trialsPerLen">Trials per length</label>
+            <input id="trialsPerLen" type="number" min="1" max="5" value="1">
+          </div>
+          <div>
+            <label for="failRule">Fail rule</label>
+            <select id="failRule">
+              <option value="2">Stop after 2 fails at same length</option>
+              <option value="1">Stop after 1 fail at same length</option>
+              <option value="3">Stop after 3 fails at same length</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="status" id="status" style="margin-top:8px">
+          <span class="pill">Length: <strong id="lenBadge" style="margin-left:6px">—</strong></span>
+          <span class="pill" id="trialBadge">Trial: —</span>
+          <span class="pill good" id="bestSpan">Best span: —</span>
+        </div>
+
+        <div>
+          <h3 style="margin:16px 0 8px">Session log</h3>
+          <div id="log" class="log" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <!-- ===== Right: Task area ===== -->
+      <div>
+        <h2 style="margin:0 0 8px">Task area</h2>
+        <p class="helper" style="margin-top:0">
+          Focus on the shops. They will light up in order. Watch carefully, then click them in the same order
+          (or in reverse if Backward mode is selected).
+        </p>
+
+        <div class="street-wrap">
+          <div id="street" class="street" role="application" aria-label="Street of shops"></div>
+
+          <!-- Non-blocking countdown overlay -->
+          <div id="countdown" class="countdown-overlay" aria-live="assertive" aria-atomic="true">
+            <div class="countdown-bubble" role="status">
+              <div class="countdown-label">Get ready…</div>
+              <div id="countdownNum" class="countdown-number">2</div>
+            </div>
+          </div>
+          <span id="ariaStatus" class="sr-only"></span>
+        </div>
+      </div>
+    </section>
+    <!-- Clinician notes card will be injected automatically by clinician_feedback.js -->
+  </main>
+
+  <script>
+    // ===== Data / elements =====
     const ALL_SHOPS = [
       { key:'bakery', label:'Bakery', emoji:'🥖' },
       { key:'pharmacy', label:'Pharmacy', emoji:'💊' },
@@ -161,8 +172,6 @@
       { key:'cinema', label:'Cinema', emoji:'🎬' },
       { key:'toys', label:'Toy Shop', emoji:'🧸' },
     ];
-
-    // Active subset used in the current session
     let shops = [];
 
     const $ = s=>document.querySelector(s);
@@ -175,11 +184,26 @@
     const countdownNumEl = $('#countdownNum');
 
     const controls = {
-      mode: $('#mode'), startLen: $('#startLen'), maxLen: $('#maxLen'), onMs: $('#onMs'), gapMs: $('#gapMs'), trialsPerLen: $('#trialsPerLen'), failRule: $('#failRule'), shopCount: $('#shopCount'),
-      startBtn: $('#startBtn'), pauseBtn: $('#pauseBtn'), resetBtn: $('#resetBtn'), downloadBtn: $('#downloadBtn'), demoBtn: $('#demoBtn')
+      mode: $('#mode'),
+      startLen: $('#startLen'),
+      maxLen: $('#maxLen'),
+      onMs: $('#onMs'),
+      gapMs: $('#gapMs'),
+      trialsPerLen: $('#trialsPerLen'),
+      failRule: $('#failRule'),
+      shopCount: $('#shopCount'),
+      startBtn: $('#startBtn'),
+      pauseBtn: $('#pauseBtn'),
+      resetBtn: $('#resetBtn'),
+      downloadBtn: $('#downloadBtn'),
+      demoBtn: $('#demoBtn'),
     };
 
-    const status = { lenBadge: $('#lenBadge'), trialBadge: $('#trialBadge'), bestSpan: $('#bestSpan') };
+    const status = {
+      lenBadge: $('#lenBadge'),
+      trialBadge: $('#trialBadge'),
+      bestSpan: $('#bestSpan'),
+    };
 
     let state = {
       running:false, paused:false, awaiting:false,
@@ -188,6 +212,7 @@
       sessionRows:[], sessionId:'E'+Math.random().toString(36).slice(2,8), mode:'forward'
     };
 
+    // ===== Helpers =====
     function initStreet(){
       const count = parseInt(controls.shopCount?.value || '8', 10);
       shops = ALL_SHOPS.slice(0, Math.max(4, Math.min(count, ALL_SHOPS.length)));
@@ -211,10 +236,19 @@
 
     function setShopsDisabled(v){ $$('.shop').forEach(b=>b.classList.toggle('disabled', v)); }
 
-    function log(line){ const ts = new Date().toLocaleTimeString(); logEl.textContent += `[${ts}] ${line}\n`; logEl.scrollTop = logEl.scrollHeight; }
-    function updateBadges(){ status.lenBadge.textContent = state.seqLen; status.trialBadge.textContent = `Trial: ${state.trialAtLen+1}`; status.bestSpan.textContent = `Best span: ${state.bestSpan}`; }
+    function log(line){
+      const ts = new Date().toLocaleTimeString();
+      logEl.textContent += `[${ts}] ${line}\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
 
-    async function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+    function updateBadges(){
+      status.lenBadge.textContent = state.seqLen;
+      status.trialBadge.textContent = `Trial: ${state.trialAtLen+1}`;
+      status.bestSpan.textContent = `Best span: ${state.bestSpan}`;
+    }
+
+    const sleep = ms => new Promise(r=>setTimeout(r, ms));
 
     async function showCountdown(seconds=2){
       countdownEl.classList.add('active');
@@ -230,7 +264,8 @@
     async function playSequence(){
       setShopsDisabled(true);
       state.awaiting=false; state.input=[]; state.responseTimes=[]; state.timestamps=[];
-      const onMs = parseInt(controls.onMs.value,10); const gapMs = parseInt(controls.gapMs.value,10);
+      const onMs = parseInt(controls.onMs.value,10);
+      const gapMs = parseInt(controls.gapMs.value,10);
       const nodes = $$('.shop');
       ariaStatus.textContent = `Watch the sequence of ${state.sequence.length} shops`;
       for (let i=0;i<state.sequence.length;i++){
@@ -270,7 +305,7 @@
 
     function evaluateResponse(){
       const presented = [...state.sequence];
-      const expected = (state.mode==='forward')?presented:[...presented].reverse();
+      const expected = (state.mode==='forward') ? presented : [...presented].reverse();
       const isCorrect = expected.length === state.input.length && expected.every((v,i)=>v===state.input[i]);
 
       const nodes = $$('.shop');
@@ -321,14 +356,21 @@
       state.mode = controls.mode.value;
       state.seqLen = parseInt(controls.startLen.value,10);
       state.trialAtLen = 0; state.failsAtLen = 0; state.bestSpan = 0; state.sessionRows = [];
-      state.running = true; state.paused=false; controls.pauseBtn.disabled=false; controls.downloadBtn.disabled=true; controls.startBtn.disabled=true; logEl.textContent='';
+      state.running = true; state.paused=false;
+      controls.pauseBtn.disabled=false; controls.downloadBtn.disabled=true; controls.startBtn.disabled=true; logEl.textContent='';
       log(`Session ${state.sessionId} started (${state.mode}).`);
-      if (demo){ controls.mode.value='forward'; state.mode='forward'; controls.startLen.value=3; controls.maxLen.value=4; controls.trialsPerLen.value=1; controls.onMs.value=600; controls.gapMs.value=250; state.seqLen=3; }
+      if (demo){
+        controls.mode.value='forward'; state.mode='forward';
+        controls.startLen.value=3; controls.maxLen.value=4; controls.trialsPerLen.value=1;
+        controls.onMs.value=600; controls.gapMs.value=250; state.seqLen=3;
+      }
       runTrial();
     }
 
     function endSession(reason='Session ended.'){
-      state.running=false; state.awaiting=false; controls.pauseBtn.disabled=true; controls.downloadBtn.disabled=false; controls.startBtn.disabled=false; setShopsDisabled(false);
+      state.running=false; state.awaiting=false;
+      controls.pauseBtn.disabled=true; controls.downloadBtn.disabled=false; controls.startBtn.disabled=false;
+      setShopsDisabled(false);
       log(`— ${reason} Best span: ${state.bestSpan}.`);
     }
 
@@ -340,17 +382,44 @@
       updateBadges(); log('Reset. Configure settings and press Start session.');
     }
 
-    function togglePause(){ if(!state.running) return; state.paused=!state.paused; controls.pauseBtn.textContent = state.paused? 'Resume':'Pause'; log(state.paused? 'Paused.':'Resumed.'); }
+    function togglePause(){
+      if(!state.running) return;
+      state.paused=!state.paused;
+      controls.pauseBtn.textContent = state.paused? 'Resume':'Pause';
+      log(state.paused? 'Paused.':'Resumed.');
+    }
 
     function toCSV(rows){
       const headers=['sessionId','timestamp','mode','seqLen','trial','presented','expected','response','correct','rt_first_ms','rt_mean_ms','rt_total_ms'];
       const lines=[headers.join(',')];
-      for(const r of rows){ const vals=headers.map(h=>String(r[h]??'').replace(/,/g,';')); lines.push(vals.join(',')); }
+      for(const r of rows){
+        const vals=headers.map(h=>String(r[h]??'').replace(/,/g,';'));
+        lines.push(vals.join(','));
+      }
       return lines.join('\n');
     }
-    function downloadCSV(){ if(!state.sessionRows.length){ alert('No data to download yet.'); return; } const csv=toCSV(state.sessionRows); const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); const fn=`errands_memory_${state.sessionId}.csv`; a.href=URL.createObjectURL(blob); a.download=fn; a.click(); URL.revokeObjectURL(a.href); }
 
-    // wire
+    // Attach the <a download> to the DOM so clinician_feedback.js can augment CSV with clinician_comment
+    function downloadCSV(){
+      if(!state.sessionRows.length){ alert('No data to download yet.'); return; }
+      const csv=toCSV(state.sessionRows);
+      const blob=new Blob([csv],{type:'text/csv'});
+      const a=document.createElement('a');
+      const fn=`errands_memory_${state.sessionId}.csv`;
+      a.href=URL.createObjectURL(blob);
+      a.download=fn;
+      a.style.display='none';
+      document.body.appendChild(a);
+      // First click is intercepted by clinician_feedback.js, which augments then re-clicks
+      a.click();
+      // Clean up shortly after
+      setTimeout(()=>{
+        URL.revokeObjectURL(a.href);
+        a.remove();
+      }, 1500);
+    }
+
+    // Wire up controls
     controls.startBtn.addEventListener('click',()=>startSession(false));
     controls.demoBtn.addEventListener('click',()=>startSession(true));
     controls.resetBtn.addEventListener('click',resetAll);
@@ -359,23 +428,13 @@
 
     // Rebuild street when shop count changes (only when idle)
     if (controls.shopCount){
-      controls.shopCount.addEventListener('change', ()=>{
-        if (!state.running){ initStreet(); }
-      });
+      controls.shopCount.addEventListener('change', ()=>{ if (!state.running){ initStreet(); } });
     }
 
-    initStreet(); updateBadges(); log('Ready. Choose settings and press Start session.');
+    // Init
+    initStreet();
+    updateBadges();
+    log('Ready. Choose settings and press Start session.');
   </script>
-<section id="clinician-notes">
-<div style="background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 16px; margin-top: 24px;">
-<label for="clinician-comment" style="display:block;font-weight:600;margin-bottom:8px;">
-      Clinician comments (optional)
-    </label>
-<textarea id="clinician-comment" placeholder="Enter any notes relevant to this session..." rows="4" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); font: inherit; resize: vertical;"></textarea>
-<p style="margin:8px 0 0; color: var(--muted); font-size: 0.9rem;">
-      This note will be added as <code>clinician_comment</code> in the exported CSV.
-    </p>
-</div>
-</section></main></body>
+</body>
 </html>
-
