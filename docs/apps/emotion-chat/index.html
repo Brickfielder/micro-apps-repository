@@ -5,96 +5,62 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Emotion Chat — Social Cognition Micro-App</title>
 
-  <!-- Tell frame.js which app we are; it will inject the hero from catalog.json -->
-  <meta name="app-slug" content="emotion_chat"/>
-  <!-- Optional overrides if you want to force a custom title/desc
-  <meta name="app-title" content="Emotion Chat">
-  <meta name="app-desc" content="WhatsApp-style scenarios to practice emotion recognition, theory of mind, and social reasoning.">
-  -->
-  <!-- Opt-in styling toggles used across Barista/Audio Errands -->
+  <!-- Frame pulls title/desc from catalog.json using this slug -->
+  <meta name="app-slug" content="emotion-chat"/>
   <meta name="theme" content="bold dense">
 
- <!-- Shared assets published from repo/docs/ as site root (no /docs in URL) -->
-<link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3">
-<script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
-<script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
+  <!-- Shared assets published from repo/docs/ as site root (no /docs in URL) -->
+  <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3">
+  <script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
+  <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
 
   <style>
-    /* ===== App-local styles: minimal, lean on shared theme ===== */
-
-    /* Compact toolbar like Barista/Audio Errands */
-    .toolbar label{ margin:0 .25rem 0 0; font-weight:600; }
+    /* App-local (light) */
+    .toolbar{ display:flex; flex-wrap:wrap; gap:.75rem; align-items:flex-end; margin-bottom: .75rem; }
     .toolbar .ctrl{ display:inline-grid; gap:.35rem; }
+    .toolbar label{ font-weight:600; }
 
-    /* Two-column content area inside #app-root */
-    .app-grid{ display:grid; gap:clamp(12px,1.2vw,18px); grid-template-columns: 1fr 1fr; }
-    @media (max-width: 980px){ .app-grid{ grid-template-columns: 1fr; } }
+    .app-grid{ display:grid; gap:clamp(12px,1.2vw,18px); grid-template-columns:1fr 1fr; }
+    @media (max-width:980px){ .app-grid{ grid-template-columns:1fr; } }
 
-    .card{
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: clamp(14px, 1.6vw, 18px);
-    }
+    .card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+           box-shadow:var(--shadow); padding: clamp(14px,1.6vw,18px); }
     .card h2{ margin:0 0 .5rem; }
 
-    /* Chat window */
-    .chat{
-      background: color-mix(in oklab, var(--surface), var(--line) 10%);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 12px;
-      height: 520px;
-      overflow:auto;
-    }
-    .bubble{
-      max-width: 78%;
-      padding: 10px 12px;
-      border-radius: 14px;
-      margin: 10px 0;
-      display:inline-block;
-      word-wrap:break-word;
-      box-shadow: 0 2px 8px rgba(0,0,0,.06);
-      font-size: clamp(15px, 1.4vw, 16px);
-    }
-    .fromA{ background: #fff; border:1px solid color-mix(in oklab, var(--line), #000 0%); }
+    .chat{ background: color-mix(in oklab, var(--surface), var(--line) 10%);
+           border:1px solid var(--line); border-radius:14px; padding:12px; height:520px; overflow:auto; }
+    .bubble{ max-width:78%; padding:10px 12px; border-radius:14px; margin:10px 0; display:inline-block;
+             word-wrap:break-word; box-shadow:0 2px 8px rgba(0,0,0,.06); font-size:clamp(15px,1.4vw,16px); }
+    .fromA{ background:#fff; border:1px solid #e6e6e6 }
     .fromB{ background: color-mix(in oklab, var(--accent), white 85%); border:1px solid color-mix(in oklab, var(--accent), var(--line) 75%); }
-    .name{ display:block; font-size:.9rem; color: var(--muted); margin-bottom:4px }
-
+    .name{ display:block; font-size:.95rem; color:var(--muted); margin-bottom:4px }
     .footer{ display:flex; gap:10px; justify-content:space-between; align-items:center; margin-top:8px }
-    .small{ color: var(--muted); font-size:.95rem; }
+    .small{ color:var(--muted); font-size:.95rem; }
 
-    /* Steps */
-    .step{ background: var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px }
-    .row{ display:grid; gap:12px; grid-template-columns: 1fr 1fr; }
-    @media (max-width: 720px){ .row{ grid-template-columns: 1fr; } }
+    .step{ background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px }
+    .row{ display:grid; gap:12px; grid-template-columns:1fr 1fr; }
+    @media (max-width:720px){ .row{ grid-template-columns:1fr; } }
     textarea{ width:100%; min-height:120px; resize:vertical; }
-    .legend{ color: var(--muted); }
+    .legend{ color:var(--muted); }
 
-    /* Pills (use shared .pill shape, add interactive bits) */
-    .pillgrid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap:10px; }
-    .pill-btn{
-      display:inline-flex; align-items:center; justify-content:center;
-      min-height: 42px; padding: 10px 14px; border-radius: 999px; border:1px solid var(--line);
-      background:#f2f4f7; cursor:pointer; font-weight:600; transition: transform .06s ease;
-    }
-    .pill-btn:active{ transform: scale(.98) }
-    .pill-btn[aria-pressed="true"]{ background: var(--accent); color:#fff; border-color: var(--accent-600); }
+    .pillgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:10px }
+    .pill-btn{ display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:10px 14px;
+               border-radius:999px; border:1px solid var(--line); background:#f2f4f7; cursor:pointer; font-weight:600;
+               transition: transform .06s ease; }
+    .pill-btn:active{ transform:scale(.98) }
+    .pill-btn[aria-pressed="true"]{ background:var(--accent); color:#fff; border-color:var(--accent-600); }
 
-    /* Feedback tags */
     .tags{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px }
-    .tag.good{ border:1px solid #b7e3c4; background:#ecfdf5; color:#065f46; border-radius:999px; padding:6px 10px; }
-    .tag.bad { border:1px solid #f6c7c7; background:#fef2f2; color:#7f1d1d; border-radius:999px; padding:6px 10px; }
-
-    /* Divider */
-    .divider{ height:1px; background: var(--line); margin:10px 0; }
+    .tag{ border-radius:999px; padding:6px 10px; }
+    .tag.good{ border:1px solid #b7e3c4; background:#ecfdf5; color:#065f46 }
+    .tag.bad{  border:1px solid #f6c7c7; background:#fef2f2; color:#7f1d1d }
+    .divider{ height:1px; background:var(--line); margin:10px 0 }
   </style>
 </head>
 <body>
-  <!-- frame.js will wrap this in .app-wrap and inject a .app-hero above -->
+  <!-- frame.js injects the hero. Keep your app content inside #app-root -->
   <main id="app-root">
-    <!-- Controls bar -->
+    <!-- Controls -->
     <div class="toolbar" role="region" aria-label="Controls">
       <div class="ctrl">
         <label for="scenario">Scenario</label>
@@ -110,13 +76,13 @@
       <button class="button primary" id="play">Play chat</button>
       <button class="button" id="skip" disabled>Skip chat</button>
       <button class="button" id="reset" disabled>Reset</button>
-      <a class="button" id="download" download="emotion_chat_results.csv" title="Download CSV of your results" href="#" aria-disabled="true">Download CSV</a>
+      <button class="button" id="download" title="Download CSV of your results" disabled>Download CSV</button>
       <span class="small" id="status" aria-live="polite"></span>
     </div>
 
-    <!-- App grid -->
+    <!-- Content -->
     <div class="app-grid">
-      <!-- Left: Chat -->
+      <!-- Left -->
       <section class="card" aria-labelledby="chatTitle">
         <h2 id="chatTitle">Chat</h2>
         <div id="chat" class="chat" aria-label="Chat transcript" aria-live="polite"></div>
@@ -126,7 +92,7 @@
         </div>
       </section>
 
-      <!-- Right: Steps -->
+      <!-- Right -->
       <section class="card" aria-labelledby="respTitle">
         <h2 id="respTitle">Your responses</h2>
 
@@ -174,7 +140,7 @@
   </main>
 
   <script>
-  /* ========= Global master list ========= */
+  /* ========= Master list ========= */
   const MASTER_PILLS = [
     "Happy","Excited","Frustrated","Irritated","Calm","Disappointed","Guilty","Sad","Defensive","Anxious",
     "Embarrassed","Angry","Relieved","Neutral","Confused","Optimistic","Proud","Distant","Supportive",
@@ -182,13 +148,191 @@
     "Grateful","Appreciative","Concerned","Bored","Regretful","Apathetic"
   ];
 
-  /* ========= Scenarios (unchanged) ========= */
-  const SCENARIOS = /* (keep your full scenarios array here) */ <?php /* placeholder if templating */ ?>;
-  // For plain HTML use the full SCENARIOS array from your original code:
-  // --- START SCENARIOS COPY ---
-  const SCENARIOS_DATA = <?/* paste your SCENARIOS array JSON here if you prefer keeping code cleaner */?>;
-  // --- END SCENARIOS COPY ---
-  // If not using a separate SCENARIOS_DATA, just replace all SCENARIOS references below with your SCENARIOS array.
+  /* ========= Scenarios (your original set) ========= */
+  const SCENARIOS = [
+    { id:"A", title:"Group Project", people:{A:"Alex", B:"Sam"},
+      messages:[
+        {from:"A", text:"Hey, have you added your part to the doc yet?"},
+        {from:"B", text:"Not yet, had a busy day. Will do later."},
+        {from:"A", text:"Okay, it’s just due tomorrow 😬"},
+        {from:"B", text:"I know, relax. I’ll get it done."},
+        {from:"A", text:"We still need to check references and format everything."},
+        {from:"B", text:"You always stress too much. It’ll be fine."},
+        {from:"A", text:"I’m not stressing, just making sure we don’t lose marks."},
+        {from:"B", text:"Well I said I’ll do it later. Can you chill?"},
+        {from:"A", text:"…"},
+        {from:"B", text:"Why the dots? 🙄"},
+        {from:"A", text:"Nothing. I’ll just finish it myself."},
+        {from:"B", text:"Suit yourself then."}
+      ],
+      correct:{ A:["Frustrated","Disappointed","Sad","Withdrawn"], B:["Irritated","Defensive"] },
+      cues:{
+        A:"Frustration (“due tomorrow 😬”), disappointment (“I’ll finish it myself”), withdrawal (“…”).",
+        B:"Defensiveness (“You always stress too much”), irritation (🙄)."
+      }
+    },
+    { id:"B", title:"Missed Call", people:{A:"Maya", B:"Leo"},
+      messages:[
+        {from:"A", text:"Tried calling you 3 times last night, where were you? 😕"},
+        {from:"B", text:"Sorry, phone was on silent."},
+        {from:"A", text:"I was worried. Thought something happened."},
+        {from:"B", text:"Nah, just needed some quiet time."},
+        {from:"A", text:"Without telling me? We were supposed to chat."},
+        {from:"B", text:"Didn’t think it was a big deal."},
+        {from:"A", text:"Well it kind of was… I waited."},
+        {from:"B", text:"You always overthink these things."},
+        {from:"A", text:"Maybe. But it hurt a little."},
+        {from:"B", text:"I didn’t mean to. Just tired."},
+        {from:"A", text:"So… are we still talking tonight?"},
+        {from:"B", text:"Might be busy again. Don’t wait up."},
+        {from:"A", text:"Oh. Okay then."}
+      ],
+      correct:{ A:["Anxious","Hurt","Disappointed"], B:["Distant","Defensive","Irritated"] },
+      cues:{
+        A:"Anxiety (“worried”), hurt/disappointment (“I waited”, “hurt a little”).",
+        B:"Avoidance, defensiveness (“overthink”), distance (“Don’t wait up”)."
+      }
+    },
+    { id:"C", title:"Forgotten Favour", people:{A:"Liam", B:"Noah"},
+      messages:[
+        {from:"A", text:"Hey, did you manage to pick up my parcel?"},
+        {from:"B", text:"Ah, totally slipped my mind 😬 sorry."},
+        {from:"A", text:"That’s the third time you’ve forgotten…"},
+        {from:"B", text:"I’ve been super busy, cut me some slack."},
+        {from:"A", text:"I waited at home all afternoon."},
+        {from:"B", text:"I said I was sorry. Do you want me to drive there now?"},
+        {from:"A", text:"It closes in 10 minutes. Forget it."},
+        {from:"B", text:"Come on, don’t be dramatic."},
+        {from:"A", text:"Right."},
+        {from:"B", text:"Seriously, what do you want me to do?"},
+        {from:"A", text:"Nothing. I’ll figure it out."},
+        {from:"B", text:"Fine then."}
+      ],
+      correct:{ A:["Frustrated","Resentful","Disappointed"], B:["Guilty","Defensive"] },
+      cues:{
+        A:"“Third time…” = resentment; “Forget it” = disappointment.",
+        B:"“😬 sorry” = guilt; “cut me some slack” = defensive."
+      }
+    },
+    { id:"D", title:"Concert Ticket", people:{A:"Ella", B:"Sophie"},
+      messages:[
+        {from:"A", text:"Guess what, I got tickets to the concert!! 🎶🔥"},
+        {from:"B", text:"No way, lucky you."},
+        {from:"A", text:"Front row seats too 😍 can’t wait."},
+        {from:"B", text:"Wow. Must’ve cost a fortune."},
+        {from:"A", text:"Worth every penny."},
+        {from:"B", text:"I tried but they were sold out…"},
+        {from:"A", text:"I was online right when they went live."},
+        {from:"B", text:"Not all of us can sit refreshing a page all day 🙄."},
+        {from:"A", text:"Hey, sorry. Didn’t mean to rub it in."},
+        {from:"B", text:"No, it’s fine. Have fun."},
+        {from:"A", text:"Want me to record some clips for you?"},
+        {from:"B", text:"Don’t bother."},
+        {from:"A", text:"…"}
+      ],
+      correct:{ A:["Excited","Guilty"], B:["Jealous","Irritated","Hurt","Envious"] },
+      cues:{
+        A:"“Front row seats 😍” = excitement; apology hints guilt.",
+        B:"Dismissive lines + 🙄 + “Don’t bother” = envy, irritation, hurt."
+      }
+    },
+    { id:"E", title:"Lost Wallet", people:{A:"Nina", B:"Omar"},
+      messages:[
+        {from:"A", text:"I just found your wallet by the café!"},
+        {from:"B", text:"No way—are you serious??"},
+        {from:"A", text:"Yep. Everything’s inside. I can drop it off now."},
+        {from:"B", text:"I’ve been searching for an hour. I thought it was gone forever."},
+        {from:"A", text:"I’m outside your building in 5."},
+        {from:"B", text:"You’re a lifesaver. I was panicking."},
+        {from:"A", text:"All good. See you in a bit."},
+        {from:"B", text:"Thank you, really. I owe you one."},
+        {from:"A", text:"Don’t worry about it 😊"},
+        {from:"B", text:"I can finally breathe."}
+      ],
+      correct:{ A:["Supportive","Calm","Content"], B:["Relieved","Grateful","Appreciative"] },
+      cues:{ A:"Practical reassurance + calm tone.", B:"Relief (“finally breathe”), gratitude (“owe you one”)." }
+    },
+    { id:"F", title:"Presentation Praise", people:{A:"Ava", B:"Ben"},
+      messages:[
+        {from:"A", text:"Your presentation was fantastic today!"},
+        {from:"B", text:"Oh—thanks! I’m glad it landed."},
+        {from:"A", text:"The Q&A was tough but you handled it."},
+        {from:"B", text:"I did prepare for those."},
+        {from:"A", text:"You should be proud."},
+        {from:"B", text:"I am, actually. It took weeks."},
+        {from:"A", text:"It showed."},
+        {from:"B", text:"Thanks for saying that."},
+        {from:"A", text:"We should submit it to the conference."},
+        {from:"B", text:"Great idea!"}
+      ],
+      correct:{ A:["Supportive","Happy"], B:["Proud","Relieved","Happy"] },
+      cues:{ A:"Warm encouragement and affirmation.", B:"Acknowledges effort → pride; post-event easing → relief." }
+    },
+    { id:"G", title:"Awkward Joke", people:{A:"Chloe", B:"Dan"},
+      messages:[
+        {from:"A", text:"About earlier… my joke wasn’t great."},
+        {from:"B", text:"It caught people off guard."},
+        {from:"A", text:"I didn’t mean to upset anyone."},
+        {from:"B", text:"Maybe just bad timing."},
+        {from:"A", text:"I feel silly now."},
+        {from:"B", text:"Happens to everyone."},
+        {from:"A", text:"Should I apologise to Mira?"},
+        {from:"B", text:"A quick message would help."},
+        {from:"A", text:"I’ll do that now."},
+        {from:"B", text:"Good call."}
+      ],
+      correct:{ A:["Embarrassed","Regretful","Anxious"], B:["Supportive","Concerned","Calm"] },
+      cues:{ A:"Admits mistake → embarrassment/regret.", B:"Gentle guidance; steady tone." }
+    },
+    { id:"H", title:"Flat Tyre", people:{A:"Priya", B:"Tom"},
+      messages:[
+        {from:"A", text:"Stuck with a flat tyre on the A2."},
+        {from:"B", text:"Are you safe? Hazards on?"},
+        {from:"A", text:"Yeah, pulled over."},
+        {from:"B", text:"I can come out with the pump."},
+        {from:"A", text:"That’d be amazing."},
+        {from:"B", text:"Send me your location."},
+        {from:"A", text:"Done."},
+        {from:"B", text:"On my way. 15 mins."},
+        {from:"A", text:"Thanks. I was a bit shaken."},
+        {from:"B", text:"You’ll be fine. We’ve got this."}
+      ],
+      correct:{ A:["Anxious","Relieved"], B:["Concerned","Supportive","Calm"] },
+      cues:{ A:"Stress then relief when help is coming.", B:"Checks safety, offers concrete help." }
+    },
+    { id:"I", title:"Party Invite", people:{A:"Zoe", B:"Mark"},
+      messages:[
+        {from:"A", text:"You coming to Jess’s party tonight?"},
+        {from:"B", text:"Maybe. Long week."},
+        {from:"A", text:"It’ll be fun—lots of people."},
+        {from:"B", text:"Hmm."},
+        {from:"A", text:"We could go for just an hour."},
+        {from:"B", text:"I might skip this one."},
+        {from:"A", text:"Ah, okay."},
+        {from:"B", text:"Tell her happy birthday from me."},
+        {from:"A", text:"Will do."},
+        {from:"B", text:"Catch up another time?"}
+      ],
+      correct:{ A:["Disappointed","Hurt"], B:["Bored","Apathetic","Distant"] },
+      cues:{ A:"Deflation after efforts to persuade.", B:"Low-energy, non-committal; opts out." }
+    },
+    { id:"J", title:"Unexpected Gift", people:{A:"Hana", B:"Luca"},
+      messages:[
+        {from:"A", text:"Left something at your door 😊"},
+        {from:"B", text:"What? I just saw a box!"},
+        {from:"A", text:"Open it!"},
+        {from:"B", text:"Whoa—my favourite tea."},
+        {from:"A", text:"Figured you needed a pick-me-up."},
+        {from:"B", text:"This made my day."},
+        {from:"A", text:"Glad it helped."},
+        {from:"B", text:"I didn’t expect this at all."},
+        {from:"A", text:"You’ve been working so hard."},
+        {from:"B", text:"Thank you—really."}
+      ],
+      correct:{ A:["Supportive","Happy"], B:["Surprised","Grateful","Appreciative"] },
+      cues:{ A:"Attuned generosity; upbeat tone.", B:"“Didn’t expect this” + thanks → surprise + gratitude." }
+    }
+  ];
 
   /* ========= State ========= */
   let current=null, timer=null, idx=0, revealed=false, startTime=0, endTime=0;
@@ -196,7 +340,7 @@
   const $ = id => document.getElementById(id);
 
   const chatEl = $("chat"), scenarioSel = $("scenario");
-  const playBtn = $("play"), skipBtn = $("skip"), resetBtn = $("reset");
+  const playBtn = $("play"), skipBtn = $("skip"), resetBtn = $("reset"), downloadBtn = $("download");
   const statusEl = $("status"), progressEl = $("progress"), chatTitle = $("chatTitle"), timerText = $("timerText");
   const step1 = $("step1"), proceedBtn = $("proceed"), step1Hint = $("step1Hint");
   const step2 = $("step2"), submitBtn = $("submit"), step3 = $("step3");
@@ -206,7 +350,6 @@
   const pillsA = $("pillsA"), pillsB = $("pillsB");
   const fbA = $("fbA"), fbB = $("fbB"), kpi = $("kpi");
   const distractorsSel = $("distractors");
-  const downloadA = $("download");
 
   /* ========= Helpers ========= */
   function clearChat(){ chatEl.innerHTML=""; }
@@ -220,14 +363,7 @@
     wrap.style.textAlign = from==="A"?"left":"right";
     chatEl.appendChild(wrap); chatEl.scrollTop=chatEl.scrollHeight;
   }
-  function setDisabled(el,v){
-    if (el.tagName === "A") {
-      el.setAttribute("aria-disabled", v ? "true" : "false");
-      el.classList.toggle("disabled", !!v);
-    } else {
-      el.toggleAttribute("disabled", !!v);
-    }
-  }
+  function setDisabled(el,v){ el.toggleAttribute("disabled",!!v); }
   function shuffle(arr){ return [...arr].sort(()=>Math.random()-0.5); }
 
   function secondsSince(t0){ return Math.round((Date.now()-t0)/1000); }
@@ -249,7 +385,7 @@
     chatTitle.textContent = `Chat — ${current.people.A} & ${current.people.B}`;
     statusEl.textContent = "Ready";
     setDisabled(playBtn,false); setDisabled(skipBtn,true); setDisabled(resetBtn,true);
-    setDisabled(downloadA, RESULTS.length===0);
+    setDisabled(downloadBtn, RESULTS.length===0);
 
     // Step 1 reset
     freeA.value=""; freeB.value="";
@@ -395,7 +531,7 @@
     `;
     step3.hidden=false;
 
-    // Save result row
+    // Save result row (+ clinician_comment is appended by clinician_feedback.js on download)
     const durationSec = Math.max(0, Math.round(((endTime||Date.now()) - (startTime||Date.now()))/1000));
     RESULTS.push({
       scenario_id: current.id,
@@ -418,7 +554,7 @@
       duration_s: durationSec,
       timestamp: new Date().toISOString()
     });
-    setDisabled(downloadA, RESULTS.length===0);
+    setDisabled(downloadBtn, RESULTS.length===0);
   }
 
   /* ========= CSV ========= */
@@ -428,21 +564,15 @@
     const lines = [headers.join(',')].concat(rows.map(r => headers.map(h=>escape(r[h])).join(',')));
     return lines.join('\n');
   }
-
-  function triggerCSVDownload(csvText, filename){
-    const blob = new Blob([csvText], {type:"text/csv;charset=utf-8;"});
-    const url = URL.createObjectURL(blob);
-    downloadA.href = url;
-    downloadA.setAttribute("download", filename || "emotion_chat_results.csv");
-    // clinician_feedback.js will intercept this click and append clinician_comment
-    downloadA.click();
-    setTimeout(()=>URL.revokeObjectURL(url), 1000);
-  }
-
-  function handleDownload(){
+  function downloadCSV(){
     if(RESULTS.length===0) return;
     const csv = toCSV(RESULTS);
-    triggerCSVDownload(csv, "emotion_chat_results.csv");
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'emotion_chat_results.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
   }
 
   /* ========= Events ========= */
@@ -451,13 +581,9 @@
   playBtn.addEventListener("click", playChat);
   skipBtn.addEventListener("click", skipChat);
   resetBtn.addEventListener("click", resetAll);
-  downloadA.addEventListener("click", (e)=>{ 
-    if(RESULTS.length===0){ e.preventDefault(); return; }
-    // If href is already set (blob), let clinician_feedback.js augment; otherwise build now
-    if(!downloadA.href || downloadA.href === "#"){ e.preventDefault(); handleDownload(); }
-  });
-  $("proceed").addEventListener("click", ()=>{/* handled above */});
-  $("submit").addEventListener("click", computeFeedback);
+  downloadBtn.addEventListener("click", downloadCSV);
+  document.getElementById("proceed").addEventListener("click", ()=>{ step2.hidden = false; const first = pillsA.querySelector('.pill-btn'); if(first) first.focus(); });
+  document.getElementById("submit").addEventListener("click", computeFeedback);
   freeA.addEventListener("input", updateProceedState);
   freeB.addEventListener("input", updateProceedState);
 
@@ -465,7 +591,5 @@
   populateScenarioList();
   loadScenario(SCENARIOS[0].id);
   </script>
-
-  <!-- Clinician note card is injected by clinician_feedback.js; no inline HTML needed -->
 </body>
 </html>
