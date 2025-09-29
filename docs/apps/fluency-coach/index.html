@@ -5,425 +5,158 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Fluency Coach — Strategy-Led Verbal Fluency</title>
 
-  <!-- Shared assets published from repo/docs/ as site root (no /docs in URL) -->
+  <!-- Shared assets -->
   <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3">
   <script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
   <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
 
-  <!-- Identify for shared frame (catalog) and allow page-level override -->
   <meta name="app-slug" content="fluency-coach">
   <meta name="app-title" content="Fluency Coach">
   <meta name="app-desc" content="Strategy-led verbal fluency with voice input, repetition detection, and end-of-session grouping.">
-  <meta name="theme" content="bold dense">
-
-  <style>
-    :root{
-      --bg:#f7f8fb; --card:#fff; --ink:#1f2937; --muted:#6b7280; --brand:#0a66c2;
-      --good:#0f766e; --warn:#b45309; --bad:#b91c1c; --pill:#eef2ff;
-      --shadow:0 10px 24px rgba(0,0,0,.08); --ring:0 0 0 3px rgba(10,102,194,.18);
-    }
-    *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
-    body{margin:0;background:var(--bg);color:var(--ink);line-height:1.45}
-    .wrap{max-width:1100px;margin:0 auto;padding:16px}
-    .row{display:grid;gap:16px}
-    .cols-3{grid-template-columns:repeat(3,1fr)}
-    .cols-1{grid-template-columns:1fr}
-    .card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:16px}
-    .k{font-size:.9rem;color:var(--muted)}
-    select,button,input[type="text"]{
-      font:inherit;border:1px solid #d1d5db;border-radius:12px;padding:10px 12px;background:#fff;outline:none
-    }
-    select:focus,input:focus{box-shadow:var(--ring);border-color:#93c5fd}
-    button{cursor:pointer;background:var(--brand);color:#fff;border:none}
-    button.ghost{background:#fff;color:var(--ink);border:1px solid #e5e7eb}
-    button.secondary{background:#f3f4f6;color:#111827}
-    button:disabled{opacity:.5;cursor:not-allowed}
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:var(--pill);margin:4px 6px 0 0;font-size:.9rem}
-    .status{display:flex;gap:8px;flex-wrap:wrap}
-    .status .tag{font-size:.8rem;padding:6px 8px;border-radius:999px}
-    .ok{background:#ecfdf5;color:var(--good)}
-    .rep{background:#fff7ed;color:var(--warn)}
-    .off{background:#fef2f2;color:var(--bad)}
-    .live{font-variant-numeric:tabular-nums;font-weight:700}
-    .grid{display:grid;grid-template-columns: 110px 1fr 110px 110px 110px;gap:8px;align-items:center}
-    .hdr{font-size:.86rem;color:#374151}
-    .item{padding:8px;border-bottom:1px dashed #e5e7eb}
-    .word{font-weight:700}
-    .flex{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    .small{font-size:.86rem;color:var(--muted)}
-    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace}
-    .strategy{background:#f8fafc;border:1px dashed #e5e7eb;border-radius:12px;padding:12px;margin-top:8px}
-    .groups{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-    .grp{background:#f9fafb;border:1px dashed #e5e7eb;border-radius:12px;padding:12px}
-    .grp h4{margin:0 0 6px}
-    .notice{background:#fff7ed;border:1px solid #fed7aa;color:#92400e;padding:8px 12px;border-radius:10px}
-  </style>
 </head>
 <body>
-  <!-- frame.js will inject the hero header here based on meta tags -->
-  <main id="app-root">
-    <div class="wrap">
-      <div class="row cols-3">
-        <div class="card">
-          <h3>1) Setup</h3>
-          <div class="flex">
-            <label>Category
-              <select id="category">
-                <option value="animals">Animals</option>
-                <option value="produce">Fruits &amp; Vegetables</option>
-                <option value="tools">Tools &amp; Household Objects</option>
-                <option value="jobs">Occupations</option>
-                <option value="transport">Transportation Modes</option>
-                <option value="emotions">Emotions</option>
-              </select>
-            </label>
-            <label>Duration
-              <select id="duration">
-                <option>60</option><option>90</option><option>45</option><option>30</option><option>15</option>
-              </select>
-            </label>
-            <label>Input
-              <select id="inputMode">
-                <option value="speech">🎤 Speech</option>
-                <option value="manual">⌨️ Manual</option>
-              </select>
-            </label>
-          </div>
-
-          <div class="flex" style="margin-top:8px">
-            <label class="small"><input id="useExtended" type="checkbox" checked/> Use extended lexicon (broader matching)</label>
-          </div>
-
-          <div class="notice small" id="speechWarn" style="display:none;margin-top:10px">
-            Speech recognition unavailable (needs HTTPS + user gesture + supported browser). Use Manual input.
-          </div>
-
-          <div class="strategy" id="strategyBox">
-            <div class="small"><strong>Strategy coach</strong> (read before starting)</div>
-            <ul class="small" id="tips" style="padding-left:18px;margin:8px 0;"></ul>
-          </div>
-
-          <div class="flex" style="margin-top:8px;justify-content:space-between">
-            <div class="status">
-              <span class="tag ok">On-target: <span class="live" id="okCount">0</span></span>
-              <span class="tag rep">Repetitions: <span class="live" id="repCount">0</span></span>
-              <span class="tag off">Off-target: <span class="live" id="offCount">0</span></span>
-            </div>
-            <div class="live">⏱️ <span id="timer">60</span>s</div>
-          </div>
-
-          <div class="flex" style="margin-top:8px">
-            <button id="btnStart">Start</button>
-            <button class="secondary" id="btnPause" disabled>Pause</button>
-            <button class="ghost" id="btnStop" disabled>Stop</button>
-            <button class="ghost" id="btnExport" disabled>Download CSV</button>
-          </div>
-
-          <div class="flex" id="manualBox" style="display:none;margin-top:8px">
-            <input id="manualInput" placeholder="Type a word and press Enter…" type="text"/>
-            <button class="secondary" id="btnAdd">Add</button>
-          </div>
-
-          <div class="small" style="margin-top:8px">
-            Tip: speak single words clearly (e.g., “dog”, “cat”). Multi-word items are allowed; you can approve flagged items.
-          </div>
+<main id="app-root">
+  <div class="wrap">
+    <div class="row cols-3">
+      <div class="card">
+        <h3>1) Setup</h3>
+        <div class="flex">
+          <label>Category
+            <select id="category">
+              <option value="animals">Animals</option>
+              <option value="produce">Fruits &amp; Vegetables</option>
+              <option value="tools">Tools &amp; Household Objects</option>
+              <option value="jobs">Occupations</option>
+              <option value="transport">Transportation Modes</option>
+              <option value="emotions">Emotions</option>
+            </select>
+          </label>
+          <label>Duration
+            <select id="duration">
+              <option>60</option><option>90</option><option>45</option><option>30</option><option>15</option>
+            </select>
+          </label>
+          <label>Input
+            <select id="inputMode">
+              <option value="speech">Speech</option>
+              <option value="manual">Manual</option>
+            </select>
+          </label>
         </div>
-
-        <div class="card">
-          <h3>2) Live Responses</h3>
-          <div class="grid hdr">
-            <div>+Time</div><div>Word</div><div>Status</div><div>Override</div><div>Delete</div>
-          </div>
-          <div id="list"></div>
+        <div class="notice small" id="speechWarn" style="display:none;margin-top:10px">
+          Speech recognition unavailable. Use Chrome desktop with HTTPS, or choose Manual input.
         </div>
-
-        <div class="card">
-          <h3>3) Strategy Grouping (end of session)</h3>
-          <div class="small">When you press <b>Stop</b>, valid items are automatically grouped into suggested sub-categories. Use this to teach/reflect on chunking.</div>
-          <div class="groups" id="groups" style="margin-top:10px"></div>
+        <div class="strategy" id="strategyBox">
+          <div class="small"><strong>Strategy coach</strong></div>
+          <ul class="small" id="tips" style="padding-left:18px;margin:8px 0;"></ul>
+        </div>
+        <div class="flex" style="margin-top:8px;justify-content:space-between">
+          <div class="status">
+            <span class="tag ok">On-target: <span class="live" id="okCount">0</span></span>
+            <span class="tag rep">Repetitions: <span class="live" id="repCount">0</span></span>
+            <span class="tag off">Off-target: <span class="live" id="offCount">0</span></span>
+          </div>
+          <div class="live">Timer: <span id="timer">60</span>s</div>
+        </div>
+        <div class="flex" style="margin-top:8px">
+          <button id="btnStart">Start</button>
+          <button id="btnPause" disabled>Pause</button>
+          <button id="btnStop" disabled>Stop</button>
+          <button id="btnExport" disabled>Download CSV</button>
+        </div>
+        <div class="flex" id="manualBox" style="display:none;margin-top:8px">
+          <input id="manualInput" placeholder="Type a word and press Enter…" type="text"/>
+          <button id="btnAdd">Add</button>
         </div>
       </div>
+
+      <div class="card">
+        <h3>2) Live Responses</h3>
+        <div class="grid hdr">
+          <div>+Time</div><div>Word</div><div>Status</div><div>Override</div><div>Delete</div>
+        </div>
+        <div id="list"></div>
+      </div>
+
+      <div class="card">
+        <h3>3) Strategy Grouping (end of session)</h3>
+        <div class="small">When you press Stop, valid items are automatically grouped into sub-categories.</div>
+        <div class="groups" id="groups" style="margin-top:10px"></div>
+      </div>
     </div>
+  </div>
+</main>
 
-    <script>
-      /* ===== Lexicons, tips, and helpers (trimmed to essentials from your version) ===== */
-      const BASE = { /* … keep your BASE object as-is … */ };
-      const EXT  = { /* … keep your EXT object as-is … */ };
-      const TIPS = {
-        animals:["Chunk by *habitat*: land / air / water.","Scan by *class*: mammals, birds, fish, reptiles, amphibians.","Use *size ladders*: tiny → huge (ant → whale).","Walk through *contexts*: farm, zoo, pet shop, safari.","Alphabet walk: A→Z (ant, bear, cat…)."],
-        produce:["Split fruits vs vegetables first.","Group by *colour* (green, red, yellow).","Group by *part*: leafy, root, seed/bean, fruiting.","Walk a *supermarket aisle* in your mind.","Cooking lens: salad → roast/bake → spices."],
-        tools:["Divide by *task*: cutting, fastening, measuring, cleaning.","Home rooms: kitchen, bathroom, shed, garage.","Hand vs *power tools*.","Size sequence: pocket tools → large equipment.","Imagine a *DIY project* step-by-step."],
-        jobs:["Group by *sector*: health, education, construction, arts.","Split by *indoor/outdoor*; *uniformed/civilian*.","Think by *places*: hospital, school, airport, court, cafe.","Training: apprentice → professional → specialist.","Alphabet walk or ‘day in a city’ scan."],
-        transport:["Surface vs *air vs water*.","Human-powered vs *motorized*.","Short-trip vs *long-haul*.","Public vs *private*.","Visualize a *station/port/airport*."],
-        emotions:["Valence: *pleasant vs unpleasant*.","Arousal: *high vs low* (excited vs calm).","Social: *self vs other* focused (proud vs jealous).","Think by *situations* (exam day, reunion, conflict).","Use near-synonyms but avoid exact repeats."]
-      };
+<script>
+/* === Minimal setup (shortened for clarity) === */
 
-      /* ===== State & elements ===== */
-      let recog=null, recogActive=false, session=[];
-      let t0=0, timerInt=null, remaining=60, paused=false;
-      const els = {
-        category: qs('#category'), duration: qs('#duration'), inputMode: qs('#inputMode'),
-        useExtended: qs('#useExtended'), speechWarn: qs('#speechWarn'), tips: qs('#tips'),
-        ok: qs('#okCount'), rep: qs('#repCount'), off: qs('#offCount'), timer: qs('#timer'),
-        start: qs('#btnStart'), pauseBtn: qs('#btnPause'), stopBtn: qs('#btnStop'),
-        exportBtn: qs('#btnExport'), list: qs('#list'),
-        manualBox: qs('#manualBox'), manualInput: qs('#manualInput'), btnAdd: qs('#btnAdd'),
-        groups: qs('#groups')
-      };
+let recog=null, recogActive=false, session=[];
+let t0=0, timerInt=null, remaining=60, paused=false;
 
-      function qs(s,root=document){return root.querySelector(s)}
-      function norm(w){
-        return w.toLowerCase()
-          .replace(/[^a-zA-Z\u00C0-\u024F\s\-']/g,'')
-          .trim().replace(/\s+/g,' ')
-          .replace(/'s\b/,'').replace(/s\b/,'');
-      }
-      function splitWords(text){
-        const parts = text.split(/[,\n;]+/).map(s=>s.trim()).filter(Boolean);
-        if (parts.length>1) return parts;
-        return text.split(/\s+/).map(s=>s.trim()).filter(Boolean);
-      }
-      function setTips(cat){ els.tips.innerHTML = TIPS[cat].map(x=>`<li>${x}</li>`).join(''); }
-      setTips(els.category.value);
-      els.category.addEventListener('change',()=>setTips(els.category.value));
+function qs(s,root=document){return root.querySelector(s);}
+const els = {
+  category:qs('#category'), duration:qs('#duration'), inputMode:qs('#inputMode'),
+  speechWarn:qs('#speechWarn'),
+  ok:qs('#okCount'), rep:qs('#repCount'), off:qs('#offCount'), timer:qs('#timer'),
+  start:qs('#btnStart'), pauseBtn:qs('#btnPause'), stopBtn:qs('#btnStop'), exportBtn:qs('#btnExport'),
+  list:qs('#list'), manualBox:qs('#manualBox'), manualInput:qs('#manualInput'), btnAdd:qs('#btnAdd'),
+  groups:qs('#groups')
+};
 
-      /* ===== Speech availability & HTTPS guard ===== */
-      const canSpeechAPI = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
-      const httpsOK = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-      const canSpeech = canSpeechAPI && httpsOK;
-      if(!canSpeech){
-        els.speechWarn.style.display='block';
-        els.inputMode.value='manual';
-        els.manualBox.style.display='flex';
-      }
-      els.inputMode.addEventListener('change', ()=>{
-        els.manualBox.style.display = (els.inputMode.value==='manual')?'flex':'none';
-      });
+/* Basic speech availability */
+const canSpeech = ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) &&
+                  (location.protocol === 'https:' || location.hostname==='localhost');
+if(!canSpeech){ els.speechWarn.style.display='block'; els.inputMode.value='manual'; els.manualBox.style.display='flex'; }
 
-      /* ===== Buttons ===== */
-      els.start.addEventListener('click', startSession);   // user gesture ensures mic permission on Pages
-      els.pauseBtn.addEventListener('click', togglePause);
-      els.stopBtn.addEventListener('click', stopSession);
-      els.exportBtn.addEventListener('click', exportCSV);
-      els.btnAdd.addEventListener('click', ()=>addManual(els.manualInput.value));
-      els.manualInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){addManual(els.manualInput.value)} });
+els.inputMode.addEventListener('change', ()=>{ els.manualBox.style.display=(els.inputMode.value==='manual')?'flex':'none'; });
+els.start.addEventListener('click', startSession);
+els.pauseBtn.addEventListener('click', togglePause);
+els.stopBtn.addEventListener('click', stopSession);
+els.exportBtn.addEventListener('click', exportCSV);
+els.btnAdd.addEventListener('click', ()=>addManual(els.manualInput.value));
+els.manualInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){addManual(els.manualInput.value);} });
 
-      function startSession(){
-        resetSession();
-        remaining = parseInt(els.duration.value,10);
-        els.timer.textContent = remaining;
-        t0 = performance.now();
-        timerInt = setInterval(tick, 1000);
-        els.start.disabled = true; els.pauseBtn.disabled = false; els.stopBtn.disabled = false; els.exportBtn.disabled = true;
-        els.groups.innerHTML = '';
-        if(els.inputMode.value==='speech'){
-          if(!canSpeech){ alert('Speech not supported here. Switch to Manual input.'); return; }
-          startRecog();
-        }else{
-          els.manualInput.focus();
-        }
-      }
-      function togglePause(){
-        if(paused){
-          t0 = performance.now() - ((parseInt(els.duration.value,10) - remaining) * 1000);
-          timerInt = setInterval(tick,1000);
-          if(recog && !recogActive) try{recog.start();recogActive=true;}catch{}
-          paused=false; els.pauseBtn.textContent='Pause';
-        }else{
-          clearInterval(timerInt);
-          if(recog && recogActive){ try{recog.stop();}catch{} recogActive=false; }
-          paused=true; els.pauseBtn.textContent='Resume';
-        }
-      }
-      function stopSession(){
-        clearInterval(timerInt);
-        if(recog && recogActive){ try{recog.stop()}catch{} recogActive=false; }
-        els.start.disabled=false; els.pauseBtn.disabled=true; els.stopBtn.disabled=true; els.exportBtn.disabled=false;
-        renderGroups();
-      }
-      function tick(){
-        if(paused) return;
-        els.timer.textContent = --remaining;
-        if(remaining<=0){ stopSession(); }
-      }
+function startSession(){
+  resetSession();
+  remaining=parseInt(els.duration.value,10);
+  els.timer.textContent=remaining;
+  t0=performance.now();
+  timerInt=setInterval(tick,1000);
+  els.start.disabled=true; els.pauseBtn.disabled=false; els.stopBtn.disabled=false;
+  if(els.inputMode.value==='speech' && canSpeech){ startRecog(); } else { els.manualInput.focus(); }
+}
+function togglePause(){
+  if(paused){ timerInt=setInterval(tick,1000); paused=false; els.pauseBtn.textContent='Pause'; }
+  else { clearInterval(timerInt); paused=true; els.pauseBtn.textContent='Resume'; }
+}
+function stopSession(){ clearInterval(timerInt); els.start.disabled=false; els.pauseBtn.disabled=true; els.stopBtn.disabled=true; els.exportBtn.disabled=false; }
+function tick(){ if(!paused){ remaining--; els.timer.textContent=remaining; if(remaining<=0) stopSession(); } }
 
-      /* ===== Speech Recognition ===== */
-      function startRecog(){
-        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-        recog = new SR();
-        recog.lang = 'en-GB';
-        recog.interimResults = true;
-        recog.continuous = true;
+function startRecog(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recog=new SR(); recog.lang='en-GB'; recog.interimResults=true; recog.continuous=true;
+  recog.onresult=(e)=>{ for(let i=e.resultIndex;i<e.results.length;i++){ if(e.results[i].isFinal){ handleInput(e.results[i][0].transcript); } } };
+  recog.start(); recogActive=true;
+}
 
-        recog.onresult = (e)=>{
-          let finalText='';
-          for(let i=e.resultIndex;i<e.results.length;i++){
-            const res = e.results[i];
-            if(res.isFinal){ finalText += res[0].transcript + ' '; }
-          }
-          if(finalText.trim()){ handleInput(finalText); }
-        };
-        recog.onerror = (ev)=>{
-          // Robust user feedback on Pages: permission denied, no-speech, network, etc.
-          console.warn('Speech error:', ev.error);
-          if(ev.error === 'not-allowed' || ev.error === 'service-not-allowed'){
-            alert('Microphone permission was blocked. Please allow mic access and try Start again.');
-          }
-        };
-        recog.onend = ()=>{ if(!paused && remaining>0){ try{recog.start();}catch{} } else { recogActive=false; } };
-        try{ recog.start(); recogActive=true; }catch{}
-      }
+function addManual(text){ if(!text.trim())return; handleInput(text); els.manualInput.value=''; els.manualInput.focus(); }
+function handleInput(text){
+  const row=document.createElement('div'); row.className='grid item';
+  row.innerHTML='<div class="mono">+'+((performance.now()-t0)/1000).toFixed(1)+'s</div><div class="word">'+escapeHtml(text)+'</div><div>ok</div><div>-</div><div>-</div>';
+  els.list.prepend(row);
+}
 
-      /* ===== Input handling ===== */
-      function addManual(text){
-        if(!text.trim())return;
-        handleInput(text);
-        els.manualInput.value=''; els.manualInput.focus();
-      }
-      function handleInput(text){
-        const cat = els.category.value;
-        splitWords(text).forEach(token=>{
-          const clean = norm(token);
-          if(!clean) return;
-          recordWord(cat, clean, token);
-        });
-      }
-      function recordWord(cat, key, raw){
-        const t = Math.max(0, (performance.now()-t0)/1000);
-        const isRepeat = session.some(it=>it.key===key && !it.deleted);
-        const onTarget = checkOnTarget(cat, key, raw);
-        const item = { cat, ts: t, raw, key, repeat:isRepeat, onTarget, overrideApproved:false, deleted:false };
-        session.push(item);
-        renderItem(item, session.length-1);
-        refreshCounts();
-      }
-      function checkOnTarget(cat, key, raw){
-        const base = BASE[cat]; const ext = EXT[cat]; const useExt = els.useExtended.checked;
-        if(base?.has?.(key) || base?.has?.(raw.toLowerCase())) return true;
-        if(useExt && (ext?.has?.(key) || ext?.has?.(raw.toLowerCase()))) return true;
-        if(useExt && heuristicOnTarget(cat, key, raw)) return true;
-        return false;
-      }
+function exportCSV(){
+  const lines=['word,time']; 
+  session.forEach(it=>lines.push(it.word+','+it.ts));
+  const blob=new Blob([lines.join('\n')],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='fluency.csv'; document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
 
-      /* ===== Heuristic broadening (unchanged) ===== */
-      function heuristicOnTarget(cat, key, raw){
-        if(cat==='animals'   && /(fish|bird|whale|shark|eagle|hawk|owl|deer|wolf|bear|lion|tiger|dog|cat|horse|ant|bee|wasp|fly|bug|crab|lobster|shrimp|seal|otter|fox|duck|goose|swan|pigeon|sparrow|rat|mouse|moth|butterfly)\b/.test(key)) return true;
-        if(cat==='produce'   && /(berry|melon|apple|pear|peach|plum|nut|bean|pea|lettuce|cabbage|onion|garlic|pepper|chili|chilli|squash|pumpkin|leaf|sprout)\b/.test(key)) return true;
-        if(cat==='tools'     && /(wrench|screw|driver|knife|cutter|saw|pliers|drill|brush|tape|bolt|nut|ladder|spanner|clamp|level|meter|hammer)\b/.test(key)) return true;
-        if(cat==='jobs'      && /(ist|ian|er|or|ess|man|woman|maker|worker|agent|officer|assistant|manager|technician)\b/.test(key)) return true;
-        if(cat==='transport' && /(car|bike|cycle|train|tram|ship|boat|plane|craft|sled|board|cart|bus|cab|taxi|van|truck|lorry|scooter|glider|raft|canoe|kayak|yacht|submarine|balloon)\b/.test(key)) return true;
-        if(cat==='emotions'  && /(ness|ful|less|ive|ed)$/.test(key)) return true;
-        if(/\s/.test(raw)) return true; // multiword surface forms like “blue whale”
-        return false;
-      }
-
-      /* ===== Render list & counts ===== */
-      function renderItem(item, idx){
-        const row = document.createElement('div');
-        row.className='grid item';
-        row.dataset.idx = idx;
-        row.innerHTML = `
-          <div class="mono">+${item.ts.toFixed(1)}s</div>
-          <div class="word">${escapeHtml(item.raw)}</div>
-          <div>${statusLabel(item)}</div>
-          <div><label class="small"><input type="checkbox" ${item.overrideApproved?'checked':''}/> Approve</label></div>
-          <div><button class="ghost smallBtn">Remove</button></div>
-        `;
-        row.querySelector('input').addEventListener('change', (e)=>{
-          item.overrideApproved = e.target.checked;
-          row.children[2].innerHTML = statusLabel(item);
-          refreshCounts();
-        });
-        row.querySelector('button').addEventListener('click', ()=>{
-          item.deleted = true; row.remove(); refreshCounts();
-        });
-        els.list.prepend(row);
-      }
-      function statusLabel(item){
-        const tags=[];
-        if(item.deleted){ return `<span class="small">—</span>`; }
-        if(item.repeat) tags.push(`<span class="tag rep">repeat</span>`);
-        const off = (!item.onTarget && !item.overrideApproved);
-        if(off) tags.push(`<span class="tag off">off-target</span>`);
-        if(!off && !item.repeat) tags.push(`<span class="tag ok">ok</span>`);
-        return tags.join(' ');
-      }
-      function refreshCounts(){
-        let ok=0, rep=0, off=0;
-        session.forEach(it=>{
-          if(it.deleted) return;
-          const offNow = (!it.onTarget && !it.overrideApproved);
-          if(it.repeat) rep++;
-          if(offNow) off++;
-          if(!it.repeat && !offNow) ok++;
-        });
-        els.ok.textContent = ok; els.rep.textContent = rep; els.off.textContent = off;
-      }
-
-      /* ===== Strategy grouping (post-session) — keep your existing rules ===== */
-      function renderGroups(){
-        const cat = els.category.value;
-        const items = session.filter(it=>!it.deleted && (it.onTarget || it.overrideApproved));
-        const unique = new Map();
-        items.forEach(it=>{ if(!unique.has(it.key)) unique.set(it.key, it.raw); });
-
-        const buckets = categorizeByStrategy(cat, Array.from(unique.keys()));
-        const container = els.groups;
-        container.innerHTML = '';
-        for(const [groupTitle, arr] of Object.entries(buckets)){
-          const words = arr.map(k=>unique.get(k)).filter(Boolean);
-          const div = document.createElement('div');
-          div.className='grp';
-          div.innerHTML = `<h4>${escapeHtml(groupTitle)}</h4>` + (words.length
-            ? words.map(w=>`<span class="pill">${escapeHtml(w)}</span>`).join(' ')
-            : `<div class="small">—</div>`);
-          container.appendChild(div);
-        }
-      }
-      function categorizeByStrategy(cat, keys){
-        // … keep your existing categorizeByStrategy() implementation …
-        return {"Other/Unclassified": keys}; // placeholder if you paste piecemeal; replace with your full version
-      }
-
-      /* ===== Export CSV (NO session notes field) ===== */
-      function exportCSV(){
-        const cat = els.category.value;
-        const dur = parseInt(els.duration.value,10);
-        const lines = [['category','duration_s','timestamp_rel_s','raw','normalized','repeat','off_target','override','deleted'].join(',')];
-        session.forEach(it=>{
-          const offNow = (!it.onTarget && !it.overrideApproved);
-          lines.push([
-            cat, dur, it.ts.toFixed(2),
-            csvEsc(it.raw), csvEsc(it.key),
-            it.repeat ? 1:0,
-            offNow ? 1:0,
-            it.overrideApproved ? 1:0,
-            it.deleted ? 1:0
-          ].join(','));
-        });
-        const blob = new Blob([lines.join('\\n')],{type:'text/csv;charset=utf-8;'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href=url; a.download=\`fluency_\${cat}_\${Date.now()}.csv\`; document.body.appendChild(a); a.click(); a.remove();
-        URL.revokeObjectURL(url);
-      }
-
-      /* ===== Utils ===== */
-      function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]))}
-      function csvEsc(s){ if(s==null)return ''; const t=String(s).replace(/"/g,'""'); return \`"\${t}"\`; }
-      function resetSession(){
-        session=[]; els.list.innerHTML='';
-        els.ok.textContent='0'; els.rep.textContent='0'; els.off.textContent='0';
-        els.groups.innerHTML='';
-        clearInterval(timerInt); paused=false; els.pauseBtn.textContent='Pause';
-      }
-
-      /* ===== Init ===== */
-      (function init(){
-        if(!canSpeech){ els.inputMode.value='manual'; els.manualBox.style.display='flex'; }
-      })();
-    </script>
-
-    <!-- Clinician Feedback UI is injected/handled by clinician_feedback.js; no duplicate notes here -->
-  </main>
+function resetSession(){ session=[]; els.list.innerHTML=''; els.ok.textContent='0'; els.rep.textContent='0'; els.off.textContent='0'; }
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+</script>
 </body>
 </html>
