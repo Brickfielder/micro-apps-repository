@@ -391,15 +391,20 @@
     }
     let scheduleHandle=null; function schedule(fn,ms){ clearTimeout(scheduleHandle); scheduleHandle=setTimeout(fn,ms); }
 
-    function pickVoice(){
-      if(!("speechSynthesis" in window)) return null;
-      const name=voiceSel.value;
-      const voices=speechSynthesis.getVoices() || [];
-      return voices.find(v=>v.name===name)
-          || voices.find(v=>/^en-GB/.test(v.lang))
-          || voices.find(v=>/^en/.test(v.lang))
-          || voices[0] || null;
-    }
+function pickVoice(){
+  if(!("speechSynthesis" in window)) return null;
+  const voices = speechSynthesis.getVoices() || [];
+  // 1st choice: any Libby (name contains “Libby” and likely “Online/Natural/Neural”)
+  const libby = voices.find(v => /libby/i.test(v.name) && /(online|natural|neural)/i.test(v.name));
+  // 2nd choice: any Libby variant
+  const anyLibby = libby || voices.find(v => /libby/i.test(v.name));
+  // Fallbacks: en-GB → any en → first
+  return anyLibby
+      || voices.find(v => /^en-GB/.test(v.lang))
+      || voices.find(v => /^en/.test(v.lang))
+      || voices[0]
+      || null;
+}
     function stopSpeak(){ if("speechSynthesis" in window){ speechSynthesis.cancel(); } }
     function speak(text){
       if(!("speechSynthesis" in window)) return { onend:cb=>cb&&cb() };
@@ -589,21 +594,41 @@
     };
 
     // ===== Robust voice loading =====
-    function populateVoices(){
-      if(!("speechSynthesis" in window)) { voiceSel.innerHTML='<option>Speech not supported</option>'; return true; }
-      const voices = speechSynthesis.getVoices();
-      if(!voices || voices.length===0) return false;
-      voiceSel.innerHTML="";
-      voices.sort((a,b)=>(a.lang+a.name).localeCompare(b.lang+b.name))
-        .forEach(v=>{ const o=document.createElement("option"); o.value=v.name; o.textContent=v.name+" — "+v.lang; voiceSel.appendChild(o); });
-      const preferred=["Google UK English Female","Microsoft Sonia Online (Natural) - English (Great Britain)","Microsoft Ryan Online (Natural) - English (Great Britain)","Google italiano"];
-      const hit = voices.find(v=>preferred.includes(v.name))
-                 || voices.find(v=>/^en-GB/.test(v.lang))
-                 || voices.find(v=>/^en/.test(v.lang))
-                 || voices[0];
-      if(hit) voiceSel.value = hit.name;
-      return true;
-    }
+function populateVoices(){
+  if(!("speechSynthesis" in window)) { 
+    voiceSel.innerHTML='<option>Speech not supported</option>'; 
+    return true; 
+  }
+  const voices = speechSynthesis.getVoices();
+  if(!voices || voices.length===0) return false;
+
+  // filter for Libby Online Natural
+  const libbyList = voices.filter(v => /libby/i.test(v.name) && /(online|natural|neural)/i.test(v.name));
+
+  voiceSel.innerHTML = "";
+
+  if (libbyList.length) {
+    libbyList.forEach(v => {
+      const o = document.createElement("option");
+      o.value = v.name;
+      o.textContent = v.name + " — " + v.lang;
+      voiceSel.appendChild(o);
+    });
+    voiceSel.value = libbyList[0].name; // preselect Libby
+    return true;
+  }
+
+  // fallback if Libby not found
+  const fallback = voices.find(v => /^en-GB/.test(v.lang)) || voices[0];
+  if (fallback) {
+    const o = document.createElement("option");
+    o.value = fallback.name;
+    o.textContent = fallback.name + " — " + fallback.lang;
+    voiceSel.appendChild(o);
+    voiceSel.value = fallback.name;
+  }
+  return true;
+}
     function initVoices(){
       if(populateVoices()) return;
       if("speechSynthesis" in window){
