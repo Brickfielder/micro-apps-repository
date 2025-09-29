@@ -1,273 +1,209 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Emergency Dispatch — Executive Function Trainer</title>
-<meta content="Route the correct unit to each incident while following a single active restriction rule." name="description"/>
-<style>
-  /* ===== Micro-Apps brand (light) ===== */
-  :root{
-    color-scheme: light;
-    --bg:#f7f8fb;
-    --surface:#ffffff;
-    --card:#ffffff;
-    --text:#1f2937;          /* slate-800 */
-    --muted:#6b7280;         /* slate-500 */
-    --line:#e5e7eb;          /* slate-200 */
-    --accent:#ff7a6e;        /* softened coral */
-    --accent-600:#ff6254;
-    --accent-700:#f24f40;
-    --pill:#f2f4f7;          /* neutral chip bg */
-    --ok:#16a34a;            /* green-600 */
-    --warn:#f59e0b;          /* amber-500 */
-    --err:#ef4444;           /* red-500 */
-    --shadow: 0 10px 30px rgba(2,6,23,0.06);
-    --radius: 18px;
-  }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Emergency Dispatch — Executive Function Trainer</title>
 
-  *{box-sizing:border-box}
-  html,body{margin:0;height:100%}
-  body{
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-    background:var(--bg); color:var(--text);
-  }
+  <!-- Theme + shared frame (same setup as Barista / Audio Errands) -->
+  <meta name="theme" content="bold dense" />
+  <meta name="app-slug" content="emergency-despatch" />
+  <!-- Fallbacks if catalog.json lacks this slug -->
+  <meta name="app-title" content="Emergency Dispatch" />
+  <meta name="app-desc"  content="Route the correct unit to each incident while following a single active restriction rule." />
 
-  .container{min-height:100vh; display:grid; grid-template-rows:auto 1fr auto;}
-  header{
-    background:var(--card);
-    border-bottom:1px solid var(--line);
-    padding:16px clamp(16px, 4vw, 28px);
-    display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap;
-  }
-  h1{
-    margin:0;
-    font-size:clamp(22px, 2.8vw, 34px);
-    line-height:1.1;
-    letter-spacing:0.2px;
-    color:var(--text);
-  }
-  .subtitle{
-    margin-top:6px; color:var(--muted); font-size:clamp(13px, 1.4vw, 14px);
-  }
+  <link rel="stylesheet" href="/micro-apps-repository/docs/shared/theme.css" />
+  <script defer src="/micro-apps-repository/docs/shared/frame.js"></script>
+  <script defer src="/micro-apps-repository/docs/shared/clinician_feedback.js"></script>
 
-  .badge{
-    display:inline-block; padding:4px 10px; border-radius:999px; background:var(--pill);
-    border:1px solid var(--line); font-size:12px; font-weight:600; color:var(--text);
-  }
+  <style>
+    /* App-specific visuals (kept lean; uses theme tokens) */
+    .panel{
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      min-height: 0;
+    }
+    .section-title{
+      margin: 6px 0 8px;
+      font-size: 0.85rem;
+      letter-spacing: .2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+    .rule-card{
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .rule-card.active{ outline: 2px solid color-mix(in oklab, var(--accent), white 70%); }
 
-  .header-right{
-    display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-  }
-  .kpi{display:flex; gap:10px; align-items:center}
-  .kpi .pill{
-    padding:6px 10px; border-radius:999px; background:var(--pill); border:1px solid var(--line);
-    font-variant-numeric:tabular-nums; font-size:13px; font-weight:700;
-  }
-  .pill.warn{color:var(--warn)}
-  .pill.ok{color:var(--ok)}
+    .mem{ display:flex; gap:6px; flex-wrap:wrap; margin-top:10px }
+    .chip{
+      background:#f2f4f7; border:1px solid var(--line); border-radius:999px; padding:6px 10px;
+      font-size:12px; color:#111827;
+    }
+    @media (prefers-color-scheme: dark){
+      .chip{ background:#1f2937; color:#e5e7eb; }
+    }
 
-  .btn{
-    appearance:none; cursor:pointer; border-radius:12px; border:1px solid var(--line);
-    background:var(--surface); color:var(--text); padding:10px 14px; font-weight:700; font-size:14px;
-    box-shadow:var(--shadow); transition:transform .04s ease, filter .15s ease;
-  }
-  .btn:hover:not(:disabled){filter:brightness(0.98)}
-  .btn:active:not(:disabled){transform:translateY(1px)}
-  .btn:disabled{opacity:.55; cursor:not-allowed}
-  .btn.primary{background:var(--accent); border-color:var(--accent-600); color:#fff}
-  .btn.success{background:var(--ok); border-color:var(--ok); color:#fff}
+    /* Map */
+    .map{
+      position:relative; height:560px; min-height:360px;
+      background: radial-gradient(1000px 380px at 50% 25%, #fafafa 0%, #f2f4f8 60%, #eef2f6 100%);
+      border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;
+    }
+    .grid-box{
+      position:absolute; inset:8% 12%;
+      border:2px dashed var(--accent-600); border-radius:16px; pointer-events:none;
+      box-shadow:0 0 0 2px color-mix(in oklab, var(--accent), white 80%) inset;
+    }
+    #mapLayer{ position:absolute; inset:8% 12%; }
+    .compass{
+      position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+      padding:6px 10px; border-radius:999px; border:1px solid var(--line); background:#fff; font-size:12px; color:var(--muted);
+    }
+    .district{
+      position:absolute; font-weight:900; letter-spacing:1.5px; padding:6px 10px; border-radius:10px;
+      background:#ffffffcc; border:1px solid var(--line); user-select:none; pointer-events:none;
+      font-size:14px; color:#111827;
+    }
+    .district.n{ top:4%; left:50%; transform:translateX(-50%) }
+    .district.s{ bottom:4%; left:50%; transform:translateX(-50%) }
+    .district.w{ left:6%; top:50%; transform:translateY(-50%) rotate(-90deg) }
+    .district.e{ right:6%; top:50%; transform:translateY(-50%) rotate(90deg) }
 
-  main{
-    display:grid; grid-template-columns:300px 1fr 320px; gap:16px;
-    padding:18px clamp(16px, 4vw, 28px);
-  }
-  @media (max-width: 1050px){
-    main{grid-template-columns:1fr; }
-    .side-right{order:3}
-  }
+    .incident{
+      position:absolute; transform:translate(-50%,-50%); padding:8px 10px; border-radius:999px; border:1px solid var(--line);
+      display:flex; gap:8px; align-items:center; font-size:13px; background:#fff; box-shadow:var(--shadow);
+    }
+    .incident.med{ outline:2px solid #67e8f9 }
+    .incident.fire{ outline:2px solid #facc15 }
+    .incident.pol{ outline:2px solid #93c5fd }
+    .incident.selected{ box-shadow:0 0 0 3px color-mix(in oklab, var(--accent), white 70%), var(--shadow) }
+    .pulse{ position:absolute; inset:-6px; border-radius:999px; border:2px solid rgba(0,0,0,.12); animation:pulse 1.4s infinite }
+    @keyframes pulse{ 0%{transform:scale(.82);opacity:.55} 70%{transform:scale(1.2);opacity:.06} 100%{transform:scale(1.28);opacity:0} }
 
-  .panel{
-    background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:14px;
-    box-shadow:var(--shadow); min-height:0; overflow:auto;
-  }
+    /* Right panel */
+    .stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:12px; }
+    .stat{ background:#f2f4f7; border:1px solid var(--line); border-radius:12px; padding:10px; text-align:center; }
+    .stat strong{ display:block; margin-top:4px; font-size:18px }
+    @media (prefers-color-scheme: dark){ .stat{ background:#1f2937; } }
 
-  .section-title{
-    margin:10px 0 8px; font-size:14px; letter-spacing:.2px; color:var(--muted);
-    text-transform:uppercase; font-weight:800;
-  }
+    .inc-list .row{
+      background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px; margin-bottom:10px;
+      display:grid; grid-template-columns:1fr auto; gap:8px;
+    }
+    .row.selected{ box-shadow:0 0 0 3px color-mix(in oklab, var(--accent), white 70%) }
+    .tag{
+      display:inline-block; font-size:11px; background:#f2f4f7; border:1px solid var(--line);
+      padding:2px 8px; border-radius:999px; margin-left:6px;
+    }
+    .meta{ font-size:12px; color:var(--muted); margin-top:4px }
 
-  .rule-card{
-    background:linear-gradient(0deg, #fff 0%, #fff 100%);
-    border:1px solid var(--line); border-radius:14px; padding:12px; margin-bottom:10px;
-  }
-  .rule-card.active{outline:2px solid rgba(242,79,64,.25)}
-
-  .mem{display:flex; gap:6px; flex-wrap:wrap; margin-top:10px}
-  .chip{
-    background:var(--pill); border:1px solid var(--line); border-radius:999px; padding:6px 10px;
-    font-size:12px; color:#111827;
-  }
-
-  /* Map */
-  .map{
-    position:relative; height:560px; min-height:360px; background:
-      radial-gradient(1000px 380px at 50% 25%, #fafafa 0%, #f2f4f8 60%, #eef2f6 100%);
-    border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;
-  }
-  .grid{
-    position:absolute; inset:8% 12%;
-    border:2px dashed var(--accent-600); border-radius:16px; pointer-events:none;
-    box-shadow:0 0 0 2px rgba(242,79,64,.12) inset;
-  }
-  #mapLayer{position:absolute; inset:8% 12%;}
-  .compass{
-    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-    padding:6px 10px; border-radius:999px; border:1px solid var(--line); background:#fff; font-size:12px; color:var(--muted);
-  }
-  .district{
-    position:absolute; font-weight:900; letter-spacing:1.5px; padding:6px 10px; border-radius:10px;
-    background:#ffffffcc; border:1px solid var(--line); user-select:none; pointer-events:none;
-    font-size:14px; color:#111827;
-  }
-  .district.n{top:4%; left:50%; transform:translateX(-50%)}
-  .district.s{bottom:4%; left:50%; transform:translateX(-50%)}
-  .district.w{left:6%; top:50%; transform:translateY(-50%) rotate(-90deg)}
-  .district.e{right:6%; top:50%; transform:translateY(-50%) rotate(90deg)}
-
-  .incident{
-    position:absolute; transform:translate(-50%,-50%); padding:8px 10px; border-radius:999px; border:1px solid var(--line);
-    display:flex; gap:8px; align-items:center; font-size:13px; background:#fff; box-shadow:var(--shadow);
-  }
-  .incident.med{outline:2px solid #67e8f9}
-  .incident.fire{outline:2px solid #facc15}
-  .incident.pol{outline:2px solid #93c5fd}
-  .incident.selected{box-shadow:0 0 0 3px rgba(255,122,110,.25), var(--shadow)}
-  .pulse{position:absolute; inset:-6px; border-radius:999px; border:2px solid rgba(0,0,0,.12); animation:pulse 1.4s infinite}
-  @keyframes pulse{0%{transform:scale(.82);opacity:.55}70%{transform:scale(1.2);opacity:.06}100%{transform:scale(1.28);opacity:0}}
-
-  .stats{
-    display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:12px;
-  }
-  .stat{
-    background:var(--pill); border:1px solid var(--line); border-radius:12px; padding:10px; text-align:center;
-  }
-  .stat strong{display:block; margin-top:4px; font-size:18px}
-
-  .inc-list .row{
-    background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px; margin-bottom:10px;
-    display:grid; grid-template-columns:1fr auto; gap:8px;
-  }
-  .row.selected{box-shadow:0 0 0 3px rgba(255,122,110,.25)}
-  .tag{
-    display:inline-block; font-size:11px; background:var(--pill); border:1px solid var(--line);
-    padding:2px 8px; border-radius:999px; margin-left:6px;
-  }
-  .meta{font-size:12px; color:var(--muted); margin-top:4px}
-
-  .controls{display:grid; grid-template-columns:repeat(2,1fr); gap:10px}
-
-  footer{
-    color:var(--muted); font-size:12px; padding:14px clamp(16px, 4vw, 28px);
-    display:flex; justify-content:center; gap:10px; border-top:1px solid var(--line); background:#fff;
-  }
-
-  /* Modal */
-  .modal{position:fixed; inset:0; background:rgba(17,24,39,.45); display:none; align-items:center; justify-content:center; z-index:50}
-  .modal .content{
-    background:#fff; border:1px solid var(--line); border-radius:18px; padding:22px; max-width:560px; width:92%;
-    box-shadow:var(--shadow);
-  }
-  .content h3{margin:0 0 10px; color:#111827}
-</style>
-<meta content="Emergency_despatch" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../../../shared/theme.css" rel="stylesheet"/><script defer="" src="../../../shared/frame.js"></script><script defer="" src="../../../shared/clinician_feedback.js"></script>  <meta name="app-slug" content="emergency-despatch">
+    /* Responsive grid: same pattern as other apps via theme grid helpers */
+    .layout{ display:grid; gap: clamp(12px,1.2vw,18px); grid-template-columns: 300px 1fr 320px; }
+    @media (max-width: 1050px){ .layout{ grid-template-columns: 1fr; } }
+  </style>
 </head>
-<body><main id="app-root">
-<div class="container">
-<header>
-<div>
-<h1>Emergency Dispatch</h1>
-<div class="subtitle">Route the correct unit to each incident. <span class="badge">One Active Rule Only</span></div>
-</div>
-<div class="header-right">
-<div class="kpi">
-<span class="pill">Level: <span id="level">1</span></span>
-<span class="pill ok">Score: <span id="score">0</span></span>
-<span class="pill warn">Time: <span id="timer">03:00</span></span>
-</div>
-<button class="btn primary" id="startBtn">Start New Shift</button>
-<button class="btn" disabled="" id="pauseBtn">Pause</button>
-<button class="btn" disabled="" id="downloadBtn">Download CSV</button>
-</div>
-</header>
-<main>
-<!-- Left: Rules & WM -->
-<section class="panel">
-<div class="section-title">Briefing</div>
-<div class="rule-card">
-<strong>Baseline</strong><br/>
+<body>
+  <!-- The hero banner is injected above via frame.js based on app-slug/title/desc -->
+
+  <main id="app-root">
+    <!-- Collapsible controls + instructions (like the other apps) -->
+    <details class="toolbar">
+      <summary><strong>Session controls & instructions</strong></summary>
+      <div class="pill">Level: <span id="level">1</span></div>
+      <div class="pill">Score: <span id="score">0</span></div>
+      <div class="pill">Time: <span id="timer">03:00</span></div>
+      <button class="button primary" id="startBtn">Start New Shift</button>
+      <button class="button" id="pauseBtn" disabled>Pause</button>
+      <button class="button" id="downloadBtn" disabled>Download CSV</button>
+      <div class="helper" style="width:100%;margin-top:6px">
+        Baseline: match <em>incident type</em> to the <em>correct unit</em> (🩺→🚑 • 🔥→🚒 • 🚨→🚓).
+        Exactly one restriction is active at any time: <span class="pill" id="rulePill">—</span>
+      </div>
+    </details>
+
+    <!-- Three-panel layout -->
+    <div class="layout">
+      <!-- Left: Briefing & WM -->
+      <section class="panel">
+        <div class="section-title">Briefing</div>
+        <div class="rule-card">
+          <strong>Baseline</strong><br/>
           Match <em>incident type</em> to the <em>correct unit</em>: 🩺 Medical → Ambulance • 🔥 Fire → Fire • 🚨 Police → Police.
         </div>
-<div class="rule-card active" id="activeRuleCard">
-<strong>Active Restriction (Single)</strong>
-<div id="activeRuleText" style="margin-top:6px; color:var(--muted);">—</div>
-</div>
-<div class="rule-card">
-<strong>Session</strong>
-<div style="margin-top:6px; color:var(--muted);">3 minutes. Ends early if more than 8 incidents are pending. Incidents spawn <em>inside the dashed square</em>.</div>
-</div>
-<div class="section-title">Working Memory</div>
-<div class="mem" id="wmBar"></div>
-</section>
-<!-- Map -->
-<section class="map">
-<div class="grid" id="grid"></div>
-<div class="district n">NORTH</div>
-<div class="district s">SOUTH</div>
-<div class="district w">WEST</div>
-<div class="district e">EAST</div>
-<div class="compass">N • E • S • W</div>
-<div id="mapLayer"></div>
-</section>
-<!-- Right: Incidents & Controls -->
-<section class="panel side-right">
-<div class="stats">
-<div class="stat"><div>Success</div><strong id="success">--%</strong></div>
-<div class="stat"><div>Resolved</div><strong id="resolved">0</strong></div>
-<div class="stat"><div>Errors</div><strong id="errors">0</strong></div>
-</div>
-<div class="section-title">Incidents</div>
-<div class="inc-list" id="incList"></div>
-<div class="section-title">Dispatch</div>
-<div class="controls">
-<button class="btn" disabled="" id="btnAmb">🚑 Ambulance</button>
-<button class="btn" disabled="" id="btnFire">🚒 Fire</button>
-<button class="btn" disabled="" id="btnPol">🚓 Police</button>
-<button class="btn success" disabled="" id="btnHold">⏳ Hold</button>
-</div>
-<div style="margin-top:10px; font-size:12px; color:var(--muted)">
-<span class="badge">Executive Skills: Working Memory • Flexibility • Inhibition</span>
-</div>
-</section>
-</main>
-<footer>
-<span>Prototype — self-contained, no external libraries</span>
-<span>•</span>
-<span>Made for cognitive rehab research</span>
-</footer>
-</div>
-<!-- Results -->
-<div class="modal" id="resultModal">
-<div class="content">
-<h3 id="resultTitle">Shift Complete</h3>
-<p id="resultBody"></p>
-<div style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px">
-<button class="btn" id="closeModal">Close</button>
-<button class="btn primary" id="nextLevel">Next Level</button>
-</div>
-</div>
-</div>
-<script>
+        <div class="rule-card active" id="activeRuleCard">
+          <strong>Active Restriction (Single)</strong>
+          <div id="activeRuleText" style="margin-top:6px; color:var(--muted);">—</div>
+        </div>
+        <div class="rule-card">
+          <strong>Session</strong>
+          <div style="margin-top:6px; color:var(--muted);">
+            3 minutes. Ends early if more than 8 incidents are pending. Incidents spawn <em>inside the dashed square</em>.
+          </div>
+        </div>
+
+        <div class="section-title">Working Memory</div>
+        <div class="mem" id="wmBar"></div>
+      </section>
+
+      <!-- Center: Map -->
+      <section class="map">
+        <div class="grid-box" id="grid"></div>
+        <div class="district n">NORTH</div>
+        <div class="district s">SOUTH</div>
+        <div class="district w">WEST</div>
+        <div class="district e">EAST</div>
+        <div class="compass">N • E • S • W</div>
+        <div id="mapLayer"></div>
+      </section>
+
+      <!-- Right: Incidents & Controls -->
+      <section class="panel">
+        <div class="stats">
+          <div class="stat"><div>Success</div><strong id="success">--%</strong></div>
+          <div class="stat"><div>Resolved</div><strong id="resolved">0</strong></div>
+          <div class="stat"><div>Errors</div><strong id="errors">0</strong></div>
+        </div>
+
+        <div class="section-title">Incidents</div>
+        <div class="inc-list" id="incList"></div>
+
+        <div class="section-title">Dispatch</div>
+        <div class="grid cols-2">
+          <button class="button" id="btnAmb" disabled>🚑 Ambulance</button>
+          <button class="button" id="btnFire" disabled>🚒 Fire</button>
+          <button class="button" id="btnPol" disabled>🚓 Police</button>
+          <button class="button primary" id="btnHold" disabled>⏳ Hold</button>
+        </div>
+
+        <p class="helper" style="margin-top:10px">
+          <span class="pill">Executive Skills: Working Memory • Flexibility • Inhibition</span>
+        </p>
+      </section>
+    </div>
+
+    <!-- Results modal -->
+    <div class="note-card" id="resultModal" style="display:none; position:fixed; inset:0; background:rgba(17,24,39,.45); align-items:center; justify-content:center; z-index:50;">
+      <div class="panel" style="max-width:560px; width:92%; margin:auto;">
+        <h3 id="resultTitle" style="margin-top:0">Shift Complete</h3>
+        <p id="resultBody"></p>
+        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px">
+          <button class="button" id="closeModal">Close</button>
+          <button class="button primary" id="nextLevel">Next Level</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
   // ===== Types & Data =====
   const TYPES = {
     med: {label:'Medical', icon:'🩺', needs:'ambulance'},
@@ -308,7 +244,8 @@
     btnAmb: el('btnAmb'), btnFire: el('btnFire'), btnPol: el('btnPol'), btnHold: el('btnHold'),
     modal: el('resultModal'), resultTitle: el('resultTitle'), resultBody: el('resultBody'),
     closeModal: el('closeModal'), nextLevel: el('nextLevel'),
-    activeRuleText: el('activeRuleText')
+    activeRuleText: el('activeRuleText'),
+    rulePill: document.getElementById('rulePill')
   };
 
   // ===== Helpers =====
@@ -334,12 +271,13 @@
   // ===== Restriction (single) =====
   function chooseSingleRestriction(prev){
     let r = pick(RESTRICTION_POOL);
-    // avoid immediate repetition
     for(let i=0;i<10 && prev && r.unit===prev.unit && r.dir===prev.dir;i++){
       r = pick(RESTRICTION_POOL);
     }
     S.restriction = r;
-    d.activeRuleText.textContent = `🚫 No ${cap(r.unit)} in ${r.dir}`;
+    const text = `🚫 No ${cap(r.unit)} in ${r.dir}`;
+    d.activeRuleText.textContent = text;
+    if (d.rulePill) d.rulePill.textContent = text;
   }
 
   function violatesRestriction(kind, inc){
@@ -502,13 +440,13 @@
 
     if(S.incidents.length> S.maxOpen){ stop('Overload: too many open incidents'); return; }
 
-    // Progression: every few resolves, level up and rotate to a NEW single restriction
+    // Progression
     if(S.resolved && S.resolved % (5 + Math.floor(S.level/2)) === 0){
       S.level++; pushWM(`Level ${S.level}`);
       const prev = S.restriction; chooseSingleRestriction(prev);
     }
 
-    // Gentle pacing adapt
+    // Pacing adapt
     const open = S.incidents.length; const succ = successRate();
     if(open>5 || succ<70){ S.spawnProb = 0.42; S.ttlFactor = 1.30; }
     else if(succ>85 && open<3){ S.spawnProb = 0.62; S.ttlFactor = 1.10; }
@@ -585,7 +523,13 @@
   }
   function download(){
     const blob = new Blob([toCSV()], {type:'text/csv'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `dispatch_log_level${S.level}.csv`; a.click(); URL.revokeObjectURL(a.href);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `dispatch_log_level${S.level}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(a.href);
+    a.remove();
   }
 
   // ===== Events =====
@@ -621,17 +565,6 @@
 
   // Init
   window.addEventListener('load', ()=>reset(1));
-</script>
-<section id="clinician-notes">
-<div style="background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 16px; margin-top: 24px;">
-<label for="clinician-comment" style="display:block;font-weight:600;margin-bottom:8px;">
-      Clinician comments (optional)
-    </label>
-<textarea id="clinician-comment" placeholder="Enter any notes relevant to this session..." rows="4" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); font: inherit; resize: vertical;"></textarea>
-<p style="margin:8px 0 0; color: var(--muted); font-size: 0.9rem;">
-      This note will be added as <code>clinician_comment</code> in the exported CSV.
-    </p>
-</div>
-</section></main></body>
+  </script>
+</body>
 </html>
-
