@@ -3,160 +3,585 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Fluency Coach — Strategy-Led Verbal Fluency</title>
+  <title>Fluency Coach - Strategy-Led Verbal Fluency</title>
 
-  <!-- Shared assets -->
+  <!-- Shared assets from repo root -->
   <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3">
   <script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
   <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
 
+  <!-- Frame header meta -->
   <meta name="app-slug" content="fluency-coach">
   <meta name="app-title" content="Fluency Coach">
   <meta name="app-desc" content="Strategy-led verbal fluency with voice input, repetition detection, and end-of-session grouping.">
+  <meta name="theme" content="bold dense">
+
+  <style>
+    :root{
+      --bg:#f7f8fb; --card:#ffffff; --ink:#1f2937; --muted:#6b7280; --brand:#0a66c2;
+      --good:#0f766e; --warn:#b45309; --bad:#b91c1c; --pill:#eef2ff;
+      --line:#e5e7eb; --shadow:0 10px 24px rgba(0,0,0,.08); --ring:0 0 0 3px rgba(10,102,194,.18);
+    }
+    *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    body{margin:0;background:var(--bg);color:var(--ink);line-height:1.45}
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    .row{display:grid;gap:16px}
+    .cols-3{grid-template-columns:repeat(3,1fr)}
+    .cols-1{grid-template-columns:1fr}
+    .card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:16px}
+    .small{font-size:.9rem;color:var(--muted)}
+    .flex{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    select,button,input[type="text"]{
+      font:inherit;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;outline:none
+    }
+    select:focus,input:focus{box-shadow:var(--ring);border-color:#93c5fd}
+    button{cursor:pointer;background:var(--brand);color:#fff;border:none}
+    button.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+    button.secondary{background:#f3f4f6;color:#111827}
+    button:disabled{opacity:.55;cursor:not-allowed}
+    .grid{display:grid;grid-template-columns:110px 1fr 110px 110px 110px;gap:8px;align-items:center}
+    .hdr{font-size:.9rem;color:#374151}
+    .item{padding:8px;border-bottom:1px dashed var(--line)}
+    .word{font-weight:700}
+    .tag{font-size:.8rem;padding:6px 8px;border-radius:9999px}
+    .ok{background:#ecfdf5;color:var(--good)}
+    .rep{background:#fff7ed;color:var(--warn)}
+    .off{background:#fef2f2;color:var(--bad)}
+    .live{font-variant-numeric:tabular-nums;font-weight:700}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:9999px;background:var(--pill);margin:4px 6px 0 0;font-size:.9rem}
+    .groups{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .grp{background:#f9fafb;border:1px dashed var(--line);border-radius:12px;padding:12px}
+    .grp h4{margin:0 0 6px}
+    .notice{background:#fff7ed;border:1px solid #fed7aa;color:#92400e;padding:8px 12px;border-radius:10px}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace}
+    #micStatus.ok { color:#0f766e; }
+    #micStatus.warn { color:#b45309; }
+    #micStatus.bad { color:#b91c1c; }
+  </style>
 </head>
 <body>
-<main id="app-root">
-  <div class="wrap">
-    <div class="row cols-3">
-      <div class="card">
-        <h3>1) Setup</h3>
-        <div class="flex">
-          <label>Category
-            <select id="category">
-              <option value="animals">Animals</option>
-              <option value="produce">Fruits &amp; Vegetables</option>
-              <option value="tools">Tools &amp; Household Objects</option>
-              <option value="jobs">Occupations</option>
-              <option value="transport">Transportation Modes</option>
-              <option value="emotions">Emotions</option>
-            </select>
-          </label>
-          <label>Duration
-            <select id="duration">
-              <option>60</option><option>90</option><option>45</option><option>30</option><option>15</option>
-            </select>
-          </label>
-          <label>Input
-            <select id="inputMode">
-              <option value="speech">Speech</option>
-              <option value="manual">Manual</option>
-            </select>
-          </label>
-        </div>
-        <div class="notice small" id="speechWarn" style="display:none;margin-top:10px">
-          Speech recognition unavailable. Use Chrome desktop with HTTPS, or choose Manual input.
-        </div>
-        <div class="strategy" id="strategyBox">
-          <div class="small"><strong>Strategy coach</strong></div>
-          <ul class="small" id="tips" style="padding-left:18px;margin:8px 0;"></ul>
-        </div>
-        <div class="flex" style="margin-top:8px;justify-content:space-between">
-          <div class="status">
-            <span class="tag ok">On-target: <span class="live" id="okCount">0</span></span>
-            <span class="tag rep">Repetitions: <span class="live" id="repCount">0</span></span>
-            <span class="tag off">Off-target: <span class="live" id="offCount">0</span></span>
+  <!-- frame.js injects the hero from the meta above -->
+  <main id="app-root">
+    <div class="wrap">
+      <div class="row cols-3">
+        <div class="card">
+          <h3>1) Setup</h3>
+          <div class="flex">
+            <label>Category
+              <select id="category">
+                <option value="animals">Animals</option>
+                <option value="produce">Fruits and Vegetables</option>
+                <option value="tools">Tools and Household</option>
+                <option value="jobs">Occupations</option>
+                <option value="transport">Transportation</option>
+                <option value="emotions">Emotions</option>
+              </select>
+            </label>
+            <label>Duration
+              <select id="duration">
+                <option>60</option><option>90</option><option>45</option><option>30</option><option>15</option>
+              </select>
+            </label>
+            <label>Input
+              <select id="inputMode">
+                <option value="speech">Speech</option>
+                <option value="manual">Manual</option>
+              </select>
+            </label>
           </div>
-          <div class="live">Timer: <span id="timer">60</span>s</div>
-        </div>
-        <div class="flex" style="margin-top:8px">
-          <button id="btnStart">Start</button>
-          <button id="btnPause" disabled>Pause</button>
-          <button id="btnStop" disabled>Stop</button>
-          <button id="btnExport" disabled>Download CSV</button>
-        </div>
-        <div class="flex" id="manualBox" style="display:none;margin-top:8px">
-          <input id="manualInput" placeholder="Type a word and press Enter…" type="text"/>
-          <button id="btnAdd">Add</button>
-        </div>
-      </div>
 
-      <div class="card">
-        <h3>2) Live Responses</h3>
-        <div class="grid hdr">
-          <div>+Time</div><div>Word</div><div>Status</div><div>Override</div><div>Delete</div>
-        </div>
-        <div id="list"></div>
-      </div>
+          <div class="notice small" id="speechWarn" style="display:none;margin-top:10px">
+            Speech recognition needs Chrome or Edge on HTTPS (or localhost). If unavailable, use Manual input.
+          </div>
 
-      <div class="card">
-        <h3>3) Strategy Grouping (end of session)</h3>
-        <div class="small">When you press Stop, valid items are automatically grouped into sub-categories.</div>
-        <div class="groups" id="groups" style="margin-top:10px"></div>
+          <div class="flex" style="margin-top:8px;justify-content:space-between">
+            <div class="flex" style="gap:6px;flex-wrap:wrap">
+              <span class="tag ok">On-target: <span class="live" id="okCount">0</span></span>
+              <span class="tag rep">Repetitions: <span class="live" id="repCount">0</span></span>
+              <span class="tag off">Off-target: <span class="live" id="offCount">0</span></span>
+            </div>
+            <div class="live">Timer: <span id="timer">60</span>s</div>
+          </div>
+
+          <div class="flex" style="margin-top:8px">
+            <button id="btnStart">Start</button>
+            <button class="secondary" id="btnPause" disabled>Pause</button>
+            <button class="ghost" id="btnStop" disabled>Stop</button>
+            <button class="ghost" id="btnExport" disabled>Download CSV</button>
+          </div>
+
+          <!-- Mic status and interim transcript -->
+          <div class="small" id="micStatus" style="margin-top:6px;display:none;">Mic: idle</div>
+          <div class="small" id="interim" style="margin-top:4px;color:#6b7280;display:none;">...</div>
+
+          <div class="flex" id="manualBox" style="display:none;margin-top:8px">
+            <input id="manualInput" placeholder="Type a word and press Enter" type="text"/>
+            <button class="secondary" id="btnAdd">Add</button>
+          </div>
+
+          <div class="small" style="margin-top:8px">
+            Tip: say single words clearly. Multi-word items are allowed; you can approve flagged items later.
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>2) Live Responses</h3>
+          <div class="grid hdr">
+            <div>+Time</div><div>Word</div><div>Status</div><div>Override</div><div>Delete</div>
+          </div>
+          <div id="list"></div>
+        </div>
+
+        <div class="card">
+          <h3>3) Strategy Grouping (end of session)</h3>
+          <div class="small">When you press Stop, valid items are grouped into suggested sub-categories.</div>
+          <div class="groups" id="groups" style="margin-top:10px"></div>
+        </div>
       </div>
     </div>
-  </div>
-</main>
 
-<script>
-/* === Minimal setup (shortened for clarity) === */
+    <script>
+      /* Basic lexicon skeleton. You can expand these sets later. */
+      var BASE = {
+        animals: new Set(["dog","cat","horse","cow","sheep","goat","lion","tiger","bear","eagle","shark","whale","fish","bird"]),
+        produce: new Set(["apple","banana","orange","pear","grape","carrot","potato","tomato","onion","lettuce","pepper"]),
+        tools: new Set(["hammer","screwdriver","wrench","saw","knife","scissors","drill","tape","pliers","brush"]),
+        jobs: new Set(["doctor","nurse","teacher","engineer","driver","pilot","chef","police","firefighter","psychologist"]),
+        transport: new Set(["car","bus","train","tram","bicycle","bike","plane","boat","ship","helicopter","subway"]),
+        emotions: new Set(["happy","sad","angry","afraid","calm","anxious","proud","jealous","surprised","bored"])
+      };
+      var EXT = {
+        animals: new Set(["wolf","fox","deer","monkey","dolphin","owl","duck","goose","swan","snake","lizard","frog"]),
+        produce: new Set(["strawberry","blueberry","broccoli","cauliflower","spinach","cucumber","pumpkin","squash"]),
+        tools: new Set(["chisel","plane","sandpaper","level","clamp","ladder","router","sander","grinder"]),
+        jobs: new Set(["paramedic","therapist","scientist","programmer","designer","lawyer","accountant"]),
+        transport: new Set(["van","lorry","taxi","scooter","motorcycle","kayak","yacht","glider","rocket"]),
+        emotions: new Set(["content","relieved","furious","worried","relaxed","serene","ashamed","guilty"])
+      };
 
-let recog=null, recogActive=false, session=[];
-let t0=0, timerInt=null, remaining=60, paused=false;
+      /* Heuristic broadening */
+      function heuristicOnTarget(cat, key, raw){
+        if(cat==='animals'   && /(fish|bird|whale|shark|eagle|hawk|owl|deer|wolf|bear|lion|tiger|dog|cat|horse)\b/.test(key)) return true;
+        if(cat==='produce'   && /(berry|melon|apple|pear|peach|plum|nut|bean|pea|lettuce|cabbage|onion|garlic|pepper|squash|pumpkin)\b/.test(key)) return true;
+        if(cat==='tools'     && /(wrench|screw|driver|knife|cutter|saw|pliers|drill|brush|tape|bolt|nut|clamp|level|meter|hammer)\b/.test(key)) return true;
+        if(cat==='jobs'      && /(ist|ian|er|or|assistant|manager|technician|officer|worker)\b/.test(key)) return true;
+        if(cat==='transport' && /(car|bike|cycle|train|tram|ship|boat|plane|bus|cab|taxi|van|truck|lorry|scooter|canoe|kayak)\b/.test(key)) return true;
+        if(cat==='emotions'  && /(ness|ful|less|ive|ed)$/.test(key)) return true;
+        if(/\s/.test(raw)) return true;
+        return false;
+      }
 
-function qs(s,root=document){return root.querySelector(s);}
-const els = {
-  category:qs('#category'), duration:qs('#duration'), inputMode:qs('#inputMode'),
-  speechWarn:qs('#speechWarn'),
-  ok:qs('#okCount'), rep:qs('#repCount'), off:qs('#offCount'), timer:qs('#timer'),
-  start:qs('#btnStart'), pauseBtn:qs('#btnPause'), stopBtn:qs('#btnStop'), exportBtn:qs('#btnExport'),
-  list:qs('#list'), manualBox:qs('#manualBox'), manualInput:qs('#manualInput'), btnAdd:qs('#btnAdd'),
-  groups:qs('#groups')
-};
+      /* State */
+      var recog = null, recogActive = false, session = [];
+      var t0 = 0, timerInt = null, remaining = 60, paused = false;
 
-/* Basic speech availability */
-const canSpeech = ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) &&
-                  (location.protocol === 'https:' || location.hostname==='localhost');
-if(!canSpeech){ els.speechWarn.style.display='block'; els.inputMode.value='manual'; els.manualBox.style.display='flex'; }
+      function qs(s,root){ if(!root) root=document; return root.querySelector(s); }
+      var els = {
+        category: qs('#category'), duration: qs('#duration'), inputMode: qs('#inputMode'),
+        speechWarn: qs('#speechWarn'),
+        ok: qs('#okCount'), rep: qs('#repCount'), off: qs('#offCount'), timer: qs('#timer'),
+        start: qs('#btnStart'), pauseBtn: qs('#btnPause'), stopBtn: qs('#btnStop'), exportBtn: qs('#btnExport'),
+        list: qs('#list'), manualBox: qs('#manualBox'), manualInput: qs('#manualInput'), btnAdd: qs('#btnAdd'),
+        groups: qs('#groups'), micStatus: qs('#micStatus'), interim: qs('#interim')
+      };
 
-els.inputMode.addEventListener('change', ()=>{ els.manualBox.style.display=(els.inputMode.value==='manual')?'flex':'none'; });
-els.start.addEventListener('click', startSession);
-els.pauseBtn.addEventListener('click', togglePause);
-els.stopBtn.addEventListener('click', stopSession);
-els.exportBtn.addEventListener('click', exportCSV);
-els.btnAdd.addEventListener('click', ()=>addManual(els.manualInput.value));
-els.manualInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){addManual(els.manualInput.value);} });
+      /* Speech availability: Chrome/Edge on secure origin */
+      var hasWebkitSR = (typeof window.webkitSpeechRecognition !== 'undefined');
+      var secureOrigin = (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1');
+      var canSpeech = hasWebkitSR && secureOrigin;
 
-function startSession(){
-  resetSession();
-  remaining=parseInt(els.duration.value,10);
-  els.timer.textContent=remaining;
-  t0=performance.now();
-  timerInt=setInterval(tick,1000);
-  els.start.disabled=true; els.pauseBtn.disabled=false; els.stopBtn.disabled=false;
-  if(els.inputMode.value==='speech' && canSpeech){ startRecog(); } else { els.manualInput.focus(); }
-}
-function togglePause(){
-  if(paused){ timerInt=setInterval(tick,1000); paused=false; els.pauseBtn.textContent='Pause'; }
-  else { clearInterval(timerInt); paused=true; els.pauseBtn.textContent='Resume'; }
-}
-function stopSession(){ clearInterval(timerInt); els.start.disabled=false; els.pauseBtn.disabled=true; els.stopBtn.disabled=true; els.exportBtn.disabled=false; }
-function tick(){ if(!paused){ remaining--; els.timer.textContent=remaining; if(remaining<=0) stopSession(); } }
+      if(!canSpeech){
+        els.speechWarn.style.display = 'block';
+        els.inputMode.value = 'manual';
+        els.manualBox.style.display = 'flex';
+      }
 
-function startRecog(){
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  recog=new SR(); recog.lang='en-GB'; recog.interimResults=true; recog.continuous=true;
-  recog.onresult=(e)=>{ for(let i=e.resultIndex;i<e.results.length;i++){ if(e.results[i].isFinal){ handleInput(e.results[i][0].transcript); } } };
-  recog.start(); recogActive=true;
-}
+      els.inputMode.addEventListener('change', function(){
+        els.manualBox.style.display = (els.inputMode.value === 'manual') ? 'flex' : 'none';
+      });
 
-function addManual(text){ if(!text.trim())return; handleInput(text); els.manualInput.value=''; els.manualInput.focus(); }
-function handleInput(text){
-  const row=document.createElement('div'); row.className='grid item';
-  row.innerHTML='<div class="mono">+'+((performance.now()-t0)/1000).toFixed(1)+'s</div><div class="word">'+escapeHtml(text)+'</div><div>ok</div><div>-</div><div>-</div>';
-  els.list.prepend(row);
-}
+      els.start.addEventListener('click', startSession);
+      els.pauseBtn.addEventListener('click', togglePause);
+      els.stopBtn.addEventListener('click', stopSession);
+      els.exportBtn.addEventListener('click', exportCSV);
+      els.btnAdd.addEventListener('click', function(){ addManual(els.manualInput.value); });
+      els.manualInput.addEventListener('keydown', function(e){ if(e.key==='Enter'){ addManual(els.manualInput.value); } });
 
-function exportCSV(){
-  const lines=['word,time']; 
-  session.forEach(it=>lines.push(it.word+','+it.ts));
-  const blob=new Blob([lines.join('\n')],{type:'text/csv'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a'); a.href=url; a.download='fluency.csv'; document.body.appendChild(a); a.click(); a.remove();
-  URL.revokeObjectURL(url);
-}
+      function startSession(){
+        resetSession();
+        remaining = parseInt(els.duration.value, 10);
+        els.timer.textContent = remaining;
+        t0 = performance.now();
+        timerInt = setInterval(tick, 1000);
+        els.start.disabled = true;
+        els.pauseBtn.disabled = false;
+        els.stopBtn.disabled = false;
+        els.exportBtn.disabled = true;
+        els.groups.innerHTML = '';
+        if(els.inputMode.value === 'speech' && canSpeech){
+          startRecog();
+        }else{
+          els.manualInput.focus();
+        }
+      }
 
-function resetSession(){ session=[]; els.list.innerHTML=''; els.ok.textContent='0'; els.rep.textContent='0'; els.off.textContent='0'; }
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-</script>
+      function togglePause(){
+        if(paused){
+          t0 = performance.now() - ((parseInt(els.duration.value,10) - remaining) * 1000);
+          timerInt = setInterval(tick, 1000);
+          if(recog && !recogActive){
+            try{ recog.start(); recogActive = true; }catch(e){}
+          }
+          paused = false; els.pauseBtn.textContent = 'Pause';
+        }else{
+          clearInterval(timerInt);
+          if(recog && recogActive){
+            try{ recog.stop(); }catch(e){}
+            recogActive = false;
+          }
+          paused = true; els.pauseBtn.textContent = 'Resume';
+        }
+      }
+
+      function stopSession(){
+        clearInterval(timerInt);
+        if(recog && recogActive){ try{ recog.stop(); }catch(e){} recogActive = false; }
+        els.start.disabled = false;
+        els.pauseBtn.disabled = true;
+        els.stopBtn.disabled = true;
+        els.exportBtn.disabled = false;
+        setMic('idle', 'Mic: stopped');
+        els.interim.style.display = 'none';
+        renderGroups();
+      }
+
+      function tick(){
+        if(paused) return;
+        remaining--;
+        els.timer.textContent = remaining;
+        if(remaining <= 0){ stopSession(); }
+      }
+
+      function startRecog(){
+        if(!hasWebkitSR) return;
+        if(recogActive) return;
+
+        var SR = window.webkitSpeechRecognition;
+        recog = new SR();
+        recog.lang = 'en-GB';
+        recog.interimResults = true;
+        recog.continuous = true;
+
+        recog.onstart = function(){ setMic('ok', 'Mic: listening'); els.interim.style.display = 'block'; };
+        recog.onaudiostart = function(){ setMic('ok', 'Mic: audio detected'); };
+        recog.onsoundstart = function(){ setMic('ok', 'Mic: sound detected'); };
+        recog.onsoundend = function(){ setMic('warn', 'Mic: sound ended'); };
+        recog.onaudioend = function(){ setMic('warn', 'Mic: audio ended'); };
+        recog.onspeechend = function(){ setMic('warn', 'Mic: speech ended'); };
+
+        recog.onresult = function(e){
+          var interimText = '';
+          for(var i=e.resultIndex;i<e.results.length;i++){
+            var res = e.results[i];
+            var txt = res[0].transcript;
+            if(res.isFinal){
+              if(txt && txt.trim()){ handleInput(txt); }
+            }else{
+              interimText += txt + ' ';
+            }
+          }
+          if(interimText){
+            els.interim.textContent = interimText.trim();
+          }else{
+            els.interim.textContent = '';
+          }
+        };
+
+        recog.onerror = function(ev){
+          console.warn('Speech error:', ev && ev.error);
+          if(ev && (ev.error === 'no-speech' || ev.error === 'audio-capture')){
+            setMic('warn', 'Mic: no speech or no audio capture');
+          }else if(ev && (ev.error === 'not-allowed' || ev.error === 'service-not-allowed')){
+            setMic('bad', 'Mic: permission blocked');
+            alert('Microphone permission blocked. Allow mic access and press Start again.');
+          }else if(ev && ev.error === 'aborted'){
+            setMic('warn', 'Mic: aborted');
+          }else{
+            setMic('warn', 'Mic: error');
+          }
+        };
+
+        recog.onend = function(){
+          // Auto-restart while session is active and not paused
+          if(!paused && remaining > 0){
+            try{ recog.start(); recogActive = true; }catch(e){}
+          }else{
+            recogActive = false;
+          }
+        };
+
+        try{
+          recog.start();
+          recogActive = true;
+        }catch(e){
+          // Start called twice raises an error in some versions
+          console.warn('Start error:', e);
+        }
+      }
+
+      function setMic(kind, text){
+        els.micStatus.style.display = 'block';
+        els.micStatus.classList.remove('ok','warn','bad');
+        if(kind === 'ok') els.micStatus.classList.add('ok');
+        else if(kind === 'warn') els.micStatus.classList.add('warn');
+        else if(kind === 'bad') els.micStatus.classList.add('bad');
+        els.micStatus.textContent = text || 'Mic: status';
+      }
+
+      /* Input and scoring */
+      function norm(w){
+        return String(w||'').toLowerCase()
+          .replace(/[^a-zA-Z\\u00C0-\\u024F\\s\\-']/g,'')
+          .trim().replace(/\\s+/g,' ')
+          .replace(/'s\\b/,'').replace(/s\\b/,'');
+      }
+      function splitWords(text){
+        var parts = text.split(/[\\n,;]+/).map(function(s){return s.trim();}).filter(Boolean);
+        if(parts.length > 1) return parts;
+        return text.split(/\\s+/).map(function(s){return s.trim();}).filter(Boolean);
+      }
+
+      function handleInput(text){
+        var cat = els.category.value;
+        var tokens = splitWords(text);
+        for(var i=0;i<tokens.length;i++){
+          var raw = tokens[i];
+          var key = norm(raw);
+          if(!key) continue;
+          recordWord(cat, key, raw);
+        }
+      }
+
+      function recordWord(cat, key, raw){
+        var t = Math.max(0, (performance.now() - t0) / 1000);
+        var isRepeat = session.some(function(it){ return it.key === key && !it.deleted; });
+        var onTarget = checkOnTarget(cat, key, raw);
+        var item = { cat:cat, ts:t, raw:raw, key:key, repeat:isRepeat, onTarget:onTarget, overrideApproved:false, deleted:false };
+        session.push(item);
+        renderItem(item, session.length - 1);
+        refreshCounts();
+      }
+
+      function checkOnTarget(cat, key, raw){
+        var base = BASE[cat]; var ext = EXT[cat];
+        if(base && base.has && (base.has(key) || base.has(raw.toLowerCase()))) return true;
+        if(ext && ext.has && (ext.has(key) || ext.has(raw.toLowerCase()))) return true;
+        return heuristicOnTarget(cat, key, raw);
+      }
+
+      function renderItem(item, idx){
+        var row = document.createElement('div');
+        row.className = 'grid item';
+        row.dataset.idx = String(idx);
+        row.innerHTML =
+          '<div class="mono">+' + item.ts.toFixed(1) + 's</div>' +
+          '<div class="word">' + escapeHtml(item.raw) + '</div>' +
+          '<div>' + statusLabel(item) + '</div>' +
+          '<div><label class="small"><input type="checkbox"' + (item.overrideApproved?' checked':'') + '/> Approve</label></div>' +
+          '<div><button class="ghost smallBtn">Remove</button></div>';
+
+        row.querySelector('input').addEventListener('change', function(e){
+          item.overrideApproved = e.target.checked;
+          row.children[2].innerHTML = statusLabel(item);
+          refreshCounts();
+        });
+        row.querySelector('button').addEventListener('click', function(){
+          item.deleted = true; row.remove(); refreshCounts();
+        });
+        els.list.prepend(row);
+      }
+
+      function statusLabel(item){
+        if(item.deleted) return '<span class="small">-</span>';
+        var parts = [];
+        if(item.repeat) parts.push('<span class="tag rep">repeat</span>');
+        var off = (!item.onTarget && !item.overrideApproved);
+        if(off) parts.push('<span class="tag off">off-target</span>');
+        if(!off && !item.repeat) parts.push('<span class="tag ok">ok</span>');
+        return parts.join(' ');
+      }
+
+      function refreshCounts(){
+        var ok=0, rep=0, off=0;
+        for(var i=0;i<session.length;i++){
+          var it = session[i];
+          if(it.deleted) continue;
+          var offNow = (!it.onTarget && !it.overrideApproved);
+          if(it.repeat) rep++;
+          if(offNow) off++;
+          if(!it.repeat && !offNow) ok++;
+        }
+        els.ok.textContent = String(ok);
+        els.rep.textContent = String(rep);
+        els.off.textContent = String(off);
+      }
+
+      function renderGroups(){
+        var cat = els.category.value;
+        var items = session.filter(function(it){ return !it.deleted && (it.onTarget || it.overrideApproved); });
+        var unique = new Map();
+        for(var i=0;i<items.length;i++){
+          var it = items[i];
+          if(!unique.has(it.key)) unique.set(it.key, it.raw);
+        }
+        var buckets = categorizeByStrategy(cat, Array.from(unique.keys()));
+        var container = els.groups;
+        container.innerHTML = '';
+        for(var title in buckets){
+          if(!buckets.hasOwnProperty(title)) continue;
+          var keys = buckets[title];
+          var words = [];
+          for(var j=0;j<keys.length;j++){
+            var raw = unique.get(keys[j]);
+            if(raw) words.push('<span class="pill">' + escapeHtml(raw) + '</span>');
+          }
+          var div = document.createElement('div');
+          div.className = 'grp';
+          div.innerHTML = '<h4>' + escapeHtml(title) + '</h4>' + (words.length ? words.join(' ') : '<div class="small">-</div>');
+          container.appendChild(div);
+        }
+      }
+
+      function categorizeByStrategy(cat, keys){
+        var out = {};
+        function put(bucket, key){ if(!out[bucket]) out[bucket]=[]; out[bucket].push(key); }
+        function ensure(arr){ for(var i=0;i<arr.length;i++){ if(!out[arr[i]]) out[arr[i]]=[]; } }
+
+        if(cat==='animals'){
+          ensure(["Mammals","Birds","Fish","Reptiles","Amphibians","Invertebrates","Other"]);
+          for(var i=0;i<keys.length;i++){
+            var k = keys[i];
+            if(/(dog|cat|horse|cow|sheep|goat|lion|tiger|bear|wolf|fox|deer|monkey|whale|dolphin|seal|otter)\b/.test(k)) { put("Mammals",k); continue; }
+            if(/(eagle|hawk|owl|duck|goose|swan|pigeon|sparrow|bird)\b/.test(k)) { put("Birds",k); continue; }
+            if(/(shark|salmon|tuna|cod|trout|fish)\b/.test(k)) { put("Fish",k); continue; }
+            if(/(snake|lizard|gecko|crocodile|alligator|turtle|tortoise)\b/.test(k)) { put("Reptiles",k); continue; }
+            if(/(frog|toad|salamander|newt)\b/.test(k)) { put("Amphibians",k); continue; }
+            if(/(ant|bee|wasp|butterfly|moth|spider|crab|lobster|shrimp|jellyfish)\b/.test(k)) { put("Invertebrates",k); continue; }
+            put("Other",k);
+          }
+          return out;
+        }
+
+        if(cat==='produce'){
+          ensure(["Fruits","Vegetables","Leafy greens","Roots and tubers","Beans and seeds","Other"]);
+          for(var i2=0;i2<keys.length;i2++){
+            var k2 = keys[i2];
+            if(/(apple|pear|banana|orange|grape|berry|melon|peach|plum|cherry|kiwi)\b/.test(k2)) { put("Fruits",k2); continue; }
+            if(/(tomato|onion|pepper|cucumber|squash|pumpkin|broccoli|cauliflower|mushroom)\b/.test(k2)) { put("Vegetables",k2); continue; }
+            if(/(lettuce|cabbage|kale|spinach|endive|rocket|watercress)\b/.test(k2)) { put("Leafy greens",k2); continue; }
+            if(/(carrot|parsnip|turnip|beet|radish|potato|yam|sweet potato)\b/.test(k2)) { put("Roots and tubers",k2); continue; }
+            if(/(pea|bean|lentil|seed|nut)\b/.test(k2)) { put("Beans and seeds",k2); continue; }
+            put("Other",k2);
+          }
+          return out;
+        }
+
+        if(cat==='tools'){
+          ensure(["Cutting","Fastening","Measuring","Power tools","Household","Other"]);
+          for(var i3=0;i3<keys.length;i3++){
+            var k3 = keys[i3];
+            if(/(knife|scissors|cutter|saw|chisel|plane|file)\b/.test(k3)) { put("Cutting",k3); continue; }
+            if(/(screw|screwdriver|wrench|spanner|socket|pliers|clamp|hammer|nail|bolt|nut)\b/.test(k3)) { put("Fastening",k3); continue; }
+            if(/(tape measure|ruler|square|level|meter|gauge)\b/.test(k3)) { put("Measuring",k3); continue; }
+            if(/(drill|driver|grinder|sander|router|lathe)\b/.test(k3)) { put("Power tools",k3); continue; }
+            if(/(broom|brush|mop|bucket|vacuum|pan|pot|spatula|whisk)\b/.test(k3)) { put("Household",k3); continue; }
+            put("Other",k3);
+          }
+          return out;
+        }
+
+        if(cat==='jobs'){
+          ensure(["Health","Education and Research","Trades","Tech and Business","Law and Emergency","Other"]);
+          for(var i4=0;i4<keys.length;i4++){
+            var k4 = keys[i4];
+            if(/(doctor|nurse|paramedic|therapist|psychologist|pharmacist|dentist)\b/.test(k4)) { put("Health",k4); continue; }
+            if(/(teacher|lecturer|professor|researcher|scientist)\b/.test(k4)) { put("Education and Research",k4); continue; }
+            if(/(electrician|plumber|carpenter|bricklayer|mechanic|welder|builder)\b/.test(k4)) { put("Trades",k4); continue; }
+            if(/(engineer|developer|programmer|designer|manager|accountant|analyst)\b/.test(k4)) { put("Tech and Business",k4); continue; }
+            if(/(police|officer|firefighter|lawyer|barrister|solicitor)\b/.test(k4)) { put("Law and Emergency",k4); continue; }
+            put("Other",k4);
+          }
+          return out;
+        }
+
+        if(cat==='transport'){
+          ensure(["Road","Rail","Water","Air or Space","Human or Animal","Other"]);
+          for(var i5=0;i5<keys.length;i5++){
+            var k5 = keys[i5];
+            if(/(car|van|lorry|truck|bus|coach|taxi|cab|motorcycle|scooter)\b/.test(k5)) { put("Road",k5); continue; }
+            if(/(train|tram|subway|metro|underground|monorail)\b/.test(k5)) { put("Rail",k5); continue; }
+            if(/(boat|ship|ferry|canoe|kayak|yacht|sailboat|submarine)\b/.test(k5)) { put("Water",k5); continue; }
+            if(/(plane|airplane|jet|helicopter|glider|balloon|rocket)\b/.test(k5)) { put("Air or Space",k5); continue; }
+            if(/(bicycle|bike|tricycle|wheelbarrow|horse|camel|dogsledge|dogsled)\b/.test(k5)) { put("Human or Animal",k5); continue; }
+            put("Other",k5);
+          }
+          return out;
+        }
+
+        if(cat==='emotions'){
+          ensure(["Positive","Negative","High arousal","Low arousal","Social or Relational","Other"]);
+          for(var i6=0;i6<keys.length;i6++){
+            var k6 = keys[i6];
+            if(/(happy|content|relieved|calm|serene|proud)\b/.test(k6)) { put("Positive",k6); }
+            if(/(sad|angry|afraid|anxious|worried|ashamed|guilty|jealous|bored)\b/.test(k6)) { put("Negative",k6); }
+            if(/(angry|afraid|anxious|worried|excited|furious)\b/.test(k6)) { put("High arousal",k6); }
+            if(/(calm|relaxed|serene|content|bored)\b/.test(k6)) { put("Low arousal",k6); }
+            if(/(proud|ashamed|guilty|jealous)\b/.test(k6)) { put("Social or Relational",k6); }
+            if(!out["Positive"].includes(k6) && !out["Negative"].includes(k6) && !out["High arousal"].includes(k6) && !out["Low arousal"].includes(k6) && !out["Social or Relational"].includes(k6)){ put("Other",k6); }
+          }
+          return out;
+        }
+
+        out["Other"] = keys;
+        return out;
+      }
+
+      function exportCSV(){
+        var cat = els.category.value;
+        var dur = parseInt(els.duration.value,10);
+        var lines = ['category,duration_s,timestamp_rel_s,raw,normalized,repeat,off_target,override,deleted'];
+        for(var i=0;i<session.length;i++){
+          var it = session[i];
+          var offNow = (!it.onTarget && !it.overrideApproved);
+          lines.push(
+            cat + ',' + dur + ',' + it.ts.toFixed(2) + ',' +
+            csvEsc(it.raw) + ',' + csvEsc(it.key) + ',' +
+            (it.repeat?1:0) + ',' + (offNow?1:0) + ',' + (it.overrideApproved?1:0) + ',' + (it.deleted?1:0)
+          );
+        }
+        var blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'});
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a'); a.href = url; a.download = 'fluency_' + cat + '_' + Date.now() + '.csv';
+        document.body.appendChild(a); a.click(); a.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      function csvEsc(s){ if(s==null) return ''; var t = String(s).replace(/"/g,'""'); return '"' + t + '"'; }
+      function escapeHtml(s){ return String(s).replace(/[&<>"']/g,function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]); }); }
+      function resetSession(){
+        session = []; els.list.innerHTML = '';
+        els.ok.textContent = '0'; els.rep.textContent = '0'; els.off.textContent = '0';
+        els.groups.innerHTML = '';
+        clearInterval(timerInt); paused = false; els.pauseBtn.textContent = 'Pause';
+        els.micStatus.style.display = 'none'; els.interim.style.display = 'none';
+      }
+
+      (function init(){
+        if(!canSpeech){ els.inputMode.value = 'manual'; els.manualBox.style.display = 'flex'; }
+      })();
+    </script>
+
+    <!-- Clinician feedback is handled by clinician_feedback.js. No duplicate notes UI here. -->
+  </main>
 </body>
 </html>
