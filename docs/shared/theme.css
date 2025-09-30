@@ -7,7 +7,7 @@
 
 /* ===== Base tokens (light) ===== */
 :root{
-  color-scheme: light dark;
+  color-scheme: light;
 
   /* Palette */
   --bg: #f7f8fb;
@@ -32,18 +32,6 @@
   /* Radius & elevation */
   --radius: 16px;
   --shadow: 0 1px 2px rgba(16,24,40,.06), 0 8px 24px rgba(16,24,40,.08);
-}
-
-/* ===== Dark mode adjustments ===== */
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg: #0f172a;
-    --surface: #111827;
-    --text: #f9fafb;
-    --muted: #9ca3af;
-    --line: #1f2937;
-    --shadow: 0 1px 2px rgba(0,0,0,.40), 0 10px 26px rgba(0,0,0,.60);
-  }
 }
 
 /* ===== Bold & Dense toggles (opt-in) =====
