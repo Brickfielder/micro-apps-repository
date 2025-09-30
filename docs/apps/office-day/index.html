@@ -1,662 +1,624 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Reminder Quest — Office Day — v1.4</title>
-<style>
-    :root{
-      --bg:#f7f7fb;
-      --ink:#1b1f24;
-      --muted:#666b73;
-      --primary:#3a6ff8;
-      --card:#ffffff;
-      --pill:#eef2ff;
-      --shadow:0 8px 20px rgba(20,20,40,0.08);
-      --radius:18px;
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>Reminder Quest — Office Day</title>
+  <meta name="description" content="Approve green docs, reject red ones, and remember time/event-based tasks while you work." />
+
+  <!-- Micro-Apps hero injection -->
+  <meta name="app-slug" content="office-day">
+  <meta name="app-title" content="Reminder Quest — Office Day">
+  <meta name="app-desc" content="Prospective memory under load: keep working while recalling time- and event-based tasks." />
+  <meta name="theme" content="bold"> <!-- optional: bold/dense from frame.js -->
+
+  <!-- Shared assets (light only) -->
+  <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3">
+  <script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
+  <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
+
+  <style>
+    :root{ color-scheme: light; } /* force light */
+
+    /* Page scaffold (use shared tokens) */
+    body{ margin:0; background:var(--bg); color:var(--text); font-family: var(--font, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif); }
+    #app-root{ padding: 16px; }
+    .app-wrap{ max-width: 1100px; margin: 0 auto; }
+
+    /* Controls bar */
+    .app-controls{
+      display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between;
+      background:var(--surface); border:1px solid var(--line); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding:12px 14px; margin-bottom:12px;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans";
-      background:var(--bg);
-      color:var(--ink);
-      line-height:1.25;
-    }
-    header{
-      padding: 20px clamp(16px, 2vw, 28px);
-      display:flex;align-items:center;gap:18px;justify-content:space-between;flex-wrap:wrap;
-    }
-    h1{font-size:clamp(22px, 3.4vw, 32px);margin:0;font-weight:800;letter-spacing:0.2px}
-    .tag{background:var(--pill);padding:8px 12px;border-radius:999px;font-size:12px;color:var(--primary);font-weight:700}
-    main{max-width:1100px;margin:0 auto;padding:12px clamp(12px, 3vw, 28px) 32px;display:grid;gap:16px}
-    .grid{display:grid;grid-template-columns: 1.1fr 0.9fr; gap:16px}
-    .card{
-      background:var(--card);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:16px;
-    }
-    .card h2{margin:0 0 8px 0;font-size:18px}
-    .muted{color:var(--muted);font-size:14px}
-    .controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+    .btns{ display:flex; gap:10px; flex-wrap:wrap; }
     button{
-      appearance:none;border:0;border-radius:12px;padding:12px 16px;
-      font-weight:700;cursor:pointer;background:var(--primary);color:white;
-      transition:transform .06s ease, box-shadow .2s ease;
-      box-shadow:0 6px 14px rgba(58,111,248,0.2);
+      appearance:none; border:0; border-radius:12px; padding:10px 14px; font-weight:700; cursor:pointer;
+      background:var(--accent); color:#fff; box-shadow:0 6px 14px rgba(0,0,0,.12);
+      transition:transform .06s ease, box-shadow .2s ease; }
+    button.secondary{ background:var(--pill); color:var(--accent-700); box-shadow:none; }
+    button.ghost{ background:transparent; border:2px solid var(--line); color:var(--text); box-shadow:none; }
+    button:active{ transform: translateY(1px); }
+
+    /* Grid & cards */
+    .grid{ display:grid; grid-template-columns: 1.1fr 0.9fr; gap:16px; }
+    .card{
+      background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+      box-shadow:var(--shadow); padding:16px;
     }
-    button.secondary{background:#e8ebff;color:#2946b8;box-shadow:none}
-    button.ghost{background:transparent;border:2px solid #d6d8df;color:#2d3142;box-shadow:none}
-    button:active{transform: translateY(1px)}
-    .statbar{display:flex;gap:12px;flex-wrap:wrap}
-    .pill{background:#f0f1f6;border-radius:999px;padding:8px 12px;font-weight:700;font-size:13px}
-    .pill.good{background:#e8fbf2;color:#087a4a}
-    .pill.bad{background:#ffefef;color:#992f2f}
-    .flex{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-    .timer{font-size:20px;font-weight:900;letter-spacing:0.5px}
-    .timer.small{font-size:14px;font-weight:800;color:#3b3f4a;opacity:0.85}
-    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .doc-stream{display:grid;grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px;margin-top:10px}
-    .doc{border:2px dashed #d6d8df;border-radius:14px;padding:12px;background:#fafbff;display:flex;flex-direction:column;gap:8px}
-    .doc .meta{display:flex;gap:8px;align-items:center;justify-content:space-between}
-    .badge{padding:4px 8px;border-radius:999px;font-weight:800;font-size:12px}
-    .green{background:#e7fbef;color:#0e7a49}
-    .red{background:#ffebeb;color:#8f3030}
-    .btnrow{display:flex;gap:8px;flex-wrap:wrap}
-    .phone{display:flex;align-items:center;gap:10px;margin-top:8px}
-    .phone .icon{font-size:24px}
-    .phone .ring{animation:ring 0.8s ease-in-out infinite}
-    @keyframes ring{0%{transform:rotate(0deg)}25%{transform:rotate(12deg)}50%{transform:rotate(0deg)}75%{transform:rotate(-12deg)}100%{transform:rotate(0deg)}}
-    .notice{background:#fff6d8;border:1px solid #ffe6a4;padding:10px;border-radius:10px}
-    .divider{height:1px;background:#eceef4;margin:10px 0}
-    .log{max-height:200px;overflow:auto;background:#0f1222;color:#e9ecff;border-radius:12px;padding:10px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New";font-size:12px}
-    .modal-backdrop{position:fixed;inset:0;background:rgba(20,20,30,0.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
-    .modal{background:white;border-radius:16px;box-shadow:var(--shadow);max-width:760px;width:min(760px, 96vw);padding:18px}
-    .modal h3{margin:0 0 8px 0}
-    .modal small{color:#4a4e57}
-    .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-    .formrow{display:flex;gap:8px;align-items:center;justify-content:space-between;background:#f7f8ff;border:1px solid #e6e8f5;border-radius:12px;padding:10px}
-    .formrow label{font-weight:700}
-    input[type="range"]{width:100%}
-    .help{font-size:12px;color:#5a5f6d}
-    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .card h2{ margin:0 0 8px 0; font-size:18px }
+    .muted{ color:var(--muted); font-size:14px }
+    .divider{ height:1px; background:var(--line); margin:10px 0 }
+
+    /* Stream */
+    .doc-stream{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px; margin-top:10px }
+    .doc{ border:2px dashed var(--line); border-radius:14px; padding:12px; background:var(--surface-alt, #fafbff); display:flex; flex-direction:column; gap:8px }
+    .doc .meta{ display:flex; gap:8px; align-items:center; justify-content:space-between }
+    .badge{ padding:4px 8px; border-radius:999px; font-weight:800; font-size:12px }
+    .green{ background:#e7fbef; color:#0e7a49 }
+    .red{ background:#ffebeb; color:#8f3030 }
+    .btnrow{ display:flex; gap:8px; flex-wrap:wrap }
+
+    /* Status */
+    .statbar{ display:flex; gap:12px; flex-wrap:wrap }
+    .pill{ background:#f0f1f6; border-radius:999px; padding:8px 12px; font-weight:700; font-size:13px }
+    .pill.good{ background:#e8fbf2; color:#087a4a }
+    .pill.bad{ background:#ffefef; color:#992f2f }
+
+    .flex{ display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap }
+    .timer{ font-size:20px; font-weight:900; letter-spacing:.5px }
+    .timer.small{ font-size:14px; font-weight:800; opacity:.85 }
+
+    /* Phone */
+    .phone{ display:flex; align-items:center; gap:10px; margin-top:8px }
+    .phone .icon{ font-size:24px }
+    .phone .ring{ animation:ring .8s ease-in-out infinite }
+    @keyframes ring{0%{transform:rotate(0)}25%{transform:rotate(12deg)}50%{transform:rotate(0)}75%{transform:rotate(-12deg)}100%{transform:rotate(0)}}
+
+    .notice{ background:#fff6d8; border:1px solid #ffe6a4; padding:10px; border-radius:10px }
+    .log{
+      max-height:200px; overflow:auto; background:#0f1222; color:#e9ecff; border-radius:12px; padding:10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New"; font-size:12px;
+    }
+
+    /* Modals */
+    .modal-backdrop{ position:fixed; inset:0; background:rgba(20,20,30,.55); display:none; align-items:center; justify-content:center; padding:16px; z-index:10 }
+    .modal{ background:white; border-radius:16px; box-shadow:var(--shadow); max-width:760px; width:min(760px, 96vw); padding:18px }
+    .modal h3{ margin:0 0 8px 0 }
+    .two{ display:grid; grid-template-columns:1fr 1fr; gap:12px }
+    .grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px }
+    .formrow{ display:flex; gap:8px; align-items:center; justify-content:space-between; background:#f7f8ff; border:1px solid #e6e8f5; border-radius:12px; padding:10px }
+    .help{ font-size:12px; color:var(--muted) }
+
+    /* Collapsible instructions */
+    details.app-instructions{ margin: 8px 0 16px }
+    details.app-instructions > summary{
+      list-style:none; cursor:pointer; font-weight:800; padding:10px 12px; border-radius:10px;
+      background:var(--pill); color:var(--accent-700); border:1px solid var(--line);
+    }
+    details.app-instructions[open]{ background:transparent }
+    details.app-instructions .content{ padding:12px; background:var(--surface); border:1px solid var(--line); border-radius:12px; margin-top:8px }
+
+    /* Responsive */
     @media (max-width: 880px){
-      .grid{grid-template-columns:1fr}
-      .grid3{grid-template-columns:1fr}
+      .grid{ grid-template-columns:1fr }
+      .grid3{ grid-template-columns:1fr }
     }
   </style>
-<meta content="Office_Day" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../../../shared/theme.css" rel="stylesheet"/><script defer="" src="../../../shared/frame.js"></script><script defer="" src="../../../shared/clinician_feedback.js"></script>  <meta name="app-slug" content="office-day">
 </head>
-<body><main id="app-root">
-<header aria-label="App header">
-<div class="row">
-<span aria-hidden="true" class="tag">Prototype</span>
-<h1>Reminder Quest — <span style="color:var(--primary)">Office Day</span></h1>
-</div>
-<div class="controls">
-<button aria-label="Start a new round" id="startBtn">Start new round</button>
-<button class="secondary" id="downloadBtn" title="Download CSV log">Download CSV</button>
-<button class="ghost" id="difficultyBtn" title="Open difficulty panel">Difficulty</button>
-<button class="ghost" id="helpBtn">How to play</button>
-</div>
-</header>
-<main>
-<section aria-label="Game area" class="grid">
-<!-- LEFT COLUMN -->
-<div aria-labelledby="ongoingTitle" class="card">
-<div class="flex">
-<h2 id="ongoingTitle">Ongoing Task — Document Sorting</h2>
-<div class="row" style="gap:16px">
-<div aria-live="polite" class="timer" id="timer">03:00</div>
-<div aria-live="polite" class="timer small" id="timerElapsed">Elapsed 00:00</div>
-</div>
-</div>
-<p class="muted">Approve <strong>green</strong> documents and reject <strong>red</strong> ones.
-          This keeps you busy while you remember your <em>other</em> tasks.</p>
-<div aria-label="Incoming documents" class="doc-stream" id="docStream" role="list"></div>
-<div class="divider"></div>
-<div aria-live="polite" class="phone">
-<div class="icon" id="phoneIcon" title="Phone status">📞</div>
-<div class="muted" id="phoneStatus">Phone is quiet.</div>
-<div class="btnrow" id="phoneButtons" style="display:none">
-<button aria-label="Answer phone" class="ghost" id="answerBtn">Answer</button>
-<button aria-label="Ignore phone" class="ghost" id="ignoreBtn">Ignore</button>
-</div>
-</div>
-</div>
-<!-- RIGHT COLUMN -->
-<div aria-labelledby="pmTitle" class="card">
-<h2 id="pmTitle">Prospective Tasks</h2>
-<div aria-live="polite" class="notice" id="briefingBox" role="status">
-<strong>Briefing will appear when you start a round.</strong>
-</div>
-<div class="divider"></div>
-<div class="row">
-<button class="secondary" disabled="" id="sendReportBtn">Send report</button>
-<span class="muted">Use only when the briefing says so (time-based).</span>
-</div>
-<div class="divider"></div>
-<div aria-live="polite" class="statbar" id="statsPills"></div>
-<div class="divider"></div>
-<div aria-label="Event log" class="log" id="log" role="log"></div>
-</div>
-</section>
-</main>
-<!-- BRIEFING MODAL -->
-<div aria-labelledby="modalTitle" aria-modal="true" class="modal-backdrop" id="modalBackdrop" role="dialog">
-<div class="modal">
-<h3 id="modalTitle">Briefing</h3>
-<p class="muted">Remember these while you work:</p>
-<div class="two">
-<div>
-<h4>Time-based</h4>
-<ul id="timeTasks"></ul>
-</div>
-<div>
-<h4>Event-based</h4>
-<ul id="eventTasks"></ul>
-</div>
-</div>
-<div class="divider"></div>
-<div class="row">
-<button id="beginRoundBtn">Begin round</button>
-<button class="ghost" id="cancelRoundBtn">Cancel</button>
-</div>
-</div>
-</div>
-<!-- HELP MODAL -->
-<div aria-labelledby="helpTitle" aria-modal="true" class="modal-backdrop" id="helpBackdrop" role="dialog">
-<div class="modal">
-<h3 id="helpTitle">How to play</h3>
-<ol>
-<li><strong>Start new round</strong> to see your briefing.</li>
-<li>Keep working: approve <em>green</em> docs, reject <em>red</em> docs.</li>
-<li><strong>Prospective memory:</strong> act at the right <strong>elapsed time</strong> (e.g., “Send report at 01:30”)
-            or in response to the right event (Answer only when the <strong>Manager</strong> calls).</li>
-<li>Top-right = <strong>remaining</strong>; small clock = <strong>elapsed</strong>.</li>
-<li>Scoring tracks correct recalls, misses, early/late actions, and mistakes. Difficulty adapts between rounds.</li>
-</ol>
-<div class="row">
-<button id="closeHelpBtn">Close</button>
-</div>
-</div>
-</div>
-<!-- DIFFICULTY MODAL -->
-<div aria-labelledby="difficultyTitle" aria-modal="true" class="modal-backdrop" id="difficultyBackdrop" role="dialog">
-<div class="modal">
-<h3 id="difficultyTitle">Difficulty &amp; Session Settings</h3>
-<p class="help">Changes are saved to this browser and apply to the <strong>next round</strong>. You can also lock values to prevent auto-adaptation.</p>
-<div class="grid3">
-<div class="formrow">
-<label for="timeWindow">± Time window (s)</label>
-<input id="timeWindow" max="15" min="1" step="1" type="range"/>
-<output id="timeWindowOut">6</output>
-</div>
-<div class="formrow">
-<label for="docEveryMs">Doc interval (ms)</label>
-<input id="docEveryMs" max="3500" min="1200" step="100" type="range"/>
-<output id="docEveryMsOut">2500</output>
-</div>
-<div class="formrow">
-<label for="phoneChance">Phone chance (/8s)</label>
-<input id="phoneChance" max="0.5" min="0.05" step="0.01" type="range"/>
-<output id="phoneChanceOut">0.22</output>
-</div>
-<div class="formrow">
-<label for="fakeManagerRate">Fake-caller rate</label>
-<input id="fakeManagerRate" max="0.9" min="0" step="0.05" type="range"/>
-<output id="fakeManagerRateOut">0.5</output>
-</div>
-<div class="formrow">
-<label for="pmTimeTasks">Time PM tasks</label>
-<input id="pmTimeTasks" max="3" min="1" step="1" type="range"/>
-<output id="pmTimeTasksOut">1</output>
-</div>
-<div class="formrow">
-<label for="pmEventTasks">Event PM tasks</label>
-<input id="pmEventTasks" max="3" min="1" step="1" type="range"/>
-<output id="pmEventTasksOut">1</output>
-</div>
-</div>
-<div class="divider"></div>
-<div class="two">
-<div class="formrow">
-<label><input id="lockAdapt" type="checkbox"/> Lock difficulty (disable auto-adapt)</label>
-<span class="help">If checked, the app will not adjust difficulty after a round.</span>
-</div>
-<div class="row" style="justify-content:flex-end">
-<button id="saveDiffBtn">Save</button>
-<button class="ghost" id="resetDiffBtn">Reset to defaults</button>
-<button class="ghost" id="closeDiffBtn">Close</button>
-</div>
-</div>
-</div>
-</div>
-<script>
-    // ====== Defaults & Load ======
-    const ROUND_SECONDS_DEFAULT = 180; // fixed 3 minutes
-    const DEFAULTS = {
-      pmTimeTasks: 1,
-      pmEventTasks: 1,
-      timeWindow: 6,
-      docEveryMs: 2500,
-      phoneChance: 0.22,
-      fakeManagerRate: 0.5,
-      lockAdapt: false
-    };
-    let difficulty = Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem("officeDayDifficulty")||"{}"));
+<body>
 
-    let round = null;
-    let logEl = null;
-    let stats = null;
-    let timers = [];
-    let phoneRinging = false;
-    let currentCaller = null;
-    let streamDocId = 0;
-    let targetSendReportAt = null; // seconds into round
-    let pmSpec = { timeTasks: [], eventTasks: [] };
-    let csvRows = [];
+  <main id="app-root">
+    <div class="app-wrap">
 
-    // ====== DOM ======
-    const el = id => document.getElementById(id);
-    const $start = el("startBtn");
-    const $download = el("downloadBtn");
-    const $help = el("helpBtn");
-    const $difficultyBtn = el("difficultyBtn");
-    const $phoneStatus = el("phoneStatus");
-    const $phoneIcon = el("phoneIcon");
-    const $phoneButtons = el("phoneButtons");
-    const $answer = el("answerBtn");
-    const $ignore = el("ignoreBtn");
-    const $sendReport = el("sendReportBtn");
-    const $timer = el("timer");
-    const $timerElapsed = el("timerElapsed");
-    const $docStream = el("docStream");
-    const $brief = el("briefingBox");
-    const $statsPills = el("statsPills");
-    logEl = el("log");
-
-    const $modal = el("modalBackdrop");
-    const $helpModal = el("helpBackdrop");
-    const $diffModal = el("difficultyBackdrop");
-    const $beginRound = el("beginRoundBtn");
-    const $cancelRound = el("cancelRoundBtn");
-    const $timeTasks = el("timeTasks");
-    const $eventTasks = el("eventTasks");
-
-    // Difficulty controls
-    const $tw = el("timeWindow"), $twOut = el("timeWindowOut");
-    const $docMs = el("docEveryMs"), $docMsOut = el("docEveryMsOut");
-    const $phoneCh = el("phoneChance"), $phoneChOut = el("phoneChanceOut");
-    const $fakeRate = el("fakeManagerRate"), $fakeRateOut = el("fakeManagerRateOut");
-    const $pmTime = el("pmTimeTasks"), $pmTimeOut = el("pmTimeTasksOut");
-    const $pmEvent = el("pmEventTasks"), $pmEventOut = el("pmEventTasksOut");
-    const $lockAdapt = el("lockAdapt");
-    const $saveDiff = el("saveDiffBtn");
-    const $resetDiff = el("resetDiffBtn");
-    const $closeDiff = el("closeDiffBtn");
-
-    // ====== Utilities ======
-    function rnd(min, max){ return Math.floor(Math.random()*(max-min+1))+min }
-    function nowTs(){ return Date.now() }
-    function fmt(s){
-      const m = Math.floor(s/60), r = s%60;
-      return (m<10?"0"+m:m)+":"+(r<10?"0"+r:r);
-    }
-    function clearTimers(){ timers.forEach(clearInterval); timers=[]; }
-    function log(msg){
-      const t = (round?fmt(round.elapsed):"00:00");
-      const line = "["+t+"] " + msg;
-      logEl.textContent += (logEl.textContent ? "\n" : "") + line;
-      logEl.scrollTop = logEl.scrollHeight;
-      csvRows.push([Date.now(), t, msg]);
-    }
-    function setStatsPills(){
-      $statsPills.innerHTML = "";
-      const mk = (label, val, mod) => {
-        const s = document.createElement("div");
-        s.className = "pill"+(mod?(" "+mod):"");
-        s.textContent = label + ": " + val;
-        $statsPills.appendChild(s);
-      };
-      if(!stats) return;
-      mk("Correct PM", stats.correctPM, "good");
-      mk("Off-time PM", stats.offTimePM);
-      mk("Missed PM", stats.missedPM, "bad");
-      mk("Phone hits", stats.correctPhone, "good");
-      mk("Phone errors", stats.phoneErrors, "bad");
-      mk("Doc correct", stats.docCorrect, "good");
-      mk("Doc errors", stats.docErrors, "bad");
-    }
-
-    function updateTimerUI(){
-      if(!round) return;
-      const remaining = Math.max(0, ROUND_SECONDS_DEFAULT - round.elapsed);
-      $timer.textContent = fmt(remaining);      // remaining
-      $timerElapsed.textContent = "Elapsed " + fmt(round.elapsed); // elapsed
-      if(remaining<=0){
-        endRound();
-      }
-    }
-
-    function endRound(){
-      if(!round) return;
-      clearTimers();
-      phoneRinging=false; currentCaller=null;
-      $phoneIcon.classList.remove("ring");
-      $phoneButtons.style.display = "none";
-      $phoneStatus.textContent = "Round complete.";
-      $sendReport.disabled = true;
-      $start.disabled = false;
-      log("Round ended.");
-
-      if(!difficulty.lockAdapt){
-        const pmScore = stats.correctPM - (stats.missedPM + stats.offTimePM);
-        const phoneScore = stats.correctPhone - stats.phoneErrors;
-        const docScore = stats.docCorrect - stats.docErrors;
-        const totalDelta = pmScore + 0.5*phoneScore + 0.25*docScore;
-
-        if(totalDelta >= 3){
-          difficulty.pmTimeTasks = Math.min(3, difficulty.pmTimeTasks + (Math.random()>0.6?1:0));
-          difficulty.pmEventTasks = Math.min(3, difficulty.pmEventTasks + (Math.random()>0.6?1:0));
-          difficulty.timeWindow = Math.max(2, difficulty.timeWindow-1);
-          difficulty.docEveryMs = Math.max(1200, difficulty.docEveryMs-120);
-          difficulty.phoneChance = Math.min(0.45, difficulty.phoneChance+0.02);
-          log("Difficulty increased slightly.");
-        } else if(totalDelta <= -2){
-          difficulty.pmTimeTasks = Math.max(1, difficulty.pmTimeTasks-1);
-          difficulty.pmEventTasks = Math.max(1, difficulty.pmEventTasks-1);
-          difficulty.timeWindow = Math.min(12, difficulty.timeWindow+1);
-          difficulty.docEveryMs = Math.min(3500, difficulty.docEveryMs+120);
-          difficulty.phoneChance = Math.max(0.08, difficulty.phoneChance-0.02);
-          log("Difficulty eased slightly.");
-        } else {
-          log("Difficulty unchanged.");
-        }
-      } else {
-        log("Difficulty locked: auto-adaptation disabled.");
-      }
-
-      persistDifficulty();
-      $brief.innerHTML = `<strong>Round finished.</strong> Start a new round to receive a fresh briefing.`;
-      setStatsPills();
-    }
-
-    // ====== Prospective Tasks Generation ======
-    function newBriefing(){
-      pmSpec = { timeTasks: [], eventTasks: [] };
-      $timeTasks.innerHTML = "";
-      $eventTasks.innerHTML = "";
-
-      // Time-based tasks (primary used by 'Send report' button)
-      const countT = Math.max(1, difficulty.pmTimeTasks);
-      const times = new Set();
-      while(times.size < countT){
-        times.add(rnd(40, 140));
-      }
-      const arrTimes = [...times].sort((a,b)=>a-b);
-      targetSendReportAt = arrTimes[0];
-      const liT = document.createElement("li");
-      liT.textContent = `Send the report when ELAPSED time reaches ${fmt(targetSendReportAt)} (±${difficulty.timeWindow}s).`;
-      $timeTasks.appendChild(liT);
-
-      // Event-based tasks (answer only the Manager)
-      const countE = Math.max(1, difficulty.pmEventTasks);
-      for(let i=0;i<countE;i++){
-        const liE = document.createElement("li");
-        liE.textContent = `Answer the phone only if the caller is the Manager.`;
-        $eventTasks.appendChild(liE);
-        pmSpec.eventTasks.push({ type:"phone-only-manager" });
-      }
-    }
-
-    // ====== Round Control ======
-    function startRound(){
-      round = { startedAt: nowTs(), elapsed: 0 };
-      stats = {
-        correctPM:0, offTimePM:0, missedPM:0,
-        correctPhone:0, phoneErrors:0,
-        docCorrect:0, docErrors:0
-      };
-      csvRows = [["epoch","clock","event"]];
-      streamDocId = 0;
-      phoneRinging=false; currentCaller=null;
-      $sendReport.disabled = false;
-      $start.disabled = true;
-      $docStream.innerHTML = "";
-      logEl.textContent = "";
-      $brief.innerHTML = `<strong>Active:</strong> Send report at elapsed ${fmt(targetSendReportAt)} (±${difficulty.timeWindow}s). Answer only Manager.`;
-      log("Round started.");
-      setStatsPills();
-      updateTimerUI();
-
-      timers.push(setInterval(()=>{
-        round.elapsed = Math.min(ROUND_SECONDS_DEFAULT, Math.floor((nowTs()-round.startedAt)/1000));
-        updateTimerUI();
-      }, 1000));
-
-      timers.push(setInterval(()=> spawnDoc(), difficulty.docEveryMs));
-      timers.push(setInterval(()=> maybeRingPhone(), 8000));
-    }
-
-    function spawnDoc(){
-      const id = ++streamDocId;
-      const isGreen = Math.random() < 0.6;
-      const doc = document.createElement("div");
-      doc.className="doc";
-      doc.setAttribute("role","listitem");
-      doc.innerHTML = `
-        <div class="meta">
-          <div class="muted">Document #${id}</div>
-          <div class="badge ${isGreen?'green':'red'}">${isGreen?'GREEN':'RED'}</div>
+      <!-- Controls bar -->
+      <div class="app-controls" role="toolbar" aria-label="Session controls">
+        <div class="left">
+          <span class="tag pill" aria-hidden="true">Prototype</span>
         </div>
-        <div class="btnrow">
-          <button class="secondary" data-act="approve">Approve</button>
-          <button class="ghost" data-act="reject">Reject</button>
+        <div class="btns">
+          <button id="startBtn" aria-label="Start a new round">Start new round</button>
+          <button id="downloadBtn" class="secondary" title="Download CSV log">Download CSV</button>
+          <button id="difficultyBtn" class="ghost" title="Open difficulty panel">Difficulty</button>
+          <button id="helpBtn" class="ghost">How to play</button>
         </div>
-      `;
-      $docStream.prepend(doc);
+      </div>
 
-      const approve = doc.querySelector('[data-act="approve"]');
-      const reject = doc.querySelector('[data-act="reject"]');
-      approve.onclick = ()=>{
-        if(isGreen){ stats.docCorrect++; log(`Approved GREEN doc #${id} ✓`); }
-        else { stats.docErrors++; log(`Error: approved RED doc #${id}`); }
-        doc.remove(); setStatsPills();
-      };
-      reject.onclick = ()=>{
-        if(!isGreen){ stats.docCorrect++; log(`Rejected RED doc #${id} ✓`); }
-        else { stats.docErrors++; log(`Error: rejected GREEN doc #${id}`); }
-        doc.remove(); setStatsPills();
-      };
-      while($docStream.children.length > 8){
-        $docStream.lastElementChild?.remove();
-      }
-    }
+      <!-- Collapsible instructions (quick glance) -->
+      <details class="app-instructions">
+        <summary>How to play (quick)</summary>
+        <div class="content">
+          <ol>
+            <li><strong>Start new round</strong> to see your briefing.</li>
+            <li>Keep working: approve <em>green</em> docs, reject <em>red</em> docs.</li>
+            <li><strong>Prospective memory:</strong> act at the right <strong>elapsed time</strong> or for the right <strong>event</strong> (answer only when the <strong>Manager</strong> calls).</li>
+            <li>Top timer = <strong>remaining</strong>; smaller = <strong>elapsed</strong>.</li>
+            <li>Scoring tracks recalls, misses, early/late actions, and mistakes. Difficulty adapts between rounds.</li>
+          </ol>
+        </div>
+      </details>
 
-    function maybeRingPhone(){
-      if(phoneRinging) return;
-      if(Math.random() < difficulty.phoneChance){
-        phoneRinging = true;
-        const isManager = Math.random() >= difficulty.fakeManagerRate;
-        currentCaller = isManager ? "Manager" : (Math.random()<0.5?"Colleague":"Unknown");
-        $phoneIcon.classList.add("ring");
-        $phoneStatus.textContent = `Call from ${currentCaller}!`;
-        $phoneButtons.style.display = "flex";
-        log(`Phone ringing from ${currentCaller}.`);
+      <!-- Main grid -->
+      <section class="grid" aria-label="Game area">
+        <!-- LEFT: Ongoing task -->
+        <div class="card" aria-labelledby="ongoingTitle">
+          <div class="flex">
+            <h2 id="ongoingTitle">Ongoing Task — Document Sorting</h2>
+            <div class="flex" style="gap:16px">
+              <div class="timer" id="timer" aria-live="polite">03:00</div>
+              <div class="timer small" id="timerElapsed" aria-live="polite">Elapsed 00:00</div>
+            </div>
+          </div>
+          <p class="muted">
+            Approve <strong>green</strong> documents and reject <strong>red</strong> ones. This keeps you busy while you remember your <em>other</em> tasks.
+          </p>
 
-        const callerAtStart = currentCaller;
-        setTimeout(()=>{
-          if(phoneRinging && currentCaller === callerAtStart){
-            if(callerAtStart === "Manager"){
-              stats.phoneErrors++; log("Missed Manager call (error).");
-              setStatsPills();
-            } else {
-              log("Ignored non-Manager call (ok).");
-            }
-            phoneRinging=false; currentCaller=null;
-            $phoneIcon.classList.remove("ring");
-            $phoneButtons.style.display = "none";
-            $phoneStatus.textContent = "Phone is quiet.";
-          }
-        }, 6000);
-      }
-    }
+          <div id="docStream" class="doc-stream" role="list" aria-label="Incoming documents"></div>
 
-    // ====== Interactions ======
-    $sendReport.addEventListener("click", ()=>{
-      if(!round){ log("No active round."); return; }
-      const t = round.elapsed;
-      const diff = Math.abs(t - targetSendReportAt);
-      if(diff <= difficulty.timeWindow){
-        stats.correctPM++; log(`Sent report at the right time ✓ (elapsed ${fmt(t)}; target ${fmt(targetSendReportAt)} ±${difficulty.timeWindow}s)`);
-      } else if (t < targetSendReportAt){
-        stats.offTimePM++; log(`Sent report too early (elapsed ${fmt(t)}; target ${fmt(targetSendReportAt)}).`);
-      } else {
-        stats.offTimePM++; log(`Sent report too late (elapsed ${fmt(t)}; target ${fmt(targetSendReportAt)}).`);
-      }
-      $sendReport.disabled = true;
-      setStatsPills();
-    });
+          <div class="divider"></div>
 
-    $answer.addEventListener("click", ()=>{
-      if(!phoneRinging){ log("No call to answer."); return; }
-      if(currentCaller === "Manager"){
-        stats.correctPhone++; log("Answered Manager ✓");
-      } else {
-        stats.phoneErrors++; log(`Error: answered ${currentCaller}.`);
-      }
-      phoneRinging=false; currentCaller=null;
-      $phoneIcon.classList.remove("ring");
-      $phoneButtons.style.display = "none";
-      $phoneStatus.textContent = "Phone is quiet.";
-      setStatsPills();
-    });
+          <div class="phone" aria-live="polite">
+            <div id="phoneIcon" class="icon" title="Phone status">📞</div>
+            <div id="phoneStatus" class="muted">Phone is quiet.</div>
+            <div id="phoneButtons" class="btnrow" style="display:none">
+              <button id="answerBtn" class="ghost" aria-label="Answer phone">Answer</button>
+              <button id="ignoreBtn" class="ghost" aria-label="Ignore phone">Ignore</button>
+            </div>
+          </div>
+        </div>
 
-    $ignore.addEventListener("click", ()=>{
-      if(!phoneRinging){ log("No call to ignore."); return; }
-      if(currentCaller === "Manager"){
-        stats.phoneErrors++; log("Error: ignored Manager.");
-      } else {
-        log(`Ignored ${currentCaller} (ok).`);
-      }
-      phoneRinging=false; currentCaller=null;
-      $phoneIcon.classList.remove("ring");
-      $phoneButtons.style.display = "none";
-      $phoneStatus.textContent = "Phone is quiet.";
-      setStatsPills();
-    });
+        <!-- RIGHT: Prospective tasks, stats, log -->
+        <div class="card" aria-labelledby="pmTitle">
+          <h2 id="pmTitle">Prospective Tasks</h2>
+          <div id="briefingBox" class="notice" aria-live="polite" role="status">
+            <strong>Welcome.</strong> Click <em>Start new round</em> to receive your briefing. Use the <strong>elapsed</strong> clock to time actions.
+          </div>
 
-    // ====== CSV ======
-    $download.addEventListener("click", ()=>{
-      const csv = csvRows.map(r => r.map(x => `"${String(x).replaceAll('"','""')}"`).join(",")).join("\n");
-      const blob = new Blob([csv], {type:"text/csv"});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url; a.download = "office_day_log.csv";
-      a.click();
-      setTimeout(()=>URL.revokeObjectURL(url), 1000);
-    });
+          <div class="divider"></div>
 
-    // ====== Modals ======
-    function openBriefing(){ newBriefing(); $modal.style.display = "flex"; }
-    function closeBriefing(){ $modal.style.display = "none"; }
-    $start.addEventListener("click", openBriefing);
-    $beginRound.addEventListener("click", ()=>{ closeBriefing(); startRound(); });
-    $cancelRound.addEventListener("click", closeBriefing);
+          <div class="flex">
+            <button id="sendReportBtn" class="secondary" disabled>Send report</button>
+            <span class="muted">Use only when the briefing says so (time-based).</span>
+          </div>
 
-    $help.addEventListener("click", ()=>{ $helpModal.style.display="flex"; });
-    el("closeHelpBtn").addEventListener("click", ()=>{ $helpModal.style.display="none"; });
+          <div class="divider"></div>
+          <div id="statsPills" class="statbar" aria-live="polite"></div>
 
-    $difficultyBtn.addEventListener("click", ()=>{
-      hydrateDiffUI();
-      $diffModal.style.display="flex";
-    });
-    $closeDiff.addEventListener("click", ()=>{ $diffModal.style.display="none"; });
+          <div class="divider"></div>
+          <div id="log" class="log" role="log" aria-label="Event log"></div>
+        </div>
+      </section>
 
-    // ====== Difficulty panel logic ======
-    function hydrateDiffUI(){
-      $tw.value = difficulty.timeWindow; $twOut.textContent = difficulty.timeWindow;
-      $docMs.value = difficulty.docEveryMs; $docMsOut.textContent = difficulty.docEveryMs;
-      $phoneCh.value = difficulty.phoneChance; $phoneChOut.textContent = difficulty.phoneChance.toFixed(2);
-      $fakeRate.value = difficulty.fakeManagerRate; $fakeRateOut.textContent = difficulty.fakeManagerRate.toFixed(2);
-      $pmTime.value = difficulty.pmTimeTasks; $pmTimeOut.textContent = difficulty.pmTimeTasks;
-      $pmEvent.value = difficulty.pmEventTasks; $pmEventOut.textContent = difficulty.pmEventTasks;
-      $lockAdapt.checked = !!difficulty.lockAdapt;
-    }
-    function attachRange(range, out, transform=(v)=>v){
-      range.addEventListener("input", ()=>{ out.textContent = transform(Number(range.value)); });
-    }
-    attachRange($tw, $twOut);
-    attachRange($docMs, $docMsOut);
-    attachRange($phoneCh, $phoneChOut, v=>v.toFixed(2));
-    attachRange($fakeRate, $fakeRateOut, v=>v.toFixed(2));
-    attachRange($pmTime, $pmTimeOut);
-    attachRange($pmEvent, $pmEventOut);
+      <!-- Clinician notes (CSV-integrated by clinician_feedback.js) -->
+      <section id="clinician-notes" style="margin-top:16px">
+        <div style="background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 16px;">
+          <label for="clinician-comment" style="display:block;font-weight:600;margin-bottom:8px;">
+            Clinician comments (optional)
+          </label>
+          <textarea id="clinician-comment" rows="4"
+            placeholder="Enter any notes relevant to this session..."
+            data-csv-key="clinician_comment"
+            style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); font: inherit; resize: vertical;"></textarea>
+          <p style="margin:8px 0 0; color: var(--muted); font-size: 0.9rem;">
+            This note will be added as <code>clinician_comment</code> in the exported CSV.
+          </p>
+        </div>
+      </section>
+    </div>
+  </main>
 
-    function persistDifficulty(){
-      localStorage.setItem("officeDayDifficulty", JSON.stringify(difficulty));
-    }
+  <!-- BRIEFING MODAL -->
+  <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <h3 id="modalTitle">Briefing</h3>
+      <p class="muted">Remember these while you work:</p>
+      <div class="two">
+        <div>
+          <h4>Time-based</h4>
+          <ul id="timeTasks"></ul>
+        </div>
+        <div>
+          <h4>Event-based</h4>
+          <ul id="eventTasks"></ul>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="btns" style="justify-content:flex-end">
+        <button id="beginRoundBtn">Begin round</button>
+        <button id="cancelRoundBtn" class="ghost">Cancel</button>
+      </div>
+    </div>
+  </div>
 
-    $saveDiff.addEventListener("click", ()=>{
-      difficulty.timeWindow = Number($tw.value);
-      difficulty.docEveryMs = Number($docMs.value);
-      difficulty.phoneChance = Number($phoneCh.value);
-      difficulty.fakeManagerRate = Number($fakeRate.value);
-      difficulty.pmTimeTasks = Number($pmTime.value);
-      difficulty.pmEventTasks = Number($pmEvent.value);
-      difficulty.lockAdapt = !!$lockAdapt.checked;
-      persistDifficulty();
-      log("Difficulty settings saved (apply next round).");
-      $diffModal.style.display="none";
-    });
+  <!-- HELP MODAL (kept) -->
+  <div id="helpBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="modal">
+      <h3 id="helpTitle">How to play</h3>
+      <ol>
+        <li><strong>Start new round</strong> to see your briefing.</li>
+        <li>Approve <em>green</em> docs, reject <em>red</em> docs.</li>
+        <li><strong>Prospective memory:</strong> time-based actions and event-based phone rules.</li>
+        <li>Top-right = remaining; small clock = elapsed.</li>
+        <li>Scoring and auto-adapting difficulty across rounds.</li>
+      </ol>
+      <div class="btns" style="justify-content:flex-end">
+        <button id="closeHelpBtn">Close</button>
+      </div>
+    </div>
+  </div>
 
-    $resetDiff.addEventListener("click", ()=>{
-      difficulty = {...DEFAULTS};
-      persistDifficulty();
-      hydrateDiffUI();
-      log("Difficulty reset to defaults.");
-    });
+  <!-- DIFFICULTY MODAL -->
+  <div id="difficultyBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="difficultyTitle">
+    <div class="modal">
+      <h3 id="difficultyTitle">Difficulty &amp; Session Settings</h3>
+      <p class="help">Changes save locally and apply to the <strong>next round</strong>. You can lock values to prevent auto-adaptation.</p>
+      <div class="grid3">
+        <div class="formrow">
+          <label for="timeWindow">± Time window (s)</label>
+          <input id="timeWindow" type="range" min="1" max="15" step="1"/><output id="timeWindowOut">6</output>
+        </div>
+        <div class="formrow">
+          <label for="docEveryMs">Doc interval (ms)</label>
+          <input id="docEveryMs" type="range" min="1200" max="3500" step="100"/><output id="docEveryMsOut">2500</output>
+        </div>
+        <div class="formrow">
+          <label for="phoneChance">Phone chance (/8s)</label>
+          <input id="phoneChance" type="range" min="0.05" max="0.5" step="0.01"/><output id="phoneChanceOut">0.22</output>
+        </div>
+        <div class="formrow">
+          <label for="fakeManagerRate">Fake-caller rate</label>
+          <input id="fakeManagerRate" type="range" min="0" max="0.9" step="0.05"/><output id="fakeManagerRateOut">0.5</output>
+        </div>
+        <div class="formrow">
+          <label for="pmTimeTasks">Time PM tasks</label>
+          <input id="pmTimeTasks" type="range" min="1" max="3" step="1"/><output id="pmTimeTasksOut">1</output>
+        </div>
+        <div class="formrow">
+          <label for="pmEventTasks">Event PM tasks</label>
+          <input id="pmEventTasks" type="range" min="1" max="3" step="1"/><output id="pmEventTasksOut">1</output>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="two">
+        <div class="formrow">
+          <label><input id="lockAdapt" type="checkbox"/> Lock difficulty (disable auto-adapt)</label>
+          <span class="help">If checked, the app will not adjust difficulty after a round.</span>
+        </div>
+        <div class="btns" style="justify-content:flex-end">
+          <button id="saveDiffBtn">Save</button>
+          <button id="resetDiffBtn" class="ghost">Reset to defaults</button>
+          <button id="closeDiffBtn" class="ghost">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    // ====== Missed PM detection at end of round ======
-    const _endRound = endRound;
-    endRound = function(){
-      if(round){
-        if(!$sendReport.disabled){
-          stats.missedPM++;
-          log("Missed: never sent the report.");
-          $sendReport.disabled = true;
-        }
-      }
-      _endRound();
+  <!-- ===== App logic (unchanged, with small tweaks for CSV + layout) ===== -->
+  <script>
+  // ====== Defaults & Load ======
+  const ROUND_SECONDS_DEFAULT = 180; // fixed 3 minutes
+  const DEFAULTS = { pmTimeTasks:1, pmEventTasks:1, timeWindow:6, docEveryMs:2500, phoneChance:0.22, fakeManagerRate:0.5, lockAdapt:false };
+  let difficulty = Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem("officeDayDifficulty")||"{}"));
+
+  let round = null, logEl = null, stats = null, timers = [];
+  let phoneRinging = false, currentCaller = null, streamDocId = 0;
+  let targetSendReportAt = null; // seconds into round
+  let pmSpec = { timeTasks: [], eventTasks: [] };
+  let csvRows = [];
+
+  // ====== DOM ======
+  const el = id => document.getElementById(id);
+  const $start = el("startBtn"), $download = el("downloadBtn"), $help = el("helpBtn"), $difficultyBtn = el("difficultyBtn");
+  const $phoneStatus = el("phoneStatus"), $phoneIcon = el("phoneIcon"), $phoneButtons = el("phoneButtons");
+  const $answer = el("answerBtn"), $ignore = el("ignoreBtn"), $sendReport = el("sendReportBtn");
+  const $timer = el("timer"), $timerElapsed = el("timerElapsed"), $docStream = el("docStream");
+  const $brief = el("briefingBox"), $statsPills = el("statsPills"); logEl = el("log");
+
+  const $modal = el("modalBackdrop"), $helpModal = el("helpBackdrop"), $diffModal = el("difficultyBackdrop");
+  const $beginRound = el("beginRoundBtn"), $cancelRound = el("cancelRoundBtn");
+  const $timeTasks = el("timeTasks"), $eventTasks = el("eventTasks");
+
+  // Difficulty controls
+  const $tw = el("timeWindow"), $twOut = el("timeWindowOut");
+  const $docMs = el("docEveryMs"), $docMsOut = el("docEveryMsOut");
+  const $phoneCh = el("phoneChance"), $phoneChOut = el("phoneChanceOut");
+  const $fakeRate = el("fakeManagerRate"), $fakeRateOut = el("fakeManagerRateOut");
+  const $pmTime = el("pmTimeTasks"), $pmTimeOut = el("pmTimeTasksOut");
+  const $pmEvent = el("pmEventTasks"), $pmEventOut = el("pmEventTasksOut");
+  const $lockAdapt = el("lockAdapt");
+  const $saveDiff = el("saveDiffBtn"), $resetDiff = el("resetDiffBtn"), $closeDiff = el("closeDiffBtn");
+
+  // ====== Utilities ======
+  const rnd = (min,max)=> Math.floor(Math.random()*(max-min+1))+min;
+  const nowTs = ()=> Date.now();
+  const fmt = s => { const m=Math.floor(s/60), r=s%60; return (m<10?"0"+m:m)+":"+(r<10?"0"+r:r); };
+  const clearTimers = ()=>{ timers.forEach(clearInterval); timers=[]; };
+  function log(msg){
+    const t = (round?fmt(round.elapsed):"00:00");
+    const line = "["+t+"] " + msg;
+    logEl.textContent += (logEl.textContent ? "\n" : "") + line;
+    logEl.scrollTop = logEl.scrollHeight;
+    csvRows.push([Date.now(), t, msg]);
+  }
+  function setStatsPills(){
+    $statsPills.innerHTML = "";
+    const mk = (label, val, mod) => {
+      const s = document.createElement("div");
+      s.className = "pill"+(mod?(" "+mod):"");
+      s.textContent = label + ": " + val;
+      $statsPills.appendChild(s);
     };
+    if(!stats) return;
+    mk("Correct PM", stats.correctPM, "good");
+    mk("Off-time PM", stats.offTimePM);
+    mk("Missed PM", stats.missedPM, "bad");
+    mk("Phone hits", stats.correctPhone, "good");
+    mk("Phone errors", stats.phoneErrors, "bad");
+    mk("Doc correct", stats.docCorrect, "good");
+    mk("Doc errors", stats.docErrors, "bad");
+  }
 
-    // Accessibility: close modals on Esc
-    document.addEventListener("keydown",(e)=>{
-      if(e.key==="Escape"){
-        $modal.style.display="none";
-        $helpModal.style.display="none";
-        $diffModal.style.display="none";
+  function updateTimerUI(){
+    if(!round) return;
+    const remaining = Math.max(0, ROUND_SECONDS_DEFAULT - round.elapsed);
+    $timer.textContent = fmt(remaining);             // remaining
+    $timerElapsed.textContent = "Elapsed " + fmt(round.elapsed); // elapsed
+    if(remaining<=0) endRound();
+  }
+
+  // ====== Briefing generation ======
+  function newBriefing(){
+    pmSpec = { timeTasks: [], eventTasks: [] };
+    $timeTasks.innerHTML = ""; $eventTasks.innerHTML = "";
+
+    // Time-based
+    const countT = Math.max(1, difficulty.pmTimeTasks);
+    const times = new Set();
+    while(times.size < countT){ times.add(rnd(40, 140)); }
+    const arrTimes = [...times].sort((a,b)=>a-b);
+    targetSendReportAt = arrTimes[0];
+    const liT = document.createElement("li");
+    liT.textContent = `Send the report when ELAPSED time reaches ${fmt(targetSendReportAt)} (±${difficulty.timeWindow}s).`;
+    $timeTasks.appendChild(liT);
+
+    // Event-based (Manager-only)
+    const countE = Math.max(1, difficulty.pmEventTasks);
+    for(let i=0;i<countE;i++){
+      const liE = document.createElement("li");
+      liE.textContent = `Answer the phone only if the caller is the Manager.`;
+      $eventTasks.appendChild(liE);
+      pmSpec.eventTasks.push({ type:"phone-only-manager" });
+    }
+  }
+
+  // ====== Round control ======
+  function startRound(){
+    round = { startedAt: nowTs(), elapsed: 0 };
+    stats = { correctPM:0, offTimePM:0, missedPM:0, correctPhone:0, phoneErrors:0, docCorrect:0, docErrors:0 };
+    csvRows = [["epoch","clock","event"]];
+    streamDocId = 0;
+    phoneRinging=false; currentCaller=null;
+    $sendReport.disabled = false; $start.disabled = true;
+    $docStream.innerHTML = ""; logEl.textContent = "";
+    $brief.innerHTML = `<strong>Active:</strong> Send report at elapsed ${fmt(targetSendReportAt)} (±${difficulty.timeWindow}s). Answer only Manager.`;
+    log("Round started."); setStatsPills(); updateTimerUI();
+
+    timers.push(setInterval(()=>{ round.elapsed = Math.min(ROUND_SECONDS_DEFAULT, Math.floor((nowTs()-round.startedAt)/1000)); updateTimerUI(); }, 1000));
+    timers.push(setInterval(()=> spawnDoc(), difficulty.docEveryMs));
+    timers.push(setInterval(()=> maybeRingPhone(), 8000));
+  }
+
+  function endRoundBase(){
+    clearTimers(); phoneRinging=false; currentCaller=null;
+    $phoneIcon?.classList.remove("ring"); $phoneButtons.style.display = "none";
+    $phoneStatus.textContent = "Round complete."; $sendReport.disabled = true; $start.disabled = false;
+    log("Round ended.");
+
+    if(!difficulty.lockAdapt){
+      const pmScore = stats.correctPM - (stats.missedPM + stats.offTimePM);
+      const phoneScore = stats.correctPhone - stats.phoneErrors;
+      const docScore = stats.docCorrect - stats.docErrors;
+      const totalDelta = pmScore + 0.5*phoneScore + 0.25*docScore;
+
+      if(totalDelta >= 3){
+        difficulty.pmTimeTasks = Math.min(3, difficulty.pmTimeTasks + (Math.random()>0.6?1:0));
+        difficulty.pmEventTasks = Math.min(3, difficulty.pmEventTasks + (Math.random()>0.6?1:0));
+        difficulty.timeWindow = Math.max(2, difficulty.timeWindow-1);
+        difficulty.docEveryMs = Math.max(1200, difficulty.docEveryMs-120);
+        difficulty.phoneChance = Math.min(0.45, difficulty.phoneChance+0.02);
+        log("Difficulty increased slightly.");
+      } else if(totalDelta <= -2){
+        difficulty.pmTimeTasks = Math.max(1, difficulty.pmTimeTasks-1);
+        difficulty.pmEventTasks = Math.max(1, difficulty.pmEventTasks-1);
+        difficulty.timeWindow = Math.min(12, difficulty.timeWindow+1);
+        difficulty.docEveryMs = Math.min(3500, difficulty.docEveryMs+120);
+        difficulty.phoneChance = Math.max(0.08, difficulty.phoneChance-0.02);
+        log("Difficulty eased slightly.");
+      } else {
+        log("Difficulty unchanged.");
       }
-    });
+    } else {
+      log("Difficulty locked: auto-adaptation disabled.");
+    }
 
-    // Initial UI
+    persistDifficulty();
+    $brief.innerHTML = `<strong>Round finished.</strong> Start a new round to receive a fresh briefing.`;
     setStatsPills();
-    $brief.innerHTML = `<strong>Welcome.</strong> Click <em>Start new round</em> to receive your briefing. Use the <strong>elapsed</strong> clock to time actions.`;
-  </script>
-<section id="clinician-notes">
-<div style="background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 16px; margin-top: 24px;">
-<label for="clinician-comment" style="display:block;font-weight:600;margin-bottom:8px;">
-      Clinician comments (optional)
-    </label>
-<textarea id="clinician-comment" placeholder="Enter any notes relevant to this session..." rows="4" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); font: inherit; resize: vertical;"></textarea>
-<p style="margin:8px 0 0; color: var(--muted); font-size: 0.9rem;">
-      This note will be added as <code>clinician_comment</code> in the exported CSV.
-    </p>
-</div>
-</section></main></body>
-</html>
+  }
 
+  // Wrap to record missed PM if report never sent
+  const _endRound = endRoundBase;
+  function endRound(){
+    if(round && !$sendReport.disabled){
+      stats.missedPM++; log("Missed: never sent the report.");
+      $sendReport.disabled = true;
+    }
+    _endRound();
+  }
+
+  // ====== Stream & phone ======
+  function spawnDoc(){
+    const id = ++streamDocId;
+    const isGreen = Math.random() < 0.6;
+    const doc = document.createElement("div");
+    doc.className="doc"; doc.setAttribute("role","listitem");
+    doc.innerHTML = `
+      <div class="meta">
+        <div class="muted">Document #${id}</div>
+        <div class="badge ${isGreen?'green':'red'}">${isGreen?'GREEN':'RED'}</div>
+      </div>
+      <div class="btnrow">
+        <button class="secondary" data-act="approve">Approve</button>
+        <button class="ghost" data-act="reject">Reject</button>
+      </div>
+    `;
+    $docStream.prepend(doc);
+
+    const approve = doc.querySelector('[data-act="approve"]');
+    const reject = doc.querySelector('[data-act="reject"]');
+    approve.onclick = ()=>{
+      if(isGreen){ stats.docCorrect++; log(\`Approved GREEN doc #\${id} ✓\`); }
+      else { stats.docErrors++; log(\`Error: approved RED doc #\${id}\`); }
+      doc.remove(); setStatsPills();
+    };
+    reject.onclick = ()=>{
+      if(!isGreen){ stats.docCorrect++; log(\`Rejected RED doc #\${id} ✓\`); }
+      else { stats.docErrors++; log(\`Error: rejected GREEN doc #\${id}\`); }
+      doc.remove(); setStatsPills();
+    };
+    while($docStream.children.length > 8){ $docStream.lastElementChild?.remove(); }
+  }
+
+  function maybeRingPhone(){
+    if(phoneRinging) return;
+    if(Math.random() < difficulty.phoneChance){
+      phoneRinging = true;
+      const isManager = Math.random() >= difficulty.fakeManagerRate;
+      currentCaller = isManager ? "Manager" : (Math.random()<0.5?"Colleague":"Unknown");
+      $phoneIcon.classList.add("ring");
+      $phoneStatus.textContent = \`Call from \${currentCaller}!\`;
+      $phoneButtons.style.display = "flex";
+      log(\`Phone ringing from \${currentCaller}.\`);
+
+      const callerAtStart = currentCaller;
+      setTimeout(()=>{
+        if(phoneRinging && currentCaller === callerAtStart){
+          if(callerAtStart === "Manager"){ stats.phoneErrors++; log("Missed Manager call (error)."); setStatsPills(); }
+          else { log("Ignored non-Manager call (ok)."); }
+          phoneRinging=false; currentCaller=null;
+          $phoneIcon.classList.remove("ring"); $phoneButtons.style.display = "none";
+          $phoneStatus.textContent = "Phone is quiet.";
+        }
+      }, 6000);
+    }
+  }
+
+  // ====== Interactions ======
+  $sendReport.addEventListener("click", ()=>{
+    if(!round){ log("No active round."); return; }
+    const t = round.elapsed, diff = Math.abs(t - targetSendReportAt);
+    if(diff <= difficulty.timeWindow){ stats.correctPM++; log(\`Sent report at right time ✓ (elapsed \${fmt(t)}; target \${fmt(targetSendReportAt)} ±\${difficulty.timeWindow}s)\`); }
+    else if (t < targetSendReportAt){ stats.offTimePM++; log(\`Sent report too early (elapsed \${fmt(t)}; target \${fmt(targetSendReportAt)})\`); }
+    else { stats.offTimePM++; log(\`Sent report too late (elapsed \${fmt(t)}; target \${fmt(targetSendReportAt)})\`); }
+    $sendReport.disabled = true; setStatsPills();
+  });
+
+  $answer.addEventListener("click", ()=>{
+    if(!phoneRinging){ log("No call to answer."); return; }
+    if(currentCaller === "Manager"){ stats.correctPhone++; log("Answered Manager ✓"); }
+    else { stats.phoneErrors++; log(\`Error: answered \${currentCaller}.\`); }
+    phoneRinging=false; currentCaller=null;
+    $phoneIcon.classList.remove("ring"); $phoneButtons.style.display = "none";
+    $phoneStatus.textContent = "Phone is quiet."; setStatsPills();
+  });
+
+  $ignore.addEventListener("click", ()=>{
+    if(!phoneRinging){ log("No call to ignore."); return; }
+    if(currentCaller === "Manager"){ stats.phoneErrors++; log("Error: ignored Manager."); }
+    else { log(\`Ignored \${currentCaller} (ok).\`); }
+    phoneRinging=false; currentCaller=null;
+    $phoneIcon.classList.remove("ring"); $phoneButtons.style.display = "none";
+    $phoneStatus.textContent = "Phone is quiet."; setStatsPills();
+  });
+
+  // ====== CSV (plus clinician_comment hydration) ======
+  function getClinicianComment(){
+    const ta = document.getElementById("clinician-comment");
+    return ta ? ta.value : "";
+  }
+  $download.addEventListener("click", ()=>{
+    // If clinician_feedback.js is present, it may append its own metadata.
+    // We also add a final row with clinician_comment for resilience.
+    const note = getClinicianComment();
+    if(note) csvRows.push([Date.now(), fmt(round?round.elapsed:0), "clinician_comment: " + note]);
+
+    const csv = csvRows.map(r => r.map(x => '"' + String(x).replaceAll('"','""') + '"').join(",")).join("\n");
+    const blob = new Blob([csv], {type:"text/csv"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "office_day_log.csv"; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  });
+
+  // ====== Modals ======
+  function openBriefing(){ newBriefing(); $modal.style.display = "flex"; }
+  function closeBriefing(){ $modal.style.display = "none"; }
+  $start.addEventListener("click", openBriefing);
+  $beginRound.addEventListener("click", ()=>{ closeBriefing(); startRound(); });
+  $cancelRound.addEventListener("click", closeBriefing);
+
+  $help.addEventListener("click", ()=>{ $helpModal.style.display="flex"; });
+  document.getElementById("closeHelpBtn").addEventListener("click", ()=>{ $helpModal.style.display="none"; });
+
+  $difficultyBtn.addEventListener("click", ()=>{ hydrateDiffUI(); $diffModal.style.display="flex"; });
+  $closeDiff.addEventListener("click", ()=>{ $diffModal.style.display="none"; });
+
+  // ====== Difficulty panel logic ======
+  function hydrateDiffUI(){
+    $tw.value = difficulty.timeWindow; $twOut.textContent = difficulty.timeWindow;
+    $docMs.value = difficulty.docEveryMs; $docMsOut.textContent = difficulty.docEveryMs;
+    $phoneCh.value = difficulty.phoneChance; $phoneChOut.textContent = difficulty.phoneChance.toFixed(2);
+    $fakeRate.value = difficulty.fakeManagerRate; $fakeRateOut.textContent = difficulty.fakeManagerRate.toFixed(2);
+    $pmTime.value = difficulty.pmTimeTasks; $pmTimeOut.textContent = difficulty.pmTimeTasks;
+    $pmEvent.value = difficulty.pmEventTasks; $pmEventOut.textContent = difficulty.pmEventTasks;
+    $lockAdapt.checked = !!difficulty.lockAdapt;
+  }
+  function attachRange(range, out, transform=(v)=>v){
+    range.addEventListener("input", ()=>{ out.textContent = transform(Number(range.value)); });
+  }
+  attachRange($tw, $twOut);
+  attachRange($docMs, $docMsOut);
+  attachRange($phoneCh, $phoneChOut, v=>v.toFixed(2));
+  attachRange($fakeRate, $fakeRateOut, v=>v.toFixed(2));
+  attachRange($pmTime, $pmTimeOut);
+  attachRange($pmEvent, $pmEventOut);
+
+  function persistDifficulty(){ localStorage.setItem("officeDayDifficulty", JSON.stringify(difficulty)); }
+
+  $saveDiff.addEventListener("click", ()=>{
+    difficulty.timeWindow = Number($tw.value);
+    difficulty.docEveryMs = Number($docMs.value);
+    difficulty.phoneChance = Number($phoneCh.value);
+    difficulty.fakeManagerRate = Number($fakeRate.value);
+    difficulty.pmTimeTasks = Number($pmTime.value);
+    difficulty.pmEventTasks = Number($pmEvent.value);
+    difficulty.lockAdapt = !!$lockAdapt.checked;
+    persistDifficulty(); log("Difficulty settings saved (apply next round).");
+    $diffModal.style.display="none";
+  });
+
+  $resetDiff.addEventListener("click", ()=>{
+    difficulty = {...DEFAULTS}; persistDifficulty(); hydrateDiffUI(); log("Difficulty reset to defaults.");
+  });
+
+  // ESC to close any modal
+  document.addEventListener("keydown",(e)=>{
+    if(e.key==="Escape"){ $modal.style.display="none"; $helpModal.style.display="none"; $diffModal.style.display="none"; }
+  });
+
+  // Initial UI
+  setStatsPills();
+  </script>
+</body>
+</html>
