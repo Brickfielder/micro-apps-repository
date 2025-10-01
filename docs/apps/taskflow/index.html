@@ -340,27 +340,30 @@
       targetEl.classList.remove('drop-target');
       const dataId = e.dataTransfer.getData('text/id');
       if(!dataId) return;
-      const pill = sourceEl.querySelector(\`.pill[data-id="\${CSS.escape(dataId)}"]\`);
-      if(!pill) return;
-      const after = getDragAfter(targetEl, e.clientY);
-      if(after==null) targetEl.appendChild(pill); else targetEl.insertBefore(pill, after);
-      pill.draggable = true; onAdd && onAdd(dataId); updateSourceLockState();
-    });
-    sourceEl.addEventListener('dragstart', e=>{
-      const t = e.target.closest('.pill'); if(!t) return;
-      dragEl=t; t.classList.add('dragging'); e.dataTransfer.effectAllowed='move';
-      e.dataTransfer.setData('text/id', t.dataset.id);
-    });
-    sourceEl.addEventListener('dragend', ()=>{ if(dragEl){ dragEl.classList.remove('dragging'); dragEl=null; } });
+  const pill = sourceEl.querySelector(`.pill[data-id="${CSS.escape(dataId)}"]`);
+  if(!pill) return;
+  const after = getDragAfter(targetEl, e.clientY);
+  if(after==null) targetEl.appendChild(pill); else targetEl.insertBefore(pill, after);
+  pill.draggable = true;
+  onAdd && onAdd(dataId);
+  updateSourceLockState();
+});
 
-    function getDragAfter(container, y){
-      const els = [...container.querySelectorAll('.pill:not(.dragging)')];
-      return els.reduce((closest, child)=>{
-        const box=child.getBoundingClientRect(); const offset=y-box.top-box.height/2;
-        return (offset<0 && offset>closest.offset)?{offset,element:child}:closest;
-      }, {offset:Number.NEGATIVE_INFINITY}).element;
-    }
+sourceEl.addEventListener('dragstart', e=>{
+  const t = e.target.closest('.pill');
+  if(!t) return;
+  dragEl = t;
+  t.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/id', t.dataset.id);
+});
+
+sourceEl.addEventListener('dragend', ()=>{
+  if(dragEl){
+    dragEl.classList.remove('dragging');
+    dragEl = null;
   }
+});
 
   /* =========================
      Tap Mode (mobile)
