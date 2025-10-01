@@ -35,13 +35,6 @@
     "tags": ["visuospatial", "memory"]
   },
   {
-    "slug": "fluency-coach",
-    "title": "Fluency Coach",
-    "description": "Word generation and category switching with gentle time cues.",
-    "emoji": "🗣️",
-    "tags": ["language", "executive"]
-  },
-  {
     "slug": "maze-explorer",
     "title": "Maze Explorer",
     "description": "Spatial planning and working memory in grid-based mazes.",
