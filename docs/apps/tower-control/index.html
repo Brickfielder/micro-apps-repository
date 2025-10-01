@@ -45,6 +45,16 @@
       box-shadow: var(--shadow);
       padding: clamp(16px, 2vw, 24px);
     }
+/* Keep controls visible under the radar while scrolling */
+@media (min-width:1024px){
+  .controls{
+    position: sticky;
+    top: 8px;                 /* adjust if you want tighter/looser */
+    z-index: 5;               /* sit above nearby cards */
+    align-self: start;        /* don’t stretch in the grid cell */
+    background: var(--surface); /* avoids translucency artifacts */
+  }
+}
 
     /* Radar */
     .radar{
