@@ -21,7 +21,7 @@
     :root{ --radar-h: 380px; }
     #app-root{ display:grid; gap:clamp(12px,1.2vw,18px); }
 
-    /* One clean vertical stack */
+    /* Single clean vertical stack */
     .tc-app{
       display:grid;
       gap:clamp(12px,1.2vw,18px);
@@ -35,6 +35,12 @@
       box-shadow: var(--shadow);
       padding: clamp(16px, 2vw, 24px);
     }
+
+    /* Top session toolbar (now above radar) */
+    #topbar .toolbar{
+      display:flex; flex-wrap:wrap; align-items:center; gap:10px;
+    }
+    .pill{ display:inline-block; padding:6px 12px; border-radius:999px; background:var(--pill); color:var(--text); font-size:.9rem; font-weight:500; }
 
     /* Radar fills the whole card */
     .radar{
@@ -78,7 +84,7 @@
       border:2px solid var(--accent); box-shadow:0 0 0 2px color-mix(in oklab, var(--accent), transparent 75%);
     }
 
-    /* Controls: full width, sticky just under hero/radar */
+    /* Controls: full width, sticky just under radar */
     .controls{
       position: sticky;
       top: 8px;
@@ -92,7 +98,7 @@
       .controls{ grid-template-columns: repeat(4, minmax(0,1fr)); }
     }
 
-    /* Active Protocols and Status */
+    /* Active Protocols & Status */
     table.map{ width:100%; border-collapse:separate; border-spacing:0 6px; }
     .map td{
       padding:8px 10px; border:1px solid var(--line); border-radius:10px;
@@ -100,15 +106,30 @@
     }
     .kv{ display:grid; grid-template-columns:auto 1fr; gap:.25rem .75rem; }
     .kv dt{ color: var(--muted); } .kv dd{ margin:0; }
-
-    /* Small utilities */
-    .toolbar{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-    .pill{ display:inline-block; padding:6px 12px; border-radius:999px; background:var(--pill); color:var(--text); font-size:.85rem; font-weight:500; }
   </style>
 </head>
 <body>
   <div id="app-root">
     <main class="tc-app" data-app-title="Tower Control" data-app-tags="executive, attention" data-app-version="trainer-1">
+
+      <!-- TOP: Session toolbar moved here -->
+      <section class="panel" id="topbar" aria-label="Session settings and controls">
+        <div class="toolbar">
+          <label class="pill">Difficulty&nbsp;
+            <select id="difficulty">
+              <option value="easy">Easy</option>
+              <option value="normal" selected>Normal</option>
+              <option value="hard">Hard</option>
+            </select>
+          </label>
+          <button class="button" id="reshuffle" type="button">New Round</button>
+          <button class="button" id="show-help" type="button">Instructions</button>
+          <button class="button primary" id="start" type="button">Start</button>
+          <button class="button" id="pause" type="button">Pause</button>
+          <button class="button" id="reset" type="button">Reset</button>
+          <button class="button" id="downloadCsv" type="button" title="Download session data (CSV)">Download CSV</button>
+        </div>
+      </section>
 
       <!-- 1) Radar -->
       <section class="panel radar" id="radar" aria-label="Radar display" role="img"></section>
@@ -126,21 +147,6 @@
         <h2 id="task-h">Active Protocols</h2>
         <p class="helper">Match planes to actions according to today’s rules.</p>
         <table class="map" id="protocols"></table>
-        <div class="toolbar">
-          <label class="pill">Difficulty&nbsp;
-            <select id="difficulty">
-              <option value="easy">Easy</option>
-              <option value="normal" selected>Normal</option>
-              <option value="hard">Hard</option>
-            </select>
-          </label>
-          <button class="button" id="reshuffle" type="button">New Round</button>
-          <button class="button" id="show-help" type="button">Instructions</button>
-          <button class="button primary" id="start" type="button">Start</button>
-          <button class="button" id="pause" type="button">Pause</button>
-          <button class="button" id="reset" type="button">Reset</button>
-          <button class="button" id="downloadCsv" type="button" title="Download session data (CSV)">Download CSV</button>
-        </div>
       </section>
 
       <!-- 4) Status (full width) -->
@@ -166,7 +172,7 @@
       <li>New planes spawn over time. Difficulty controls spawn rate &amp; max planes.</li>
       <li>Use <em>New Round</em> anytime to reshuffle the protocols.</li>
     </ol>
-    <div class="toolbar" style="justify-content:flex-end">
+    <div class="toolbar" style="display:flex;justify-content:flex-end;gap:10px">
       <button class="button" id="close-help" type="button">Close</button>
     </div>
   </dialog>
