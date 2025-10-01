@@ -1,650 +1,664 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>TaskFlow — Plan · Check · Feedback (Tap &amp; Drag)</title>
-<style>
-:root{
-  --bg:#f7f9fc; 
-  --fg:#222; 
-  --muted:#666;
-  --card:#ffffff; 
-  --accent:#3a5bff; 
-  --good:#1a8d5f;
-  --pill:#eef2fa;
-}
-*{box-sizing:border-box}
-body{
-  margin:0; 
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans";
-  background:linear-gradient(180deg,#f7f9fc 0%, #e8eef9 100%); 
-  color:var(--fg);
-}
-header{
-  padding:20px 16px; 
-  border-bottom:1px solid #d0d7e7; 
-  position:sticky; 
-  top:0; 
-  backdrop-filter: blur(6px);
-  background: rgba(255,255,255,0.85);
-}
-h1{margin:0 0 4px; font-weight:700; font-size: clamp(18px, 2.4vw, 28px)}
-.sub{color:var(--muted); font-size:14px}
-main{padding:16px; max-width:1200px; margin:0 auto}
-.controls{display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:10px 0 18px;}
-select, button{
-  background:var(--card); 
-  color:var(--fg); 
-  border:1px solid #c2cce7; 
-  border-radius:10px; 
-  padding:10px 12px;
-  font-size:14px; 
-  cursor:pointer;
-}
-button.primary{ background:linear-gradient(180deg,#4c6dff,#2746d9); border:none; color:#fff; }
-button.ghost{ background:transparent; border:1px dashed var(--accent); color:var(--accent); }
-button:disabled{opacity:.6; cursor:not-allowed}
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>TaskFlow — Plan · Check · Feedback (Tap & Drag)</title>
 
-.panel{
-  background:var(--card); 
-  border:1px solid #d0d7e7; 
-  border-radius:18px; 
-  padding:14px;
-  box-shadow: 0 4px 12px rgba(0,0,0,.08); 
-  margin-bottom:16px;
-}
-.panel h2{ margin:0 0 10px; font-size:18px; display:flex; align-items:center; gap:8px; }
-.hint{ color:var(--muted); font-size:13px; margin-top:6px }
-.brief-title{ font-weight:700; margin-bottom:4px }
-.brief-body{ color:var(--muted); line-height:1.4 }
+  <!-- Micro-Apps shared assets -->
+  <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3">
+  <script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
+  <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
 
-.grid{ display:grid; gap:16px; grid-template-columns: 1fr; }
-@media (min-width: 980px){ .grid{ grid-template-columns: repeat(3, 1fr); } }
+  <!-- Let frame.js find the catalog entry (or override below) -->
+  <meta name="app-slug" content="taskflow">
+  <!-- Optional explicit overrides (these win over catalog.json if present) -->
+  <meta name="app-title" content="TaskFlow — Plan · Check · Feedback">
+  <meta name="app-desc" content="Mobile: tap to move & reorder • Desktop: drag-and-drop. Plan first, review, then confirm for feedback.">
 
-.list{
-  min-height: 180px; 
-  border:1px dashed #b8c4e3; 
-  border-radius:14px; 
-  padding:10px; 
-  display:flex; 
-  flex-direction:column; 
-  gap:8px;
-  background:#f1f4fb;
-}
-.pill{
-  background:var(--pill); 
-  border:1px solid #c2cce7; 
-  border-radius:999px; 
-  padding:10px 12px; 
-  display:flex; 
-  align-items:center; 
-  gap:10px;
-  font-size:15px; 
-  user-select:none;
-}
-.pill .handle{ font-size:16px; opacity:.6; cursor:grab }
-.dragging{ opacity:.6; transform: scale(0.98) }
-.drop-target{ outline:2px dashed var(--accent); border-radius:12px }
+  <!-- Optional style toggles for the shared theme (can remove if not wanted) -->
+  <meta name="theme" content="dense">
 
-.badge{font-size:12px; padding:3px 8px; border-radius:999px; background:#dfe6fb; color:#2746d9; margin-left:auto}
-.inactive{ opacity:0.45; pointer-events:none; filter: grayscale(0.3); }
+  <style>
+    /* Local, app-specific styles (kept minimal to play nicely with theme.css) */
+    :root{
+      --accent:#3a5bff;       /* keep app accent while overall theme stays light */
+      --good:#1a8d5f;
+      --pill:#eef2fa;
+    }
 
-.aligned{ border-color:#1c7f5f; background:#dff5ec }
+    /* Panels & headings inside #app-root already get spacing from theme.css */
+    .panel{
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: clamp(12px, 1.5vw, 18px);
+    }
+    .panel h2{ margin:0 0 8px; font-size:1.05rem; display:flex; align-items:center; gap:.5rem; }
+    .hint{ color: var(--muted); font-size:.95rem; }
 
-.split{ display:grid; grid-template-columns: 1fr; gap:10px; margin-top:8px; }
-@media (min-width: 680px){ .split{ grid-template-columns: 1fr 1fr; } }
-.mono{ font-family: ui-monospace, Menlo, Consolas, monospace; font-size:13px }
-.reflections h3{ margin:8px 0 4px; font-size:15px }
-.reflections ul{ margin:6px 0 0 18px }
-.soft{ color:var(--muted); font-size:13px }
-footer{ color:#666; font-size:12px; margin:12px 0 30px }
+    /* Control bar */
+    .controls{
+      display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+      background: var(--surface); border:1px solid var(--line);
+      border-radius: 12px; box-shadow: var(--shadow);
+      padding: 10px;
+    }
+    .modeChip{
+      margin-left:auto; font-size:.85rem;
+      padding:4px 8px; border-radius:999px;
+      background:#eef2fa; border:1px solid var(--line);
+    }
 
-/* Tap helpers */
-.pill.tapable{ cursor:pointer; }
-.toolbar{ display:flex; gap:6px; margin-left:auto }
-.toolbtn{ border:1px solid #c2cce7; background:#fff; border-radius:8px; padding:2px 8px; font-size:13px; }
-.modeChip{ font-size:12px; padding:4px 8px; border-radius:999px; background:#eef2fa; border:1px solid #c2cce7 }
-</style>
-<meta content="Taskflow" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../../../shared/theme.css" rel="stylesheet"/><script defer="" src="../../../shared/frame.js"></script><script defer="" src="../../../shared/clinician_feedback.js"></script>  <meta name="app-slug" content="taskflow">
+    /* Lists & pills */
+    .grid{ display:grid; gap: clamp(12px,1.2vw,18px); grid-template-columns: 1fr; }
+    @media (min-width: 980px){ .grid{ grid-template-columns: repeat(3, 1fr); } }
+
+    .list{
+      min-height: 180px;
+      border:1px dashed color-mix(in oklab, var(--line), black 4%);
+      border-radius: 14px;
+      padding: 10px;
+      display:flex; flex-direction:column; gap:8px;
+      background: color-mix(in oklab, var(--surface), var(--line) 8%);
+    }
+    .pill{
+      background: var(--pill);
+      border:1px solid color-mix(in oklab, var(--line), black 6%);
+      border-radius:999px;
+      padding:10px 12px;
+      display:flex; align-items:center; gap:10px;
+      font-size:.95rem; user-select:none;
+    }
+    .pill .handle{ font-size:1.1rem; opacity:.6; cursor:grab }
+    .dragging{ opacity:.6; transform: scale(.98) }
+    .drop-target{ outline:2px dashed var(--accent); border-radius:12px }
+    .badge{ font-size:.8rem; padding:3px 8px; border-radius:999px; background:#dfe6fb; color:#2746d9; margin-left:auto }
+    .inactive{ opacity:.45; pointer-events:none; filter:grayscale(.3); }
+    .aligned{ border-color:#1c7f5f; background:#dff5ec }
+
+    /* Split feedback view */
+    .split{ display:grid; grid-template-columns:1fr; gap:10px; margin-top:8px; }
+    @media (min-width:680px){ .split{ grid-template-columns:1fr 1fr; } }
+    .reflections h3{ margin:8px 0 4px; font-size:1rem; }
+    .reflections ul{ margin:6px 0 0 18px }
+
+    /* Tap helpers */
+    .pill.tapable{ cursor:pointer; }
+    .toolbar{ display:flex; gap:6px; margin-left:auto }
+    .toolbtn{ border:1px solid var(--line); background:var(--surface); border-radius:8px; padding:2px 8px; font-size:.9rem; }
+
+    /* Details block for instructions (folds under hero) */
+    details.instructions{
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 10px 12px;
+    }
+    details.instructions > summary{ font-weight:600; cursor:pointer; }
+    details.instructions[open]{ padding-bottom: 12px; }
+  </style>
 </head>
-<body><main id="app-root">
-<header>
-<h1>TaskFlow — Plan · Check · Feedback</h1>
-<div class="sub">Mobile = tap to move &amp; reorder; Desktop = drag-and-drop. The left list locks when empty; review in the middle, then Confirm for feedback.</div>
-</header>
-<main>
-<div class="controls">
-<label>Scenario: 
-      <select id="scenarioSelect">
-<option value="clinic">🏥 Clinic Day Planner</option>
-<option value="meal">🍝 Simple Meal + Child Pickup</option>
-</select>
-</label>
-<label>Difficulty:
-      <select id="difficultySelect">
-<option value="easy">Easy (6 steps)</option>
-<option value="medium">Medium</option>
-</select>
-</label>
-<button class="primary" id="startBtn">Start New Trial ▶</button>
-<button id="resetBtn">Reset</button>
-<button class="ghost" id="downloadBtn">Download CSV</button>
-<span class="sub" id="status"></span>
-<span aria-live="polite" class="modeChip" id="modeChip"></span>
-</div>
-<!-- Briefing panel -->
-<section aria-label="Scenario briefing" class="panel" id="briefPanel">
-<div class="brief-title" id="briefTitle">Scenario:</div>
-<div class="brief-body" id="briefBody"></div>
-</section>
-<div class="grid" id="sections">
-<!-- 1) PLAN (source-only) -->
-<section aria-label="Planning board" class="panel" id="planPanel">
-<h2>1) Plan (choose your steps &amp; order) 🧠</h2>
-<div class="hint">Move each item into the middle list in the order you think is correct. On mobile, tap items. On desktop, drag using the ⋮ handle.</div>
-<div aria-live="polite" class="list" id="planList"></div>
-<div class="soft" style="margin-top:6px">Tip: you can reorder later in the middle list before confirming</div>
-</section>
-<!-- 2) CHECK (review & adjust) -->
-<section aria-label="Check board" class="panel" id="checkPanel">
-<h2>2) Check &amp; adjust 🔍</h2>
-<div class="hint">When the left list empties, it will grey out. Reorder here until you’re happy, then Confirm.</div>
-<div aria-live="polite" class="list" id="checkList"></div>
-<div style="display:flex; gap:10px; margin-top:10px">
-<button class="primary" disabled="" id="confirmBtn">Confirm Plan ✓</button>
-</div>
-</section>
-<!-- 3) FEEDBACK -->
-<section aria-label="Feedback board" class="panel" id="feedbackPanel">
-<h2>3) Feedback — Alignment &amp; Reflection 🧾</h2>
-<div class="split">
-<div>
-<div class="hint"><strong>Suggested sequence</strong></div>
-<div class="list" id="idealList"></div>
-</div>
-<div>
-<div class="hint">Your sequence</div>
-<div class="list" id="userList"></div>
-</div>
-</div>
-<div id="summary" style="margin-top:10px; font-weight:600"></div>
-<div class="reflections" id="reflections" style="margin-top:6px"></div>
-</section>
-</div>
-<footer>
-    Prototype for research/demonstration only — not a medical device. No data leaves your browser. ©
-  </footer>
-</main>
-<script>
-/* ------------------ Scenario Briefings ------------------ */
-const BRIEFINGS = {
-  meal: {
-    title: 'Scenario: 🍝 Simple Meal + Child Pickup',
-    body: `Briefing for the participant:<br>
-    You are preparing an evening meal while also needing to pick up your child from nursery, which is only <strong>2 minutes away</strong>.
-    The challenge is to organise the cooking so that the food is ready, the kitchen is safe, and you collect your child on time.
-    Follow food-safety rules, manage timing, and make sure the kitchen is safe before leaving.`
-  },
-  clinic: {
-    title: 'Scenario: 🏥 Clinic Day Planner',
-    body: `Briefing for the participant:<br>
-    You have an outpatient appointment this afternoon. Plan the tasks to get there and back safely and efficiently:
-    bring the right documents, travel to the hospital, check in and attend your appointment, handle any payments/validation,
-    collect any prescription, optionally pick up a few groceries, and return home. Aim to follow sensible time windows and safety rules
-    (e.g., have your travel card/phone ready).`
-  }
-};
 
-/* ------------------ Scenario Definitions ------------------ */
-const SCENARIOS = {
-  clinic: {
-    name: "Clinic Day Planner",
-    emoji: "🏥",
-    steps: {
-      easy: [
-        {id:"bus_to_hospital", txt:"Take the bus to hospital", icon:"🚌"},
-        {id:"check_in", txt:"Check in at reception", icon:"🧾"},
-        {id:"see_doctor", txt:"See the doctor", icon:"👩‍⚕️"},
-        {id:"collect_rx", txt:"Collect prescription", icon:"💊"},
-        {id:"groceries", txt:"Buy quick groceries", icon:"🛒"},
-        {id:"bus_home", txt:"Bus back home", icon:"🏠"},
-      ],
-      medium: [
-        {id:"prepare_docs", txt:"Bring NHS number & appointment letter", icon:"📄"},
-        {id:"ready_travel", txt:"Charge phone / prepare travel card", icon:"🔋🎫"},
-        {id:"leave_home", txt:"Leave home in good time", icon:"🚪"},
-        {id:"bus_to_hospital", txt:"Take the bus to hospital", icon:"🚌"},
-        {id:"check_in", txt:"Check in at reception", icon:"🧾"},
-        {id:"wait_call", txt:"Wait to be called", icon:"🪑"},
-        {id:"see_doctor", txt:"See the doctor", icon:"👩‍⚕️"},
-        {id:"validate_pay", txt:"Validate ticket / pay as needed", icon:"🅿️"},
-        {id:"collect_rx", txt:"Collect prescription", icon:"💊"},
-        {id:"groceries", txt:"Buy quick groceries (optional)", icon:"🛒"},
-        {id:"bus_home", txt:"Bus back home", icon:"🏠"},
-      ]
+<body>
+  <!-- The hero header is injected above this by frame.js -->
+  <main id="app-root" role="main">
+    <!-- Collapsible instructions live under the injected hero -->
+    <details class="instructions" open>
+      <summary>Instructions</summary>
+      <p class="helper" style="margin:.5rem 0 0">
+        Mobile: <strong>tap</strong> items to move and use the mini toolbar to reorder. Desktop: <strong>drag</strong> via the ⋮ handle. 
+        Plan first, review in the middle, then <em>Confirm</em> to get feedback and reflections.
+      </p>
+    </details>
+
+    <!-- Controls -->
+    <div class="controls" aria-label="Scenario & actions">
+      <label>Scenario
+        <select id="scenarioSelect">
+          <option value="clinic">🏥 Clinic Day Planner</option>
+          <option value="meal">🍝 Simple Meal + Child Pickup</option>
+        </select>
+      </label>
+
+      <label>Difficulty
+        <select id="difficultySelect">
+          <option value="easy">Easy (6 steps)</option>
+          <option value="medium">Medium</option>
+        </select>
+      </label>
+
+      <button class="button primary" id="startBtn">Start New Trial ▶</button>
+      <button class="button" id="resetBtn">Reset</button>
+      <a class="button" id="downloadBtn" role="button">Download CSV</a>
+
+      <span class="modeChip" id="modeChip" aria-live="polite"></span>
+    </div>
+
+    <!-- Briefing -->
+    <section class="panel" id="briefPanel" aria-label="Scenario briefing">
+      <h2>Scenario</h2>
+      <div class="helper" id="briefTitle" style="font-weight:700; margin-top:.25rem">—</div>
+      <div id="briefBody" style="margin-top:.25rem"></div>
+    </section>
+
+    <!-- Boards -->
+    <div class="grid" id="sections">
+      <!-- 1) PLAN -->
+      <section class="panel" id="planPanel" aria-label="Planning board">
+        <h2>1) Plan (choose your steps & order) 🧠</h2>
+        <p class="hint">Move each item into the middle list in the order you think is correct.</p>
+        <div class="list" id="planList" aria-live="polite"></div>
+        <p class="helper" style="margin-top:6px">You can reorder later in the middle list before confirming.</p>
+      </section>
+
+      <!-- 2) CHECK -->
+      <section class="panel" id="checkPanel" aria-label="Check board">
+        <h2>2) Check & adjust 🔍</h2>
+        <p class="hint">When the left list empties, it locks. Reorder here until you’re happy, then Confirm.</p>
+        <div class="list" id="checkList" aria-live="polite"></div>
+        <div style="display:flex; gap:10px; margin-top:10px">
+          <button class="button primary" id="confirmBtn" disabled>Confirm Plan ✓</button>
+          <span id="status" class="helper" aria-live="polite"></span>
+        </div>
+      </section>
+
+      <!-- 3) FEEDBACK -->
+      <section class="panel" id="feedbackPanel" aria-label="Feedback board">
+        <h2>3) Feedback — Alignment & Reflection 🧾</h2>
+        <div class="split">
+          <div>
+            <div class="hint"><strong>Suggested sequence</strong></div>
+            <div class="list" id="idealList"></div>
+          </div>
+          <div>
+            <div class="hint">Your sequence</div>
+            <div class="list" id="userList"></div>
+          </div>
+        </div>
+        <div id="summary" style="margin-top:10px; font-weight:600"></div>
+        <div id="reflections" class="reflections" style="margin-top:6px"></div>
+      </section>
+    </div>
+
+    <footer class="helper" style="margin-top:10px">
+      Prototype for research/demonstration only — not a medical device. No data leaves your browser. ©
+    </footer>
+  </main>
+
+  <script>
+  /* =========================
+     Scenario Briefings
+     ========================= */
+  const BRIEFINGS = {
+    meal: {
+      title: 'Scenario: 🍝 Simple Meal + Child Pickup',
+      body: `Briefing for the participant:<br>
+        You are preparing an evening meal while also needing to pick up your child from nursery, which is only <strong>2 minutes away</strong>.
+        The challenge is to organise the cooking so that the food is ready, the kitchen is safe, and you collect your child on time.
+        Follow food-safety rules, manage timing, and make sure the kitchen is safe before leaving.`
     },
-    ideal: {
-      easy: ["bus_to_hospital","check_in","see_doctor","collect_rx","groceries","bus_home"],
-      medium: ["prepare_docs","ready_travel","leave_home","bus_to_hospital","check_in","wait_call","see_doctor","validate_pay","collect_rx","groceries","bus_home"]
+    clinic: {
+      title: 'Scenario: 🏥 Clinic Day Planner',
+      body: `Briefing for the participant:<br>
+        You have an outpatient appointment this afternoon. Plan the tasks to get there and back safely and efficiently:
+        bring the right documents, travel to the hospital, check in and attend your appointment, handle any payments/validation,
+        collect any prescription, optionally pick up a few groceries, and return home. Aim to follow sensible time windows and safety rules
+        (e.g., have your travel card/phone ready).`
+    }
+  };
+
+  /* =========================
+     Scenario Definitions
+     ========================= */
+  const SCENARIOS = {
+    clinic: {
+      name: "Clinic Day Planner",
+      emoji: "🏥",
+      steps: {
+        easy: [
+          {id:"bus_to_hospital", txt:"Take the bus to hospital", icon:"🚌"},
+          {id:"check_in", txt:"Check in at reception", icon:"🧾"},
+          {id:"see_doctor", txt:"See the doctor", icon:"👩‍⚕️"},
+          {id:"collect_rx", txt:"Collect prescription", icon:"💊"},
+          {id:"groceries", txt:"Buy quick groceries", icon:"🛒"},
+          {id:"bus_home", txt:"Bus back home", icon:"🏠"},
+        ],
+        medium: [
+          {id:"prepare_docs", txt:"Bring NHS number & appointment letter", icon:"📄"},
+          {id:"ready_travel", txt:"Charge phone / prepare travel card", icon:"🔋🎫"},
+          {id:"leave_home", txt:"Leave home in good time", icon:"🚪"},
+          {id:"bus_to_hospital", txt:"Take the bus to hospital", icon:"🚌"},
+          {id:"check_in", txt:"Check in at reception", icon:"🧾"},
+          {id:"wait_call", txt:"Wait to be called", icon:"🪑"},
+          {id:"see_doctor", txt:"See the doctor", icon:"👩‍⚕️"},
+          {id:"validate_pay", txt:"Validate ticket / pay as needed", icon:"🅿️"},
+          {id:"collect_rx", txt:"Collect prescription", icon:"💊"},
+          {id:"groceries", txt:"Buy quick groceries (optional)", icon:"🛒"},
+          {id:"bus_home", txt:"Bus back home", icon:"🏠"},
+        ]
+      },
+      ideal: {
+        easy: ["bus_to_hospital","check_in","see_doctor","collect_rx","groceries","bus_home"],
+        medium: ["prepare_docs","ready_travel","leave_home","bus_to_hospital","check_in","wait_call","see_doctor","validate_pay","collect_rx","groceries","bus_home"]
+      },
+      flexGroups: { easy: [], medium: [] }
     },
-    flexGroups: { easy: [], medium: [] }
-  },
-  meal: {
-    name: "Simple Meal + Child Pickup",
-    emoji: "🍝",
-    steps: {
-      easy: [
-        {id:"wash_hands", txt:"Wash hands", icon:"🧼"},
-        {id:"boil_pasta", txt:"Start pasta cooking", icon:"🍝"},
-        {id:"set_timer", txt:"Set timer", icon:"⏲️"},
-        {id:"switch_off", txt:"Switch hob off", icon:"🔥✖️"},
-        {id:"pickup_child", txt:"Pick up child (nursery 2 min away)", icon:"👶"},
-        {id:"enjoy_meal", txt:"Enjoy the meal at home", icon:"🏡🍽️"},
-      ],
-      medium: [
-        {id:"wash_hands", txt:"Wash hands", icon:"🧼"},
-        {id:"gather_items", txt:"Gather ingredients & equipment", icon:"🥕🍅🔪"},
-        {id:"boil_water", txt:"Boil water in a pot", icon:"💧🔥"},
-        {id:"prep_sauce", txt:"Prepare the simple sauce", icon:"🍅🧄"},
-        {id:"boil_pasta", txt:"Put pasta in boiling water", icon:"🍝"},
-        {id:"set_timer", txt:"Set a timer for the pasta", icon:"⏲️"},
-        {id:"lay_table", txt:"Lay the table", icon:"🍽️🧺"},
-        {id:"switch_off", txt:"Switch off the hob/stove", icon:"🔥✖️"},
-        {id:"pasta_to_table", txt:"Put the pasta on the table", icon:"🍲"},
-        {id:"pickup_child", txt:"Pick up child (nursery 2 min away)", icon:"👶"},
-        {id:"enjoy_meal", txt:"Enjoy the meal at home", icon:"🏡🍽️"},
-      ]
-    },
-    ideal: {
-      easy: ["wash_hands","boil_pasta","set_timer","switch_off","pickup_child","enjoy_meal"],
-      medium: ["wash_hands","gather_items","boil_water","prep_sauce","boil_pasta","set_timer","lay_table","switch_off","pasta_to_table","pickup_child","enjoy_meal"]
-    },
-    flexGroups: {
-      easy: [],
-      medium: [
-        ["boil_water","prep_sauce"],
-        ["boil_pasta","set_timer"]
-      ]
+    meal: {
+      name: "Simple Meal + Child Pickup",
+      emoji: "🍝",
+      steps: {
+        easy: [
+          {id:"wash_hands", txt:"Wash hands", icon:"🧼"},
+          {id:"boil_pasta", txt:"Start pasta cooking", icon:"🍝"},
+          {id:"set_timer", txt:"Set timer", icon:"⏲️"},
+          {id:"switch_off", txt:"Switch hob off", icon:"🔥✖️"},
+          {id:"pickup_child", txt:"Pick up child (nursery 2 min away)", icon:"👶"},
+          {id:"enjoy_meal", txt:"Enjoy the meal at home", icon:"🏡🍽️"},
+        ],
+        medium: [
+          {id:"wash_hands", txt:"Wash hands", icon:"🧼"},
+          {id:"gather_items", txt:"Gather ingredients & equipment", icon:"🥕🍅🔪"},
+          {id:"boil_water", txt:"Boil water in a pot", icon:"💧🔥"},
+          {id:"prep_sauce", txt:"Prepare the simple sauce", icon:"🍅🧄"},
+          {id:"boil_pasta", txt:"Put pasta in boiling water", icon:"🍝"},
+          {id:"set_timer", txt:"Set a timer for the pasta", icon:"⏲️"},
+          {id:"lay_table", txt:"Lay the table", icon:"🍽️🧺"},
+          {id:"switch_off", txt:"Switch off the hob/stove", icon:"🔥✖️"},
+          {id:"pasta_to_table", txt:"Put the pasta on the table", icon:"🍲"},
+          {id:"pickup_child", txt:"Pick up child (nursery 2 min away)", icon:"👶"},
+          {id:"enjoy_meal", txt:"Enjoy the meal at home", icon:"🏡🍽️"},
+        ]
+      },
+      ideal: {
+        easy: ["wash_hands","boil_pasta","set_timer","switch_off","pickup_child","enjoy_meal"],
+        medium: ["wash_hands","gather_items","boil_water","prep_sauce","boil_pasta","set_timer","lay_table","switch_off","pasta_to_table","pickup_child","enjoy_meal"]
+      },
+      flexGroups: {
+        easy: [],
+        medium: [
+          ["boil_water","prep_sauce"],
+          ["boil_pasta","set_timer"]
+        ]
+      }
     }
+  };
+
+  /* =========================
+     State
+     ========================= */
+  let currentScenarioKey = "clinic";
+  let currentDifficulty = "easy";
+  let trialId = 0;
+
+  let addedOrder = [];
+  let checkOrder = [];
+  let trialStart = null;
+
+  const LOG = [];
+  const el = id => document.getElementById(id);
+
+  /* =========================
+     Helpers
+     ========================= */
+  function clearNode(node){ while(node.firstChild) node.removeChild(node.firstChild); }
+  function makePill(step){
+    const div = document.createElement('div');
+    div.className = "pill";
+    div.draggable = true;
+    div.dataset.id = step.id;
+    div.innerHTML = `<span class="handle" aria-hidden="true">⋮⋮</span> <span>${step.icon}</span> <span>${step.txt}</span>`;
+    return div;
   }
-};
+  function shuffleArray(a){ const arr=a.slice(); for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+  function readOrder(container){ return [...container.querySelectorAll('.pill')].map(p=>p.dataset.id); }
+  function tag(text){ const b=document.createElement('span'); b.className='badge'; b.textContent=text; return b; }
 
-/* ------------------ State ------------------ */
-let currentScenarioKey = "clinic";
-let currentDifficulty = "easy";
-let trialId = 0;
+  /* =========================
+     Drag & Drop (desktop)
+     ========================= */
+  function makeSourceToTarget(sourceEl, targetEl, onAdd, onReorder){
+    let dragEl = null;
+    targetEl.addEventListener('dragstart', e=>{
+      const t = e.target.closest('.pill'); if(!t) return;
+      dragEl=t; t.classList.add('dragging'); e.dataTransfer.effectAllowed='move';
+    });
+    targetEl.addEventListener('dragend', ()=>{
+      if(dragEl){ dragEl.classList.remove('dragging'); dragEl=null; onReorder && onReorder(readOrder(targetEl)); }
+    });
+    targetEl.addEventListener('dragover', e=>{
+      e.preventDefault();
+      const after = getDragAfter(targetEl, e.clientY);
+      const dragging = targetEl.querySelector('.pill.dragging');
+      if(dragging){ if(after==null) targetEl.appendChild(dragging); else targetEl.insertBefore(dragging, after); }
+      else targetEl.classList.add('drop-target');
+    });
+    targetEl.addEventListener('dragleave', ()=> targetEl.classList.remove('drop-target'));
+    targetEl.addEventListener('drop', e=>{
+      targetEl.classList.remove('drop-target');
+      const dataId = e.dataTransfer.getData('text/id');
+      if(!dataId) return;
+      const pill = sourceEl.querySelector(\`.pill[data-id="\${CSS.escape(dataId)}"]\`);
+      if(!pill) return;
+      const after = getDragAfter(targetEl, e.clientY);
+      if(after==null) targetEl.appendChild(pill); else targetEl.insertBefore(pill, after);
+      pill.draggable = true; onAdd && onAdd(dataId); updateSourceLockState();
+    });
+    sourceEl.addEventListener('dragstart', e=>{
+      const t = e.target.closest('.pill'); if(!t) return;
+      dragEl=t; t.classList.add('dragging'); e.dataTransfer.effectAllowed='move';
+      e.dataTransfer.setData('text/id', t.dataset.id);
+    });
+    sourceEl.addEventListener('dragend', ()=>{ if(dragEl){ dragEl.classList.remove('dragging'); dragEl=null; } });
 
-let addedOrder = [];
-let checkOrder = [];
-let trialStart = null;
-
-const el = id => document.getElementById(id);
-
-/* ------------------ Helpers ------------------ */
-function clearNode(node){ while(node.firstChild) node.removeChild(node.firstChild); }
-function makePill(step){
-  const div = document.createElement('div');
-  div.className = "pill";
-  div.draggable = true;
-  div.dataset.id = step.id;
-  div.innerHTML = `<span class="handle" aria-hidden="true">⋮⋮</span> <span>${step.icon}</span> <span>${step.txt}</span>`;
-  return div;
-}
-function shuffleArray(a){ const arr=a.slice(); for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
-function readOrder(container){ return [...container.querySelectorAll('.pill')].map(p=>p.dataset.id); }
-function tag(text){ const b=document.createElement('span'); b.className='badge'; b.textContent=text; return b; }
-
-/* ------------------ Drag & Drop (desktop) ------------------ */
-function makeSourceToTarget(sourceEl, targetEl, onAdd, onReorder){
-  let dragEl = null;
-  targetEl.addEventListener('dragstart', e=>{
-    const t = e.target.closest('.pill'); if(!t) return;
-    dragEl=t; t.classList.add('dragging'); e.dataTransfer.effectAllowed='move';
-  });
-  targetEl.addEventListener('dragend', e=>{
-    if(dragEl){ dragEl.classList.remove('dragging'); dragEl=null; onReorder && onReorder(readOrder(targetEl)); }
-  });
-  targetEl.addEventListener('dragover', e=>{
-    e.preventDefault();
-    const after = getDragAfter(targetEl, e.clientY);
-    const dragging = targetEl.querySelector('.pill.dragging');
-    if(dragging){ if(after==null) targetEl.appendChild(dragging); else targetEl.insertBefore(dragging, after); }
-    else targetEl.classList.add('drop-target');
-  });
-  targetEl.addEventListener('dragleave', ()=> targetEl.classList.remove('drop-target'));
-  targetEl.addEventListener('drop', e=>{
-    targetEl.classList.remove('drop-target');
-    const dataId = e.dataTransfer.getData('text/id');
-    if(!dataId) return;
-    const pill = sourceEl.querySelector(`.pill[data-id="${CSS.escape(dataId)}"]`);
-    if(!pill) return;
-    const after = getDragAfter(targetEl, e.clientY);
-    if(after==null) targetEl.appendChild(pill); else targetEl.insertBefore(pill, after);
-    pill.draggable = true; onAdd && onAdd(dataId); updateSourceLockState();
-  });
-  sourceEl.addEventListener('dragstart', e=>{
-    const t = e.target.closest('.pill'); if(!t) return;
-    dragEl=t; t.classList.add('dragging'); e.dataTransfer.effectAllowed='move';
-    e.dataTransfer.setData('text/id', t.dataset.id);
-  });
-  sourceEl.addEventListener('dragend', e=>{ if(dragEl){ dragEl.classList.remove('dragging'); dragEl=null; } });
-
-  function getDragAfter(container, y){
-    const els = [...container.querySelectorAll('.pill:not(.dragging)')];
-    return els.reduce((closest, child)=>{
-      const box=child.getBoundingClientRect(); const offset=y-box.top-box.height/2;
-      return (offset<0 && offset>closest.offset)?{offset,element:child}:closest;
-    }, {offset:Number.NEGATIVE_INFINITY}).element;
-  }
-}
-
-/* ------------------ Tap Mode (mobile) ------------------ */
-let tapMode = false;
-function setModeTap(){ tapMode = true; el('modeChip').textContent = 'Mode: Tap'; }
-function setModeDrag(){ tapMode = false; el('modeChip').textContent = 'Mode: Drag'; }
-
-function enableTapAffordances(){
-  // Disable native drag
-  document.querySelectorAll('.pill').forEach(p=>{ p.draggable=false; p.classList.add('tapable'); });
-  // Plan: tap to append to check
-  el('planList').addEventListener('click', planTapHandler);
-  // Check: tap to open mini toolbar
-  el('checkList').addEventListener('click', checkTapHandler);
-}
-function disableTapAffordances(){
-  el('planList').removeEventListener('click', planTapHandler);
-  el('checkList').removeEventListener('click', checkTapHandler);
-  document.querySelectorAll('.pill').forEach(p=>{ p.draggable=true; p.classList.remove('tapable'); removeToolbar(p); });
-}
-function planTapHandler(e){
-  const pill = e.target.closest('.pill'); if(!pill) return;
-  const id = pill.dataset.id;
-  el('checkList').appendChild(pill);
-  addedOrder.push(id);
-  updateSourceLockState();
-}
-function checkTapHandler(e){
-  const pill = e.target.closest('.pill'); if(!pill) return;
-  toggleToolbar(pill);
-}
-function toggleToolbar(pill){
-  if(pill.querySelector('.toolbar')){ removeToolbar(pill); return; }
-  const tb = document.createElement('div'); tb.className='toolbar';
-  const up = document.createElement('button'); up.className='toolbtn'; up.textContent='↑'; up.title='Move up';
-  const down = document.createElement('button'); down.className='toolbtn'; down.textContent='↓'; down.title='Move down';
-  const back = document.createElement('button'); back.className='toolbtn'; back.textContent='↩'; back.title='Send back to Plan';
-  tb.append(up,down,back); pill.appendChild(tb);
-  up.addEventListener('click', (ev)=>{ ev.stopPropagation(); const prev = pill.previousElementSibling; if(prev) prev.before(pill); });
-  down.addEventListener('click', (ev)=>{ ev.stopPropagation(); const next = pill.nextElementSibling; if(next) next.after(pill); });
-  back.addEventListener('click', (ev)=>{ ev.stopPropagation(); el('planList').appendChild(pill); updateSourceLockState(); });
-}
-function removeToolbar(pill){ const t = pill.querySelector('.toolbar'); if(t) t.remove(); }
-
-/* ------------------ App Flow ------------------ */
-function updateBriefing(){
-  const key = currentScenarioKey;
-  el('briefTitle').textContent = BRIEFINGS[key].title;
-  el('briefBody').innerHTML = BRIEFINGS[key].body;
-}
-function loadScenario(){
-  const s = SCENARIOS[currentScenarioKey];
-  const steps = s.steps[currentDifficulty];
-  const shuffled = shuffleArray(steps);
-  const planList = el('planList'); const checkList = el('checkList');
-  clearNode(planList); clearNode(checkList);
-  shuffled.forEach(st=> planList.appendChild(makePill(st)));
-  addedOrder = [];
-  el('confirmBtn').disabled = true;
-  el('planList').classList.remove('inactive');
-  el('status').textContent = `Scenario: ${s.emoji} ${s.name} · ${currentDifficulty}`;
-  wireInteractions();
-  updateBriefing();
-}
-function wireInteractions(){
-  // Reset listeners
-  disableTapAffordances();
-  // Decide mode
-  const coarse = window.matchMedia('(pointer: coarse)').matches || ('ontouchstart' in window);
-  if(coarse){ setModeTap(); enableTapAffordances(); }
-  else { setModeDrag(); makeSourceToTarget(el('planList'), el('checkList'), (id)=>{addedOrder.push(id); updateSourceLockState();}, ()=>{}); }
-}
-function updateSourceLockState(){
-  const src = el('planList');
-  const empty = src.querySelectorAll('.pill').length===0;
-  el('confirmBtn').disabled = !empty;
-  if(empty){ src.classList.add('inactive'); } else { src.classList.remove('inactive'); }
-}
-
-/* ------------------ Alignment & Reflection Feedback ------------------ */
-function computeFeedback(){
-  const s = SCENARIOS[currentScenarioKey];
-  const steps = s.steps[currentDifficulty];
-  const suggested = s.ideal[currentDifficulty];
-  const flex = (s.flexGroups?.[currentDifficulty]) || [];
-  const stepsById = Object.fromEntries(steps.map(st=>[st.id,st]));
-
-  // Suggested (render)
-  const idealList = el('idealList'); clearNode(idealList);
-  suggested.forEach((id, idx)=>{
-    const p = makePill(stepsById[id]); p.appendChild(tag(`#${idx+1}`)); idealList.appendChild(p);
-  });
-
-  // User (render; mark aligned anchors only)
-  const userList = el('userList'); clearNode(userList);
-  const alignedIndices = evaluateAlignmentWithFlex(suggested, checkOrder, flex);
-  checkOrder.forEach((id, idx)=>{
-    const p = makePill(stepsById[id]); p.appendChild(tag(`#${idx+1}`));
-    if(alignedIndices.has(idx)) p.classList.add('aligned');
-    userList.appendChild(p);
-  });
-
-  // Summary (soft)
-  el('summary').textContent = `Aligned anchors: ${alignedIndices.size} / ${suggested.length}`;
-
-  // Reflection points
-  const refl = el('reflections'); clearNode(refl);
-  const points = buildReflections(currentScenarioKey, currentDifficulty, suggested, checkOrder);
-  if(points.length===0){
-    const p = document.createElement('p'); p.textContent = "🟦 Reflection: Compare your plan with the suggested one. Do the steps you have taken seem similar? If not - would you change anything, and if so, what and why?";
-    refl.appendChild(p);
-  } else {
-    const grouped = groupReflections(points);
-    for(const [title, items] of grouped){
-      const h3 = document.createElement('h3'); h3.textContent = title; refl.appendChild(h3);
-      const ul = document.createElement('ul');
-      items.forEach(t=>{ const li=document.createElement('li'); li.textContent = t; ul.appendChild(li); });
-      refl.appendChild(ul);
-    }
-  }
-}
-
-/* Which indices count as aligned (exact match or flexible pair occupying correct two slots) */
-function evaluateAlignmentWithFlex(suggested, user, flexGroups){
-  const aligned = new Set();
-  const indexOf = Object.fromEntries(suggested.map((id,i)=>[id,i]));
-
-  // Flex groups
-  const flexIndexPairs = flexGroups.map(([a,b])=>{
-    const ia = indexOf[a], ib = indexOf[b];
-    return ia<ib ? [ia,ib,a,b] : [ib,ia,b,a];
-  });
-  flexIndexPairs.forEach(([i1,i2,a,b])=>{
-    const setIdeal = new Set([a,b]);
-    const ok = setIdeal.has(user[i1]) && setIdeal.has(user[i2]) && user[i1]!==user[i2];
-    if(ok){ aligned.add(i1); aligned.add(i2); }
-  });
-
-  // Non-flex exact matches
-  for(let i=0;i<suggested.length;i++){
-    if(aligned.has(i)) continue;
-    if(user[i] === suggested[i]) aligned.add(i);
-  }
-  return aligned;
-}
-
-/* Build reflection points */
-function buildReflections(sKey, diff, suggested, user){
-  const pos = Object.fromEntries(user.map((id,i)=>[id,i]));
-  const pts = [];
-
-  if(sKey === 'meal' && diff === 'medium'){
-    const before = (a,b)=> pos[a]!=null && pos[b]!=null && pos[a] < pos[b];
-    const exists = id => pos[id]!=null;
-
-    if(exists('pickup_child') && exists('switch_off') && !before('switch_off','pickup_child')){
-      pts.push({cat:'Safety', msg:'Before leaving, consider switching the hob off first.'});
-    }
-    if(exists('pickup_child') && exists('pasta_to_table') && !before('pasta_to_table','pickup_child')){
-      pts.push({cat:'Safety', msg:'Placing hot pasta safely on the table before leaving can help avoid leaving food unattended.'});
-    }
-    if(exists('boil_pasta') && exists('boil_water') && pos['boil_pasta'] < pos['boil_water']){
-      pts.push({cat:'Dependencies', msg:'Pasta usually goes in after the water is boiling — does your order account for that?'});
-    }
-    if(exists('prep_sauce') && exists('gather_items') && pos['prep_sauce'] < pos['gather_items']){
-      pts.push({cat:'Dependencies', msg:'Prepping the sauce works best after gathering ingredients and equipment.'});
-    }
-    if(exists('set_timer') && exists('pickup_child') && !before('set_timer','pickup_child')){
-      pts.push({cat:'Timing', msg:'Setting a timer before leaving can help prevent overcooking.'});
-    }
-    if(exists('lay_table') && exists('pickup_child') && !before('lay_table','pickup_child')){
-      pts.push({cat:'Efficiency', msg:'Laying the table before pickup can make serving easier when you return.'});
-    }
-    if(exists('wash_hands') && (exists('boil_pasta')||exists('prep_sauce')) && !before('wash_hands', (exists('prep_sauce')?'prep_sauce':'boil_pasta'))){
-      pts.push({cat:'Hygiene', msg:'Consider washing hands before handling food or equipment.'});
-    }
-    if(exists('enjoy_meal') && exists('pickup_child') && !before('pickup_child','enjoy_meal')){
-      pts.push({cat:'Flow', msg:'Enjoying the meal typically comes after the pickup — does your plan reflect that?'});
+    function getDragAfter(container, y){
+      const els = [...container.querySelectorAll('.pill:not(.dragging)')];
+      return els.reduce((closest, child)=>{
+        const box=child.getBoundingClientRect(); const offset=y-box.top-box.height/2;
+        return (offset<0 && offset>closest.offset)?{offset,element:child}:closest;
+      }, {offset:Number.NEGATIVE_INFINITY}).element;
     }
   }
 
-  if(sKey === 'clinic' && diff === 'medium'){
-    const before = (a,b)=> pos[a]!=null && pos[b]!=null && pos[a] < pos[b];
-    const exists = id => pos[id]!=null;
+  /* =========================
+     Tap Mode (mobile)
+     ========================= */
+  let tapMode = false;
+  function setModeTap(){ tapMode = true; el('modeChip').textContent = 'Mode: Tap'; }
+  function setModeDrag(){ tapMode = false; el('modeChip').textContent = 'Mode: Drag'; }
 
-    if(exists('prepare_docs') && exists('leave_home') && !before('prepare_docs','leave_home')){
-      pts.push({cat:'Preparation', msg:'Having documents ready before leaving can reduce stress at check-in.'});
-    }
-    if(exists('ready_travel') && exists('leave_home') && !before('ready_travel','leave_home')){
-      pts.push({cat:'Preparation', msg:'Charging phone / getting the travel card ready before leaving may help avoid delays.'});
-    }
-    if(exists('check_in') && exists('see_doctor') && !before('check_in','see_doctor')){
-      pts.push({cat:'Clinic flow', msg:'Check-in usually happens before seeing the doctor.'});
-    }
-    if(exists('validate_pay') && exists('bus_home') && !before('validate_pay','bus_home')){
-      pts.push({cat:'Logistics', msg:'Validating tickets / payments before heading home can be helpful.'});
-    }
-    if(exists('groceries') && exists('collect_rx') && pos['groceries'] < pos['collect_rx']){
-      pts.push({cat:'Efficiency', msg:'Would collecting the prescription before groceries make the route simpler? (Either can be sensible.)'});
-    }
+  function enableTapAffordances(){
+    document.querySelectorAll('.pill').forEach(p=>{ p.draggable=false; p.classList.add('tapable'); });
+    el('planList').addEventListener('click', planTapHandler);
+    el('checkList').addEventListener('click', checkTapHandler);
   }
-
-  const seen = new Set(); 
-  return pts.filter(p=>{ const key=p.cat+'|'+p.msg; if(seen.has(key)) return false; seen.add(key); return true; });
-}
-
-function groupReflections(points){
-  const map = new Map();
-  for(const p of points){
-    if(!map.has(p.cat)) map.set(p.cat, []);
-    map.get(p.cat).push('💡 ' + p.msg);
+  function disableTapAffordances(){
+    el('planList').removeEventListener('click', planTapHandler);
+    el('checkList').removeEventListener('click', checkTapHandler);
+    document.querySelectorAll('.pill').forEach(p=>{ p.draggable=true; p.classList.remove('tapable'); removeToolbar(p); });
   }
-  const order = ['Safety','Hygiene','Timing','Dependencies','Preparation','Clinic flow','Logistics','Efficiency','Flow'];
-  const out = [];
-  order.forEach(cat=>{ if(map.has(cat)) out.push([cat, map.get(cat)]); });
-  for(const [k,v] of map){ if(!order.includes(k)) out.push([k,v]); }
-  return out;
-}
+  function planTapHandler(e){
+    const pill = e.target.closest('.pill'); if(!pill) return;
+    const id = pill.dataset.id;
+    el('checkList').appendChild(pill);
+    addedOrder.push(id);
+    updateSourceLockState();
+  }
+  function checkTapHandler(e){
+    const pill = e.target.closest('.pill'); if(!pill) return;
+    toggleToolbar(pill);
+  }
+  function toggleToolbar(pill){
+    if(pill.querySelector('.toolbar')){ removeToolbar(pill); return; }
+    const tb = document.createElement('div'); tb.className='toolbar';
+    const up = document.createElement('button'); up.className='toolbtn'; up.textContent='↑'; up.title='Move up';
+    const down = document.createElement('button'); down.className='toolbtn'; down.textContent='↓'; down.title='Move down';
+    const back = document.createElement('button'); back.className='toolbtn'; back.textContent='↩'; back.title='Send back to Plan';
+    tb.append(up,down,back); pill.appendChild(tb);
+    up.addEventListener('click', (ev)=>{ ev.stopPropagation(); const prev = pill.previousElementSibling; if(prev) prev.before(pill); });
+    down.addEventListener('click', (ev)=>{ ev.stopPropagation(); const next = pill.nextElementSibling; if(next) next.after(pill); });
+    back.addEventListener('click', (ev)=>{ ev.stopPropagation(); el('planList').appendChild(pill); updateSourceLockState(); });
+  }
+  function removeToolbar(pill){ const t = pill.querySelector('.toolbar'); if(t) t.remove(); }
 
-/* ------------------ CSV Logging ------------------ */
-const LOG = [];
-function appendLog(){
-  const now = new Date();
-  const s = SCENARIOS[currentScenarioKey];
-  const suggested = s.ideal[currentDifficulty];
-  const flex = (s.flexGroups?.[currentDifficulty]) || [];
-  const aligned = evaluateAlignmentWithFlex(suggested, checkOrder, flex).size;
-  const duration = trialStart ? Math.round((now - trialStart)/1000) : null;
-
-  LOG.push({
-    timestamp: now.toISOString(),
-    trial_id: trialId,
-    scenario: s.name,
-    difficulty: currentDifficulty,
-    steps_n: suggested.length,
-    added_order: addedOrder.join('|'),
-    final_order: checkOrder.join('|'),
-    suggested_order: suggested.join('|'),
-    aligned_anchors: aligned,
-    seconds: duration
-  });
-  try{ localStorage.setItem('taskflow_log_soft', JSON.stringify(LOG)); }catch(e){}
-}
-function downloadCSV(){
-  const rows = [
-    ["timestamp","trial_id","scenario","difficulty","steps_n","added_order","final_order","suggested_order","aligned_anchors","seconds"],
-    ...LOG.map(r=>[
-      r.timestamp, r.trial_id, r.scenario, r.difficulty, r.steps_n, r.added_order, r.final_order, r.suggested_order, r.aligned_anchors, r.seconds
-    ])
-  ];
-  const csv = rows.map(r=>r.map(cell=> String(cell).includes(',')||String(cell).includes('|') ? `"${String(cell).replaceAll('"','""')}"` : String(cell)).join(',')).join('\n');
-  const blob = new Blob([csv], {type:'text/csv'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `taskflow_log_${new Date().toISOString().replace(/[:.]/g,'-')}.csv`;
-  document.body.appendChild(a); a.click(); a.remove();
-}
-
-/* ------------------ Wiring ------------------ */
-function init(){
-  try{
-    const saved = localStorage.getItem('taskflow_log_soft');
-    if(saved) { const parsed = JSON.parse(saved); if(Array.isArray(parsed)) LOG.push(...parsed); }
-  }catch(e){}
-
-  el('scenarioSelect').addEventListener('change', e=>{
-    currentScenarioKey = e.target.value; updateBriefing();
-  });
-  el('difficultySelect').addEventListener('change', e=>{ currentDifficulty = e.target.value; });
-
-  el('startBtn').addEventListener('click', ()=>{
-    trialId += 1; trialStart = new Date();
-    loadScenario();
-    el('planPanel').scrollIntoView({behavior:'smooth', block:'start'});
+  /* =========================
+     App Flow
+     ========================= */
+  function updateBriefing(){
+    const key = currentScenarioKey;
+    el('briefTitle').textContent = BRIEFINGS[key].title;
+    el('briefBody').innerHTML = BRIEFINGS[key].body;
+  }
+  function loadScenario(){
+    const s = SCENARIOS[currentScenarioKey];
+    const steps = s.steps[currentDifficulty];
+    const shuffled = shuffleArray(steps);
+    const planList = el('planList'); const checkList = el('checkList');
+    clearNode(planList); clearNode(checkList);
+    shuffled.forEach(st=> planList.appendChild(makePill(st)));
+    addedOrder = [];
     el('confirmBtn').disabled = true;
-  });
-  el('confirmBtn').addEventListener('click', ()=>{
-    checkOrder = readOrder(el('checkList'));
-    computeFeedback();
-    appendLog();
-    el('feedbackPanel').scrollIntoView({behavior:'smooth', block:'start'});
-  });
-  el('resetBtn').addEventListener('click', ()=>{
-    addedOrder = []; checkOrder = []; trialStart = null;
-    clearNode(el('planList')); clearNode(el('checkList'));
-    clearNode(el('idealList')); clearNode(el('userList'));
-    el('summary').textContent=''; clearNode(el('reflections'));
-    el('status').textContent=''; el('confirmBtn').disabled = true;
     el('planList').classList.remove('inactive');
-  });
-  el('downloadBtn').addEventListener('click', downloadCSV);
+    el('status').textContent = \`Scenario: \${s.emoji} \${s.name} · \${currentDifficulty}\`;
+    wireInteractions();
+    updateBriefing();
+  }
+  function wireInteractions(){
+    disableTapAffordances();
+    const coarse = window.matchMedia('(pointer: coarse)').matches || ('ontouchstart' in window);
+    if(coarse){ setModeTap(); enableTapAffordances(); }
+    else { setModeDrag(); makeSourceToTarget(el('planList'), el('checkList'), (id)=>{addedOrder.push(id); updateSourceLockState();}, ()=>{}); }
+  }
+  function updateSourceLockState(){
+    const src = el('planList');
+    const empty = src.querySelectorAll('.pill').length===0;
+    el('confirmBtn').disabled = !empty;
+    if(empty){ src.classList.add('inactive'); } else { src.classList.remove('inactive'); }
+  }
 
-  currentScenarioKey = el('scenarioSelect').value;
-  currentDifficulty = el('difficultySelect').value;
-  updateBriefing();
-}
-document.addEventListener('DOMContentLoaded', init);
-</script>
-<section id="clinician-notes">
-<div style="background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 16px; margin-top: 24px;">
-<label for="clinician-comment" style="display:block;font-weight:600;margin-bottom:8px;">
-      Clinician comments (optional)
-    </label>
-<textarea id="clinician-comment" placeholder="Enter any notes relevant to this session..." rows="4" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); font: inherit; resize: vertical;"></textarea>
-<p style="margin:8px 0 0; color: var(--muted); font-size: 0.9rem;">
-      This note will be added as <code>clinician_comment</code> in the exported CSV.
-    </p>
-</div>
-</section></main></body>
+  /* =========================
+     Alignment & Reflection
+     ========================= */
+  function computeFeedback(){
+    const s = SCENARIOS[currentScenarioKey];
+    const steps = s.steps[currentDifficulty];
+    const suggested = s.ideal[currentDifficulty];
+    const flex = (s.flexGroups?.[currentDifficulty]) || [];
+    const stepsById = Object.fromEntries(steps.map(st=>[st.id,st]));
+
+    // Suggested
+    const idealList = el('idealList'); clearNode(idealList);
+    suggested.forEach((id, idx)=>{
+      const p = makePill(stepsById[id]); p.appendChild(tag('#'+(idx+1))); idealList.appendChild(p);
+    });
+
+    // User
+    const userList = el('userList'); clearNode(userList);
+    const alignedIndices = evaluateAlignmentWithFlex(suggested, checkOrder, flex);
+    checkOrder.forEach((id, idx)=>{
+      const p = makePill(stepsById[id]); p.appendChild(tag('#'+(idx+1)));
+      if(alignedIndices.has(idx)) p.classList.add('aligned');
+      userList.appendChild(p);
+    });
+
+    // Summary
+    el('summary').textContent = \`Aligned anchors: \${alignedIndices.size} / \${suggested.length}\`;
+
+    // Reflections
+    const refl = el('reflections'); clearNode(refl);
+    const points = buildReflections(currentScenarioKey, currentDifficulty, suggested, checkOrder);
+    if(points.length===0){
+      const p = document.createElement('p');
+      p.textContent = "🟦 Reflection: Compare your plan with the suggested one. Do the steps seem similar? Would you change anything—what and why?";
+      refl.appendChild(p);
+    } else {
+      const grouped = groupReflections(points);
+      for(const [title, items] of grouped){
+        const h3 = document.createElement('h3'); h3.textContent = title; refl.appendChild(h3);
+        const ul = document.createElement('ul');
+        items.forEach(t=>{ const li=document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+        refl.appendChild(ul);
+      }
+    }
+  }
+
+  function evaluateAlignmentWithFlex(suggested, user, flexGroups){
+    const aligned = new Set();
+    const indexOf = Object.fromEntries(suggested.map((id,i)=>[id,i]));
+
+    const flexIndexPairs = flexGroups.map(([a,b])=>{
+      const ia = indexOf[a], ib = indexOf[b];
+      return ia<ib ? [ia,ib,a,b] : [ib,ia,b,a];
+    });
+    flexIndexPairs.forEach(([i1,i2,a,b])=>{
+      const setIdeal = new Set([a,b]);
+      const ok = setIdeal.has(user[i1]) && setIdeal.has(user[i2]) && user[i1]!==user[i2];
+      if(ok){ aligned.add(i1); aligned.add(i2); }
+    });
+
+    for(let i=0;i<suggested.length;i++){
+      if(aligned.has(i)) continue;
+      if(user[i] === suggested[i]) aligned.add(i);
+    }
+    return aligned;
+  }
+
+  function buildReflections(sKey, diff, suggested, user){
+    const pos = Object.fromEntries(user.map((id,i)=>[id,i]));
+    const pts = [];
+    const before = (a,b)=> pos[a]!=null && pos[b]!=null && pos[a] < pos[b];
+    const exists = id => pos[id]!=null;
+
+    if(sKey === 'meal' && diff === 'medium'){
+      if(exists('pickup_child') && exists('switch_off') && !before('switch_off','pickup_child')){
+        pts.push({cat:'Safety', msg:'Before leaving, consider switching the hob off first.'});
+      }
+      if(exists('pickup_child') && exists('pasta_to_table') && !before('pasta_to_table','pickup_child')){
+        pts.push({cat:'Safety', msg:'Placing hot pasta safely on the table before leaving helps avoid unattended food.'});
+      }
+      if(exists('boil_pasta') && exists('boil_water') && pos['boil_pasta'] < pos['boil_water']){
+        pts.push({cat:'Dependencies', msg:'Pasta usually goes in after the water is boiling—does your order reflect that?'});
+      }
+      if(exists('prep_sauce') && exists('gather_items') && pos['prep_sauce'] < pos['gather_items']){
+        pts.push({cat:'Dependencies', msg:'Prepping the sauce works best after gathering ingredients and equipment.'});
+      }
+      if(exists('set_timer') && exists('pickup_child') && !before('set_timer','pickup_child')){
+        pts.push({cat:'Timing', msg:'Setting a timer before leaving can help prevent overcooking.'});
+      }
+      if(exists('lay_table') && exists('pickup_child') && !before('lay_table','pickup_child')){
+        pts.push({cat:'Efficiency', msg:'Laying the table before pickup can make serving easier when you return.'});
+      }
+      if(exists('wash_hands') && (exists('boil_pasta')||exists('prep_sauce')) && !before('wash_hands', (exists('prep_sauce')?'prep_sauce':'boil_pasta'))){
+        pts.push({cat:'Hygiene', msg:'Consider washing hands before handling food or equipment.'});
+      }
+      if(exists('enjoy_meal') && exists('pickup_child') && !before('pickup_child','enjoy_meal')){
+        pts.push({cat:'Flow', msg:'Enjoying the meal typically comes after the pickup—does your plan reflect that?'});
+      }
+    }
+
+    if(sKey === 'clinic' && diff === 'medium'){
+      if(exists('prepare_docs') && exists('leave_home') && !before('prepare_docs','leave_home')){
+        pts.push({cat:'Preparation', msg:'Having documents ready before leaving can reduce stress at check-in.'});
+      }
+      if(exists('ready_travel') && exists('leave_home') && !before('ready_travel','leave_home')){
+        pts.push({cat:'Preparation', msg:'Charging phone / getting the travel card ready before leaving may help avoid delays.'});
+      }
+      if(exists('check_in') && exists('see_doctor') && !before('check_in','see_doctor')){
+        pts.push({cat:'Clinic flow', msg:'Check-in usually happens before seeing the doctor.'});
+      }
+      if(exists('validate_pay') && exists('bus_home') && !before('validate_pay','bus_home')){
+        pts.push({cat:'Logistics', msg:'Validating tickets / payments before heading home can be helpful.'});
+      }
+      if(exists('groceries') && exists('collect_rx') && pos['groceries'] < pos['collect_rx']){
+        pts.push({cat:'Efficiency', msg:'Would collecting the prescription before groceries make the route simpler? (Either can be sensible.)'});
+      }
+    }
+
+    const seen = new Set(); 
+    return pts.filter(p=>{ const key=p.cat+'|'+p.msg; if(seen.has(key)) return false; seen.add(key); return true; });
+  }
+
+  function groupReflections(points){
+    const map = new Map();
+    for(const p of points){
+      if(!map.has(p.cat)) map.set(p.cat, []);
+      map.get(p.cat).push('💡 ' + p.msg);
+    }
+    const order = ['Safety','Hygiene','Timing','Dependencies','Preparation','Clinic flow','Logistics','Efficiency','Flow'];
+    const out = [];
+    order.forEach(cat=>{ if(map.has(cat)) out.push([cat, map.get(cat)]); });
+    for(const [k,v] of map){ if(!order.includes(k)) out.push([k,v]); }
+    return out;
+  }
+
+  /* =========================
+     CSV Logging (+ shared augmenter adds clinician_comment)
+     ========================= */
+  function appendLog(){
+    const now = new Date();
+    const s = SCENARIOS[currentScenarioKey];
+    const suggested = s.ideal[currentDifficulty];
+    const flex = (s.flexGroups?.[currentDifficulty]) || [];
+    const aligned = evaluateAlignmentWithFlex(suggested, checkOrder, flex).size;
+    const duration = trialStart ? Math.round((now - trialStart)/1000) : null;
+
+    LOG.push({
+      timestamp: now.toISOString(),
+      trial_id: trialId,
+      scenario: s.name,
+      difficulty: currentDifficulty,
+      steps_n: suggested.length,
+      added_order: addedOrder.join('|'),
+      final_order: checkOrder.join('|'),
+      suggested_order: suggested.join('|'),
+      aligned_anchors: aligned,
+      seconds: duration
+    });
+    try{ localStorage.setItem('taskflow_log_soft', JSON.stringify(LOG)); }catch(e){}
+  }
+
+  function downloadCSV(){
+    const rows = [
+      ["timestamp","trial_id","scenario","difficulty","steps_n","added_order","final_order","suggested_order","aligned_anchors","seconds"],
+      ...LOG.map(r=>[
+        r.timestamp, r.trial_id, r.scenario, r.difficulty, r.steps_n, r.added_order, r.final_order, r.suggested_order, r.aligned_anchors, r.seconds
+      ])
+    ];
+    const csv = rows.map(r=>r.map(cell=>{
+      const s = String(cell);
+      return (s.includes(',')||s.includes('|')) ? '"'+s.replaceAll('"','""')+'"' : s;
+    }).join(',')).join('\n');
+
+    const blob = new Blob([csv], {type:'text/csv'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `taskflow_log_${new Date().toISOString().replace(/[:.]/g,'-')}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  /* =========================
+     Wiring
+     ========================= */
+  function init(){
+    try{
+      const saved = localStorage.getItem('taskflow_log_soft');
+      if(saved) { const parsed = JSON.parse(saved); if(Array.isArray(parsed)) LOG.push(...parsed); }
+    }catch(e){}
+
+    el('scenarioSelect').addEventListener('change', e=>{
+      currentScenarioKey = e.target.value; updateBriefing();
+    });
+    el('difficultySelect').addEventListener('change', e=>{ currentDifficulty = e.target.value; });
+
+    el('startBtn').addEventListener('click', ()=>{
+      trialId += 1; trialStart = new Date();
+      loadScenario();
+      el('planPanel').scrollIntoView({behavior:'smooth', block:'start'});
+      el('confirmBtn').disabled = true;
+    });
+    el('confirmBtn').addEventListener('click', ()=>{
+      checkOrder = readOrder(el('checkList'));
+      computeFeedback();
+      appendLog();
+      el('feedbackPanel').scrollIntoView({behavior:'smooth', block:'start'});
+    });
+    el('resetBtn').addEventListener('click', ()=>{
+      addedOrder = []; checkOrder = []; trialStart = null;
+      clearNode(el('planList')); clearNode(el('checkList'));
+      clearNode(el('idealList')); clearNode(el('userList'));
+      el('summary').textContent=''; clearNode(el('reflections'));
+      el('status').textContent=''; el('confirmBtn').disabled = true;
+      el('planList').classList.remove('inactive');
+    });
+    el('downloadBtn').addEventListener('click', downloadCSV);
+
+    currentScenarioKey = el('scenarioSelect').value;
+    currentDifficulty = el('difficultySelect').value;
+    updateBriefing();
+  }
+  document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
 </html>
-
