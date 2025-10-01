@@ -188,136 +188,136 @@
     </footer>
   </main>
 
-  <script>
-  /* =========================
-     Scenario Briefings
-     ========================= */
-  const BRIEFINGS = {
-    meal: {
-      title: 'Scenario: 🍝 Simple Meal + Child Pickup',
-      body: `Briefing for the participant:<br>
-        You are preparing an evening meal while also needing to pick up your child from nursery, which is only <strong>2 minutes away</strong>.
-        The challenge is to organise the cooking so that the food is ready, the kitchen is safe, and you collect your child on time.
-        Follow food-safety rules, manage timing, and make sure the kitchen is safe before leaving.`
-    },
-    clinic: {
-      title: 'Scenario: 🏥 Clinic Day Planner',
-      body: `Briefing for the participant:<br>
-        You have an outpatient appointment this afternoon. Plan the tasks to get there and back safely and efficiently:
-        bring the right documents, travel to the hospital, check in and attend your appointment, handle any payments/validation,
-        collect any prescription, optionally pick up a few groceries, and return home. Aim to follow sensible time windows and safety rules
-        (e.g., have your travel card/phone ready).`
-    }
-  };
-
-  /* =========================
-     Scenario Definitions
-     ========================= */
-  const SCENARIOS = {
-    clinic: {
-      name: "Clinic Day Planner",
-      emoji: "🏥",
-      steps: {
-        easy: [
-          {id:"bus_to_hospital", txt:"Take the bus to hospital", icon:"🚌"},
-          {id:"check_in", txt:"Check in at reception", icon:"🧾"},
-          {id:"see_doctor", txt:"See the doctor", icon:"👩‍⚕️"},
-          {id:"collect_rx", txt:"Collect prescription", icon:"💊"},
-          {id:"groceries", txt:"Buy quick groceries", icon:"🛒"},
-          {id:"bus_home", txt:"Bus back home", icon:"🏠"},
-        ],
-        medium: [
-          {id:"prepare_docs", txt:"Bring NHS number & appointment letter", icon:"📄"},
-          {id:"ready_travel", txt:"Charge phone / prepare travel card", icon:"🔋🎫"},
-          {id:"leave_home", txt:"Leave home in good time", icon:"🚪"},
-          {id:"bus_to_hospital", txt:"Take the bus to hospital", icon:"🚌"},
-          {id:"check_in", txt:"Check in at reception", icon:"🧾"},
-          {id:"wait_call", txt:"Wait to be called", icon:"🪑"},
-          {id:"see_doctor", txt:"See the doctor", icon:"👩‍⚕️"},
-          {id:"validate_pay", txt:"Validate ticket / pay as needed", icon:"🅿️"},
-          {id:"collect_rx", txt:"Collect prescription", icon:"💊"},
-          {id:"groceries", txt:"Buy quick groceries (optional)", icon:"🛒"},
-          {id:"bus_home", txt:"Bus back home", icon:"🏠"},
-        ]
-      },
-      ideal: {
-        easy: ["bus_to_hospital","check_in","see_doctor","collect_rx","groceries","bus_home"],
-        medium: ["prepare_docs","ready_travel","leave_home","bus_to_hospital","check_in","wait_call","see_doctor","validate_pay","collect_rx","groceries","bus_home"]
-      },
-      flexGroups: { easy: [], medium: [] }
-    },
-    meal: {
-      name: "Simple Meal + Child Pickup",
-      emoji: "🍝",
-      steps: {
-        easy: [
-          {id:"wash_hands", txt:"Wash hands", icon:"🧼"},
-          {id:"boil_pasta", txt:"Start pasta cooking", icon:"🍝"},
-          {id:"set_timer", txt:"Set timer", icon:"⏲️"},
-          {id:"switch_off", txt:"Switch hob off", icon:"🔥✖️"},
-          {id:"pickup_child", txt:"Pick up child (nursery 2 min away)", icon:"👶"},
-          {id:"enjoy_meal", txt:"Enjoy the meal at home", icon:"🏡🍽️"},
-        ],
-        medium: [
-          {id:"wash_hands", txt:"Wash hands", icon:"🧼"},
-          {id:"gather_items", txt:"Gather ingredients & equipment", icon:"🥕🍅🔪"},
-          {id:"boil_water", txt:"Boil water in a pot", icon:"💧🔥"},
-          {id:"prep_sauce", txt:"Prepare the simple sauce", icon:"🍅🧄"},
-          {id:"boil_pasta", txt:"Put pasta in boiling water", icon:"🍝"},
-          {id:"set_timer", txt:"Set a timer for the pasta", icon:"⏲️"},
-          {id:"lay_table", txt:"Lay the table", icon:"🍽️🧺"},
-          {id:"switch_off", txt:"Switch off the hob/stove", icon:"🔥✖️"},
-          {id:"pasta_to_table", txt:"Put the pasta on the table", icon:"🍲"},
-          {id:"pickup_child", txt:"Pick up child (nursery 2 min away)", icon:"👶"},
-          {id:"enjoy_meal", txt:"Enjoy the meal at home", icon:"🏡🍽️"},
-        ]
-      },
-      ideal: {
-        easy: ["wash_hands","boil_pasta","set_timer","switch_off","pickup_child","enjoy_meal"],
-        medium: ["wash_hands","gather_items","boil_water","prep_sauce","boil_pasta","set_timer","lay_table","switch_off","pasta_to_table","pickup_child","enjoy_meal"]
-      },
-      flexGroups: {
-        easy: [],
-        medium: [
-          ["boil_water","prep_sauce"],
-          ["boil_pasta","set_timer"]
-        ]
-      }
-    }
-  };
-
-  /* =========================
-     State
-     ========================= */
-  let currentScenarioKey = "clinic";
-  let currentDifficulty = "easy";
-  let trialId = 0;
-
-  let addedOrder = [];
-  let checkOrder = [];
-  let trialStart = null;
-
-  const LOG = [];
-  const el = id => document.getElementById(id);
-
-  /* =========================
-     Helpers
-     ========================= */
-  function clearNode(node){ while(node.firstChild) node.removeChild(node.firstChild); }
-  function makePill(step){
-    const div = document.createElement('div');
-    div.className = "pill";
-    div.draggable = true;
-    div.dataset.id = step.id;
-    div.innerHTML = `<span class="handle" aria-hidden="true">⋮⋮</span> <span>${step.icon}</span> <span>${step.txt}</span>`;
-    return div;
+<script>
+/* =========================
+   Scenario Briefings
+   ========================= */
+const BRIEFINGS = {
+  meal: {
+    title: 'Scenario: 🍝 Simple Meal + Child Pickup',
+    body: `Briefing for the participant:<br>
+      You are preparing an evening meal while also needing to pick up your child from nursery, which is only <strong>2 minutes away</strong>.
+      The challenge is to organise the cooking so that the food is ready, the kitchen is safe, and you collect your child on time.
+      Follow food-safety rules, manage timing, and make sure the kitchen is safe before leaving.`
+  },
+  clinic: {
+    title: 'Scenario: 🏥 Clinic Day Planner',
+    body: `Briefing for the participant:<br>
+      You have an outpatient appointment this afternoon. Plan the tasks to get there and back safely and efficiently:
+      bring the right documents, travel to the hospital, check in and attend your appointment, handle any payments/validation,
+      collect any prescription, optionally pick up a few groceries, and return home. Aim to follow sensible time windows and safety rules
+      (e.g., have your travel card/phone ready).`
   }
-  function shuffleArray(a){ const arr=a.slice(); for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
-  function readOrder(container){ return [...container.querySelectorAll('.pill')].map(p=>p.dataset.id); }
-  function tag(text){ const b=document.createElement('span'); b.className='badge'; b.textContent=text; return b; }
+};
 
 /* =========================
-   Drag & Drop (desktop)
+   Scenario Definitions
+   ========================= */
+const SCENARIOS = {
+  clinic: {
+    name: "Clinic Day Planner",
+    emoji: "🏥",
+    steps: {
+      easy: [
+        {id:"bus_to_hospital", txt:"Take the bus to hospital", icon:"🚌"},
+        {id:"check_in", txt:"Check in at reception", icon:"🧾"},
+        {id:"see_doctor", txt:"See the doctor", icon:"👩‍⚕️"},
+        {id:"collect_rx", txt:"Collect prescription", icon:"💊"},
+        {id:"groceries", txt:"Buy quick groceries", icon:"🛒"},
+        {id:"bus_home", txt:"Bus back home", icon:"🏠"},
+      ],
+      medium: [
+        {id:"prepare_docs", txt:"Bring NHS number & appointment letter", icon:"📄"},
+        {id:"ready_travel", txt:"Charge phone / prepare travel card", icon:"🔋🎫"},
+        {id:"leave_home", txt:"Leave home in good time", icon:"🚪"},
+        {id:"bus_to_hospital", txt:"Take the bus to hospital", icon:"🚌"},
+        {id:"check_in", txt:"Check in at reception", icon:"🧾"},
+        {id:"wait_call", txt:"Wait to be called", icon:"🪑"},
+        {id:"see_doctor", txt:"See the doctor", icon:"👩‍⚕️"},
+        {id:"validate_pay", txt:"Validate ticket / pay as needed", icon:"🅿️"},
+        {id:"collect_rx", txt:"Collect prescription", icon:"💊"},
+        {id:"groceries", txt:"Buy quick groceries (optional)", icon:"🛒"},
+        {id:"bus_home", txt:"Bus back home", icon:"🏠"},
+      ]
+    },
+    ideal: {
+      easy: ["bus_to_hospital","check_in","see_doctor","collect_rx","groceries","bus_home"],
+      medium: ["prepare_docs","ready_travel","leave_home","bus_to_hospital","check_in","wait_call","see_doctor","validate_pay","collect_rx","groceries","bus_home"]
+    },
+    flexGroups: { easy: [], medium: [] }
+  },
+  meal: {
+    name: "Simple Meal + Child Pickup",
+    emoji: "🍝",
+    steps: {
+      easy: [
+        {id:"wash_hands", txt:"Wash hands", icon:"🧼"},
+        {id:"boil_pasta", txt:"Start pasta cooking", icon:"🍝"},
+        {id:"set_timer", txt:"Set timer", icon:"⏲️"},
+        {id:"switch_off", txt:"Switch hob off", icon:"🔥✖️"},
+        {id:"pickup_child", txt:"Pick up child (nursery 2 min away)", icon:"👶"},
+        {id:"enjoy_meal", txt:"Enjoy the meal at home", icon:"🏡🍽️"},
+      ],
+      medium: [
+        {id:"wash_hands", txt:"Wash hands", icon:"🧼"},
+        {id:"gather_items", txt:"Gather ingredients & equipment", icon:"🥕🍅🔪"},
+        {id:"boil_water", txt:"Boil water in a pot", icon:"💧🔥"},
+        {id:"prep_sauce", txt:"Prepare the simple sauce", icon:"🍅🧄"},
+        {id:"boil_pasta", txt:"Put pasta in boiling water", icon:"🍝"},
+        {id:"set_timer", txt:"Set a timer for the pasta", icon:"⏲️"},
+        {id:"lay_table", txt:"Lay the table", icon:"🍽️🧺"},
+        {id:"switch_off", txt:"Switch off the hob/stove", icon:"🔥✖️"},
+        {id:"pasta_to_table", txt:"Put the pasta on the table", icon:"🍲"},
+        {id:"pickup_child", txt:"Pick up child (nursery 2 min away)", icon:"👶"},
+        {id:"enjoy_meal", txt:"Enjoy the meal at home", icon:"🏡🍽️"},
+      ]
+    },
+    ideal: {
+      easy: ["wash_hands","boil_pasta","set_timer","switch_off","pickup_child","enjoy_meal"],
+      medium: ["wash_hands","gather_items","boil_water","prep_sauce","boil_pasta","set_timer","lay_table","switch_off","pasta_to_table","pickup_child","enjoy_meal"]
+    },
+    flexGroups: {
+      easy: [],
+      medium: [
+        ["boil_water","prep_sauce"],
+        ["boil_pasta","set_timer"]
+      ]
+    }
+  }
+};
+
+/* =========================
+   State
+   ========================= */
+let currentScenarioKey = "clinic";
+let currentDifficulty = "easy";
+let trialId = 0;
+
+let addedOrder = [];
+let checkOrder = [];
+let trialStart = null;
+
+const LOG = [];
+const el = id => document.getElementById(id);
+
+/* =========================
+   Helpers
+   ========================= */
+function clearNode(node){ while(node.firstChild) node.removeChild(node.firstChild); }
+function makePill(step){
+  const div = document.createElement('div');
+  div.className = "pill";
+  div.draggable = true;
+  div.dataset.id = step.id;
+  div.innerHTML = `<span class="handle" aria-hidden="true">⋮⋮</span> <span>${step.icon}</span> <span>${step.txt}</span>`;
+  return div;
+}
+function shuffleArray(a){ const arr=a.slice(); for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+function readOrder(container){ return [...container.querySelectorAll('.pill')].map(p=>p.dataset.id); }
+function tag(text){ const b=document.createElement('span'); b.className='badge'; b.textContent=text; return b; }
+
+/* =========================
+   Desktop Drag & Drop only
    ========================= */
 function getDragAfter(container, y){
   const els = [...container.querySelectorAll('.pill:not(.dragging)')];
@@ -326,10 +326,7 @@ function getDragAfter(container, y){
   for (const el of els){
     const box = el.getBoundingClientRect();
     const offset = y - (box.top + box.height/2);
-    if (offset < 0 && offset > closestOffset){
-      closestOffset = offset;
-      closest = el;
-    }
+    if (offset < 0 && offset > closestOffset){ closestOffset = offset; closest = el; }
   }
   return closest;
 }
@@ -337,134 +334,76 @@ function getDragAfter(container, y){
 function makeSourceToTarget(sourceEl, targetEl, onAdd, onReorder){
   let dragEl = null;
 
+  // Reorder *within* target
   targetEl.addEventListener('dragstart', e=>{
     const t = e.target.closest('.pill'); if(!t) return;
-    dragEl = t;
-    t.classList.add('dragging');
+    dragEl = t; t.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
   });
-
   targetEl.addEventListener('dragend', ()=>{
-    if(dragEl){
-      dragEl.classList.remove('dragging');
-      dragEl = null;
-      onReorder && onReorder(readOrder(targetEl));
-    }
+    if(dragEl){ dragEl.classList.remove('dragging'); dragEl=null; onReorder && onReorder(readOrder(targetEl)); }
   });
-
   targetEl.addEventListener('dragover', e=>{
     e.preventDefault();
     const after = getDragAfter(targetEl, e.clientY);
     const dragging = targetEl.querySelector('.pill.dragging');
-    if(dragging){
-      if(after == null) targetEl.appendChild(dragging);
-      else targetEl.insertBefore(dragging, after);
-    } else {
-      targetEl.classList.add('drop-target');
-    }
+    if(dragging){ if(after==null) targetEl.appendChild(dragging); else targetEl.insertBefore(dragging, after); }
   });
 
-  targetEl.addEventListener('dragleave', ()=> targetEl.classList.remove('drop-target'));
-
+  // Drag from source -> into target
+  sourceEl.addEventListener('dragstart', e=>{
+    const t = e.target.closest('.pill'); if(!t) return;
+    dragEl = t; t.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/id', t.dataset.id);
+  });
+  sourceEl.addEventListener('dragend', ()=>{
+    if(dragEl){ dragEl.classList.remove('dragging'); dragEl=null; }
+  });
+  targetEl.addEventListener('dragover', e=> e.preventDefault());
   targetEl.addEventListener('drop', e=>{
-    targetEl.classList.remove('drop-target');
+    e.preventDefault();
     const dataId = e.dataTransfer.getData('text/id');
     if(!dataId) return;
     const pill = sourceEl.querySelector(`.pill[data-id="${CSS.escape(dataId)}"]`);
     if(!pill) return;
     const after = getDragAfter(targetEl, e.clientY);
-    if(after == null) targetEl.appendChild(pill);
-    else targetEl.insertBefore(pill, after);
+    if(after==null) targetEl.appendChild(pill); else targetEl.insertBefore(pill, after);
     pill.draggable = true;
     onAdd && onAdd(dataId);
     updateSourceLockState();
   });
+}
 
-  sourceEl.addEventListener('dragstart', e=>{
-    const t = e.target.closest('.pill'); if(!t) return;
-    dragEl = t;
-    t.classList.add('dragging');
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/id', t.dataset.id);
-  });
+/* =========================
+   App Flow
+   ========================= */
+function updateBriefing(){
+  const key = currentScenarioKey;
+  el('briefTitle').textContent = BRIEFINGS[key].title;
+  el('briefBody').innerHTML = BRIEFINGS[key].body;
+}
 
-  sourceEl.addEventListener('dragend', ()=>{
-    if(dragEl){
-      dragEl.classList.remove('dragging');
-      dragEl = null;
-    }
-  });
-} // ✅ this brace was missing
+function loadScenario(){
+  const s = SCENARIOS[currentScenarioKey];
+  if(!s){ console.error('Unknown scenario key', currentScenarioKey); return; }
+  const steps = s.steps[currentDifficulty];
+  if(!steps){ console.error('Unknown difficulty', currentDifficulty); return; }
 
-  /* =========================
-     Tap Mode (mobile)
-     ========================= */
-  let tapMode = false;
-  function setModeTap(){ tapMode = true; el('modeChip').textContent = 'Mode: Tap'; }
-  function setModeDrag(){ tapMode = false; el('modeChip').textContent = 'Mode: Drag'; }
+  const shuffled = shuffleArray(steps);
+  const planList = el('planList'); const checkList = el('checkList');
+  clearNode(planList); clearNode(checkList);
+  shuffled.forEach(st=> planList.appendChild(makePill(st)));
+  addedOrder = [];
+  el('confirmBtn').disabled = true;
+  el('planList').classList.remove('inactive');
+  el('status').textContent = `Scenario: ${s.emoji} ${s.name} · ${currentDifficulty}`;
 
-  function enableTapAffordances(){
-    document.querySelectorAll('.pill').forEach(p=>{ p.draggable=false; p.classList.add('tapable'); });
-    el('planList').addEventListener('click', planTapHandler);
-    el('checkList').addEventListener('click', checkTapHandler);
-  }
-  function disableTapAffordances(){
-    el('planList').removeEventListener('click', planTapHandler);
-    el('checkList').removeEventListener('click', checkTapHandler);
-    document.querySelectorAll('.pill').forEach(p=>{ p.draggable=true; p.classList.remove('tapable'); removeToolbar(p); });
-  }
-  function planTapHandler(e){
-    const pill = e.target.closest('.pill'); if(!pill) return;
-    const id = pill.dataset.id;
-    el('checkList').appendChild(pill);
-    addedOrder.push(id);
-    updateSourceLockState();
-  }
-  function checkTapHandler(e){
-    const pill = e.target.closest('.pill'); if(!pill) return;
-    toggleToolbar(pill);
-  }
-  function toggleToolbar(pill){
-    if(pill.querySelector('.toolbar')){ removeToolbar(pill); return; }
-    const tb = document.createElement('div'); tb.className='toolbar';
-    const up = document.createElement('button'); up.className='toolbtn'; up.textContent='↑'; up.title='Move up';
-    const down = document.createElement('button'); down.className='toolbtn'; down.textContent='↓'; down.title='Move down';
-    const back = document.createElement('button'); back.className='toolbtn'; back.textContent='↩'; back.title='Send back to Plan';
-    tb.append(up,down,back); pill.appendChild(tb);
-    up.addEventListener('click', (ev)=>{ ev.stopPropagation(); const prev = pill.previousElementSibling; if(prev) prev.before(pill); });
-    down.addEventListener('click', (ev)=>{ ev.stopPropagation(); const next = pill.nextElementSibling; if(next) next.after(pill); });
-    back.addEventListener('click', (ev)=>{ ev.stopPropagation(); el('planList').appendChild(pill); updateSourceLockState(); });
-  }
-  function removeToolbar(pill){ const t = pill.querySelector('.toolbar'); if(t) t.remove(); }
-
-  /* =========================
-     App Flow
-     ========================= */
-  function updateBriefing(){
-    const key = currentScenarioKey;
-    el('briefTitle').textContent = BRIEFINGS[key].title;
-    el('briefBody').innerHTML = BRIEFINGS[key].body;
-  }
-  function loadScenario(){
-    const s = SCENARIOS[currentScenarioKey];
-    const steps = s.steps[currentDifficulty];
-    const shuffled = shuffleArray(steps);
-    const planList = el('planList'); const checkList = el('checkList');
-    clearNode(planList); clearNode(checkList);
-    shuffled.forEach(st=> planList.appendChild(makePill(st)));
-    addedOrder = [];
-    el('confirmBtn').disabled = true;
-    el('planList').classList.remove('inactive');
-     el('status').textContent = `Scenario: ${s.emoji} ${s.name} · ${currentDifficulty}`;
-  wireInteractions();
+  // Desktop-only wiring
+  makeSourceToTarget(planList, checkList, (id)=>{ addedOrder.push(id); updateSourceLockState(); }, ()=>{});
   updateBriefing();
 }
-function wireInteractions(){
-  disableTapAffordances();
-  const coarse = window.matchMedia('(pointer: coarse)').matches || ('ontouchstart' in window);
-  if(coarse){ setModeTap(); enableTapAffordances(); }
-  else { setModeDrag(); makeSourceToTarget(el('planList'), el('checkList'), (id)=>{addedOrder.push(id); updateSourceLockState();}, ()=>{}); }
-}
+
 function updateSourceLockState(){
   const src = el('planList');
   const empty = src.querySelectorAll('.pill').length===0;
@@ -521,7 +460,6 @@ function computeFeedback(){
 function evaluateAlignmentWithFlex(suggested, user, flexGroups){
   const aligned = new Set();
   const indexOf = Object.fromEntries(suggested.map((id,i)=>[id,i]));
-
   const flexIndexPairs = flexGroups.map(([a,b])=>{
     const ia = indexOf[a], ib = indexOf[b];
     return ia<ib ? [ia,ib,a,b] : [ib,ia,b,a];
@@ -531,7 +469,6 @@ function evaluateAlignmentWithFlex(suggested, user, flexGroups){
     const ok = setIdeal.has(user[i1]) && setIdeal.has(user[i2]) && user[i1]!==user[i2];
     if(ok){ aligned.add(i1); aligned.add(i2); }
   });
-
   for(let i=0;i<suggested.length;i++){
     if(aligned.has(i)) continue;
     if(user[i] === suggested[i]) aligned.add(i);
@@ -590,7 +527,7 @@ function buildReflections(sKey, diff, suggested, user){
     }
   }
 
-  const seen = new Set(); 
+  const seen = new Set();
   return pts.filter(p=>{ const key=p.cat+'|'+p.msg; if(seen.has(key)) return false; seen.add(key); return true; });
 }
 
@@ -608,7 +545,7 @@ function groupReflections(points){
 }
 
 /* =========================
-   CSV Logging (+ shared augmenter adds clinician_comment)
+   CSV Logging
    ========================= */
 function appendLog(){
   const now = new Date();
@@ -651,6 +588,7 @@ function downloadCSV(){
   a.download = `taskflow_log_${new Date().toISOString().replace(/[:.]/g,'-')}.csv`;
   document.body.appendChild(a); a.click(); a.remove();
 }
+
 /* =========================
    Wiring
    ========================= */
@@ -692,9 +630,12 @@ function init(){
   updateBriefing();
 }
 
-/* ✅ Call init immediately if DOM is already ready; otherwise wait. */
+/* Run */
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {
   init();
 }
+</script>
+</body>
+</html>
