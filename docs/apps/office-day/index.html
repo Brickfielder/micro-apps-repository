@@ -533,111 +533,166 @@ function maybeRingPhone(){
   }
 }
 
-  // ====== Interactions ======
-  $sendReport.addEventListener("click", ()=>{
-    if(!round){ log("No active round."); return; }
-    const t = round.elapsed, diff = Math.abs(t - targetSendReportAt);
-    if(diff <= difficulty.timeWindow){ stats.correctPM++; log(\`Sent report at right time ✓ (elapsed \${fmt(t)}; target \${fmt(targetSendReportAt)} ±\${difficulty.timeWindow}s)\`); }
-    else if (t < targetSendReportAt){ stats.offTimePM++; log(\`Sent report too early (elapsed \${fmt(t)}; target \${fmt(targetSendReportAt)})\`); }
-    else { stats.offTimePM++; log(\`Sent report too late (elapsed \${fmt(t)}; target \${fmt(targetSendReportAt)})\`); }
-    $sendReport.disabled = true; setStatsPills();
-  });
-
-  $answer.addEventListener("click", ()=>{
-    if(!phoneRinging){ log("No call to answer."); return; }
-    if(currentCaller === "Manager"){ stats.correctPhone++; log("Answered Manager ✓"); }
-    else { stats.phoneErrors++; log(\`Error: answered \${currentCaller}.\`); }
-    phoneRinging=false; currentCaller=null;
-    $phoneIcon.classList.remove("ring"); $phoneButtons.style.display = "none";
-    $phoneStatus.textContent = "Phone is quiet."; setStatsPills();
-  });
-
-  $ignore.addEventListener("click", ()=>{
-    if(!phoneRinging){ log("No call to ignore."); return; }
-    if(currentCaller === "Manager"){ stats.phoneErrors++; log("Error: ignored Manager."); }
-    else { log(\`Ignored \${currentCaller} (ok).\`); }
-    phoneRinging=false; currentCaller=null;
-    $phoneIcon.classList.remove("ring"); $phoneButtons.style.display = "none";
-    $phoneStatus.textContent = "Phone is quiet."; setStatsPills();
-  });
-
-  // ====== CSV (plus clinician_comment hydration) ======
-  function getClinicianComment(){
-    const ta = document.getElementById("clinician-comment");
-    return ta ? ta.value : "";
+ // ====== Interactions ======
+$sendReport.addEventListener("click", () => {
+  if (!round) {
+    log("No active round.");
+    return;
   }
-  $download.addEventListener("click", ()=>{
-    // If clinician_feedback.js is present, it may append its own metadata.
-    // We also add a final row with clinician_comment for resilience.
-    const note = getClinicianComment();
-    if(note) csvRows.push([Date.now(), fmt(round?round.elapsed:0), "clinician_comment: " + note]);
+  const t = round.elapsed;
+  const diff = Math.abs(t - targetSendReportAt);
 
-    const csv = csvRows.map(r => r.map(x => '"' + String(x).replaceAll('"','""') + '"').join(",")).join("\n");
-    const blob = new Blob([csv], {type:"text/csv"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = "office_day_log.csv"; a.click();
-    setTimeout(()=>URL.revokeObjectURL(url), 1000);
-  });
-
-  // ====== Modals ======
-  function openBriefing(){ newBriefing(); $modal.style.display = "flex"; }
-  function closeBriefing(){ $modal.style.display = "none"; }
-  $start.addEventListener("click", openBriefing);
-  $beginRound.addEventListener("click", ()=>{ closeBriefing(); startRound(); });
-  $cancelRound.addEventListener("click", closeBriefing);
-
-  $help.addEventListener("click", ()=>{ $helpModal.style.display="flex"; });
-  document.getElementById("closeHelpBtn").addEventListener("click", ()=>{ $helpModal.style.display="none"; });
-
-  $difficultyBtn.addEventListener("click", ()=>{ hydrateDiffUI(); $diffModal.style.display="flex"; });
-  $closeDiff.addEventListener("click", ()=>{ $diffModal.style.display="none"; });
-
-  // ====== Difficulty panel logic ======
-  function hydrateDiffUI(){
-    $tw.value = difficulty.timeWindow; $twOut.textContent = difficulty.timeWindow;
-    $docMs.value = difficulty.docEveryMs; $docMsOut.textContent = difficulty.docEveryMs;
-    $phoneCh.value = difficulty.phoneChance; $phoneChOut.textContent = difficulty.phoneChance.toFixed(2);
-    $fakeRate.value = difficulty.fakeManagerRate; $fakeRateOut.textContent = difficulty.fakeManagerRate.toFixed(2);
-    $pmTime.value = difficulty.pmTimeTasks; $pmTimeOut.textContent = difficulty.pmTimeTasks;
-    $pmEvent.value = difficulty.pmEventTasks; $pmEventOut.textContent = difficulty.pmEventTasks;
-    $lockAdapt.checked = !!difficulty.lockAdapt;
+  if (diff <= difficulty.timeWindow) {
+    stats.correctPM++;
+    log(`Sent report at right time ✓ (elapsed ${fmt(t)}; target ${fmt(targetSendReportAt)} ±${difficulty.timeWindow}s)`);
+  } else if (t < targetSendReportAt) {
+    stats.offTimePM++;
+    log(`Sent report too early (elapsed ${fmt(t)}; target ${fmt(targetSendReportAt)})`);
+  } else {
+    stats.offTimePM++;
+    log(`Sent report too late (elapsed ${fmt(t)}; target ${fmt(targetSendReportAt)})`);
   }
-  function attachRange(range, out, transform=(v)=>v){
-    range.addEventListener("input", ()=>{ out.textContent = transform(Number(range.value)); });
-  }
-  attachRange($tw, $twOut);
-  attachRange($docMs, $docMsOut);
-  attachRange($phoneCh, $phoneChOut, v=>v.toFixed(2));
-  attachRange($fakeRate, $fakeRateOut, v=>v.toFixed(2));
-  attachRange($pmTime, $pmTimeOut);
-  attachRange($pmEvent, $pmEventOut);
 
-  function persistDifficulty(){ localStorage.setItem("officeDayDifficulty", JSON.stringify(difficulty)); }
-
-  $saveDiff.addEventListener("click", ()=>{
-    difficulty.timeWindow = Number($tw.value);
-    difficulty.docEveryMs = Number($docMs.value);
-    difficulty.phoneChance = Number($phoneCh.value);
-    difficulty.fakeManagerRate = Number($fakeRate.value);
-    difficulty.pmTimeTasks = Number($pmTime.value);
-    difficulty.pmEventTasks = Number($pmEvent.value);
-    difficulty.lockAdapt = !!$lockAdapt.checked;
-    persistDifficulty(); log("Difficulty settings saved (apply next round).");
-    $diffModal.style.display="none";
-  });
-
-  $resetDiff.addEventListener("click", ()=>{
-    difficulty = {...DEFAULTS}; persistDifficulty(); hydrateDiffUI(); log("Difficulty reset to defaults.");
-  });
-
-  // ESC to close any modal
-  document.addEventListener("keydown",(e)=>{
-    if(e.key==="Escape"){ $modal.style.display="none"; $helpModal.style.display="none"; $diffModal.style.display="none"; }
-  });
-
-  // Initial UI
+  $sendReport.disabled = true;
   setStatsPills();
+});
+
+$answer.addEventListener("click", () => {
+  if (!phoneRinging) {
+    log("No call to answer.");
+    return;
+  }
+  if (currentCaller === "Manager") {
+    stats.correctPhone++;
+    log("Answered Manager ✓");
+  } else {
+    stats.phoneErrors++;
+    log(`Error: answered ${currentCaller}.`);
+  }
+  phoneRinging = false;
+  currentCaller = null;
+  $phoneIcon.classList.remove("ring");
+  $phoneButtons.style.display = "none";
+  $phoneStatus.textContent = "Phone is quiet.";
+  setStatsPills();
+});
+
+$ignore.addEventListener("click", () => {
+  if (!phoneRinging) {
+    log("No call to ignore.");
+    return;
+  }
+  if (currentCaller === "Manager") {
+    stats.phoneErrors++;
+    log("Error: ignored Manager.");
+  } else {
+    log(`Ignored ${currentCaller} (ok).`);
+  }
+  phoneRinging = false;
+  currentCaller = null;
+  $phoneIcon.classList.remove("ring");
+  $phoneButtons.style.display = "none";
+  $phoneStatus.textContent = "Phone is quiet.";
+  setStatsPills();
+});
+
+// ====== CSV (plus clinician_comment hydration) ======
+function getClinicianComment() {
+  const ta = document.getElementById("clinician-comment");
+  return ta ? ta.value : "";
+}
+
+$download.addEventListener("click", () => {
+  // If clinician_feedback.js is present, it may append its own metadata.
+  // We also add a final row with clinician_comment for resilience.
+  const note = getClinicianComment();
+  if (note) {
+    csvRows.push([Date.now(), fmt(round ? round.elapsed : 0), "clinician_comment: " + note]);
+  }
+
+  const csv = csvRows
+    .map(r => r.map(x => '"' + String(x).replaceAll('"', '""') + '"').join(","))
+    .join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "office_day_log.csv";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
+// ====== Modals ======
+function openBriefing() { newBriefing(); $modal.style.display = "flex"; }
+function closeBriefing() { $modal.style.display = "none"; }
+
+$start.addEventListener("click", openBriefing);
+$beginRound.addEventListener("click", () => { closeBriefing(); startRound(); });
+$cancelRound.addEventListener("click", closeBriefing);
+
+$help.addEventListener("click", () => { $helpModal.style.display = "flex"; });
+document.getElementById("closeHelpBtn").addEventListener("click", () => { $helpModal.style.display = "none"; });
+
+$difficultyBtn.addEventListener("click", () => { hydrateDiffUI(); $diffModal.style.display = "flex"; });
+$closeDiff.addEventListener("click", () => { $diffModal.style.display = "none"; });
+
+// ====== Difficulty panel logic ======
+function hydrateDiffUI() {
+  $tw.value = difficulty.timeWindow; $twOut.textContent = difficulty.timeWindow;
+  $docMs.value = difficulty.docEveryMs; $docMsOut.textContent = difficulty.docEveryMs;
+  $phoneCh.value = difficulty.phoneChance; $phoneChOut.textContent = difficulty.phoneChance.toFixed(2);
+  $fakeRate.value = difficulty.fakeManagerRate; $fakeRateOut.textContent = difficulty.fakeManagerRate.toFixed(2);
+  $pmTime.value = difficulty.pmTimeTasks; $pmTimeOut.textContent = difficulty.pmTimeTasks;
+  $pmEvent.value = difficulty.pmEventTasks; $pmEventOut.textContent = difficulty.pmEventTasks;
+  $lockAdapt.checked = !!difficulty.lockAdapt;
+}
+
+function attachRange(range, out, transform = v => v) {
+  range.addEventListener("input", () => { out.textContent = transform(Number(range.value)); });
+}
+
+attachRange($tw, $twOut);
+attachRange($docMs, $docMsOut);
+attachRange($phoneCh, $phoneChOut, v => v.toFixed(2));
+attachRange($fakeRate, $fakeRateOut, v => v.toFixed(2));
+attachRange($pmTime, $pmTimeOut);
+attachRange($pmEvent, $pmEventOut);
+
+function persistDifficulty() {
+  localStorage.setItem("officeDayDifficulty", JSON.stringify(difficulty));
+}
+
+$saveDiff.addEventListener("click", () => {
+  difficulty.timeWindow = Number($tw.value);
+  difficulty.docEveryMs = Number($docMs.value);
+  difficulty.phoneChance = Number($phoneCh.value);
+  difficulty.fakeManagerRate = Number($fakeRate.value);
+  difficulty.pmTimeTasks = Number($pmTime.value);
+  difficulty.pmEventTasks = Number($pmEvent.value);
+  difficulty.lockAdapt = !!$lockAdapt.checked;
+  persistDifficulty();
+  log("Difficulty settings saved (apply next round).");
+  $diffModal.style.display = "none";
+});
+
+$resetDiff.addEventListener("click", () => {
+  difficulty = { ...DEFAULTS };
+  persistDifficulty();
+  hydrateDiffUI();
+  log("Difficulty reset to defaults.");
+});
+
+// ESC to close any modal
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    $modal.style.display = "none";
+    $helpModal.style.display = "none";
+    $diffModal.style.display = "none";
+  }
+});
+
+// Initial UI
+setStatsPills();
   </script>
 </body>
 </html>
