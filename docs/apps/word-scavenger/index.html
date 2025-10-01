@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Word Scavenge — USN rehab (updated)</title>
 
-  <!-- Tailwind (CDN for fast iteration) -->
+  <!-- Tailwind for utilities -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Micro-Apps shared assets -->
@@ -21,15 +21,13 @@
   <style>
     @keyframes wiggle { 0%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} 100%{transform:translateX(0)} }
     .wiggle { animation: wiggle .22s ease-in-out; }
-    .anchor-stripe {
-      width: 44px; background: #ef4444; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      color: white; font-weight: 700; writing-mode: vertical-rl; text-orientation: mixed; user-select: none;
+    .anchor-stripe{
+      width:44px;background:#ef4444;cursor:pointer;display:flex;align-items:center;justify-content:center;
+      color:#fff;font-weight:700;writing-mode:vertical-rl;text-orientation:mixed;user-select:none;
     }
-    .anchor-stripe.sticky { position: sticky; top: 7rem; border-radius: 10px; box-shadow: 0 10px 20px rgba(0,0,0,.15); }
+    .anchor-stripe.sticky{position:sticky;top:7rem;border-radius:10px;box-shadow:0 10px 20px rgba(0,0,0,.15);}
   </style>
 </head>
-
 <body>
   <main id="app-root">
     <!-- Toolbar -->
@@ -39,9 +37,7 @@
           <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white grid place-content-center font-bold">WS</div>
           <div>
             <div class="text-xl font-semibold">Word Scavenge</div>
-            <div class="text-xs text-slate-500">
-              Tap the <span class="text-red-600 font-semibold">left red anchor stripe</span>, choose a left word → match on the right
-            </div>
+            <div class="text-xs text-slate-500">Tap the <span class="text-red-600 font-semibold">left red anchor stripe</span>, choose a left word → match on the right</div>
           </div>
         </div>
         <div class="flex items-center gap-2">
@@ -53,7 +49,7 @@
       </div>
     </header>
 
-    <!-- Help (collapsed on load) -->
+    <!-- Help (collapsed by default) -->
     <section id="help" class="hidden mt-4 mb-4 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
       <div class="font-semibold mb-1">How it works</div>
       <ul class="list-disc ml-5 text-sm text-slate-600 space-y-1">
@@ -61,12 +57,11 @@
         <li>Then select a word on the <span class="font-semibold">left</span>, and match it with the corresponding word on the right.</li>
         <li>Correct matches are <span class="font-semibold">locked and highlighted in green on both sides</span>.</li>
         <li>Starting on the right is blocked and logged as a compliance event.</li>
-        <li>Timer pauses automatically after <span id="idleHint" class="font-mono">30s</span> of inactivity.</li>
-        <li>Download a CSV log with all sessions stored locally (persists between runs).</li>
+        <li>If enabled, the timer can auto-pause after idle time.</li>
       </ul>
     </section>
 
-    <!-- Settings (collapsed on load) -->
+    <!-- Settings (collapsed by default) -->
     <section id="settings" class="hidden mb-6 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm grid md:grid-cols-2 gap-4">
       <div class="space-y-3">
         <label class="block text-sm">Word set</label>
@@ -76,20 +71,29 @@
         <input id="pairCount" type="range" min="4" max="12" value="8" class="w-full"/>
 
         <div class="flex items-center gap-2">
-          <input id="requireLeftStart" type="checkbox" checked/>
+          <input id="requireLeftStart" type="checkbox" checked>
           <label for="requireLeftStart" class="text-sm">Require left-start (recommended)</label>
         </div>
 
         <div class="flex items-center gap-2">
-          <input id="requireAnchor" type="checkbox" checked/>
+          <input id="requireAnchor" type="checkbox" checked>
           <label for="requireAnchor" class="text-sm">Require left-margin anchor before each match</label>
         </div>
 
-        <label class="block text-sm">Auto-pause if idle (seconds)</label>
-        <input id="idleSecs" type="number" min="5" max="300" value="30" class="w-28 p-2 rounded-xl border border-slate-300"/>
+        <!-- NEW: explicit enable toggle (off by default) -->
+        <div class="flex items-center gap-2">
+          <input id="enableIdle" type="checkbox">
+          <label for="enableIdle" class="text-sm">Enable auto-pause if idle</label>
+        </div>
+
+        <label class="block text-sm">Idle seconds (when enabled)</label>
+        <div class="flex items-center gap-2">
+          <input id="idleSecs" type="number" min="5" max="300" value="30" class="w-28 p-2 rounded-xl border border-slate-300" disabled>
+          <span class="text-xs text-slate-500">Current: <span id="idleHint" class="font-mono">30s</span></span>
+        </div>
 
         <div class="flex items-center gap-2">
-          <input id="bigText" type="checkbox" checked/>
+          <input id="bigText" type="checkbox" checked>
           <label for="bigText" class="text-sm">Large text mode</label>
         </div>
 
@@ -101,12 +105,11 @@
 
       <div class="space-y-3">
         <div class="flex items-center gap-2">
-          <input id="useCustom" type="checkbox"/>
+          <input id="useCustom" type="checkbox">
           <label for="useCustom" class="text-sm">Use custom list</label>
         </div>
-
         <textarea id="customPairs" class="w-full h-40 p-3 rounded-xl border border-slate-300 disabled:opacity-50 font-mono text-xs" placeholder="left,right&#10;cat,meow&#10;..." disabled></textarea>
-        <div class="text-xs text-slate-500">Format: one pair per line, comma-separated. Left word will appear in the left column.</div>
+        <div class="text-xs text-slate-500">Format: one pair per line, comma-separated. Left word appears on the left.</div>
       </div>
     </section>
 
@@ -121,23 +124,19 @@
 
     <!-- Game area -->
     <section class="grid md:grid-cols-[auto,1fr,1fr] items-start gap-4">
-      <!-- Left anchor stripe -->
       <div id="anchorBtn" class="anchor-stripe sticky">ANCHOR</div>
 
-      <!-- Left column -->
       <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
         <div class="text-sm font-semibold mb-2">Left — start here</div>
         <div id="leftList" class="grid gap-2"></div>
       </div>
 
-      <!-- Right column -->
       <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
         <div class="text-sm font-semibold mb-2">Right — find the match</div>
         <div id="rightList" class="grid gap-2"></div>
       </div>
     </section>
 
-    <!-- Completion -->
     <section id="completeBanner" class="hidden mt-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900">
       <div class="font-semibold">Session complete</div>
       <div class="text-sm">Well done! Download the CSV log for your records, or start a new session.</div>
@@ -154,37 +153,26 @@
   </div>
 
   <script>
-    // -------- Word sets --------
+    // ===== Word sets =====
     const SETS = {
-      "Everyday pairs": [
-        ["dog","bark"],["rain","umbrella"],["key","lock"],["table","chair"],["tooth","brush"],["shoe","lace"],["phone","call"],["cake","birthday"],["door","handle"],["pen","write"],["light","switch"],["plant","water"]
-      ],
-      "Opposites": [
-        ["hot","cold"],["up","down"],["day","night"],["open","closed"],["fast","slow"],["early","late"],["loud","quiet"],["full","empty"],["hard","soft"],["bright","dim"]
-      ],
-      "Synonyms": [
-        ["happy","glad"],["quick","fast"],["angry","mad"],["small","little"],["smart","clever"],["large","big"],["silent","quiet"],["ill","sick"],["start","begin"],["finish","end"]
-      ],
-      "Kitchen & home": [
-        ["knife","cut"],["pan","fry"],["broom","sweep"],["toaster","bread"],["kettle","boil"],["plate","dish"],["cup","tea"],["bin","rubbish"],["sink","wash"],["bed","sleep"]
-      ],
-      "Games": [
-        ["chess","board"],["tennis","racket"],["football","goal"],["basketball","hoop"],["golf","club"],["baseball","bat"],["poker","cards"],["bowling","pins"],["video game","controller"],["hide-and-seek","count"]
-      ],
-      "Jobs": [
-        ["doctor","hospital"],["teacher","classroom"],["chef","kitchen"],["pilot","airplane"],["farmer","field"],["nurse","patient"],["engineer","design"],["artist","paint"],["lawyer","court"],["firefighter","hose"]
-      ]
+      "Everyday pairs":[["dog","bark"],["rain","umbrella"],["key","lock"],["table","chair"],["tooth","brush"],["shoe","lace"],["phone","call"],["cake","birthday"],["door","handle"],["pen","write"],["light","switch"],["plant","water"]],
+      "Opposites":[["hot","cold"],["up","down"],["day","night"],["open","closed"],["fast","slow"],["early","late"],["loud","quiet"],["full","empty"],["hard","soft"],["bright","dim"]],
+      "Synonyms":[["happy","glad"],["quick","fast"],["angry","mad"],["small","little"],["smart","clever"],["large","big"],["silent","quiet"],["ill","sick"],["start","begin"],["finish","end"]],
+      "Kitchen & home":[["knife","cut"],["pan","fry"],["broom","sweep"],["toaster","bread"],["kettle","boil"],["plate","dish"],["cup","tea"],["bin","rubbish"],["sink","wash"],["bed","sleep"]],
+      "Games":[["chess","board"],["tennis","racket"],["football","goal"],["basketball","hoop"],["golf","club"],["baseball","bat"],["poker","cards"],["bowling","pins"],["video game","controller"],["hide-and-seek","count"]],
+      "Jobs":[["doctor","hospital"],["teacher","classroom"],["chef","kitchen"],["pilot","airplane"],["farmer","field"],["nurse","patient"],["engineer","design"],["artist","paint"],["lawyer","court"],["firefighter","hose"]]
     };
 
-    // -------- Persistence --------
+    // ===== Persistence =====
     const PERSIST_KEY = 'ws_persist_v1';
-    function loadPersist(){ try{ const j = localStorage.getItem(PERSIST_KEY); return j ? JSON.parse(j) : {sessions: []}; }catch{ return {sessions: []}; } }
-    function savePersist(obj){ try{ localStorage.setItem(PERSIST_KEY, JSON.stringify(obj)); }catch{} }
-    function clearPersist(){ try{ localStorage.removeItem(PERSIST_KEY); }catch{} }
+    const loadPersist = ()=>{ try{ const j=localStorage.getItem(PERSIST_KEY); return j?JSON.parse(j):{sessions:[]}; }catch{ return {sessions:[]}; } };
+    const savePersist = (o)=>{ try{ localStorage.setItem(PERSIST_KEY, JSON.stringify(o)); }catch{} };
+    const clearPersist = ()=>{ try{ localStorage.removeItem(PERSIST_KEY); }catch{} };
 
-    // -------- State --------
+    // ===== State =====
     let requireLeftStart = true;
     let requireAnchor = true;
+    let enableIdle = false;
     let idleSecs = 30;
     let bigText = true;
     let useCustom = false;
@@ -192,29 +180,18 @@
     let setName = "Everyday pairs";
     let pairCount = 8;
 
-    let leftWords = [];
-    let rightWords = [];
-    let pairMap = {};
-    let solvedLefts = new Set();
-    let solvedRights = new Set();
-
+    let leftWords = [], rightWords = [], pairMap = {};
+    let solvedLefts = new Set(), solvedRights = new Set();
     let selectedLeft = null;
-    let rightFirstAttempts = 0;
-    let errors = 0;
+    let rightFirstAttempts = 0, errors = 0;
 
     // timing
-    let hasStarted = false;          // arm idle-pause only after first interaction
     let paused = false;
     let sessionStart = Date.now();
-    let totalPaused = 0;
-    let pauseStart = null;
-    let displayTimerId = null;
-    let idleTimerId = null;
-    let idlePauses = 0;
+    let totalPaused = 0, pauseStart = null, displayTimerId = null, idleTimerId = null, idlePauses = 0;
 
     // anchor + trial timing
-    let anchorTapped = false;
-    let anchorAtMs = 0;
+    let anchorTapped = false, anchorAtMs = 0;
     let currentTrial = null; // {left, leftAtMs, errors, anchorAtMs}
     let anchorReminders = 0;
 
@@ -223,45 +200,35 @@
     let currentSessionIdx = -1;
     let sessionUUID = null;
 
-    // -------- Utils --------
+    // ===== Utils =====
     function shuffle(arr, seed=Math.floor(Math.random()*1e9)){
-      const a = arr.slice();
-      let s = seed;
-      for(let i=a.length-1; i>0; i--){
-        s = (s * 1664525 + 1013904223) % 4294967296;
-        const r = s / 4294967296;
-        const j = Math.floor(r * (i+1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
+      const a=arr.slice(); let s=seed;
+      for(let i=a.length-1;i>0;i--){ s=(s*1664525+1013904223)>>>0; const j=Math.floor((s/4294967296)*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
       return a;
     }
     function beep(freq=520, duration=120){
-      try{
-        const ctx = new (window.AudioContext||window.webkitAudioContext)();
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.type = 'sine'; o.frequency.value=freq; o.connect(g); g.connect(ctx.destination);
-        o.start(); g.gain.setValueAtTime(0.2, ctx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration/1000);
-        setTimeout(()=>ctx.close(), duration+50);
+      try{ const ctx=new (window.AudioContext||window.webkitAudioContext)(); const o=ctx.createOscillator(); const g=ctx.createGain();
+        o.type='sine'; o.frequency.value=freq; o.connect(g); g.connect(ctx.destination); o.start(); g.gain.setValueAtTime(0.2, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+duration/1000); setTimeout(()=>ctx.close(), duration+50);
       }catch{}
     }
-    function msFmt(ms){ const s=Math.floor(ms/1000), m=Math.floor(s/60), ss=s%60; return `${m}:${String(ss).padStart(2,'0')}`; }
-    function debounce(fn, ms=120){ let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), ms); }; }
+    const msFmt = (ms)=>{ const s=Math.floor(ms/1000), m=Math.floor(s/60), ss=s%60; return `${m}:${String(ss).padStart(2,'0')}`; };
+    const debounce = (fn,ms=120)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; };
 
-    // -------- DOM refs --------
+    // ===== DOM =====
     const setSelect = document.getElementById('setSelect');
     const pairCountLab = document.getElementById('pairCountLab');
     const pairCountInp = document.getElementById('pairCount');
     const requireLeftStartInp = document.getElementById('requireLeftStart');
     const requireAnchorInp = document.getElementById('requireAnchor');
+    const enableIdleInp = document.getElementById('enableIdle');
     const idleSecsInp = document.getElementById('idleSecs');
+    const idleHint = document.getElementById('idleHint');
     const bigTextInp = document.getElementById('bigText');
     const useCustomInp = document.getElementById('useCustom');
     const customPairsTA = document.getElementById('customPairs');
     const downloadBtn = document.getElementById('downloadBtn');
     const clearBtn = document.getElementById('clearBtn');
-    const idleHint = document.getElementById('idleHint');
 
     const leftList = document.getElementById('leftList');
     const rightList = document.getElementById('rightList');
@@ -283,9 +250,8 @@
     const pauseOverlay = document.getElementById('pauseOverlay');
     const resumeBtn = document.getElementById('resumeBtn');
 
-    // -------- Init controls --------
+    // ===== Init controls =====
     function initControls(){
-      // Set list
       setSelect.innerHTML = Object.keys(SETS).map(k=>`<option>${k}</option>`).join('');
       setSelect.value = setName;
       pairCountInp.max = String(Math.max(4, SETS[setName].length));
@@ -294,22 +260,31 @@
       setSelect.addEventListener('change', ()=>{
         setName = setSelect.value;
         pairCountInp.max = String(Math.max(4, SETS[setName].length));
-        if(pairCount > SETS[setName].length){ pairCount = SETS[setName].length; pairCountInp.value = pairCount; }
+        if(pairCount>SETS[setName].length){ pairCount=SETS[setName].length; pairCountInp.value=pairCount; pairCountLab.textContent=String(pairCount); }
         newSession();
       });
+
       pairCountInp.addEventListener('input', ()=>{
-        pairCount = parseInt(pairCountInp.value, 10);
+        pairCount = parseInt(pairCountInp.value,10);
         pairCountLab.textContent = String(pairCount);
         newSession();
       });
 
-      requireLeftStartInp.addEventListener('change', ()=>{ requireLeftStart = requireLeftStartInp.checked; });
-      requireAnchorInp.addEventListener('change', ()=>{ requireAnchor = requireAnchorInp.checked; });
+      requireLeftStartInp.addEventListener('change', ()=> requireLeftStart = requireLeftStartInp.checked );
+      requireAnchorInp.addEventListener('change', ()=> requireAnchor = requireAnchorInp.checked );
+
+      enableIdleInp.addEventListener('change', ()=>{
+        enableIdle = enableIdleInp.checked;
+        idleSecsInp.disabled = !enableIdle;
+        if(!enableIdle){ if(idleTimerId) clearTimeout(idleTimerId); idleTimerId = null; }
+      });
+
       idleSecsInp.addEventListener('change', ()=>{
         idleSecs = Math.max(5, Math.min(300, Number(idleSecsInp.value)));
         idleHint.textContent = idleSecs + 's';
-        if(hasStarted) resetIdle();
+        if(enableIdle) resetIdle();
       });
+
       bigTextInp.addEventListener('change', ()=>{ bigText = bigTextInp.checked; renderLists(); adjustAnchorHeight(); });
 
       useCustomInp.addEventListener('change', ()=>{ useCustom = useCustomInp.checked; customPairsTA.disabled = !useCustom; newSession(); });
@@ -318,35 +293,25 @@
       downloadBtn.addEventListener('click', downloadCSV);
       clearBtn.addEventListener('click', ()=>{ clearPersist(); persist = loadPersist(); currentSessionIdx = -1; newSession(); alert('All stored sessions cleared.'); });
 
-      // Collapsers (labels already set for hidden sections)
-      helpBtn.addEventListener('click', ()=>{
-        const hidden = help.classList.toggle('hidden');
-        helpBtn.textContent = hidden ? 'Show help' : 'Hide help';
-      });
-      settingsBtn.addEventListener('click', ()=>{
-        const hidden = settings.classList.toggle('hidden');
-        settingsBtn.textContent = hidden ? 'Show settings' : 'Hide settings';
-      });
+      helpBtn.addEventListener('click', ()=>{ const h=help.classList.toggle('hidden'); helpBtn.textContent = h ? 'Show help' : 'Hide help'; });
+      settingsBtn.addEventListener('click', ()=>{ const h=settings.classList.toggle('hidden'); settingsBtn.textContent = h ? 'Show settings' : 'Hide settings'; });
 
-      pauseBtn.addEventListener('click', ()=>{ if(paused) resume(); else pause(); });
+      pauseBtn.addEventListener('click', ()=>{ paused ? resume() : pause(); });
       newBtn.addEventListener('click', newSession);
-      resumeBtn.addEventListener('click', ()=>{ resume(); if(hasStarted) resetIdle(); });
+      resumeBtn.addEventListener('click', ()=>{ resume(); if(enableIdle) resetIdle(); });
 
-      // Arm idle only after the first interaction; thereafter, reset on each interaction
-      const armOrResetIdle = () => {
-        if (!hasStarted) { hasStarted = true; resetIdle(); }
-        else { resetIdle(); }
-      };
-      window.addEventListener('pointerdown', armOrResetIdle, {passive:true});
-      window.addEventListener('keydown', armOrResetIdle);
-      window.addEventListener('touchstart', armOrResetIdle, {passive:true});
+      // Only reset idle when enabled and the user interacts
+      const maybeResetIdle = ()=>{ if(enableIdle) resetIdle(); };
+      window.addEventListener('pointerdown', maybeResetIdle, {passive:true});
+      window.addEventListener('keydown', maybeResetIdle);
+      window.addEventListener('touchstart', maybeResetIdle, {passive:true});
 
       window.addEventListener('resize', debounce(adjustAnchorHeight, 150));
     }
 
-    // -------- Persistence helpers for sessions --------
+    // ===== Persistence helpers =====
     function finalizePersistSession(){
-      if(currentSessionIdx < 0) return;
+      if(currentSessionIdx<0) return;
       const now = Date.now();
       const rec = persist.sessions[currentSessionIdx];
       rec.ended_at = now;
@@ -362,32 +327,30 @@
     function beginPersistSession(){
       persist = loadPersist();
       const now = Date.now();
-      sessionUUID = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('s_'+ now);
+      sessionUUID = (crypto.randomUUID ? crypto.randomUUID() : ('s_'+now));
       const rec = { id: sessionUUID, started_at: now, setName, pairCount, trials: [], errors: 0, right_first_attempts: 0, idle_pauses: 0, anchor_reminders: 0, total_time_ms: 0, active_time_ms: 0 };
       persist.sessions.push(rec);
       currentSessionIdx = persist.sessions.length - 1;
       savePersist(persist);
     }
 
-    // -------- Session lifecycle --------
+    // ===== Session lifecycle =====
     function newSession(){
       finalizePersistSession();
 
       sessionStart = Date.now();
       totalPaused = 0; pauseStart = null; updateTime(true);
-      idlePauses = 0; solvedLefts = new Set(); solvedRights = new Set();
+      idlePauses = 0; solvedLefts.clear(); solvedRights.clear();
       selectedLeft = null; errors = 0; rightFirstAttempts = 0; anchorReminders = 0;
       logs.length = 0;
 
       paused = false;
-      hasStarted = false;                     // wait for first interaction
       pauseOverlay.classList.add('hidden');
       pauseBtn.textContent = 'Pause';
       pauseBtn.className = 'px-3 py-2 rounded-xl text-sm shadow bg-amber-600 text-white';
 
       anchorTapped = false; anchorAtMs = 0; currentTrial = null;
 
-      // build pairs
       const raw = useCustom
         ? customPairsText.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).map(l=>l.split(',').map(s=>s.trim())).filter(a=>a.length===2)
         : SETS[setName];
@@ -399,7 +362,7 @@
 
       renderLists(); updateStats(); completeBanner.classList.add('hidden');
       beginPersistSession();
-      // do NOT call resetIdle() here — arms after first interaction
+      if(enableIdle) resetIdle();
       setTimeout(adjustAnchorHeight, 0);
     }
 
@@ -408,43 +371,28 @@
 
     function updateTime(reset){
       if(reset && displayTimerId){ clearInterval(displayTimerId); displayTimerId=null; }
-      const tick = ()=>{ if(!paused){ const now = Date.now(); const base = now - sessionStart - totalPaused; statTime.textContent = msFmt(base); } };
+      const tick = ()=>{ if(!paused){ const now=Date.now(); const base = now - sessionStart - totalPaused; statTime.textContent = msFmt(base); } };
       displayTimerId = setInterval(tick, 250);
     }
 
     function resetIdle(){
       if(idleTimerId) clearTimeout(idleTimerId);
-      idleTimerId = setTimeout(()=>{ if(!paused){ pause(); idlePauses++; if(currentSessionIdx>=0){ persist.sessions[currentSessionIdx].idle_pauses = idlePauses; savePersist(persist); } } }, idleSecs*1000);
+      idleTimerId = setTimeout(()=>{ if(enableIdle && !paused){ pause(); idlePauses++; if(currentSessionIdx>=0){ persist.sessions[currentSessionIdx].idle_pauses = idlePauses; savePersist(persist); } } }, idleSecs*1000);
     }
 
-    // -------- Render --------
+    // ===== Render =====
     function makeWordBtn(text, side){
       const btn = document.createElement('button');
       btn.textContent = text;
-      btn.className = [
-        'text-left px-4 py-3 rounded-2xl border shadow-sm transition-transform',
-        bigText? 'text-xl':'text-base',
-        'bg-white hover:bg-slate-50 border-slate-300'
-      ].join(' ');
-      btn.dataset.word = text;
-      btn.dataset.side = side;
+      btn.className = ['text-left px-4 py-3 rounded-2xl border shadow-sm transition-transform', (bigText?'text-xl':'text-base'), 'bg-white hover:bg-slate-50 border-slate-300'].join(' ');
+      btn.dataset.word = text; btn.dataset.side = side;
       return btn;
     }
 
     function renderLists(){
-      leftList.innerHTML = ''; rightList.innerHTML = '';
-      leftWords.forEach(w=>{
-        const btn = makeWordBtn(w,'left');
-        if(solvedLefts.has(w)) makeGreen(btn);
-        btn.addEventListener('click', ()=>onLeftClick(w, btn));
-        leftList.appendChild(btn);
-      });
-      rightWords.forEach(w=>{
-        const btn = makeWordBtn(w,'right');
-        if(solvedRights.has(w)) makeGreen(btn);
-        btn.addEventListener('click', ()=>onRightClick(w, btn));
-        rightList.appendChild(btn);
-      });
+      leftList.innerHTML=''; rightList.innerHTML='';
+      leftWords.forEach(w=>{ const b=makeWordBtn(w,'left'); if(solvedLefts.has(w)) makeGreen(b); b.addEventListener('click', ()=>onLeftClick(w,b)); leftList.appendChild(b); });
+      rightWords.forEach(w=>{ const b=makeWordBtn(w,'right'); if(solvedRights.has(w)) makeGreen(b); b.addEventListener('click', ()=>onRightClick(w,b)); rightList.appendChild(b); });
       adjustAnchorHeight();
     }
 
@@ -454,9 +402,9 @@
       el.disabled = true;
     }
 
-    function highlightPair(left, right){
-      [...leftList.children].forEach(el=>{ if(el.dataset.word===left){ makeGreen(el); }});
-      [...rightList.children].forEach(el=>{ if(el.dataset.word===right){ makeGreen(el); }});
+    function highlightPair(left,right){
+      [...leftList.children].forEach(el=>{ if(el.dataset.word===left) makeGreen(el); });
+      [...rightList.children].forEach(el=>{ if(el.dataset.word===right) makeGreen(el); });
     }
 
     function onLeftClick(w, btn){
@@ -464,8 +412,7 @@
       if(requireAnchor && !anchorTapped){
         anchorReminders++;
         if(currentSessionIdx>=0){ persist.sessions[currentSessionIdx].anchor_reminders = anchorReminders; savePersist(persist); }
-        anchorBtn.classList.add('wiggle','ring-4','ring-red-200');
-        setTimeout(()=>anchorBtn.classList.remove('wiggle','ring-4','ring-red-200'),220);
+        anchorBtn.classList.add('wiggle','ring-4','ring-red-200'); setTimeout(()=>anchorBtn.classList.remove('wiggle','ring-4','ring-red-200'),220);
         beep(360,120);
         return;
       }
@@ -474,7 +421,7 @@
       [...leftList.children].forEach(el=> el.classList.remove('ring-2','ring-amber-500'));
       btn.classList.add('ring-2','ring-amber-500');
       const nowBase = Date.now() - sessionStart - totalPaused;
-      currentTrial = { left: w, leftAtMs: nowBase, errors: 0, anchorAtMs };
+      currentTrial = { left:w, leftAtMs:nowBase, errors:0, anchorAtMs };
     }
 
     function onRightClick(w, btn){
@@ -489,39 +436,31 @@
       }
       const correct = pairMap[selectedLeft];
       const nowBase = Date.now() - sessionStart - totalPaused;
-      if(w === correct){
+      if(w===correct){
         solvedLefts.add(selectedLeft); solvedRights.add(w);
-        highlightPair(selectedLeft, w);
+        highlightPair(selectedLeft,w);
         [...leftList.children].forEach(el=> el.classList.remove('ring-2','ring-amber-500'));
-        logs.push({
-          trial: logs.length+1,
-          left: selectedLeft,
-          rightChosen: w,
-          correct: 1,
-          errorsBeforeCorrect: currentTrial?.errors||0,
-          anchorAtMs: currentTrial?.anchorAtMs||0,
-          leftAtMs: currentTrial?.leftAtMs||0,
-          rightAtMs: nowBase,
-          anchorToLeftLatencyMs: Math.max(0, (currentTrial?.leftAtMs||0) - (currentTrial?.anchorAtMs||0)),
-          leftToRightLatencyMs: Math.max(0, nowBase - (currentTrial?.leftAtMs||0))
-        });
-        const last = logs[logs.length-1];
+        const row = {
+          trial: logs.length+1, left: selectedLeft, rightChosen: w, correct: 1,
+          errorsBeforeCorrect: currentTrial?.errors||0, anchorAtMs: currentTrial?.anchorAtMs||0,
+          leftAtMs: currentTrial?.leftAtMs||0, rightAtMs: nowBase,
+          anchorToLeftLatencyMs: Math.max(0,(currentTrial?.leftAtMs||0)-(currentTrial?.anchorAtMs||0)),
+          leftToRightLatencyMs: Math.max(0, nowBase-(currentTrial?.leftAtMs||0))
+        };
+        logs.push(row);
         if(currentSessionIdx>=0){
           const rec = persist.sessions[currentSessionIdx];
-          rec.trials.push(last);
-          rec.errors = errors;
-          rec.right_first_attempts = rightFirstAttempts;
-          rec.idle_pauses = idlePauses;
-          rec.anchor_reminders = anchorReminders;
+          rec.trials.push(row);
+          rec.errors = errors; rec.right_first_attempts = rightFirstAttempts;
+          rec.idle_pauses = idlePauses; rec.anchor_reminders = anchorReminders;
           rec.pairCount = pairCount; rec.setName = setName;
           const nowAbs = Date.now();
           rec.active_time_ms = nowAbs - sessionStart - totalPaused;
           rec.total_time_ms = nowAbs - sessionStart;
           savePersist(persist);
         }
-        selectedLeft = null; currentTrial = null; anchorTapped = false; anchorAtMs = 0; // require fresh anchor
-        updateStats();
-        checkComplete();
+        selectedLeft = null; currentTrial = null; anchorTapped = false; anchorAtMs = 0;
+        updateStats(); checkComplete();
       } else {
         errors++; statErr.textContent = String(errors);
         if(currentSessionIdx>=0){ persist.sessions[currentSessionIdx].errors = errors; savePersist(persist); }
@@ -530,31 +469,27 @@
       }
     }
 
-    function checkComplete(){
-      const total = leftWords.length;
-      if(solvedLefts.size === total && total>0){
-        completeBanner.classList.remove('hidden');
-      }
-    }
+    function checkComplete(){ const total = leftWords.length; if(solvedLefts.size===total && total>0){ completeBanner.classList.remove('hidden'); } }
 
     // Anchor stripe
     anchorBtn.addEventListener('click', ()=>{
       if(paused) return;
       anchorTapped = true; anchorAtMs = Date.now() - sessionStart - totalPaused;
       anchorBtn.classList.add('ring-4','ring-red-200'); setTimeout(()=>anchorBtn.classList.remove('ring-4','ring-red-200'),200);
+      if(enableIdle) resetIdle();
     });
 
     // Stats
     function updateStats(){
-      const total = leftWords.length; const solved = solvedLefts.size;
+      const total = leftWords.length, solved = solvedLefts.size;
       statSolved.textContent = `${solved}/${total}`;
-      const attempts = solved + errors; // accuracy = correct / (correct + errors)
+      const attempts = solved + errors;
       statAcc.textContent = attempts ? `${Math.round((solved/attempts)*100)}%` : '0%';
       statErr.textContent = String(errors);
       statRFA.textContent = String(rightFirstAttempts);
     }
 
-    // Match anchor height to taller column
+    // Anchor height to taller column
     function adjustAnchorHeight(){
       const leftCard = leftList.parentElement;
       const rightCard = rightList.parentElement;
@@ -562,41 +497,32 @@
       anchorBtn.style.height = h + 'px';
     }
 
-    // CSV export (across all sessions)
+    // CSV
     function downloadCSV(){
       finalizePersistSession();
       persist = loadPersist();
 
       const trialsHeader = ['session_index','session_id','setName','pairCount','trial','left','rightChosen','correct','errorsBeforeCorrect','anchorAtMs','leftAtMs','rightAtMs','anchorToLeftLatencyMs','leftToRightLatencyMs'];
       const trialRows = [];
-      (persist.sessions||[]).forEach((s,idx)=>{
-        (s.trials||[]).forEach(t=>{
-          trialRows.push([idx+1, s.id, s.setName||'', s.pairCount||'', t.trial||'', t.left||'', t.rightChosen||'', t.correct||0, t.errorsBeforeCorrect||0, t.anchorAtMs||0, t.leftAtMs||0, t.rightAtMs||0, t.anchorToLeftLatencyMs||0, t.leftToRightLatencyMs||0]);
-        });
-      });
+      (persist.sessions||[]).forEach((s,idx)=> (s.trials||[]).forEach(t=>{
+        trialRows.push([idx+1,s.id,s.setName||'',s.pairCount||'',t.trial||'',t.left||'',t.rightChosen||'',t.correct||0,t.errorsBeforeCorrect||0,t.anchorAtMs||0,t.leftAtMs||0,t.rightAtMs||0,t.anchorToLeftLatencyMs||0,t.leftToRightLatencyMs||0]);
+      }));
 
       const sumHeader = ['session_index','session_id','setName','pairCount','errors','anchor_reminders','right_first_attempts','idle_pauses','active_time_ms','total_time_ms'];
-      const sumRows = (persist.sessions||[]).map((s,idx)=>[
-        idx+1, s.id, s.setName||'', s.pairCount||'', s.errors||0, s.anchor_reminders||0, s.right_first_attempts||0, s.idle_pauses||0, Math.round(s.active_time_ms||0), Math.round(s.total_time_ms||0)
-      ]);
+      const sumRows = (persist.sessions||[]).map((s,idx)=>[idx+1,s.id,s.setName||'',s.pairCount||'',s.errors||0,s.anchor_reminders||0,s.right_first_attempts||0,s.idle_pauses||0,Math.round(s.active_time_ms||0),Math.round(s.total_time_ms||0)]);
 
       const csv = [
-        ['TRIALS'], trialsHeader, ...trialRows,
-        [], ['SUMMARY_PER_SESSION'], sumHeader, ...sumRows
-      ].map(r=> Array.isArray(r) ? r.join(',') : r).join('\n');
+        ['TRIALS'],trialsHeader,...trialRows,[],
+        ['SUMMARY_PER_SESSION'],sumHeader,...sumRows
+      ].map(r=>Array.isArray(r)?r.join(','):r).join('\n');
 
       const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `word_scavenge_sessions_${new Date().toISOString().replace(/[:.]/g,'-')}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      const a = document.createElement('a'); a.href=url; a.download=`word_scavenge_sessions_${new Date().toISOString().replace(/[:.]/g,'-')}.csv`;
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     }
 
-    // Kick off
+    // Boot
     initControls(); newSession(); updateTime(true);
   </script>
 </body>
