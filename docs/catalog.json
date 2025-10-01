@@ -98,13 +98,6 @@
     "tags": ["executive"]
   },
   {
-    "slug": "visuospatial-blocks",
-    "title": "Visuospatial Blocks",
-    "description": "Recreate block patterns; spatial working memory.",
-    "emoji": "🧩",
-    "tags": ["visuospatial", "memory"]
-  },
-  {
     "slug": "word-scavenger",
     "title": "Word Scavenger",
     "description": "Find words under constraints; phonemic/semantic fluency.",
