@@ -40,7 +40,7 @@
   align-items: flex-start;
   gap: 12px;
 
-  /* Center the red anchor + canvas block */
+      /* Center the red anchor + canvas block */
   justify-content: center;        /* ⟵ key line */
   margin: 12px auto 0;            /* auto side margins to center the block */
   width: fit-content;              /* shrink-wrap to content */
@@ -55,7 +55,14 @@
       box-shadow:0 0 10px rgba(0,0,0,0.1);
       max-width:100%;
       height:auto;
-    }
+      /* Red stripe (left anchor) */
+#leftAnchor{
+  width: 14px;                 /* stripe thickness */
+  background: var(--anchor);   /* #d62828 from your :root */
+  border-radius: 10px;
+  box-shadow: 0 0 0 2px rgba(0,0,0,.04) inset, 0 2px 8px rgba(0,0,0,.08);
+  flex-shrink: 0;              /* don't collapse when the canvas gets wider */
+}
 
     #coach{
       position:absolute; display:none; z-index:10;
@@ -321,15 +328,21 @@
       function hideCoach(){ coach.style.display='none'; logEvent('coach_closed'); }
       coach.addEventListener('click', hideCoach);
       coach.addEventListener('touchstart', (e)=>{ e.preventDefault(); hideCoach(); }, {passive:false});
-
-      function resizeCanvas(){
-        const side = Math.min(520, Math.floor(window.innerWidth * 0.90));
-        canvas.width = side; canvas.height = side;
-        cellSize = canvas.width / cols;
-        placeCoach();
-        drawAll();
-        if(newMazeBtn.style.display !== 'none'){ positionNewMazeButton(); }
+    function syncAnchorHeight(){
+  // Match the stripe height to the canvas’ pixel height
+  leftAnchorEl.style.height = canvas.height + 'px';
       }
+
+  function resizeCanvas(){
+  const side = Math.min(520, Math.floor(window.innerWidth * 0.90));
+  canvas.width = side; canvas.height = side;
+  cellSize = canvas.width / cols;
+  placeCoach();
+  syncAnchorHeight();   // <-- add this line
+  drawAll();
+  if(newMazeBtn.style.display !== 'none'){ positionNewMazeButton(); }
+}
+
       window.addEventListener('resize', resizeCanvas);
 
       // ===== Cell / Maze =====
