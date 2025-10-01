@@ -477,11 +477,17 @@
 
     const approve = doc.querySelector('[data-act="approve"]');
     const reject = doc.querySelector('[data-act="reject"]');
-    approve.onclick = ()=>{
-      if(isGreen){ stats.docCorrect++; log(\`Approved GREEN doc #\${id} ✓\`); }
-      else { stats.docErrors++; log(\`Error: approved RED doc #\${id}\`); }
-      doc.remove(); setStatsPills();
-    };
+ approve.onclick = () => {
+  if (isGreen) {
+    stats.docCorrect++;
+    log(`Approved GREEN doc #${id} ✓`);
+  } else {
+    stats.docErrors++;
+    log(`Error: approved RED doc #${id}`);
+  }
+  doc.remove();
+  setStatsPills();
+};
     reject.onclick = ()=>{
       if(!isGreen){ stats.docCorrect++; log(\`Rejected RED doc #\${id} ✓\`); }
       else { stats.docErrors++; log(\`Error: rejected GREEN doc #\${id}\`); }
