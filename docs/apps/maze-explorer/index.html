@@ -20,74 +20,72 @@
   <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
 
   <style>
-    /* App-specific minimal styles; layout & typography come from shared theme */
-    :root{
-      --green:#2E8B57;
-      --dark:#1c6640;
-      --anchor:#d62828;
-      --goal:#ffd166;
-      --player:#4682B4;
-      --coach:#ffe8ed;
-      --coachBorder:#ef476f;
-      --info:#0b7285;
-    }
-    #rules.callout{
-      border-left:5px solid var(--green);
-    }
-    .wrap{
+:root{
+  --green:#2E8B57;
+  --dark:#1c6640;
+  --anchor:#d62828;
+  --goal:#ffd166;
+  --player:#4682B4;
+  --coach:#ffe8ed;
+  --coachBorder:#ef476f;
+  --info:#0b7285;
+}
+#rules.callout{ border-left:5px solid var(--green); }
+
+.wrap{
   position: relative;
   display: flex;
   align-items: flex-start;
   gap: 12px;
-
-      /* Center the red anchor + canvas block */
-  justify-content: center;        /* ⟵ key line */
-  margin: 12px auto 0;            /* auto side margins to center the block */
-  width: fit-content;              /* shrink-wrap to content */
-  max-width: 100%;                 /* don’t overflow on small screens */
+  justify-content: center;
+  margin: 12px auto 0;
+  width: fit-content;
+  max-width: 100%;
 }
-    #leftAnchor.flash{ animation: flash 0.5s ease-in-out 3; }
-    @keyframes flash { 50%{ filter:brightness(1.4);} }
 
-    #mazeCanvas{
-      touch-action:none; background:#fff;
-      border:4px solid var(--green);
-      box-shadow:0 0 10px rgba(0,0,0,0.1);
-      max-width:100%;
-      height:auto;
-      /* Red stripe (left anchor) */
+#leftAnchor.flash{ animation: flash 0.5s ease-in-out 3; }
+@keyframes flash { 50%{ filter:brightness(1.4);} }
+
+#mazeCanvas{
+  touch-action:none; background:#fff;
+  border:4px solid var(--green);
+  box-shadow:0 0 10px rgba(0,0,0,0.1);
+  max-width:100%;
+  height:auto;
+}
+
+/* ✅ moved OUTSIDE #mazeCanvas and with its own block */
 #leftAnchor{
-  width: 14px;                 /* stripe thickness */
-  background: var(--anchor);   /* #d62828 from your :root */
-  border-radius: 10px;
-  box-shadow: 0 0 0 2px rgba(0,0,0,.04) inset, 0 2px 8px rgba(0,0,0,.08);
-  flex-shrink: 0;              /* don't collapse when the canvas gets wider */
+  width:14px;
+  background:var(--anchor);
+  border-radius:10px;
+  box-shadow:0 0 0 2px rgba(0,0,0,.04) inset, 0 2px 8px rgba(0,0,0,.08);
+  flex-shrink:0;
+  cursor:pointer;
 }
 
-    #coach{
-      position:absolute; display:none; z-index:10;
-      background:var(--coach); border:3px solid var(--coachBorder);
-      border-radius:12px; padding:14px 16px; width:min(260px, 40vw);
-      box-shadow:0 10px 24px rgba(0,0,0,.25);
-      font-size:16px; line-height:1.3;
-    }
-    #coach b{ color:#b30038; }
+#coach{
+  position:absolute; display:none; z-index:10;
+  background:var(--coach); border:3px solid var(--coachBorder);
+  border-radius:12px; padding:14px 16px; width:min(260px, 40vw);
+  box-shadow:0 10px 24px rgba(0,0,0,.25);
+  font-size:16px; line-height:1.3;
+}
+#coach b{ color:#b30038; }
 
-    #anchorTip{ color:#a00; font-weight:600; display:none; }
-    #statusBar, #logBar, #metrics{ color: var(--text); }
+#anchorTip{ color:#a00; font-weight:600; display:none; }
+#statusBar, #logBar, #metrics{ color: var(--text); }
 
-    /* Make buttons adopt theme styles */
-    .dir-btn{ width:60px; height:60px; font-size:24px; }
-    .dir-grid{ display:grid; grid-template-columns: repeat(4, 60px); gap:10px; justify-content:center; }
+.dir-btn{ width:60px; height:60px; font-size:24px; }
+.dir-grid{ display:grid; grid-template-columns: repeat(4, 60px); gap:10px; justify-content:center; }
 
-    /* Responsive sizing for canvas/anchor on small screens */
-    @media (max-width: 720px){
-      #leftAnchor{ height:64vw; }
-      #mazeCanvas{ width:90vw; height:90vw; }
-      #coach{ width:54vw; font-size:15px; }
-      .dir-btn{ width:54px; height:54px; font-size:22px; }
-      .dir-grid{ grid-template-columns: repeat(4, 54px); }
-    }
+@media (max-width: 720px){
+  #leftAnchor{ height:64vw; }     /* will be overridden by inline JS height */
+  #mazeCanvas{ width:90vw; height:90vw; }
+  #coach{ width:54vw; font-size:15px; }
+  .dir-btn{ width:54px; height:54px; font-size:22px; }
+  .dir-grid{ grid-template-columns: repeat(4, 54px); }
+}
   </style>
 </head>
 
