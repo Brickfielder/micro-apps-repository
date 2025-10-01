@@ -1,58 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="color-scheme" content="light dark" />
-  <meta name="theme-color" content="#111827" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <meta name="theme" content="bold dense"/>
+  <meta name="color-scheme" content="light"/>
+  <meta name="app-slug" content="tower-control"/>
+  <!-- Optional explicit overrides (win over catalog) -->
+  <meta name="app-title" content="Tower Control — Trainer"/>
+  <meta name="app-desc" content="Match planes to actions under changing protocols. Timed spawns, accuracy stats, and difficulty levels."/>
 
   <title>Tower Control — Trainer</title>
-  <meta name="description" content="Tower Control trainer with instructions, difficulty levels, and timed spawns." />
-  <meta name="app-slug" content="tower-control" />
+  <meta name="description" content="Tower Control trainer with instructions, difficulty levels, and timed spawns."/>
 
-  <link rel="stylesheet" href="/micro-apps-repository/docs/shared/theme.css" />
-  <script defer src="/micro-apps-repository/docs/shared/frame.js"></script>
+  <!-- Shared assets published at site root -->
+  <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3"/>
+  <script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
+  <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
 
   <style>
-    html,body{margin:0}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,"Helvetica Neue",Arial}
-    :root { --radar-h: 280px; }
-    .app{max-width:1000px;margin:0 auto;display:grid;gap:clamp(12px,1.2vw,18px)}
-    .panel{background:var(--surface,#111827);border:1px solid var(--line,#1f2937);border-radius:16px;box-shadow:var(--shadow,0 1px 2px rgba(0,0,0,.4),0 10px 26px rgba(0,0,0,.6));padding:clamp(16px,2vw,24px)}
-    .radar{position:relative;height:var(--radar-h);border-radius:16px;overflow:hidden;isolation:isolate;background-image:
-      radial-gradient(circle at 50% 50%, transparent 0 1px, var(--surface,#111827) 1px 8%, transparent 8%),
-      radial-gradient(circle at 50% 50%, transparent 0 1px, var(--surface,#111827) 1px 16%, transparent 16%),
-      radial-gradient(circle at 50% 50%, transparent 0 1px, var(--surface,#111827) 1px 24%, transparent 24%),
-      radial-gradient(circle at 50% 50%, var(--line,#1f2937) 0, var(--line,#1f2937) 1px, transparent 1px)}
-    .radar::before,.radar::after{content:"";position:absolute;inset:0;pointer-events:none}
-    .radar::before{background:
-      linear-gradient(var(--line,#1f2937),var(--line,#1f2937)) 50% 0/1px 100% no-repeat,
-      linear-gradient(var(--line,#1f2937),var(--line,#1f2937)) 0 50%/100% 1px no-repeat;opacity:.6}
-    @media (prefers-reduced-motion: no-preference){
-      .radar::after{background:conic-gradient(from 0turn, rgba(255,122,110,.12) 0turn, transparent .15turn);mix-blend-mode:plus-lighter;animation:sweep 3.6s linear infinite}
-      @keyframes sweep{to{transform:rotate(1turn)}}
+    :root{ --radar-h: 320px; }
+    /* App surface uses theme tokens; no dark fallbacks */
+    #app-root{
+      display:grid;
+      gap:clamp(12px,1.2vw,18px);
     }
-    .plane{position:absolute;translate:-50% -50%;width:28px;height:28px;line-height:0;color:#60a5fa;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35));cursor:pointer}
-    .plane svg{width:100%;height:100%;display:block}
-    .plane[data-color=green]{color:#16a34a}.plane[data-color=blue]{color:#3b82f6}.plane[data-color=yellow]{color:#f59e0b}.plane[data-color=red]{color:#ef4444}
-    .plane.selected::after{content:"";position:absolute;inset:-8px;border-radius:999px;border:2px solid var(--accent,#ff7a6e);box-shadow:0 0 0 2px rgba(255,122,110,.25)}
-    .kv{display:grid;grid-template-columns:auto 1fr;gap:.25rem .75rem}.kv dt{color:var(--muted,#9ca3af)}.kv dd{margin:0}
-    .controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(10px,1vw,14px)}
-    @media (min-width:768px){:root{--radar-h:360px}.controls{grid-template-columns:repeat(4,minmax(0,1fr))}}
-    @media (min-width:1024px){.app{grid-template-areas:"radar side" "controls controls";grid-template-columns:2fr 1fr;align-items:start}.radar{grid-area:radar}#side-stack{grid-area:side;display:grid;gap:clamp(12px,1.2vw,18px)}.controls{grid-area:controls}:root{--radar-h:440px}}
-    /* dialog */
-    dialog.app-dialog{border:none;border-radius:16px;box-shadow:var(--shadow);background:var(--surface);color:var(--text);max-width:680px;padding:22px}
-    dialog::backdrop{background:rgba(0,0,0,.45)}
-    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:center;padding:10px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
-    .pill{display:inline-block;padding:6px 12px;border-radius:999px;background:#f2f4f7;color:#334155;font-size:.85rem;font-weight:500}
-    @media (prefers-color-scheme:dark){.pill{background:#1f2937;color:#e5e7eb}}
-    table.map{width:100%;border-collapse:separate;border-spacing:0 6px}
-    .map td{padding:8px 10px;border:1px solid var(--line);border-radius:10px}
+
+    /* Layout: radar + side on wide screens, controls full width */
+    .tc-app{
+      display:grid;
+      gap:clamp(12px,1.2vw,18px);
+    }
+    @media (min-width:1024px){
+      .tc-app{
+        grid-template-areas: "radar side" "controls controls";
+        grid-template-columns: 2fr 1fr;
+        align-items:start;
+      }
+      #radar{ grid-area: radar; }
+      #side-stack{ grid-area: side; display:grid; gap:clamp(12px,1.2vw,18px); }
+      .controls{ grid-area: controls; }
+      :root{ --radar-h: 440px; }
+    }
+    @media (min-width:768px){ :root{ --radar-h: 380px; } }
+
+    .panel{
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: clamp(16px, 2vw, 24px);
+    }
+
+    /* Radar */
+    .radar{
+      position:relative; height:var(--radar-h); border-radius:16px;
+      overflow:hidden; isolation:isolate;
+      background:
+        radial-gradient(circle at 50% 50%, transparent 0 1px, var(--surface) 1px 8%, transparent 8%),
+        radial-gradient(circle at 50% 50%, transparent 0 1px, var(--surface) 1px 16%, transparent 16%),
+        radial-gradient(circle at 50% 50%, transparent 0 1px, var(--surface) 1px 24%, transparent 24%),
+        radial-gradient(circle at 50% 50%, var(--line) 0, var(--line) 1px, transparent 1px);
+    }
+    .radar::before, .radar::after{ content:""; position:absolute; inset:0; pointer-events:none; }
+    .radar::before{
+      background:
+        linear-gradient(var(--line),var(--line)) 50% 0/1px 100% no-repeat,
+        linear-gradient(var(--line),var(--line)) 0 50%/100% 1px no-repeat;
+      opacity:.6;
+    }
+    @media (prefers-reduced-motion: no-preference){
+      .radar::after{
+        background: conic-gradient(from 0turn, color-mix(in oklab, var(--accent), transparent 88%) 0turn, transparent .15turn);
+        mix-blend-mode: plus-lighter;
+        animation: tc-sweep 3.6s linear infinite;
+      }
+      @keyframes tc-sweep{ to { transform: rotate(1turn); } }
+    }
+
+    .plane{
+      position:absolute; translate:-50% -50%;
+      width:28px; height:28px; line-height:0;
+      color:#3b82f6; filter:drop-shadow(0 1px 1px rgba(0,0,0,.25));
+      cursor:pointer;
+    }
+    .plane svg{ width:100%; height:100%; display:block; }
+    .plane[data-color=green]{ color:#16a34a; }
+    .plane[data-color=blue]{ color:#3b82f6; }
+    .plane[data-color=yellow]{ color:#f59e0b; }
+    .plane[data-color=red]{ color:#ef4444; }
+    .plane.selected::after{
+      content:""; position:absolute; inset:-8px; border-radius:999px;
+      border:2px solid var(--accent); box-shadow:0 0 0 2px color-mix(in oklab, var(--accent), transparent 75%);
+    }
+
+    /* Key/Value list */
+    .kv{ display:grid; grid-template-columns:auto 1fr; gap:.25rem .75rem; }
+    .kv dt{ color: var(--muted); }
+    .kv dd{ margin:0; }
+
+    /* Controls grid uses theme buttons */
+    .controls{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:clamp(10px,1vw,14px);
+    }
+    @media (min-width:768px){
+      .controls{ grid-template-columns: repeat(4, minmax(0,1fr)); }
+    }
+
+    /* Table for protocols */
+    table.map{ width:100%; border-collapse:separate; border-spacing:0 6px; }
+    .map td{
+      padding:8px 10px; border:1px solid var(--line); border-radius:10px;
+      background: var(--surface);
+    }
   </style>
 </head>
 <body>
+  <!-- frame.js injects the hero above this and wraps in .app-wrap -->
   <div id="app-root">
-    <main class="app" data-app-title="Tower Control" data-app-tags="executive, attention" data-app-version="trainer-1">
+    <main class="tc-app" data-app-title="Tower Control" data-app-tags="executive, attention" data-app-version="trainer-1">
 
       <section class="panel radar" id="radar" aria-label="Radar display" role="img"></section>
 
@@ -69,11 +137,11 @@
                 <option value="hard">Hard</option>
               </select>
             </label>
-            <button class="button" id="reshuffle">New Round</button>
-            <button class="button" id="show-help">Instructions</button>
-            <button class="button primary" id="start">Start</button>
-            <button class="button" id="pause">Pause</button>
-            <button class="button" id="reset">Reset</button>
+            <button class="button" id="reshuffle" type="button">New Round</button>
+            <button class="button" id="show-help" type="button">Instructions</button>
+            <button class="button primary" id="start" type="button">Start</button>
+            <button class="button" id="pause" type="button">Pause</button>
+            <button class="button" id="reset" type="button">Reset</button>
           </div>
         </section>
 
@@ -105,11 +173,11 @@
       <li><strong>Check Active Protocols</strong> (color → required action).</li>
       <li><strong>Tap a plane</strong> to select it, then <strong>tap an action</strong>.</li>
       <li>Correct action → counts as <em>Completed</em>. Wrong action → <em>Failed</em>.</li>
-      <li>New planes spawn over time. Difficulty controls spawn rate & max planes.</li>
+      <li>New planes spawn over time. Difficulty controls spawn rate &amp; max planes.</li>
       <li>Use <em>New Round</em> anytime to reshuffle the protocols.</li>
     </ol>
     <div class="toolbar" style="justify-content:flex-end">
-      <button class="button" id="close-help">Close</button>
+      <button class="button" id="close-help" type="button">Close</button>
     </div>
   </dialog>
 
@@ -159,7 +227,7 @@
     }
 
     function newRound(){
-      // create a one-to-one mapping of COLORS to ACTIONS (shuffle)
+      // one-to-one mapping of COLORS to ACTIONS (shuffle)
       const shuffled = [...ACTIONS].sort(()=>Math.random()-0.5);
       map = {};
       COLORS.forEach((c, i)=> map[c] = shuffled[i % shuffled.length]);
@@ -212,7 +280,7 @@
     }
 
     function startSpawning(){
-      if (spawnTimer) clearInterval(spawnTimer);
+      clearInterval(spawnTimer);
       spawnTimer = setInterval(spawnPlane, cfg.spawnMs);
     }
     function stopSpawning(){
@@ -252,10 +320,9 @@
     // ======= Init =======
     newRound();
     updateStatus();
-    // First-run instructions
-    el.help.showModal();
+    el.help.showModal(); // first-run instructions
 
-    // Expose for future hooks
+    // Expose for hooks
     window.app = { handleAction, setDifficulty, newRound };
   })();
   </script>
