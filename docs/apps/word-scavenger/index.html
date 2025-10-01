@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Word Scavenge — USN rehab (updated)</title>
 
-  <!-- Tailwind (kept because the app uses its utility classes) -->
+  <!-- Tailwind (CDN for fast iteration) -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Micro-Apps shared assets (served from repo root) -->
+  <!-- Micro-Apps shared assets -->
   <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3">
   <script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
   <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
@@ -31,9 +31,8 @@
 </head>
 
 <body>
-  <!-- Frame.js will wrap this in .app-wrap and inject the hero -->
   <main id="app-root">
-    <!-- Top toolbar -->
+    <!-- Toolbar -->
     <header class="sticky top-0 z-10 bg-white/80 backdrop-blur border border-slate-200 rounded-xl px-4 py-3">
       <div class="max-w-6xl mx-auto flex items-center justify-between gap-3">
         <div class="flex items-center gap-3">
@@ -46,16 +45,16 @@
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <button id="helpBtn" class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-sm">Hide help</button>
-          <button id="settingsBtn" class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-sm">Hide settings</button>
+          <button id="helpBtn" class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-sm">Show help</button>
+          <button id="settingsBtn" class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-sm">Show settings</button>
           <button id="pauseBtn" class="px-3 py-2 rounded-xl text-sm shadow bg-amber-600 text-white">Pause</button>
           <button id="newBtn" class="px-3 py-2 rounded-xl text-sm bg-slate-900 text-white shadow">New session</button>
         </div>
       </div>
     </header>
 
-    <!-- Help -->
-    <section id="help" class="mt-4 mb-4 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+    <!-- Help (collapsed on load) -->
+    <section id="help" class="hidden mt-4 mb-4 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
       <div class="font-semibold mb-1">How it works</div>
       <ul class="list-disc ml-5 text-sm text-slate-600 space-y-1">
         <li>Before <em>every</em> match, the patient must <span class="font-semibold text-red-600">tap the red left anchor stripe</span>.</li>
@@ -67,8 +66,8 @@
       </ul>
     </section>
 
-    <!-- Settings -->
-    <section id="settings" class="mb-6 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm grid md:grid-cols-2 gap-4">
+    <!-- Settings (collapsed on load) -->
+    <section id="settings" class="hidden mb-6 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm grid md:grid-cols-2 gap-4">
       <div class="space-y-3">
         <label class="block text-sm">Word set</label>
         <select id="setSelect" class="w-full p-2 rounded-xl border border-slate-300"></select>
@@ -122,7 +121,7 @@
 
     <!-- Game area -->
     <section class="grid md:grid-cols-[auto,1fr,1fr] items-start gap-4">
-      <!-- Left anchor stripe (sticky, tall) -->
+      <!-- Left anchor stripe -->
       <div id="anchorBtn" class="anchor-stripe sticky">ANCHOR</div>
 
       <!-- Left column -->
@@ -203,9 +202,11 @@
     let rightFirstAttempts = 0;
     let errors = 0;
 
+    // timing
+    let hasStarted = false;          // arm idle-pause only after first interaction
     let paused = false;
     let sessionStart = Date.now();
-    let totalPaused = 0; // ms
+    let totalPaused = 0;
     let pauseStart = null;
     let displayTimerId = null;
     let idleTimerId = null;
@@ -307,7 +308,7 @@
       idleSecsInp.addEventListener('change', ()=>{
         idleSecs = Math.max(5, Math.min(300, Number(idleSecsInp.value)));
         idleHint.textContent = idleSecs + 's';
-        resetIdle();
+        if(hasStarted) resetIdle();
       });
       bigTextInp.addEventListener('change', ()=>{ bigText = bigTextInp.checked; renderLists(); adjustAnchorHeight(); });
 
@@ -317,6 +318,7 @@
       downloadBtn.addEventListener('click', downloadCSV);
       clearBtn.addEventListener('click', ()=>{ clearPersist(); persist = loadPersist(); currentSessionIdx = -1; newSession(); alert('All stored sessions cleared.'); });
 
+      // Collapsers (labels already set for hidden sections)
       helpBtn.addEventListener('click', ()=>{
         const hidden = help.classList.toggle('hidden');
         helpBtn.textContent = hidden ? 'Show help' : 'Hide help';
@@ -328,10 +330,17 @@
 
       pauseBtn.addEventListener('click', ()=>{ if(paused) resume(); else pause(); });
       newBtn.addEventListener('click', newSession);
-      resumeBtn.addEventListener('click', ()=>{ resume(); resetIdle(); });
+      resumeBtn.addEventListener('click', ()=>{ resume(); if(hasStarted) resetIdle(); });
 
-      window.addEventListener('pointerdown', resetIdle);
-      window.addEventListener('keydown', resetIdle);
+      // Arm idle only after the first interaction; thereafter, reset on each interaction
+      const armOrResetIdle = () => {
+        if (!hasStarted) { hasStarted = true; resetIdle(); }
+        else { resetIdle(); }
+      };
+      window.addEventListener('pointerdown', armOrResetIdle, {passive:true});
+      window.addEventListener('keydown', armOrResetIdle);
+      window.addEventListener('touchstart', armOrResetIdle, {passive:true});
+
       window.addEventListener('resize', debounce(adjustAnchorHeight, 150));
     }
 
@@ -369,7 +378,13 @@
       idlePauses = 0; solvedLefts = new Set(); solvedRights = new Set();
       selectedLeft = null; errors = 0; rightFirstAttempts = 0; anchorReminders = 0;
       logs.length = 0;
-      paused = false; pauseOverlay.classList.add('hidden'); pauseBtn.textContent = 'Pause'; pauseBtn.className = 'px-3 py-2 rounded-xl text-sm shadow bg-amber-600 text-white';
+
+      paused = false;
+      hasStarted = false;                     // wait for first interaction
+      pauseOverlay.classList.add('hidden');
+      pauseBtn.textContent = 'Pause';
+      pauseBtn.className = 'px-3 py-2 rounded-xl text-sm shadow bg-amber-600 text-white';
+
       anchorTapped = false; anchorAtMs = 0; currentTrial = null;
 
       // build pairs
@@ -384,7 +399,7 @@
 
       renderLists(); updateStats(); completeBanner.classList.add('hidden');
       beginPersistSession();
-      resetIdle();
+      // do NOT call resetIdle() here — arms after first interaction
       setTimeout(adjustAnchorHeight, 0);
     }
 
@@ -449,7 +464,10 @@
       if(requireAnchor && !anchorTapped){
         anchorReminders++;
         if(currentSessionIdx>=0){ persist.sessions[currentSessionIdx].anchor_reminders = anchorReminders; savePersist(persist); }
-        anchorBtn.classList.add('wiggle'); setTimeout(()=>anchorBtn.classList.remove('wiggle'),220); beep(360,120); return;
+        anchorBtn.classList.add('wiggle','ring-4','ring-red-200');
+        setTimeout(()=>anchorBtn.classList.remove('wiggle','ring-4','ring-red-200'),220);
+        beep(360,120);
+        return;
       }
       if(solvedLefts.has(w)) return;
       selectedLeft = w;
@@ -464,7 +482,7 @@
       if(!selectedLeft){
         if(requireLeftStart){
           rightFirstAttempts++; statRFA.textContent = String(rightFirstAttempts);
-          if(currentSessionIdx>=0){ persist.sessions[currentSessionIdx].right_first_attempts = rightFirstAttempts; savePersist(persist);}
+          if(currentSessionIdx>=0){ persist.sessions[currentSessionIdx].right_first_attempts = rightFirstAttempts; savePersist(persist); }
           btn.classList.add('wiggle'); setTimeout(()=>btn.classList.remove('wiggle'),220); beep(360,120);
         }
         return;
@@ -536,7 +554,7 @@
       statRFA.textContent = String(rightFirstAttempts);
     }
 
-    // Dynamically match anchor height to the taller column
+    // Match anchor height to taller column
     function adjustAnchorHeight(){
       const leftCard = leftList.parentElement;
       const rightCard = rightList.parentElement;
@@ -544,7 +562,7 @@
       anchorBtn.style.height = h + 'px';
     }
 
-    // CSV export (across all persisted sessions)
+    // CSV export (across all sessions)
     function downloadCSV(){
       finalizePersistSession();
       persist = loadPersist();
