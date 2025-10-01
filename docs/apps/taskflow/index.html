@@ -424,244 +424,244 @@ sourceEl.addEventListener('dragend', ()=>{
     addedOrder = [];
     el('confirmBtn').disabled = true;
     el('planList').classList.remove('inactive');
-    el('status').textContent = \`Scenario: \${s.emoji} \${s.name} · \${currentDifficulty}\`;
-    wireInteractions();
-    updateBriefing();
+     el('status').textContent = `Scenario: ${s.emoji} ${s.name} · ${currentDifficulty}`;
+  wireInteractions();
+  updateBriefing();
+}
+function wireInteractions(){
+  disableTapAffordances();
+  const coarse = window.matchMedia('(pointer: coarse)').matches || ('ontouchstart' in window);
+  if(coarse){ setModeTap(); enableTapAffordances(); }
+  else { setModeDrag(); makeSourceToTarget(el('planList'), el('checkList'), (id)=>{addedOrder.push(id); updateSourceLockState();}, ()=>{}); }
+}
+function updateSourceLockState(){
+  const src = el('planList');
+  const empty = src.querySelectorAll('.pill').length===0;
+  el('confirmBtn').disabled = !empty;
+  if(empty){ src.classList.add('inactive'); } else { src.classList.remove('inactive'); }
+}
+
+/* =========================
+   Alignment & Reflection
+   ========================= */
+function computeFeedback(){
+  const s = SCENARIOS[currentScenarioKey];
+  const steps = s.steps[currentDifficulty];
+  const suggested = s.ideal[currentDifficulty];
+  const flex = (s.flexGroups?.[currentDifficulty]) || [];
+  const stepsById = Object.fromEntries(steps.map(st=>[st.id,st]));
+
+  // Suggested
+  const idealList = el('idealList'); clearNode(idealList);
+  suggested.forEach((id, idx)=>{
+    const p = makePill(stepsById[id]); p.appendChild(tag('#'+(idx+1))); idealList.appendChild(p);
+  });
+
+  // User
+  const userList = el('userList'); clearNode(userList);
+  const alignedIndices = evaluateAlignmentWithFlex(suggested, checkOrder, flex);
+  checkOrder.forEach((id, idx)=>{
+    const p = makePill(stepsById[id]); p.appendChild(tag('#'+(idx+1)));
+    if(alignedIndices.has(idx)) p.classList.add('aligned');
+    userList.appendChild(p);
+  });
+
+  // Summary
+  el('summary').textContent = `Aligned anchors: ${alignedIndices.size} / ${suggested.length}`;
+
+  // Reflections
+  const refl = el('reflections'); clearNode(refl);
+  const points = buildReflections(currentScenarioKey, currentDifficulty, suggested, checkOrder);
+  if(points.length===0){
+    const p = document.createElement('p');
+    p.textContent = "🟦 Reflection: Compare your plan with the suggested one. Do the steps seem similar? Would you change anything—what and why?";
+    refl.appendChild(p);
+  } else {
+    const grouped = groupReflections(points);
+    for(const [title, items] of grouped){
+      const h3 = document.createElement('h3'); h3.textContent = title; refl.appendChild(h3);
+      const ul = document.createElement('ul');
+      items.forEach(t=>{ const li=document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+      refl.appendChild(ul);
+    }
   }
-  function wireInteractions(){
-    disableTapAffordances();
-    const coarse = window.matchMedia('(pointer: coarse)').matches || ('ontouchstart' in window);
-    if(coarse){ setModeTap(); enableTapAffordances(); }
-    else { setModeDrag(); makeSourceToTarget(el('planList'), el('checkList'), (id)=>{addedOrder.push(id); updateSourceLockState();}, ()=>{}); }
+}
+
+function evaluateAlignmentWithFlex(suggested, user, flexGroups){
+  const aligned = new Set();
+  const indexOf = Object.fromEntries(suggested.map((id,i)=>[id,i]));
+
+  const flexIndexPairs = flexGroups.map(([a,b])=>{
+    const ia = indexOf[a], ib = indexOf[b];
+    return ia<ib ? [ia,ib,a,b] : [ib,ia,b,a];
+  });
+  flexIndexPairs.forEach(([i1,i2,a,b])=>{
+    const setIdeal = new Set([a,b]);
+    const ok = setIdeal.has(user[i1]) && setIdeal.has(user[i2]) && user[i1]!==user[i2];
+    if(ok){ aligned.add(i1); aligned.add(i2); }
+  });
+
+  for(let i=0;i<suggested.length;i++){
+    if(aligned.has(i)) continue;
+    if(user[i] === suggested[i]) aligned.add(i);
   }
-  function updateSourceLockState(){
-    const src = el('planList');
-    const empty = src.querySelectorAll('.pill').length===0;
-    el('confirmBtn').disabled = !empty;
-    if(empty){ src.classList.add('inactive'); } else { src.classList.remove('inactive'); }
-  }
+  return aligned;
+}
 
-  /* =========================
-     Alignment & Reflection
-     ========================= */
-  function computeFeedback(){
-    const s = SCENARIOS[currentScenarioKey];
-    const steps = s.steps[currentDifficulty];
-    const suggested = s.ideal[currentDifficulty];
-    const flex = (s.flexGroups?.[currentDifficulty]) || [];
-    const stepsById = Object.fromEntries(steps.map(st=>[st.id,st]));
+function buildReflections(sKey, diff, suggested, user){
+  const pos = Object.fromEntries(user.map((id,i)=>[id,i]));
+  const pts = [];
+  const before = (a,b)=> pos[a]!=null && pos[b]!=null && pos[a] < pos[b];
+  const exists = id => pos[id]!=null;
 
-    // Suggested
-    const idealList = el('idealList'); clearNode(idealList);
-    suggested.forEach((id, idx)=>{
-      const p = makePill(stepsById[id]); p.appendChild(tag('#'+(idx+1))); idealList.appendChild(p);
-    });
-
-    // User
-    const userList = el('userList'); clearNode(userList);
-    const alignedIndices = evaluateAlignmentWithFlex(suggested, checkOrder, flex);
-    checkOrder.forEach((id, idx)=>{
-      const p = makePill(stepsById[id]); p.appendChild(tag('#'+(idx+1)));
-      if(alignedIndices.has(idx)) p.classList.add('aligned');
-      userList.appendChild(p);
-    });
-
-    // Summary
-    el('summary').textContent = \`Aligned anchors: \${alignedIndices.size} / \${suggested.length}\`;
-
-    // Reflections
-    const refl = el('reflections'); clearNode(refl);
-    const points = buildReflections(currentScenarioKey, currentDifficulty, suggested, checkOrder);
-    if(points.length===0){
-      const p = document.createElement('p');
-      p.textContent = "🟦 Reflection: Compare your plan with the suggested one. Do the steps seem similar? Would you change anything—what and why?";
-      refl.appendChild(p);
-    } else {
-      const grouped = groupReflections(points);
-      for(const [title, items] of grouped){
-        const h3 = document.createElement('h3'); h3.textContent = title; refl.appendChild(h3);
-        const ul = document.createElement('ul');
-        items.forEach(t=>{ const li=document.createElement('li'); li.textContent = t; ul.appendChild(li); });
-        refl.appendChild(ul);
-      }
+  if(sKey === 'meal' && diff === 'medium'){
+    if(exists('pickup_child') && exists('switch_off') && !before('switch_off','pickup_child')){
+      pts.push({cat:'Safety', msg:'Before leaving, consider switching the hob off first.'});
+    }
+    if(exists('pickup_child') && exists('pasta_to_table') && !before('pasta_to_table','pickup_child')){
+      pts.push({cat:'Safety', msg:'Placing hot pasta safely on the table before leaving helps avoid unattended food.'});
+    }
+    if(exists('boil_pasta') && exists('boil_water') && pos['boil_pasta'] < pos['boil_water']){
+      pts.push({cat:'Dependencies', msg:'Pasta usually goes in after the water is boiling—does your order reflect that?'});
+    }
+    if(exists('prep_sauce') && exists('gather_items') && pos['prep_sauce'] < pos['gather_items']){
+      pts.push({cat:'Dependencies', msg:'Prepping the sauce works best after gathering ingredients and equipment.'});
+    }
+    if(exists('set_timer') && exists('pickup_child') && !before('set_timer','pickup_child')){
+      pts.push({cat:'Timing', msg:'Setting a timer before leaving can help prevent overcooking.'});
+    }
+    if(exists('lay_table') && exists('pickup_child') && !before('lay_table','pickup_child')){
+      pts.push({cat:'Efficiency', msg:'Laying the table before pickup can make serving easier when you return.'});
+    }
+    if(exists('wash_hands') && (exists('boil_pasta')||exists('prep_sauce')) && !before('wash_hands', (exists('prep_sauce')?'prep_sauce':'boil_pasta'))){
+      pts.push({cat:'Hygiene', msg:'Consider washing hands before handling food or equipment.'});
+    }
+    if(exists('enjoy_meal') && exists('pickup_child') && !before('pickup_child','enjoy_meal')){
+      pts.push({cat:'Flow', msg:'Enjoying the meal typically comes after the pickup—does your plan reflect that?'});
     }
   }
 
-  function evaluateAlignmentWithFlex(suggested, user, flexGroups){
-    const aligned = new Set();
-    const indexOf = Object.fromEntries(suggested.map((id,i)=>[id,i]));
-
-    const flexIndexPairs = flexGroups.map(([a,b])=>{
-      const ia = indexOf[a], ib = indexOf[b];
-      return ia<ib ? [ia,ib,a,b] : [ib,ia,b,a];
-    });
-    flexIndexPairs.forEach(([i1,i2,a,b])=>{
-      const setIdeal = new Set([a,b]);
-      const ok = setIdeal.has(user[i1]) && setIdeal.has(user[i2]) && user[i1]!==user[i2];
-      if(ok){ aligned.add(i1); aligned.add(i2); }
-    });
-
-    for(let i=0;i<suggested.length;i++){
-      if(aligned.has(i)) continue;
-      if(user[i] === suggested[i]) aligned.add(i);
+  if(sKey === 'clinic' && diff === 'medium'){
+    if(exists('prepare_docs') && exists('leave_home') && !before('prepare_docs','leave_home')){
+      pts.push({cat:'Preparation', msg:'Having documents ready before leaving can reduce stress at check-in.'});
     }
-    return aligned;
-  }
-
-  function buildReflections(sKey, diff, suggested, user){
-    const pos = Object.fromEntries(user.map((id,i)=>[id,i]));
-    const pts = [];
-    const before = (a,b)=> pos[a]!=null && pos[b]!=null && pos[a] < pos[b];
-    const exists = id => pos[id]!=null;
-
-    if(sKey === 'meal' && diff === 'medium'){
-      if(exists('pickup_child') && exists('switch_off') && !before('switch_off','pickup_child')){
-        pts.push({cat:'Safety', msg:'Before leaving, consider switching the hob off first.'});
-      }
-      if(exists('pickup_child') && exists('pasta_to_table') && !before('pasta_to_table','pickup_child')){
-        pts.push({cat:'Safety', msg:'Placing hot pasta safely on the table before leaving helps avoid unattended food.'});
-      }
-      if(exists('boil_pasta') && exists('boil_water') && pos['boil_pasta'] < pos['boil_water']){
-        pts.push({cat:'Dependencies', msg:'Pasta usually goes in after the water is boiling—does your order reflect that?'});
-      }
-      if(exists('prep_sauce') && exists('gather_items') && pos['prep_sauce'] < pos['gather_items']){
-        pts.push({cat:'Dependencies', msg:'Prepping the sauce works best after gathering ingredients and equipment.'});
-      }
-      if(exists('set_timer') && exists('pickup_child') && !before('set_timer','pickup_child')){
-        pts.push({cat:'Timing', msg:'Setting a timer before leaving can help prevent overcooking.'});
-      }
-      if(exists('lay_table') && exists('pickup_child') && !before('lay_table','pickup_child')){
-        pts.push({cat:'Efficiency', msg:'Laying the table before pickup can make serving easier when you return.'});
-      }
-      if(exists('wash_hands') && (exists('boil_pasta')||exists('prep_sauce')) && !before('wash_hands', (exists('prep_sauce')?'prep_sauce':'boil_pasta'))){
-        pts.push({cat:'Hygiene', msg:'Consider washing hands before handling food or equipment.'});
-      }
-      if(exists('enjoy_meal') && exists('pickup_child') && !before('pickup_child','enjoy_meal')){
-        pts.push({cat:'Flow', msg:'Enjoying the meal typically comes after the pickup—does your plan reflect that?'});
-      }
+    if(exists('ready_travel') && exists('leave_home') && !before('ready_travel','leave_home')){
+      pts.push({cat:'Preparation', msg:'Charging phone / getting the travel card ready before leaving may help avoid delays.'});
     }
-
-    if(sKey === 'clinic' && diff === 'medium'){
-      if(exists('prepare_docs') && exists('leave_home') && !before('prepare_docs','leave_home')){
-        pts.push({cat:'Preparation', msg:'Having documents ready before leaving can reduce stress at check-in.'});
-      }
-      if(exists('ready_travel') && exists('leave_home') && !before('ready_travel','leave_home')){
-        pts.push({cat:'Preparation', msg:'Charging phone / getting the travel card ready before leaving may help avoid delays.'});
-      }
-      if(exists('check_in') && exists('see_doctor') && !before('check_in','see_doctor')){
-        pts.push({cat:'Clinic flow', msg:'Check-in usually happens before seeing the doctor.'});
-      }
-      if(exists('validate_pay') && exists('bus_home') && !before('validate_pay','bus_home')){
-        pts.push({cat:'Logistics', msg:'Validating tickets / payments before heading home can be helpful.'});
-      }
-      if(exists('groceries') && exists('collect_rx') && pos['groceries'] < pos['collect_rx']){
-        pts.push({cat:'Efficiency', msg:'Would collecting the prescription before groceries make the route simpler? (Either can be sensible.)'});
-      }
+    if(exists('check_in') && exists('see_doctor') && !before('check_in','see_doctor')){
+      pts.push({cat:'Clinic flow', msg:'Check-in usually happens before seeing the doctor.'});
     }
-
-    const seen = new Set(); 
-    return pts.filter(p=>{ const key=p.cat+'|'+p.msg; if(seen.has(key)) return false; seen.add(key); return true; });
-  }
-
-  function groupReflections(points){
-    const map = new Map();
-    for(const p of points){
-      if(!map.has(p.cat)) map.set(p.cat, []);
-      map.get(p.cat).push('💡 ' + p.msg);
+    if(exists('validate_pay') && exists('bus_home') && !before('validate_pay','bus_home')){
+      pts.push({cat:'Logistics', msg:'Validating tickets / payments before heading home can be helpful.'});
     }
-    const order = ['Safety','Hygiene','Timing','Dependencies','Preparation','Clinic flow','Logistics','Efficiency','Flow'];
-    const out = [];
-    order.forEach(cat=>{ if(map.has(cat)) out.push([cat, map.get(cat)]); });
-    for(const [k,v] of map){ if(!order.includes(k)) out.push([k,v]); }
-    return out;
+    if(exists('groceries') && exists('collect_rx') && pos['groceries'] < pos['collect_rx']){
+      pts.push({cat:'Efficiency', msg:'Would collecting the prescription before groceries make the route simpler? (Either can be sensible.)'});
+    }
   }
 
-  /* =========================
-     CSV Logging (+ shared augmenter adds clinician_comment)
-     ========================= */
-  function appendLog(){
-    const now = new Date();
-    const s = SCENARIOS[currentScenarioKey];
-    const suggested = s.ideal[currentDifficulty];
-    const flex = (s.flexGroups?.[currentDifficulty]) || [];
-    const aligned = evaluateAlignmentWithFlex(suggested, checkOrder, flex).size;
-    const duration = trialStart ? Math.round((now - trialStart)/1000) : null;
+  const seen = new Set(); 
+  return pts.filter(p=>{ const key=p.cat+'|'+p.msg; if(seen.has(key)) return false; seen.add(key); return true; });
+}
 
-    LOG.push({
-      timestamp: now.toISOString(),
-      trial_id: trialId,
-      scenario: s.name,
-      difficulty: currentDifficulty,
-      steps_n: suggested.length,
-      added_order: addedOrder.join('|'),
-      final_order: checkOrder.join('|'),
-      suggested_order: suggested.join('|'),
-      aligned_anchors: aligned,
-      seconds: duration
-    });
-    try{ localStorage.setItem('taskflow_log_soft', JSON.stringify(LOG)); }catch(e){}
+function groupReflections(points){
+  const map = new Map();
+  for(const p of points){
+    if(!map.has(p.cat)) map.set(p.cat, []);
+    map.get(p.cat).push('💡 ' + p.msg);
   }
+  const order = ['Safety','Hygiene','Timing','Dependencies','Preparation','Clinic flow','Logistics','Efficiency','Flow'];
+  const out = [];
+  order.forEach(cat=>{ if(map.has(cat)) out.push([cat, map.get(cat)]); });
+  for(const [k,v] of map){ if(!order.includes(k)) out.push([k,v]); }
+  return out;
+}
 
-  function downloadCSV(){
-    const rows = [
-      ["timestamp","trial_id","scenario","difficulty","steps_n","added_order","final_order","suggested_order","aligned_anchors","seconds"],
-      ...LOG.map(r=>[
-        r.timestamp, r.trial_id, r.scenario, r.difficulty, r.steps_n, r.added_order, r.final_order, r.suggested_order, r.aligned_anchors, r.seconds
-      ])
-    ];
-    const csv = rows.map(r=>r.map(cell=>{
-      const s = String(cell);
-      return (s.includes(',')||s.includes('|')) ? '"'+s.replaceAll('"','""')+'"' : s;
-    }).join(',')).join('\n');
+/* =========================
+   CSV Logging (+ shared augmenter adds clinician_comment)
+   ========================= */
+function appendLog(){
+  const now = new Date();
+  const s = SCENARIOS[currentScenarioKey];
+  const suggested = s.ideal[currentDifficulty];
+  const flex = (s.flexGroups?.[currentDifficulty]) || [];
+  const aligned = evaluateAlignmentWithFlex(suggested, checkOrder, flex).size;
+  const duration = trialStart ? Math.round((now - trialStart)/1000) : null;
 
-    const blob = new Blob([csv], {type:'text/csv'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `taskflow_log_${new Date().toISOString().replace(/[:.]/g,'-')}.csv`;
-    document.body.appendChild(a); a.click(); a.remove();
-  }
+  LOG.push({
+    timestamp: now.toISOString(),
+    trial_id: trialId,
+    scenario: s.name,
+    difficulty: currentDifficulty,
+    steps_n: suggested.length,
+    added_order: addedOrder.join('|'),
+    final_order: checkOrder.join('|'),
+    suggested_order: suggested.join('|'),
+    aligned_anchors: aligned,
+    seconds: duration
+  });
+  try{ localStorage.setItem('taskflow_log_soft', JSON.stringify(LOG)); }catch(e){}
+}
 
-  /* =========================
-     Wiring
-     ========================= */
-  function init(){
-    try{
-      const saved = localStorage.getItem('taskflow_log_soft');
-      if(saved) { const parsed = JSON.parse(saved); if(Array.isArray(parsed)) LOG.push(...parsed); }
-    }catch(e){}
+function downloadCSV(){
+  const rows = [
+    ["timestamp","trial_id","scenario","difficulty","steps_n","added_order","final_order","suggested_order","aligned_anchors","seconds"],
+    ...LOG.map(r=>[
+      r.timestamp, r.trial_id, r.scenario, r.difficulty, r.steps_n, r.added_order, r.final_order, r.suggested_order, r.aligned_anchors, r.seconds
+    ])
+  ];
+  const csv = rows.map(r=>r.map(cell=>{
+    const s = String(cell);
+    return (s.includes(',')||s.includes('|')) ? '"'+s.replaceAll('"','""')+'"' : s;
+  }).join(',')).join('\n');
 
-    el('scenarioSelect').addEventListener('change', e=>{
-      currentScenarioKey = e.target.value; updateBriefing();
-    });
-    el('difficultySelect').addEventListener('change', e=>{ currentDifficulty = e.target.value; });
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `taskflow_log_${new Date().toISOString().replace(/[:.]/g,'-')}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+}
 
-    el('startBtn').addEventListener('click', ()=>{
-      trialId += 1; trialStart = new Date();
-      loadScenario();
-      el('planPanel').scrollIntoView({behavior:'smooth', block:'start'});
-      el('confirmBtn').disabled = true;
-    });
-    el('confirmBtn').addEventListener('click', ()=>{
-      checkOrder = readOrder(el('checkList'));
-      computeFeedback();
-      appendLog();
-      el('feedbackPanel').scrollIntoView({behavior:'smooth', block:'start'});
-    });
-    el('resetBtn').addEventListener('click', ()=>{
-      addedOrder = []; checkOrder = []; trialStart = null;
-      clearNode(el('planList')); clearNode(el('checkList'));
-      clearNode(el('idealList')); clearNode(el('userList'));
-      el('summary').textContent=''; clearNode(el('reflections'));
-      el('status').textContent=''; el('confirmBtn').disabled = true;
-      el('planList').classList.remove('inactive');
-    });
-    el('downloadBtn').addEventListener('click', downloadCSV);
+/* =========================
+   Wiring
+   ========================= */
+function init(){
+  try{
+    const saved = localStorage.getItem('taskflow_log_soft');
+    if(saved) { const parsed = JSON.parse(saved); if(Array.isArray(parsed)) LOG.push(...parsed); }
+  }catch(e){}
 
-    currentScenarioKey = el('scenarioSelect').value;
-    currentDifficulty = el('difficultySelect').value;
-    updateBriefing();
-  }
-  document.addEventListener('DOMContentLoaded', init);
+  el('scenarioSelect').addEventListener('change', e=>{
+    currentScenarioKey = e.target.value; updateBriefing();
+  });
+  el('difficultySelect').addEventListener('change', e=>{ currentDifficulty = e.target.value; });
+
+  el('startBtn').addEventListener('click', ()=>{
+    trialId += 1; trialStart = new Date();
+    loadScenario();
+    el('planPanel').scrollIntoView({behavior:'smooth', block:'start'});
+    el('confirmBtn').disabled = true;
+  });
+  el('confirmBtn').addEventListener('click', ()=>{
+    checkOrder = readOrder(el('checkList'));
+    computeFeedback();
+    appendLog();
+    el('feedbackPanel').scrollIntoView({behavior:'smooth', block:'start'});
+  });
+  el('resetBtn').addEventListener('click', ()=>{
+    addedOrder = []; checkOrder = []; trialStart = null;
+    clearNode(el('planList')); clearNode(el('checkList'));
+    clearNode(el('idealList')); clearNode(el('userList'));
+    el('summary').textContent=''; clearNode(el('reflections'));
+    el('status').textContent=''; el('confirmBtn').disabled = true;
+    el('planList').classList.remove('inactive');
+  });
+  el('downloadBtn').addEventListener('click', downloadCSV);
+
+  currentScenarioKey = el('scenarioSelect').value;
+  currentDifficulty = el('difficultySelect').value;
+  updateBriefing();
+}
+document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
 </html>
