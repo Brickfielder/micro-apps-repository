@@ -34,6 +34,29 @@
   /* Layout */
   main{ max-width:var(--maxw); margin:1.5rem auto 3rem; padding:0 1rem; }
 
+  /* Disclaimer card */
+  .disclaimer{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-left:6px solid var(--accent);
+    border-radius:var(--radius);
+    padding:1rem 1.25rem;
+    box-shadow:var(--shadow);
+    margin: 0 0 1rem 0;
+  }
+  .disclaimer h2{
+    margin:0 0 .35rem 0;
+    font-size:1.15rem;
+  }
+  .disclaimer p{
+    margin:.4rem 0;
+    color:var(--text);
+  }
+  .disclaimer .muted{
+    color:var(--muted);
+    font-size:.95rem;
+  }
+
   /* Grid */
   .grid{ display:grid; gap:1rem }
   @media(min-width:900px){ .grid{ grid-template-columns:repeat(2,1fr) } }
@@ -45,38 +68,39 @@
     text-decoration:none; color:inherit;
     background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
     padding:1rem; box-shadow:var(--shadow); transition:.2s;
-    aspect-ratio: 3 / 2;          /* 👈 uniform height across the grid */
-    min-height: 180px;            /* keeps touchable on small screens */
+    aspect-ratio: 3 / 2;          /* uniform height across the grid */
+    min-height: 180px;
   }
   .card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-hover) }
+
   /* Bigger title */
-.title{
-  font-weight:700;
-  font-size:1.25rem;   /* was 1.1rem */
-  margin-bottom:.4rem;
-  display:flex; align-items:center; gap:.5rem;
-}
-/* Bigger emoji */
-.emoji{ font-size:1.6rem; line-height:1 }
-/* Description text */
-.desc{
-  color:var(--muted);
-  font-size:1rem;      /* was .9rem */
-  line-height:1.4;
-  margin-bottom:.7rem;
-  overflow:hidden;
-  display:-webkit-box;
-  -webkit-line-clamp:3;
-  -webkit-box-orient:vertical;
-}
-/* Tags */
-.tag{
-  background:var(--pill);
-  padding:.3rem .7rem;
-  border-radius:9999px;
-  font-size:.85rem;    /* was .75rem */
-  white-space:nowrap;
-}
+  .title{
+    font-weight:700;
+    font-size:1.25rem;
+    margin-bottom:.4rem;
+    display:flex; align-items:center; gap:.5rem;
+  }
+  /* Bigger emoji */
+  .emoji{ font-size:1.6rem; line-height:1 }
+  /* Description text */
+  .desc{
+    color:var(--muted);
+    font-size:1rem;
+    line-height:1.4;
+    margin-bottom:.7rem;
+    overflow:hidden;
+    display:-webkit-box;
+    -webkit-line-clamp:3;
+    -webkit-box-orient:vertical;
+  }
+  /* Tags */
+  .tag{
+    background:var(--pill);
+    padding:.3rem .7rem;
+    border-radius:9999px;
+    font-size:.85rem;
+    white-space:nowrap;
+  }
 </style>
 </head>
 <body>
@@ -86,11 +110,28 @@
 <header>
   <div class="header-inner">
     <h1>Cognitive Rehabilitation Micro-Apps</h1>
-    <p class="subtitle">Interactive, lightweight tools to support assessment, practice, and research in cognitive rehabilitation.</p>
+    <p class="subtitle">Interactive, lightweight tools to support clinical practice and research in cognitive rehabilitation.</p>
   </div>
 </header>
 
 <main>
+  <!-- Disclaimer (between header and the list of apps) -->
+  <section class="disclaimer" role="note" aria-label="Disclaimer">
+    <h2>Disclaimer</h2>
+    <p>
+      These micro-apps are experimental prototypes provided for demonstration, exploration, and educational purposes only.
+      They are <strong>not medical devices</strong> and are not intended for clinical decision-making or patient care without
+      appropriate validation, governance, and supervision. Use at your own risk; I accept no liability for any use or reliance.
+    </p>
+    <p class="muted">
+      This website and the apps may be changed or withdrawn without notice, and features may be modified based on user feedback.
+    </p>
+    <p>
+      I <em>welcome collaboration</em>: if you’re interested in appropriately developing and evaluating these tools for clinical work
+      or research, please get in touch.
+    </p>
+  </section>
+
   <div id="grid" class="grid" aria-live="polite"></div>
 </main>
 
