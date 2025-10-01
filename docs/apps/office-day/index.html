@@ -488,11 +488,17 @@
   doc.remove();
   setStatsPills();
 };
-    reject.onclick = ()=>{
-      if(!isGreen){ stats.docCorrect++; log(\`Rejected RED doc #\${id} ✓\`); }
-      else { stats.docErrors++; log(\`Error: rejected GREEN doc #\${id}\`); }
-      doc.remove(); setStatsPills();
-    };
+reject.onclick = () => {
+  if (!isGreen) {
+    stats.docCorrect++;
+    log(`Rejected RED doc #${id} ✓`);
+  } else {
+    stats.docErrors++;
+    log(`Error: rejected GREEN doc #${id}`);
+  }
+  doc.remove();
+  setStatsPills();
+};
     while($docStream.children.length > 8){ $docStream.lastElementChild?.remove(); }
   }
 
