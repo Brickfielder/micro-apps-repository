@@ -1,398 +1,595 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<title>Plan with Coco — Scored Scenarios</title>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<style>
-    :root{--bg:#f8fcff;--card:#fff;--text:#222;--muted:#6b7280;--pill:#eef2ff;--accent:#2563eb;}
-    *{box-sizing:border-box}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji;background:var(--bg);color:var(--text);margin:0;padding:16px;display:flex;flex-direction:column;gap:12px;align-items:center}
-    .header{display:flex;align-items:center;gap:10px;background:var(--card);width:100%;max-width:820px;padding:12px 16px;border-radius:14px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
-    .logo{width:36px;height:36px}
-    .titleText{font-size:1.25rem;font-weight:800;letter-spacing:.2px}
-    .box{background:var(--card);width:100%;max-width:820px;padding:14px 16px;border-radius:14px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
-    .title{font-weight:700;margin-bottom:6px}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    select,button{font-size:16px;padding:10px 12px;border-radius:10px;border:1px solid #e5e7eb;background:#fff}
-    button{background:var(--accent);color:#fff;border:none}
-    button.secondary{background:#e5e7eb;color:#111}
-    button:disabled{opacity:.6}
-    ul{margin:.25rem 0 0 1rem}
-    .badges{display:flex;gap:6px;flex-wrap:wrap}
-    .badge{background:var(--pill);padding:4px 8px;border-radius:999px;font-size:14px}
-    .status{color:var(--muted);font-size:14px}
-    .grid{display:grid;grid-template-columns:1fr;gap:10px}
-    @media(min-width:700px){.grid{grid-template-columns:1fr 1fr}}
-    .hidden{display:none}
-    .ok{color:#0a7f2e}
-    .miss{color:#b45309}
-    .warn{color:#b91c1c}
-    .rules li{margin-bottom:4px}
-    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 0.95rem;}
+  <meta charset="utf-8"/>
+  <title>Plan with Coco — Scored Scenarios</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+  <!-- Shared assets published from repo/docs/ as site root (no /docs in URL) -->
+  <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3">
+  <script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
+  <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
+
+  <!-- Hero metadata (frame.js reads these) -->
+  <meta name="app-slug" content="plan-with-coco">
+  <meta name="app-title" content="Plan with Coco — Scored Scenarios">
+  <meta name="app-desc" content="Co-plan with Coco 🐦 across themed scenarios. Each scenario has its own unique required category. Cover the set, satisfy bonus rules, avoid non-essentials, and export your score to CSV.">
+  <!-- <meta name="theme" content="bold dense">  Uncomment for bolder hero -->
+
+  <style>
+    .status{ color: var(--muted); font-size:.95rem; }
+    .ok{ color:#16a34a }
+    .miss{ color:#b45309 }
+    .warn{ color:#b91c1c }
+    .mono{ font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace; }
+    .pill.missing { background: #fff1f2; color: #991b1b; border: 1px solid #fecdd3; }
+    .pill.hit { background: #dcfce7; color: #14532d; border: 1px solid #86efac; }
+    .tight p { margin:.25rem 0; }
+    select, button { min-height: 40px; }
+    .optlabel { font-weight: 600; margin-top: .25rem; display: block; }
   </style>
-<meta content="Plan_with_Coco" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../../../shared/theme.css" rel="stylesheet"/><script defer="" src="../../../shared/frame.js"></script><script defer="" src="../../../shared/clinician_feedback.js"></script>  <meta name="app-slug" content="plan-with-coco">
 </head>
-<body><main id="app-root">
-<div class="header">
-<svg aria-hidden="true" class="logo" viewbox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-<circle cx="28" cy="28" fill="#60a5fa" r="18"></circle><!-- body -->
-<circle cx="35" cy="24" fill="#93c5fd" r="6"></circle><!-- head -->
-<circle cx="37" cy="23" fill="#111" r="2"></circle><!-- eye -->
-<polygon fill="#f59e0b" points="42,26 48,24 42,22"></polygon><!-- beak -->
-<path d="M14 30 C22 38, 34 40, 46 34" fill="none" stroke="#3b82f6" stroke-width="4"></path><!-- wing -->
-</svg>
-<div class="titleText">Plan with Coco — Scored Scenarios</div>
-</div>
-<div class="box">
-<div class="title">🧠 Instructions</div>
-<div>
-      Choose a scenario, then plan together with <strong>Coco 🐦</strong>.<br/>
-      Each of you gets <strong>4 turns</strong> (total 8 accepted items). Some items are <em>plausible but not essential</em> — focus on what’s needed.
-      You can <strong>Accept</strong> or <strong>Reject</strong> Coco’s suggestions. Cover the scenario’s categories and earn extra points via bonus rules.
+<body>
+<main id="app-root">
+  <details open>
+    <summary><strong>🧠 Instructions & scoring</strong></summary>
+    <div class="tight">
+      <p>Choose a scenario, then plan together with <strong>Coco 🐦</strong>. Each of you gets <strong>4 turns</strong> (8 accepted items total). Some items are <em>plausible but not essential</em> — avoid those.</p>
+      <p class="mono">
+        • +2 for each required category covered<br>
+        • +1 for each satisfied bonus rule<br>
+        • −1 per non-essential accepted<br>
+        • +2 “Perfect plan” if all required categories covered and 0 non-essentials
+      </p>
     </div>
-<div class="mono">
-<strong>Scoring rubric:</strong><br/>
-      • +2 pts for each required category covered<br/>
-      • +1 pt for each satisfied <em>bonus rule</em><br/>
-      • −1 pt per non‑essential item accepted<br/>
-      • +2 pts “Perfect plan” bonus if all required categories are covered and 0 non‑essentials accepted
+  </details>
+
+  <!-- Toolbar -->
+  <div class="toolbar" style="justify-content:space-between; gap:12px;">
+    <div style="flex:1; min-width:240px;">
+      <label for="scenarioSelect">Scenario</label>
+      <select id="scenarioSelect" onchange="selectScenario()">
+        <option value="">-- Choose --</option>
+        <option value="0">Picnic on a hot day</option>
+        <option value="1">Rainy day hike</option>
+        <option value="2">Outdoor birthday party</option>
+        <option value="3">Beach afternoon</option>
+        <option value="4">Park concert (evening)</option>
+        <option value="5">Winter walk in the park</option>
+        <option value="6">Family picnic with toddler</option>
+        <option value="7">Sunset viewpoint hike</option>
+        <option value="8">Lakeside BBQ</option>
+        <option value="9">Community sports day</option>
+      </select>
     </div>
-</div>
-<div class="box row">
-<div>
-<strong>Scenario</strong><br/>
-<select id="scenarioSelect" onchange="selectScenario()">
-<option value="">-- Choose --</option>
-<option value="0">Picnic on a hot day</option>
-<option value="1">Rainy day hike</option>
-<option value="2">Outdoor birthday party</option>
-<option value="3">Beach afternoon</option>
-<option value="4">Park concert (evening)</option>
-<option value="5">Winter walk in the park</option>
-<option value="6">Family picnic with toddler</option>
-<option value="7">Sunset viewpoint hike</option>
-<option value="8">Lakeside BBQ</option>
-<option value="9">Community sports day</option>
-</select>
-</div>
-<div class="hidden" id="catsBox">
-<strong>Required categories</strong>
-<div class="badges" id="catBadges"></div>
-</div>
-<div class="hidden" id="rulesBox">
-<strong>Scenario rules</strong>
-<ul class="rules" id="rulesList"></ul>
-</div>
-<div class="status hidden" id="progress">Turn <span id="turnNum">1</span> of 8 • Player turns left: <span id="pLeft">4</span> • Coco turns left: <span id="cLeft">4</span></div>
-</div>
-<div class="grid">
-<div class="box">
-<div class="title">🧍 Your turn</div>
-<select id="playerChoice">
-<option value="">Choose an item</option>
-<!-- Food -->
-<option data-cat="food" value="Sandwiches">🥪 Sandwiches</option>
-<option data-cat="food" value="Fruit">🍉 Fruit</option>
-<option data-cat="food" value="Trail Mix">🥜 Trail Mix</option>
-<!-- Drinks -->
-<option data-cat="drink" value="Water">💧 Water</option>
-<option data-cat="drink" value="Juice">🧃 Juice</option>
-<!-- Safety -->
-<option data-cat="safety" value="Sunscreen">🧴 Sunscreen</option>
-<option data-cat="safety" value="Umbrella">☂️ Umbrella</option>
-<option data-cat="safety" value="Map">🗺️ Map</option>
-<!-- Comfort -->
-<option data-cat="comfort" value="Blanket">🧺 Blanket</option>
-<option data-cat="comfort" value="Jacket">🧥 Jacket</option>
-<!-- Activity -->
-<option data-cat="activity" value="Kite">🪁 Kite</option>
-<option data-cat="activity" value="Frisbee">🥏 Frisbee</option>
-<!-- Non-essentials (hidden) -->
-<option data-cat="?" value="Glitter">✨ Glitter</option>
-<option data-cat="?" value="Garlic">🧄 Garlic</option>
-<option data-cat="?" value="Alarm Clock">⏰ Alarm Clock</option>
-<option data-cat="?" value="Novelty Socks">🧦 Novelty Socks</option>
-</select>
-<button id="playerBtn" onclick="playerTurn()">Add Item</button>
-</div>
-<div class="box">
-<div class="title">🐦 Coco</div>
-<div class="status" id="statusBubble">Coco is waiting for your pick…</div>
-<div class="row hidden" id="cocoControls">
-<button class="secondary" onclick="acceptCocoItem()">✅ Accept</button>
-<button class="secondary" onclick="rejectCocoItem()">❌ Reject</button>
-</div>
-</div>
-</div>
-<div class="box">
-<div class="title">📝 Plan so far</div>
-<ul id="planList"></ul>
-<div class="status" id="liveCats"></div>
-</div>
-<div class="box hidden" id="results"></div>
-<script>
-  // --- 10 Scenarios with extra rules ---
-  // Rule types supported:
-  //  - {type:'bonusIf', cat:'comfort', points:1, desc:'Include comfort'}
-  //  - {type:'bonusIfAll', cats:['drink','safety'], points:1, desc:'Have both drink and safety'}
-  //  - {type:'bonusIfTwoOf', cats:['food','drink','comfort'], points:1, desc:'At least two of the three'}
-  const scenarios = [
-    { goal: "Picnic on a hot day",
-      needed: ["food","drink","safety","comfort","activity"],
-      rules: [
-        {type:'bonusIf', cat:'drink', points:1, desc:'Bring an extra source of hydration'},
-        {type:'bonusIf', cat:'comfort', points:1, desc:'Include something for shade/cooling'}
-      ]
-    },
-    { goal: "Rainy day hike",
-      needed: ["food","safety","comfort","activity"],
-      rules: [
-        {type:'bonusIfAll', cats:['safety','comfort'], points:1, desc:'Have both rain protection and warmth'},
-        {type:'bonusIf', cat:'drink', points:1, desc:'Don’t forget a drink even in the rain'}
-      ]
-    },
-    { goal: "Outdoor birthday party",
-      needed: ["food","drink","activity","comfort"],
-      rules: [
-        {type:'bonusIf', cat:'activity', points:1, desc:'At least one fun activity'},
-        {type:'bonusIf', cat:'safety', points:1, desc:'Plan for basic safety (sun/sharp objects)'}
-      ]
-    },
-    { goal: "Beach afternoon",
-      needed: ["drink","safety","comfort","activity"],
-      rules: [
-        {type:'bonusIfAll', cats:['drink','safety'], points:1, desc:'Hydration + sun protection combo'},
-        {type:'bonusIf', cat:'comfort', points:1, desc:'Add extra comfort for sand/heat'}
-      ]
-    },
-    { goal: "Park concert (evening)",
-      needed: ["drink","comfort","safety","activity"],
-      rules: [
-        {type:'bonusIf', cat:'comfort', points:1, desc:'Warmth/seat for evening chill'},
-        {type:'bonusIf', cat:'food', points:1, desc:'Pack a snack to avoid queues'}
-      ]
-    },
-    { goal: "Winter walk in the park",
-      needed: ["drink","safety","comfort","activity"],
-      rules: [
-        {type:'bonusIfAll', cats:['comfort','safety'], points:1, desc:'Warmth + navigation/visibility'},
-        {type:'bonusIf', cat:'food', points:1, desc:'Energy boost helps in the cold'}
-      ]
-    },
-    { goal: "Family picnic with toddler",
-      needed: ["food","drink","safety","comfort"],
-      rules: [
-        {type:'bonusIf', cat:'comfort', points:1, desc:'Extra comfort makes life easier'},
-        {type:'bonusIf', cat:'activity', points:1, desc:'A simple activity helps engagement'}
-      ]
-    },
-    { goal: "Sunset viewpoint hike",
-      needed: ["drink","safety","comfort","activity"],
-      rules: [
-        {type:'bonusIf', cat:'safety', points:1, desc:'Visibility/navigation for dusk'},
-        {type:'bonusIf', cat:'food', points:1, desc:'A light snack for the viewpoint'}
-      ]
-    },
-    { goal: "Lakeside BBQ",
-      needed: ["food","drink","safety","activity"],
-      rules: [
-        {type:'bonusIfAll', cats:['food','safety'], points:1, desc:'Food + safe setup'},
-        {type:'bonusIf', cat:'comfort', points:1, desc:'Seating/blanket improves the BBQ'}
-      ]
-    },
-    { goal: "Community sports day",
-      needed: ["drink","safety","activity","comfort"],
-      rules: [
-        {type:'bonusIf', cat:'drink', points:1, desc:'Extra hydration for exertion'},
-        {type:'bonusIf', cat:'food', points:1, desc:'Quick energy between events'}
-      ]
+
+    <div id="progress" class="status" style="display:none;">
+      Turn <span id="turnNum">1</span> of 8 • Player left: <span id="pLeft">4</span> • Coco left: <span id="cLeft">4</span>
+    </div>
+  </div>
+
+  <!-- Scenario requirements -->
+  <div class="grid cols-2">
+    <section>
+      <h3>Required categories</h3>
+      <div id="catBadges" class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px;"></div>
+      <div id="liveCats" class="status" style="margin-top:.35rem;"></div>
+    </section>
+
+    <section>
+      <h3>Scenario rules</h3>
+      <ul id="rulesList" class="mono" style="margin:.25rem 0 0 1rem;"></ul>
+    </section>
+  </div>
+
+  <!-- Turn panels -->
+  <div class="grid cols-2">
+    <section>
+      <h3>🧍 Your turn</h3>
+      <label class="optlabel" for="playerChoice">Choose an item (filtered to this scenario)</label>
+      <select id="playerChoice"><option value="">— Select after choosing a scenario —</option></select>
+      <div style="margin-top:10px;">
+        <button class="button primary" id="playerBtn" onclick="playerTurn()">Add Item</button>
+      </div>
+    </section>
+
+    <section>
+      <h3>🐦 Coco</h3>
+      <div class="status" id="statusBubble">Coco is waiting for your pick…</div>
+      <div class="toolbar" id="cocoControls" style="display:none; justify-content:flex-start;">
+        <button class="button" onclick="acceptCocoItem()">✅ Accept</button>
+        <button class="button" onclick="rejectCocoItem()">❌ Reject</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- Plan + Results -->
+  <section>
+    <h3>📝 Plan so far</h3>
+    <ul id="planList" style="margin:.25rem 0 0 1rem;"></ul>
+  </section>
+
+  <section id="results" style="display:none;"></section>
+
+  <script>
+    // ===== Scenarios with one unique required category each =====
+    // Supported rule types:
+    // - {type:'bonusIf', cat:'comfort', points:1, desc:'Include comfort'}
+    // - {type:'bonusIfAll', cats:['drink','safety'], points:1, desc:'Have both drink and safety'}
+    // - {type:'bonusIfTwoOf', cats:['food','drink','comfort'], points:1, desc:'At least two of the three'}
+
+    const scenarios = [
+      { goal: "Picnic on a hot day",
+        needed: ["food","drink","safety","comfort","cooling"],         // unique: cooling
+        rules: [
+          {type:'bonusIf', cat:'drink', points:1, desc:'Bring an extra source of hydration'},
+          {type:'bonusIf', cat:'cooling', points:1, desc:'Include something for shade/cooling'}
+        ]
+      },
+      { goal: "Rainy day hike",
+        needed: ["food","safety","comfort","rain"],                    // unique: rain
+        rules: [
+          {type:'bonusIfAll', cats:['safety','comfort'], points:1, desc:'Have both rain protection and warmth'},
+          {type:'bonusIf', cat:'drink', points:1, desc:'Don’t forget a drink even in the rain'}
+        ]
+      },
+      { goal: "Outdoor birthday party",
+        needed: ["food","drink","activity","celebration"],             // unique: celebration
+        rules: [
+          {type:'bonusIf', cat:'activity', points:1, desc:'At least one fun activity'},
+          {type:'bonusIf', cat:'safety', points:1, desc:'Plan for basic safety (sun/sharp objects)'}
+        ]
+      },
+      { goal: "Beach afternoon",
+        needed: ["drink","safety","comfort","beachgear"],              // unique: beachgear
+        rules: [
+          {type:'bonusIfAll', cats:['drink','safety'], points:1, desc:'Hydration + sun protection combo'},
+          {type:'bonusIf', cat:'comfort', points:1, desc:'Add extra comfort for sand/heat'}
+        ]
+      },
+      { goal: "Park concert (evening)",
+        needed: ["drink","seating","safety","comfort"],                // unique: seating
+        rules: [
+          {type:'bonusIf', cat:'comfort', points:1, desc:'Warmth/seat for evening chill'},
+          {type:'bonusIf', cat:'food', points:1, desc:'Pack a snack to avoid queues'}
+        ]
+      },
+      { goal: "Winter walk in the park",
+        needed: ["drink","safety","warmth","activity"],                // unique: warmth
+        rules: [
+          {type:'bonusIfAll', cats:['warmth','safety'], points:1, desc:'Warmth + navigation/visibility'},
+          {type:'bonusIf', cat:'food', points:1, desc:'Energy boost helps in the cold'}
+        ]
+      },
+      { goal: "Family picnic with toddler",
+        needed: ["food","drink","safety","toddler"],                   // unique: toddler
+        rules: [
+          {type:'bonusIf', cat:'comfort', points:1, desc:'Extra comfort makes life easier'},
+          {type:'bonusIf', cat:'activity', points:1, desc:'A simple activity helps engagement'}
+        ]
+      },
+      { goal: "Sunset viewpoint hike",
+        needed: ["drink","safety","comfort","lighting"],               // unique: lighting
+        rules: [
+          {type:'bonusIf', cat:'safety', points:1, desc:'Visibility/navigation for dusk'},
+          {type:'bonusIf', cat:'food', points:1, desc:'A light snack for the viewpoint'}
+        ]
+      },
+      { goal: "Lakeside BBQ",
+        needed: ["food","drink","safety","bbq"],                       // unique: bbq
+        rules: [
+          {type:'bonusIfAll', cats:['food','safety'], points:1, desc:'Food + safe setup'},
+          {type:'bonusIf', cat:'comfort', points:1, desc:'Seating/blanket improves the BBQ'}
+        ]
+      },
+      { goal: "Community sports day",
+        needed: ["drink","safety","activity","sports"],                // unique: sports
+        rules: [
+          {type:'bonusIf', cat:'drink', points:1, desc:'Extra hydration for exertion'},
+          {type:'bonusIf', cat:'food', points:1, desc:'Quick energy between events'}
+        ]
+      }
+    ];
+
+    // ===== Item pools (player + Coco) =====
+    const baseItems = [
+      // Food
+      { item:"Sandwiches", cat:"food" },
+      { item:"Fruit", cat:"food" },
+      { item:"Trail Mix", cat:"food" },
+      // Drinks
+      { item:"Water", cat:"drink" },
+      { item:"Juice", cat:"drink" },
+      { item:"Electrolyte Tablets", cat:"drink" },
+      // Safety
+      { item:"Sunscreen", cat:"safety" },
+      { item:"Umbrella", cat:"safety" },
+      { item:"Map", cat:"safety" },
+      { item:"First Aid Kit", cat:"safety" },
+      // Comfort
+      { item:"Blanket", cat:"comfort" },
+      { item:"Jacket", cat:"comfort" },
+      // Activity
+      { item:"Kite", cat:"activity" },
+      { item:"Frisbee", cat:"activity" },
+
+      // Unique category items
+      { item:"Ice Packs", cat:"cooling" },
+      { item:"Hand Fan", cat:"cooling" },
+
+      { item:"Raincoat", cat:"rain" },
+      { item:"Waterproof Boots", cat:"rain" },
+
+      { item:"Birthday Cake", cat:"celebration" },
+      { item:"Candles", cat:"celebration" },
+
+      { item:"Beach Towel", cat:"beachgear" },
+      { item:"Sunglasses", cat:"beachgear" },
+
+      { item:"Foldable Chair", cat:"seating" },
+      { item:"Seat Pad", cat:"seating" },
+
+      { item:"Gloves", cat:"warmth" },
+      { item:"Thermos", cat:"warmth" },
+
+      { item:"Wet Wipes", cat:"toddler" },
+      { item:"Snack Pouch", cat:"toddler" },
+
+      { item:"Headlamp", cat:"lighting" },
+      { item:"Spare Batteries", cat:"lighting" },
+
+      { item:"Charcoal", cat:"bbq" },
+      { item:"Tongs", cat:"bbq" },
+
+      { item:"Energy Gel", cat:"sports" },
+      { item:"Microfiber Towel", cat:"sports" },
+    ];
+
+    // Coco versions with reasons (use base label where possible)
+    const cocoItemsAll = [
+      { item:"Water", cat:"drink", reason:"Hydration keeps us sharp." },
+      { item:"Sunscreen", cat:"safety", reason:"UV is strong today." },
+      { item:"Blanket", cat:"comfort", reason:"Sitting on grass can be damp." },
+      { item:"Frisbee", cat:"activity", reason:"A bit of movement between snacks." },
+      { item:"Sandwiches", cat:"food", reason:"Easy to share." },
+      { item:"Trail Mix", cat:"food", reason:"Good for walks." },
+      { item:"Umbrella", cat:"safety", reason:"Backup for sudden showers." },
+      { item:"Jacket", cat:"comfort", reason:"Evenings can turn chilly." },
+      { item:"Map", cat:"safety", reason:"Helps if paths are closed." },
+      { item:"Kite", cat:"activity", reason:"If there’s a breeze." },
+
+      // Unique
+      { item:"Hand Fan", cat:"cooling", reason:"Personal cooling helps on hot days." },
+      { item:"Ice Packs", cat:"cooling", reason:"Keep drinks and you cool." },
+
+      { item:"Raincoat", cat:"rain", reason:"Keeps you dry and warm." },
+      { item:"Waterproof Boots", cat:"rain", reason:"Mud won’t slow you down." },
+
+      { item:"Birthday Cake", cat:"celebration", reason:"Centerpiece for the party." },
+      { item:"Candles", cat:"celebration", reason:"Make a wish!" },
+
+      { item:"Beach Towel", cat:"beachgear", reason:"Dry off and claim a spot." },
+      { item:"Sunglasses", cat:"beachgear", reason:"Protect eyes from glare." },
+
+      { item:"Foldable Chair", cat:"seating", reason:"Comfort during long sets." },
+      { item:"Seat Pad", cat:"seating", reason:"If chairs aren’t allowed." },
+
+      { item:"Gloves", cat:"warmth", reason:"Fingers stay toasty." },
+      { item:"Thermos", cat:"warmth", reason:"Hot drink for morale." },
+
+      { item:"Wet Wipes", cat:"toddler", reason:"Cleanup made easy." },
+      { item:"Snack Pouch", cat:"toddler", reason:"Prevent hanger meltdowns." },
+
+      { item:"Headlamp", cat:"lighting", reason:"Safe paths after sunset." },
+      { item:"Spare Batteries", cat:"lighting", reason:"Don’t get caught in the dark." },
+
+      { item:"Charcoal", cat:"bbq", reason:"Fuel for the grill." },
+      { item:"Tongs", cat:"bbq", reason:"Safe flipping and serving." },
+
+      { item:"Energy Gel", cat:"sports", reason:"Quick energy between events." },
+      { item:"Microfiber Towel", cat:"sports", reason:"Dry off fast." },
+    ];
+
+    const nonEssentialsItems = [
+      { item:"Glitter", cat:"?", reason:"For extra festivity?" },
+      { item:"Garlic", cat:"?", reason:"Maybe keeps bugs away?" },
+      { item:"Alarm Clock", cat:"?", reason:"Time can fly." },
+      { item:"Novelty Socks", cat:"?", reason:"Cheerful photos?" }
+    ];
+
+    // ===== State =====
+    const totalTurns = 8;
+    let playerTurns = 4;
+    let cocoTurns = 4;
+    let acceptedCount = 0;
+    let currentPhase = "player";
+    let pickedCats = new Set();
+    let categoryCounts = {};
+    let nonEssentials = 0;
+    let cocoPick = null;
+    let cocoRejections = 0;
+    let selectedScenario = null;
+    const sessionLog = []; // {turn, by:'player'|'coco', item, cat}
+
+    // ===== Helpers =====
+    function show(el){ el.style.display = ""; }
+    function hide(el){ el.style.display = "none"; }
+
+    function badgeEl(cat){
+      const span = document.createElement("span");
+      span.className = "pill missing";
+      span.id = "cat-"+cat;
+      span.textContent = cat;
+      return span;
     }
-  ];
-  let selectedScenario = null;
 
-  // --- State ---
-  let totalTurns = 8;
-  let playerTurns = 4;
-  let cocoTurns = 4;
-  let acceptedCount = 0;
-  let currentPhase = "player";
-  let pickedCats = new Set();
-  let categoryCounts = {food:0, drink:0, safety:0, comfort:0, activity:0};
-  let nonEssentials = 0;
-  let cocoPick = null;
-  let cocoRejections = 0;
+    function getAllowedCats(scn){
+      const set = new Set(scn.needed);
+      scn.rules.forEach(r=>{
+        if(r.type === 'bonusIf' && r.cat) set.add(r.cat);
+        if(r.type === 'bonusIfAll' && r.cats) r.cats.forEach(c=>set.add(c));
+        if(r.type === 'bonusIfTwoOf' && r.cats) r.cats.forEach(c=>set.add(c));
+      });
+      return set;
+    }
 
-  // --- Coco pool ---
-  const cocoItems = [
-    { item:"Water", cat:"drink", reason:"Hydration keeps us sharp." },
-    { item:"Sunscreen", cat:"safety", reason:"UV is strong today." },
-    { item:"Blanket", cat:"comfort", reason:"Sitting on grass can be damp." },
-    { item:"Frisbee", cat:"activity", reason:"A bit of movement between snacks." },
-    { item:"Sandwiches", cat:"food", reason:"Easy to share." },
-    { item:"Trail Mix", cat:"food", reason:"Good for walks." },
-    { item:"Umbrella", cat:"safety", reason:"Backup for sudden showers." },
-    { item:"Jacket", cat:"comfort", reason:"Evenings can turn chilly." },
-    { item:"Map", cat:"safety", reason:"Helps if paths are closed." },
-    { item:"Kite", cat:"activity", reason:"If there’s a breeze." },
-    // Non-essentials still plausible
-    { item:"Garlic", cat:"?", reason:"Maybe keeps bugs away?" },
-    { item:"Glitter", cat:"?", reason:"For extra festivity?" },
-    { item:"Alarm Clock", cat:"?", reason:"Time can fly." },
-    { item:"Novelty Socks", cat:"?", reason:"Cheerful photos?" }
-  ];
+    function rebuildPlayerChoices(allowedCats){
+      const sel = document.getElementById("playerChoice");
+      sel.innerHTML = '<option value="">—</option>';
 
-  function selectScenario(){
-    const idx = document.getElementById("scenarioSelect").value;
-    if(idx==="") return;
-    selectedScenario = scenarios[parseInt(idx)];
-    // Required cat badges
-    const badges = document.getElementById("catBadges"); badges.innerHTML = "";
-    selectedScenario.needed.forEach(c=>{
-      const b=document.createElement("span"); b.className="badge"; b.id="cat-"+c; b.textContent=c; badges.appendChild(b);
-    });
-    document.getElementById("catsBox").classList.remove("hidden");
-    // Rules list
-    const rl = document.getElementById("rulesList"); rl.innerHTML = "";
-    selectedScenario.rules.forEach(r=>{ const li=document.createElement("li"); li.textContent = `+${r.points} ${r.desc}`; rl.appendChild(li); });
-    document.getElementById("rulesBox").classList.remove("hidden");
-    resetTask();
-  }
-
-  function resetTask(){
-    acceptedCount=0; playerTurns=4; cocoTurns=4; currentPhase="player";
-    pickedCats=new Set(); categoryCounts={food:0,drink:0,safety:0,comfort:0,activity:0};
-    nonEssentials=0; cocoPick=null; cocoRejections=0;
-    document.getElementById("planList").innerHTML="";
-    document.getElementById("results").classList.add("hidden");
-    updateProgress();
-    document.getElementById("statusBubble").textContent="Coco is waiting for your pick…";
-    document.getElementById("cocoControls").classList.add("hidden");
-    document.getElementById("progress").classList.remove("hidden");
-    updateLiveCats();
-  }
-
-  function updateProgress(){
-    document.getElementById("turnNum").textContent=(acceptedCount+1);
-    document.getElementById("pLeft").textContent=playerTurns;
-    document.getElementById("cLeft").textContent=cocoTurns;
-  }
-
-  function updateLiveCats(){
-    (selectedScenario?.needed||[]).forEach(c=>{
-      const el=document.getElementById("cat-"+c);
-      if(el){
-        el.style.background=pickedCats.has(c)?"#dcfce7":"#eef2ff";
-        el.style.border=pickedCats.has(c)?"1px solid #16a34a":"1px solid #e5e7eb";
-      }
-    });
-    const missing=(selectedScenario?.needed||[]).filter(c=>!pickedCats.has(c));
-    const live=document.getElementById("liveCats");
-    live.innerHTML = missing.length===0 ? '<span class="ok">All required categories covered ✅</span>' :
-      '<span class="miss">Missing: '+missing.join(", ")+'</span>';
-  }
-
-  function addPlanLine(t){const li=document.createElement("li");li.textContent=t;document.getElementById("planList").appendChild(li);}
-
-  function applyCat(cat){
-    if(cat && cat!=="?"){ pickedCats.add(cat); if(categoryCounts[cat]!=null) categoryCounts[cat]++; }
-    else if(cat==="?"){ nonEssentials++; }
-  }
-
-  function playerTurn(){
-    if(currentPhase!=="player"||!selectedScenario)return;
-    const sel=document.getElementById("playerChoice"); const item=sel.value; if(!item)return;
-    const cat=sel.options[sel.selectedIndex].dataset.cat||"?";
-    addPlanLine("🧍 You: "+item);
-    applyCat(cat);
-    playerTurns--; acceptedCount++; sel.selectedIndex=0;
-    updateProgress(); updateLiveCats();
-    if(acceptedCount>=totalTurns){endTask();return;}
-    currentPhase="cocoSuggest"; cocoSuggest();
-  }
-
-  function cocoSuggest(){
-    const pick=cocoItems[Math.floor(Math.random()*cocoItems.length)];
-    cocoPick=pick;
-    const emotions=["🙂","😐","🤔"][Math.min(cocoRejections,2)];
-    document.getElementById("statusBubble").innerHTML=`${emotions} Coco suggests <strong>${pick.item}</strong><br><em>“${pick.reason}”</em>`;
-    document.getElementById("cocoControls").classList.remove("hidden");
-  }
-
-  function acceptCocoItem(){
-    if(currentPhase!=="cocoSuggest"||cocoTurns<=0)return;
-    addPlanLine("🐦 Coco: "+cocoPick.item);
-    applyCat(cocoPick.cat);
-    cocoTurns--; acceptedCount++; cocoRejections=0;
-    document.getElementById("cocoControls").classList.add("hidden");
-    updateProgress(); updateLiveCats();
-    if(acceptedCount>=totalTurns){endTask();return;}
-    currentPhase="player";
-    document.getElementById("statusBubble").textContent="Your turn — pick an item.";
-  }
-
-  function rejectCocoItem(){
-    cocoRejections++;
-    let face=cocoRejections===1?"😕":cocoRejections===2?"😢":cocoRejections>=3?"😭":"🙂";
-    document.getElementById("statusBubble").innerHTML=`${face} Coco will try again…`;
-    setTimeout(cocoSuggest,900);
-  }
-
-  function scoreScenario(){
-    let detail=[]; let score=0;
-    // Base: required coverage
-    const needed=selectedScenario.needed;
-    needed.forEach(cat=>{
-      if(pickedCats.has(cat)){ score+=2; detail.push(`+2 Covered ${cat}`); }
-      else { detail.push(`+0 Missing ${cat}`); }
-    });
-    // Bonus rules
-    selectedScenario.rules.forEach(rule=>{
-      if(rule.type==='bonusIf'){
-        if(categoryCounts[rule.cat] && categoryCounts[rule.cat] >= 2){ // extra beyond minimum
-          score += rule.points; detail.push(`+${rule.points} ${rule.desc}`);
+      // Group by category for neatness
+      const byCat = {};
+      baseItems.forEach(it=>{
+        if(allowedCats.has(it.cat)){
+          (byCat[it.cat] ||= []).push(it);
         }
-      } else if(rule.type==='bonusIfAll'){
-        const all = rule.cats.every(c=>pickedCats.has(c));
-        if(all){ score += rule.points; detail.push(`+${rule.points} ${rule.desc}`); }
-      } else if(rule.type==='bonusIfTwoOf'){
-        let count = rule.cats.filter(c=>pickedCats.has(c)).length;
-        if(count >= 2){ score += rule.points; detail.push(`+${rule.points} ${rule.desc}`); }
+      });
+
+      Object.keys(byCat).sort().forEach(cat=>{
+        const og = document.createElement("optgroup");
+        og.label = cat;
+        byCat[cat].forEach(it=>{
+          const o = document.createElement("option");
+          o.value = it.item;
+          o.dataset.cat = it.cat;
+          o.textContent = it.item;
+          og.appendChild(o);
+        });
+        sel.appendChild(og);
+      });
+
+      // Non-essentials at the bottom
+      if(nonEssentialsItems.length){
+        const og = document.createElement("optgroup");
+        og.label = "Non-essentials (penalized)";
+        nonEssentialsItems.forEach(it=>{
+          const o = document.createElement("option");
+          o.value = it.item;
+          o.dataset.cat = "?";
+          o.textContent = it.item;
+          og.appendChild(o);
+        });
+        sel.appendChild(og);
       }
-    });
-    // Penalty for non-essentials
-    if(nonEssentials>0){ score -= nonEssentials; detail.push(`−${nonEssentials} Non‑essential items`); }
-    // Perfect plan bonus
-    const allCovered = needed.every(c=>pickedCats.has(c));
-    if(allCovered && nonEssentials===0){ score += 2; detail.push(`+2 Perfect plan bonus`); }
-    return {score, detail};
-  }
+    }
 
-  function endTask(){
-    document.getElementById("cocoControls").classList.add("hidden");
-    const {score, detail} = scoreScenario();
-    const needed=selectedScenario.needed;
-    const missed=needed.filter(c=>!pickedCats.has(c));
-    const res=document.getElementById("results");
-    let html=`<div class="title">📊 Summary — ${selectedScenario.goal}</div>`;
-    html+= missed.length===0 ? '<p class="ok">All required categories covered ✅</p>'
-                             : `<p class="miss">Missing: ${missed.join(", ")}</p>`;
-    html+= `<p class="title">Score: <strong>${score}</strong></p>`;
-    html+= '<ul class="mono">' + detail.map(d=>`<li>${d}</li>`).join('') + '</ul>';
-    html+= '<button class="secondary" onclick="resetTask()">🔄 Restart same scenario</button>';
-    res.innerHTML=html; res.classList.remove("hidden"); document.getElementById("statusBubble").textContent="Planning complete.";
-  }
-</script>
-<section id="clinician-notes">
-<div style="background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 16px; margin-top: 24px;">
-<label for="clinician-comment" style="display:block;font-weight:600;margin-bottom:8px;">
-      Clinician comments (optional)
-    </label>
-<textarea id="clinician-comment" placeholder="Enter any notes relevant to this session..." rows="4" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); font: inherit; resize: vertical;"></textarea>
-<p style="margin:8px 0 0; color: var(--muted); font-size: 0.9rem;">
-      This note will be added as <code>clinician_comment</code> in the exported CSV.
-    </p>
-</div>
-</section></main></body>
+    function selectScenario(){
+      const idx = document.getElementById("scenarioSelect").value;
+      if(idx==="") return;
+
+      selectedScenario = scenarios[parseInt(idx,10)];
+
+      // Required category pills
+      const badges = document.getElementById("catBadges");
+      badges.innerHTML = "";
+      selectedScenario.needed.forEach(c => badges.appendChild(badgeEl(c)));
+
+      // Rules list
+      const rl = document.getElementById("rulesList"); rl.innerHTML = "";
+      selectedScenario.rules.forEach(r=>{
+        const li=document.createElement("li");
+        li.textContent = `+${r.points} ${r.desc}`;
+        rl.appendChild(li);
+      });
+
+      // Rebuild choices according to scenario
+      const allowedCats = getAllowedCats(selectedScenario);
+      rebuildPlayerChoices(allowedCats);
+
+      resetTask();
+    }
+
+    function resetTask(){
+      acceptedCount=0; playerTurns=4; cocoTurns=4; currentPhase="player";
+      pickedCats=new Set(); categoryCounts={}; sessionLog.length = 0;
+      nonEssentials=0; cocoPick=null; cocoRejections=0;
+      document.getElementById("planList").innerHTML="";
+      hide(document.getElementById("results"));
+      document.getElementById("statusBubble").textContent="Coco is waiting for your pick…";
+      hide(document.getElementById("cocoControls"));
+      show(document.getElementById("progress"));
+      updateProgress();
+      updateLiveCats();
+    }
+
+    function updateProgress(){
+      document.getElementById("turnNum").textContent=(acceptedCount+1);
+      document.getElementById("pLeft").textContent=playerTurns;
+      document.getElementById("cLeft").textContent=cocoTurns;
+    }
+
+    function updateLiveCats(){
+      (selectedScenario?.needed||[]).forEach(c=>{
+        const el=document.getElementById("cat-"+c);
+        if(el){
+          el.classList.toggle("hit", pickedCats.has(c));
+          el.classList.toggle("missing", !pickedCats.has(c));
+        }
+      });
+      const missing=(selectedScenario?.needed||[]).filter(c=>!pickedCats.has(c));
+      const live=document.getElementById("liveCats");
+      live.innerHTML = missing.length===0
+        ? '<span class="ok">All required categories covered ✅</span>'
+        : '<span class="miss">Missing: '+missing.join(", ")+'</span>';
+    }
+
+    function addPlanLine(t){
+      const li=document.createElement("li");
+      li.textContent=t;
+      document.getElementById("planList").appendChild(li);
+    }
+
+    function applyCat(cat){
+      if(cat && cat!=="?"){
+        pickedCats.add(cat);
+        categoryCounts[cat] = (categoryCounts[cat]||0) + 1;
+      } else if(cat==="?"){
+        nonEssentials++;
+      }
+    }
+
+    function playerTurn(){
+      if(currentPhase!=="player"||!selectedScenario) return;
+      const sel=document.getElementById("playerChoice");
+      const item=sel.value; if(!item) return;
+      const cat=sel.options[sel.selectedIndex].dataset.cat||"?";
+      addPlanLine("🧍 You: "+item);
+      applyCat(cat);
+      sessionLog.push({turn:acceptedCount+1, by:"player", item, cat});
+      playerTurns--; acceptedCount++; sel.selectedIndex=0;
+      updateProgress(); updateLiveCats();
+      if(acceptedCount>=totalTurns){ endTask(); return; }
+      currentPhase="cocoSuggest"; cocoSuggest();
+    }
+
+    function cocoSuggest(){
+      // Filter Coco’s pool by scenario-allowed categories (plus '?')
+      const allowed = getAllowedCats(selectedScenario);
+      const pool = cocoItemsAll.filter(x=>allowed.has(x.cat))
+                    .concat(nonEssentialsItems); // keep non-essentials possible
+      const pick=pool[Math.floor(Math.random()*pool.length)];
+      cocoPick=pick;
+      const emotions=["🙂","😐","🤔"][Math.min(cocoRejections,2)];
+      document.getElementById("statusBubble").innerHTML=`${emotions} Coco suggests <strong>${pick.item}</strong><br><em>“${pick.reason}”</em>`;
+      show(document.getElementById("cocoControls"));
+    }
+
+    function acceptCocoItem(){
+      if(currentPhase!=="cocoSuggest"||cocoTurns<=0) return;
+      addPlanLine("🐦 Coco: "+cocoPick.item);
+      applyCat(cocoPick.cat);
+      sessionLog.push({turn:acceptedCount+1, by:"coco", item:cocoPick.item, cat:cocoPick.cat});
+      cocoTurns--; acceptedCount++; cocoRejections=0;
+      hide(document.getElementById("cocoControls"));
+      updateProgress(); updateLiveCats();
+      if(acceptedCount>=totalTurns){ endTask(); return; }
+      currentPhase="player";
+      document.getElementById("statusBubble").textContent="Your turn — pick an item.";
+    }
+
+    function rejectCocoItem(){
+      cocoRejections++;
+      let face=cocoRejections===1?"😕":cocoRejections===2?"😢":cocoRejections>=3?"😭":"🙂";
+      document.getElementById("statusBubble").innerHTML=`${face} Coco will try again…`;
+      setTimeout(cocoSuggest, 900);
+    }
+
+    function scoreScenario(){
+      let detail=[]; let score=0;
+
+      // +2 per required category covered
+      const needed=selectedScenario.needed;
+      needed.forEach(cat=>{
+        if(pickedCats.has(cat)){ score+=2; detail.push(`+2 Covered ${cat}`); }
+        else { detail.push(`+0 Missing ${cat}`); }
+      });
+
+      // Bonus rules
+      selectedScenario.rules.forEach(rule=>{
+        if(rule.type==='bonusIf'){
+          if(categoryCounts[rule.cat] && categoryCounts[rule.cat] >= 2){
+            score += rule.points; detail.push(`+${rule.points} ${rule.desc}`);
+          }
+        } else if(rule.type==='bonusIfAll'){
+          const all = rule.cats.every(c=>pickedCats.has(c));
+          if(all){ score += rule.points; detail.push(`+${rule.points} ${rule.desc}`); }
+        } else if(rule.type==='bonusIfTwoOf'){
+          let count = rule.cats.filter(c=>pickedCats.has(c)).length;
+          if(count >= 2){ score += rule.points; detail.push(`+${rule.points} ${rule.desc}`); }
+        }
+      });
+
+      // Penalties & perfect bonus
+      if(nonEssentials>0){ score -= nonEssentials; detail.push(`−${nonEssentials} Non-essential items`); }
+      const allCovered = needed.every(c=>pickedCats.has(c));
+      if(allCovered && nonEssentials===0){ score += 2; detail.push(`+2 Perfect plan bonus`); }
+
+      return {score, detail, allCovered};
+    }
+
+    function endTask(){
+      hide(document.getElementById("cocoControls"));
+      const {score, detail} = scoreScenario();
+      const needed=selectedScenario.needed;
+      const missed=needed.filter(c=>!pickedCats.has(c));
+      const res=document.getElementById("results");
+
+      let html=`<h3>📊 Summary — ${selectedScenario.goal}</h3>`;
+      html+= missed.length===0 ? '<p class="ok">All required categories covered ✅</p>'
+                               : `<p class="miss">Missing: ${missed.join(", ")}</p>`;
+      html+= `<p class="mono"><strong>Score: ${score}</strong></p>`;
+      html+= '<ul class="mono" style="margin:.25rem 0 0 1rem;">' + detail.map(d=>`<li>${d}</li>`).join('') + '</ul>';
+      html+= '<div class="toolbar" style="margin-top:10px; gap:8px;">' +
+               '<button class="button" onclick="resetTask()">🔄 Restart same scenario</button>' +
+               '<button class="button primary" onclick="exportCSV()">⬇️ Export CSV</button>' +
+             '</div>';
+      res.innerHTML=html; show(res);
+      document.getElementById("statusBubble").textContent="Planning complete.";
+    }
+
+    // ===== CSV Export =====
+    function exportCSV(){
+      const ts = new Date().toISOString();
+      const scen = selectedScenario?.goal || "";
+      const needed = (selectedScenario?.needed||[]).join("|");
+      const covered = Array.from(pickedCats).join("|");
+      const missed = (selectedScenario?.needed||[]).filter(c=>!pickedCats.has(c)).join("|");
+      const {score, detail} = scoreScenario();
+      const clinicianNote = (document.getElementById("clinician-comment")?.value || "").replace(/\r?\n/g," ");
+
+      // Flatten turn log: "1:player:Water(drink); 2:coco:Blanket(comfort); ..."
+      const logStr = sessionLog.map(r=>`${r.turn}:${r.by}:${r.item}(${r.cat})`).join("; ");
+
+      const headers = [
+        "timestamp","scenario","needed_categories","covered_categories","missing_categories",
+        "score","rule_breakdown","non_essentials","player_turns","coco_turns","turn_log","clinician_comment"
+      ];
+
+      const row = [
+        ts, scen, needed, covered, missed,
+        String(score),
+        detail.join(" | "),
+        String(nonEssentials),
+        String(4 - playerTurns),
+        String(4 - cocoTurns),
+        logStr,
+        clinicianNote
+      ];
+
+      // Basic CSV escaping
+      const esc = v => `"${String(v).replace(/"/g,'""')}"`;
+      const csv = headers.map(esc).join(",") + "\n" + row.map(esc).join(",");
+
+      const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `plan-with-coco_${scen.replace(/\s+/g,'-').toLowerCase()}_${ts.slice(0,19).replace(/[:T]/g,'-')}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0);
+    }
+  </script>
+</main>
+</body>
 </html>
-
