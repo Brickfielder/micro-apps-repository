@@ -316,54 +316,85 @@
   function readOrder(container){ return [...container.querySelectorAll('.pill')].map(p=>p.dataset.id); }
   function tag(text){ const b=document.createElement('span'); b.className='badge'; b.textContent=text; return b; }
 
-  /* =========================
-     Drag & Drop (desktop)
-     ========================= */
-  function makeSourceToTarget(sourceEl, targetEl, onAdd, onReorder){
-    let dragEl = null;
-    targetEl.addEventListener('dragstart', e=>{
-      const t = e.target.closest('.pill'); if(!t) return;
-      dragEl=t; t.classList.add('dragging'); e.dataTransfer.effectAllowed='move';
-    });
-    targetEl.addEventListener('dragend', ()=>{
-      if(dragEl){ dragEl.classList.remove('dragging'); dragEl=null; onReorder && onReorder(readOrder(targetEl)); }
-    });
-    targetEl.addEventListener('dragover', e=>{
-      e.preventDefault();
-      const after = getDragAfter(targetEl, e.clientY);
-      const dragging = targetEl.querySelector('.pill.dragging');
-      if(dragging){ if(after==null) targetEl.appendChild(dragging); else targetEl.insertBefore(dragging, after); }
-      else targetEl.classList.add('drop-target');
-    });
-    targetEl.addEventListener('dragleave', ()=> targetEl.classList.remove('drop-target'));
-    targetEl.addEventListener('drop', e=>{
-      targetEl.classList.remove('drop-target');
-      const dataId = e.dataTransfer.getData('text/id');
-      if(!dataId) return;
-  const pill = sourceEl.querySelector(`.pill[data-id="${CSS.escape(dataId)}"]`);
-  if(!pill) return;
-  const after = getDragAfter(targetEl, e.clientY);
-  if(after==null) targetEl.appendChild(pill); else targetEl.insertBefore(pill, after);
-  pill.draggable = true;
-  onAdd && onAdd(dataId);
-  updateSourceLockState();
-});
-
-sourceEl.addEventListener('dragstart', e=>{
-  const t = e.target.closest('.pill');
-  if(!t) return;
-  dragEl = t;
-  t.classList.add('dragging');
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/id', t.dataset.id);
-});
-
-sourceEl.addEventListener('dragend', ()=>{
-  if(dragEl){
-    dragEl.classList.remove('dragging');
-    dragEl = null;
+/* =========================
+   Drag & Drop (desktop)
+   ========================= */
+function getDragAfter(container, y){
+  const els = [...container.querySelectorAll('.pill:not(.dragging)')];
+  let closest = null;
+  let closestOffset = Number.NEGATIVE_INFINITY;
+  for (const el of els){
+    const box = el.getBoundingClientRect();
+    const offset = y - (box.top + box.height/2);
+    if (offset < 0 && offset > closestOffset){
+      closestOffset = offset;
+      closest = el;
+    }
   }
-});
+  return closest;
+}
+
+function makeSourceToTarget(sourceEl, targetEl, onAdd, onReorder){
+  let dragEl = null;
+
+  targetEl.addEventListener('dragstart', e=>{
+    const t = e.target.closest('.pill'); if(!t) return;
+    dragEl = t;
+    t.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  });
+
+  targetEl.addEventListener('dragend', ()=>{
+    if(dragEl){
+      dragEl.classList.remove('dragging');
+      dragEl = null;
+      onReorder && onReorder(readOrder(targetEl));
+    }
+  });
+
+  targetEl.addEventListener('dragover', e=>{
+    e.preventDefault();
+    const after = getDragAfter(targetEl, e.clientY);
+    const dragging = targetEl.querySelector('.pill.dragging');
+    if(dragging){
+      if(after == null) targetEl.appendChild(dragging);
+      else targetEl.insertBefore(dragging, after);
+    } else {
+      targetEl.classList.add('drop-target');
+    }
+  });
+
+  targetEl.addEventListener('dragleave', ()=> targetEl.classList.remove('drop-target'));
+
+  targetEl.addEventListener('drop', e=>{
+    targetEl.classList.remove('drop-target');
+    const dataId = e.dataTransfer.getData('text/id');
+    if(!dataId) return;
+    const pill = sourceEl.querySelector(`.pill[data-id="${CSS.escape(dataId)}"]`);
+    if(!pill) return;
+    const after = getDragAfter(targetEl, e.clientY);
+    if(after == null) targetEl.appendChild(pill);
+    else targetEl.insertBefore(pill, after);
+    pill.draggable = true;
+    onAdd && onAdd(dataId);
+    updateSourceLockState();
+  });
+
+  sourceEl.addEventListener('dragstart', e=>{
+    const t = e.target.closest('.pill'); if(!t) return;
+    dragEl = t;
+    t.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/id', t.dataset.id);
+  });
+
+  sourceEl.addEventListener('dragend', ()=>{
+    if(dragEl){
+      dragEl.classList.remove('dragging');
+      dragEl = null;
+    }
+  });
+} // ✅ this brace was missing
 
   /* =========================
      Tap Mode (mobile)
