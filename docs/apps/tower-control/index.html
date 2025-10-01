@@ -18,25 +18,15 @@
   <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
 
   <style>
-    :root{ --radar-h: 320px; }
+    :root{ --radar-h: 380px; }
     #app-root{ display:grid; gap:clamp(12px,1.2vw,18px); }
 
-    /* Order in DOM = radar, controls, side; on desktop, keep controls under radar */
-    .tc-app{ display:grid; gap:clamp(12px,1.2vw,18px); }
-    @media (min-width:1024px){
-      .tc-app{
-        grid-template-areas:
-          "radar side"
-          "controls side";
-        grid-template-columns: 2fr 1fr;
-        align-items:start;
-      }
-      #radar{ grid-area:radar; }
-      .controls{ grid-area:controls; }
-      #side-stack{ grid-area:side; display:grid; gap:clamp(12px,1.2vw,18px); }
-      :root{ --radar-h: 440px; }
+    /* One clean vertical stack */
+    .tc-app{
+      display:grid;
+      gap:clamp(12px,1.2vw,18px);
+      grid-template-columns: minmax(280px, 100%);
     }
-    @media (min-width:768px){ :root{ --radar-h: 380px; } }
 
     .panel{
       background: var(--surface);
@@ -45,18 +35,8 @@
       box-shadow: var(--shadow);
       padding: clamp(16px, 2vw, 24px);
     }
-/* Keep controls visible under the radar while scrolling */
-@media (min-width:1024px){
-  .controls{
-    position: sticky;
-    top: 8px;                 /* adjust if you want tighter/looser */
-    z-index: 5;               /* sit above nearby cards */
-    align-self: start;        /* don’t stretch in the grid cell */
-    background: var(--surface); /* avoids translucency artifacts */
-  }
-}
 
-    /* Radar */
+    /* Radar fills the whole card */
     .radar{
       position:relative; height:var(--radar-h); border-radius:16px;
       overflow:hidden; isolation:isolate;
@@ -98,11 +78,12 @@
       border:2px solid var(--accent); box-shadow:0 0 0 2px color-mix(in oklab, var(--accent), transparent 75%);
     }
 
-    .kv{ display:grid; grid-template-columns:auto 1fr; gap:.25rem .75rem; }
-    .kv dt{ color: var(--muted); }
-    .kv dd{ margin:0; }
-
+    /* Controls: full width, sticky just under hero/radar */
     .controls{
+      position: sticky;
+      top: 8px;
+      z-index: 5;
+      background: var(--surface);
       display:grid;
       grid-template-columns: repeat(2, minmax(0,1fr));
       gap:clamp(10px,1vw,14px);
@@ -111,13 +92,16 @@
       .controls{ grid-template-columns: repeat(4, minmax(0,1fr)); }
     }
 
+    /* Active Protocols and Status */
     table.map{ width:100%; border-collapse:separate; border-spacing:0 6px; }
     .map td{
       padding:8px 10px; border:1px solid var(--line); border-radius:10px;
       background: var(--surface);
     }
+    .kv{ display:grid; grid-template-columns:auto 1fr; gap:.25rem .75rem; }
+    .kv dt{ color: var(--muted); } .kv dd{ margin:0; }
 
-    /* Tiny utilities */
+    /* Small utilities */
     .toolbar{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
     .pill{ display:inline-block; padding:6px 12px; border-radius:999px; background:var(--pill); color:var(--text); font-size:.85rem; font-weight:500; }
   </style>
@@ -126,10 +110,10 @@
   <div id="app-root">
     <main class="tc-app" data-app-title="Tower Control" data-app-tags="executive, attention" data-app-version="trainer-1">
 
-      <!-- Radar -->
+      <!-- 1) Radar -->
       <section class="panel radar" id="radar" aria-label="Radar display" role="img"></section>
 
-      <!-- Controls directly under radar -->
+      <!-- 2) Controls (full width, sticky) -->
       <section class="panel controls" aria-label="Actions">
         <button type="button" class="button primary" data-action="clear">CLEAR</button>
         <button type="button" class="button primary" data-action="land">LAND</button>
@@ -137,40 +121,38 @@
         <button type="button" class="button primary" data-action="redirect">REDIRECT</button>
       </section>
 
-      <!-- Right column (desktop) -->
-      <div id="side-stack">
-        <section class="panel" id="task-panel" aria-labelledby="task-h">
-          <h2 id="task-h">Active Protocols</h2>
-          <p class="helper">Match planes to actions according to today’s rules.</p>
-          <table class="map" id="protocols"></table>
-          <div class="toolbar">
-            <label class="pill">Difficulty&nbsp;
-              <select id="difficulty">
-                <option value="easy">Easy</option>
-                <option value="normal" selected>Normal</option>
-                <option value="hard">Hard</option>
-              </select>
-            </label>
-            <button class="button" id="reshuffle" type="button">New Round</button>
-            <button class="button" id="show-help" type="button">Instructions</button>
-            <button class="button primary" id="start" type="button">Start</button>
-            <button class="button" id="pause" type="button">Pause</button>
-            <button class="button" id="reset" type="button">Reset</button>
-            <!-- CSV -->
-            <button class="button" id="downloadCsv" type="button" title="Download session data (CSV)">Download CSV</button>
-          </div>
-        </section>
+      <!-- 3) Active Protocols (full width) -->
+      <section class="panel" id="task-panel" aria-labelledby="task-h">
+        <h2 id="task-h">Active Protocols</h2>
+        <p class="helper">Match planes to actions according to today’s rules.</p>
+        <table class="map" id="protocols"></table>
+        <div class="toolbar">
+          <label class="pill">Difficulty&nbsp;
+            <select id="difficulty">
+              <option value="easy">Easy</option>
+              <option value="normal" selected>Normal</option>
+              <option value="hard">Hard</option>
+            </select>
+          </label>
+          <button class="button" id="reshuffle" type="button">New Round</button>
+          <button class="button" id="show-help" type="button">Instructions</button>
+          <button class="button primary" id="start" type="button">Start</button>
+          <button class="button" id="pause" type="button">Pause</button>
+          <button class="button" id="reset" type="button">Reset</button>
+          <button class="button" id="downloadCsv" type="button" title="Download session data (CSV)">Download CSV</button>
+        </div>
+      </section>
 
-        <section class="panel" id="status-panel" aria-labelledby="status-h">
-          <h2 id="status-h">Status</h2>
-          <dl class="kv">
-            <dt>Success rate</dt><dd><span id="succ">0%</span></dd>
-            <dt>Completed</dt><dd><span id="done">0</span></dd>
-            <dt>Failed</dt><dd><span id="fail">0</span></dd>
-            <dt>On screen</dt><dd><span id="onscreen">0</span></dd>
-          </dl>
-        </section>
-      </div>
+      <!-- 4) Status (full width) -->
+      <section class="panel" id="status-panel" aria-labelledby="status-h">
+        <h2 id="status-h">Status</h2>
+        <dl class="kv">
+          <dt>Success rate</dt><dd><span id="succ">0%</span></dd>
+          <dt>Completed</dt><dd><span id="done">0</span></dd>
+          <dt>Failed</dt><dd><span id="fail">0</span></dd>
+          <dt>On screen</dt><dd><span id="onscreen">0</span></dd>
+        </dl>
+      </section>
     </main>
   </div>
 
@@ -205,7 +187,7 @@
     let running = false, spawnTimer = null;
     let selected = null, planes = [], completed = 0, failed = 0;
     let map = {};               // color -> required action
-    let sessionRows = [];        // CSV rows (actions only)
+    let sessionRows = [];        // CSV rows
     const sessionStart = new Date();
 
     // ======= DOM =======
@@ -239,7 +221,6 @@
     }
 
     function newRound(){
-      // shuffle one-to-one mapping of COLORS to ACTIONS
       const shuffled = [...ACTIONS].sort(()=>Math.random()-0.5);
       map = {};
       COLORS.forEach((c, i)=> map[c] = shuffled[i % shuffled.length]);
@@ -304,7 +285,7 @@
       const needed = map[selected.color];
       const ok = (action === 'clear') || (action === needed);
 
-      // CSV: log a tidy row for this action
+      // CSV row
       sessionRows.push({
         timestamp: fmtTime(Date.now()),
         session_start: fmtTime(sessionStart),
@@ -337,26 +318,18 @@
         "timestamp","session_start","difficulty","plane_id","plane_color",
         "required_action","chosen_action","correct","onscreen_before"
       ];
-      const esc = v => {
-        if (v == null) return "";
-        const s = String(v);
-        return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
-      };
+      const esc = v => (v==null) ? "" : /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g,'""')}"` : String(v);
       const body = rows.map(r => headers.map(h => esc(r[h])).join(",")).join("\n");
       return headers.join(",") + "\n" + body + "\n";
     }
-
     function downloadCSV(){
       const csv = toCSV(sessionRows);
       const blob = new Blob([csv], {type: "text/csv;charset=utf-8"});
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       const stamp = new Date().toISOString().replace(/[:.]/g,'-');
-      a.href = url;
-      a.download = `tower-control_${stamp}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      a.href = url; a.download = `tower-control_${stamp}.csv`;
+      document.body.appendChild(a); a.click(); a.remove();
       URL.revokeObjectURL(url);
     }
 
@@ -377,9 +350,9 @@
     // ======= Init =======
     newRound();
     updateStatus();
-    el.help.showModal(); // first-run instructions
+    el.help.showModal();
 
-    // Expose for hooks
+    // Hook
     window.app = { handleAction, setDifficulty, newRound, downloadCSV };
   })();
   </script>
