@@ -11,7 +11,7 @@
   <script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
   <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
 
-  <!-- Frame metadata (hero title/desc via catalog.json or explicit overrides) -->
+  <!-- Frame metadata -->
   <meta name="app-slug" content="travel-with-coco">
   <meta name="app-title" content="Travel with Coco — Milestones">
   <meta name="app-desc" content="Plan a journey with your cheeky companion. Reach your destination city before you run out of resources.">
@@ -57,9 +57,7 @@
 </head>
 
 <body>
-  <!-- frame.js wraps this in .app-wrap and injects the .app-hero above -->
   <main id="app-root" aria-live="polite">
-    <!-- Dashboard tiles -->
     <section class="dash" aria-label="Trip dashboard">
       <div class="tile"><div class="label">💰 Money</div><div class="value" id="moneyVal">—</div></div>
       <div class="tile"><div class="label">⏳ Time left (days)</div><div class="value" id="timeVal">—</div></div>
@@ -67,7 +65,6 @@
       <div class="tile"><div class="label">🐦 Coco’s Mood</div><div class="value" id="moodVal">—</div></div>
     </section>
 
-    <!-- App content -->
     <section id="app"></section>
   </main>
 
@@ -96,23 +93,20 @@
       log: [],
       lastCoco: null,
       csvRows: [],
-      todayTimeDelta: 0 // <-- travel's extra/saved time for this day (relative to baseline 1)
+      todayTimeDelta: 0
     };
 
-    // Derived
     const startCity = ()=> game.routeCities[0];
     const destination = ()=> game.routeCities[game.routeCities.length-1];
     const currentCity = ()=> game.routeCities[game.routeIndex];
     const nextCity = (advance=1)=> game.routeCities[Math.min(game.routeIndex+advance, game.routeCities.length-1)];
 
-    // Utils
     const clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
     const chance = p => Math.random() < p;
     const pick = arr => arr[Math.floor(Math.random()*arr.length)];
     const app = document.getElementById('app');
     const html = (s,...v)=>s.map((x,i)=>x+(v[i]??'')).join('');
 
-    // Dashboard
     function updateDash(){
       const money = document.getElementById('moneyVal');
       const time  = document.getElementById('timeVal');
@@ -125,7 +119,6 @@
       if(game.mood>=80) mood.classList.add('good'); else if(game.mood<20) mood.classList.add('warn');
     }
 
-    // Progress UI
     function progressBar(){
       return `<div class="progress">${
         game.routeCities.map((c,i)=>{
@@ -136,7 +129,7 @@
       }</div>`;
     }
 
-    // Options (use timeDelta relative to baseline of 1 day)
+    // Options (timeDelta is relative to a baseline of 1 day per cycle)
     function genCocoSuggestion(){
       if(game.mood<20) return null;
       let sensibleP=0.2, whimsicalP=0.5, luckyP=0.2, sabotageP=0.1;
@@ -159,7 +152,7 @@
         label:`Follow Coco → ${target}`,
         detail,
         cost, energy,
-        timeDelta: timeCost - 1, // convert to delta from the baseline 1 day
+        timeDelta: timeCost - 1,
         advance, type
       };
     }
@@ -188,7 +181,6 @@
       { key:'nomeal',     label:'🚫 No meal',    cost:  0, energy:-10, mood:-5, detail:'£0, -10 energy, -5 mood' },
     ];
 
-    // Random event
     function randomEvent(){
       if(!chance(0.2)) return null;
       const events = [
@@ -202,7 +194,6 @@
       return pick(events);
     }
 
-    // CSV export — ensure a[download] so clinician_feedback can augment the file
     function exportCSV(){
       const header = ['Day','Phase','Action','From','To','Money','Time','Energy','Mood'];
       const rows = [header, ...game.csvRows];
@@ -218,21 +209,20 @@
       URL.revokeObjectURL(url);
     }
 
-    // Screens
     function screenStart(){
-      const presetOptions = Object.keys(ROUTE_PRESETS).map(name=>`<option value="\${name}">\${name}</option>`).join('');
+      const presetOptions = Object.keys(ROUTE_PRESETS).map(name=>`<option value="${name}">${name}</option>`).join('');
       app.innerHTML = html`
         <div class="card">
           <h2>Set up your journey</h2>
           <div class="row" style="gap:8px;">
             <label>Choose a preset<br>
-              <select id="presetSel" class="btn chip">\${presetOptions}</select>
+              <select id="presetSel" class="btn chip">${presetOptions}</select>
             </label>
             <label>or edit milestones (comma-separated)<br>
-              <input id="routeStr" style="min-width:520px" value="\${game.routeCities.join(', ')}" aria-label="Route cities">
+              <input id="routeStr" style="min-width:520px" value="${game.routeCities.join(', ')}" aria-label="Route cities">
             </label>
-            <label>Days<br><input id="days" type="number" min="3" max="20" value="\${game.time}" aria-label="Time in days"></label>
-            <label>Money (£)<br><input id="cash" type="number" min="50" max="1000" value="\${game.money}" aria-label="Starting money"></label>
+            <label>Days<br><input id="days" type="number" min="3" max="20" value="${game.time}" aria-label="Time in days"></label>
+            <label>Money (£)<br><input id="cash" type="number" min="50" max="1000" value="${game.money}" aria-label="Starting money"></label>
           </div>
           <div class="toolbar">
             <div class="muted">First city = start • Last city = destination</div>
@@ -266,25 +256,24 @@
       const options = baseTravelOptions();
       const coco = genCocoSuggestion();
       game.lastCoco = coco;
-      game.todayTimeDelta = 0; // reset until a choice is made
+      game.todayTimeDelta = 0;
 
       app.innerHTML = html`
         <div class="card">
           <div class="toolbar">
-            <div>\${progressBar()}</div>
+            <div>${progressBar()}</div>
             <div class="right"><button class="btn chip" id="btnExport">⬇️ Download CSV</button></div>
           </div>
-          <h2 style="margin-top:8px">Day \${game.day} — Travel choices</h2>
-          <p><strong>Current:</strong> \${currentCity()} → <strong>Goal:</strong> \${destination()}</p>
+          <h2 style="margin-top:8px">Day ${game.day} — Travel choices</h2>
+          <p><strong>Current:</strong> ${currentCity()} → <strong>Goal:</strong> ${destination()}</p>
 
-          <!-- Coco FIRST -->
-          <div class="choice" \${!coco?'aria-disabled="true"':''} style="border:2px solid #dbeafe;background:#eff6ff">
+          <div class="choice" ${!coco?'aria-disabled="true"':''} style="border:2px solid #dbeafe;background:#eff6ff">
             <div>🐦</div>
             <div>
               <h4 style="margin:0 0 6px 0">Coco says:</h4>
-              <div>\${coco ? coco.detail : '<em>Coco is sulking… no suggestions today.</em>'}</div>
-              \${coco ? html`<small class="muted">Effect if followed: \${fmtTravel(coco)}</small>` : ''}
-              \${coco ? html`<div style="margin-top:8px" class="row"><button class="btn" id="btnCoco">\${coco.label}</button></div>` : ''}
+              <div>${coco ? coco.detail : '<em>Coco is sulking… no suggestions today.</em>'}</div>
+              ${coco ? html`<small class="muted">Effect if followed: ${fmtTravel(coco)}</small>` : ''}
+              ${coco ? html`<div style="margin-top:8px" class="row"><button class="btn" id="btnCoco">${coco.label}</button></div>` : ''}
             </div>
           </div>
 
@@ -303,10 +292,10 @@
         div.innerHTML = `
           <div>🧭</div>
           <div>
-            <h4>\${o.label}</h4>
-            <div>\${o.detail}</div>
-            <small class="muted">Effect: \${fmtTravel(o)}</small>
-            <div style="margin-top:8px" class="row"><button class="btn" data-key="\${o.key}">Choose \${o.label}</button></div>
+            <h4>${o.label}</h4>
+            <div>${o.detail}</div>
+            <small class="muted">Effect: ${fmtTravel(o)}</small>
+            <div style="margin-top:8px" class="row"><button class="btn" data-key="${o.key}">Choose ${o.label}</button></div>
           </div>`;
         list.appendChild(div);
       });
@@ -319,7 +308,7 @@
 
     function fmtTravel(o){
       const toCity = nextCity(o.advance||1);
-      const daysNum = 1 + (o.timeDelta||0); // baseline 1 day + delta
+      const daysNum = 1 + (o.timeDelta||0);
       const days = `${daysNum} day${daysNum!==1?'s':''}`;
       const cost = `${(o.cost||0) < 0 ? (o.cost) : '+'+(o.cost||0)}£`;
       const energy = (o.energy||0);
@@ -338,9 +327,8 @@
       const priorCity = currentCity();
       game.money = Math.max(0, game.money + (opt.cost||0));
       game.energy = clamp(game.energy + (opt.energy||0), 0, 100);
-      // DO NOT subtract time here — we do it once at end-of-day
       game.routeIndex = Math.min(game.routeIndex + (opt.advance||1), game.routeCities.length-1);
-      game.todayTimeDelta = opt.timeDelta || 0; // store for nightly rollover
+      game.todayTimeDelta = opt.timeDelta || 0;
       const newCity = currentCity();
 
       pushCsvRow('travel', (isCoco?`Coco: ${opt.label}`:opt.label), priorCity, newCity);
@@ -354,7 +342,7 @@
       if(checkEnd()) return;
       app.innerHTML = html`
         <div class="card">
-          <div class="toolbar"><div>\${progressBar()}</div><div class="right"><button class="btn chip" id="btnExport">⬇️ Download CSV</button></div></div>
+          <div class="toolbar"><div>${progressBar()}</div><div class="right"><button class="btn chip" id="btnExport">⬇️ Download CSV</button></div></div>
           <h2>Evening — Where will you stay?</h2>
           <div id="stayList"></div>
         </div>
@@ -367,9 +355,9 @@
         div.innerHTML = `
           <div>🛎️</div>
           <div>
-            <h4>\${s.label}</h4>
-            <div>\${s.detail}</div>
-            <div style="margin-top:8px" class="row"><button class="btn" data-key="\${s.key}">Choose \${s.label}</button></div>
+            <h4>${s.label}</h4>
+            <div>${s.detail}</div>
+            <div style="margin-top:8px" class="row"><button class="btn" data-key="${s.key}">Choose ${s.label}</button></div>
           </div>`;
         list.appendChild(div);
       });
@@ -391,7 +379,7 @@
     function screenFood(){
       app.innerHTML = html`
         <div class="card">
-          <div class="toolbar"><div>\${progressBar()}</div><div class="right"><button class="btn chip" id="btnExport">⬇️ Download CSV</button></div></div>
+          <div class="toolbar"><div>${progressBar()}</div><div class="right"><button class="btn chip" id="btnExport">⬇️ Download CSV</button></div></div>
           <h2>Food — Refuel?</h2>
           <div id="foodList"></div>
           <div class="row" style="margin-top:8px"><button class="btn ghost" id="skipFood">Skip food phase</button></div>
@@ -405,9 +393,9 @@
         div.innerHTML = `
           <div>🍽️</div>
           <div>
-            <h4>\${f.label}</h4>
-            <div>\${f.detail}</div>
-            <div style="margin-top:8px" class="row"><button class="btn" data-key="\${f.key}">Choose \${f.label}</button></div>
+            <h4>${f.label}</h4>
+            <div>${f.detail}</div>
+            <div style="margin-top:8px" class="row"><button class="btn" data-key="${f.key}">Choose ${f.label}</button></div>
           </div>`;
         list.appendChild(div);
       });
@@ -426,11 +414,9 @@
     }
 
     function nextDayEvent(){
-      // Nightly rollover: subtract exactly once per "day"
       const dayCost = 1 + (game.todayTimeDelta || 0);
       game.time = Math.max(0, game.time - dayCost);
 
-      // Then random event may add/subtract resources (including time)
       const ev = randomEvent();
       let note = 'No events today.'; if(ev){ note = ev.effect(); }
       game.log.push({type:'event', msg: note});
@@ -439,7 +425,6 @@
       updateDash();
       if(checkEnd()) return;
 
-      // Advance to next calendar day and continue
       if(game.routeIndex >= game.routeCities.length-1){ endGame(true); return; }
       game.day += 1;
       game.todayTimeDelta = 0;
@@ -466,14 +451,14 @@
 
       app.innerHTML = html`
         <div class="card">
-          <div class="toolbar"><div>\${progressBar()}</div><div class="right"><button class="btn chip" id="btnExport">⬇️ Download CSV</button></div></div>
-          <h2>\${title}</h2>
-          \${summary?html`<p class="muted">\${summary}</p>`:''}
-          <p><strong>Route:</strong> \${routeStr}</p>
-          <p><strong>Final resources:</strong> £\${game.money}, \${game.time} day(s), \${game.energy} energy, mood \${game.mood}</p>
-          <p><strong>Coco followed:</strong> \${game.followedCocoCount} time(s). Ignored: \${game.ignoredCocoCount}.</p>
-          <p><strong>Score:</strong> \${score}</p>
-          <details style="margin-top:8px"><summary>Trip Story (log)</summary><pre style="white-space:pre-wrap;background:#fafafa;border:1px solid var(--border);padding:10px;border-radius:12px">\${story}</pre></details>
+          <div class="toolbar"><div>${progressBar()}</div><div class="right"><button class="btn chip" id="btnExport">⬇️ Download CSV</button></div></div>
+          <h2>${title}</h2>
+          ${summary?html`<p class="muted">${summary}</p>`:''}
+          <p><strong>Route:</strong> ${routeStr}</p>
+          <p><strong>Final resources:</strong> £${game.money}, ${game.time} day(s), ${game.energy} energy, mood ${game.mood}</p>
+          <p><strong>Coco followed:</strong> ${game.followedCocoCount} time(s). Ignored: ${game.ignoredCocoCount}.</p>
+          <p><strong>Score:</strong> ${score}</p>
+          <details style="margin-top:8px"><summary>Trip Story (log)</summary><pre style="white-space:pre-wrap;background:#fafafa;border:1px solid var(--border);padding:10px;border-radius:12px">${story}</pre></details>
           <div class="row" style="margin-top:12px">
             <button class="btn" id="restart">Play again</button>
           </div>
@@ -483,7 +468,6 @@
       document.getElementById('restart').onclick = ()=>{ game.phase='start'; screenStart(); updateDash(); };
     }
 
-    // Init
     updateDash();
     screenStart();
   </script>
