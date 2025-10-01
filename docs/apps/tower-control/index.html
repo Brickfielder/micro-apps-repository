@@ -98,12 +98,22 @@
       .controls{ grid-template-columns: repeat(4, minmax(0,1fr)); }
     }
 
-    /* Active Protocols & Status */
-    table.map{ width:100%; border-collapse:separate; border-spacing:0 6px; }
-    .map td{
-      padding:8px 10px; border:1px solid var(--line); border-radius:10px;
-      background: var(--surface);
-    }
+/* Active Protocols & Status */
+table.map{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0 6px;
+  table-layout: fixed;        /* NEW: equal column widths */
+}
+.map td{
+  width:25%;                  /* NEW: 4 equal columns */
+  text-align:left;            /* optional, looks nicer */
+  padding:8px 10px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background: var(--surface);
+}
+
     .kv{ display:grid; grid-template-columns:auto 1fr; gap:.25rem .75rem; }
     .kv dt{ color: var(--muted); } .kv dd{ margin:0; }
   </style>
@@ -234,15 +244,27 @@
       toast('Protocols updated');
     }
 
-    function renderProtocols(){
-      el.protocols.innerHTML = COLORS.map(c => {
-        const a = map[c];
-        return `<tr>
-          <td><span class="pill" style="border:1px solid var(--line)">${c}</span></td>
-          <td><strong>${(a||'—').toUpperCase()}</strong></td>
-        </tr>`;
-      }).join('');
-    }
+function renderProtocols(){
+  // Pair colors: [0,1] for row 1, [2,3] for row 2
+  const pairs = [];
+  for (let i = 0; i < COLORS.length; i += 2) {
+    pairs.push(COLORS.slice(i, i + 2));
+  }
+  el.protocols.innerHTML = pairs.map(rowColors => {
+    // each row = color1, action1, color2, action2
+    const cells = rowColors.flatMap(c => {
+      const a = map[c];
+      return [
+        `<td><span class="pill" style="border:1px solid var(--line)">${c}</span></td>`,
+        `<td><strong>${(a || '—').toUpperCase()}</strong></td>`
+      ];
+    }).join('');
+    // If COLORS is odd-length, pad missing pair
+    const neededCells = 4 - (rowColors.length * 2);
+    const pad = neededCells > 0 ? `<td></td>`.repeat(neededCells) : '';
+    return `<tr>${cells}${pad}</tr>`;
+  }).join('');
+}
 
     function updateStatus(){
       el.done.textContent = completed;
