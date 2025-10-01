@@ -502,29 +502,36 @@ reject.onclick = () => {
     while($docStream.children.length > 8){ $docStream.lastElementChild?.remove(); }
   }
 
-  function maybeRingPhone(){
-    if(phoneRinging) return;
-    if(Math.random() < difficulty.phoneChance){
-      phoneRinging = true;
-      const isManager = Math.random() >= difficulty.fakeManagerRate;
-      currentCaller = isManager ? "Manager" : (Math.random()<0.5?"Colleague":"Unknown");
-      $phoneIcon.classList.add("ring");
-      $phoneStatus.textContent = \`Call from \${currentCaller}!\`;
-      $phoneButtons.style.display = "flex";
-      log(\`Phone ringing from \${currentCaller}.\`);
+function maybeRingPhone(){
+  if (phoneRinging) return;
+  if (Math.random() < difficulty.phoneChance) {
+    phoneRinging = true;
+    const isManager = Math.random() >= difficulty.fakeManagerRate;
+    currentCaller = isManager ? "Manager" : (Math.random() < 0.5 ? "Colleague" : "Unknown");
+    $phoneIcon.classList.add("ring");
+    $phoneStatus.textContent = `Call from ${currentCaller}!`;
+    $phoneButtons.style.display = "flex";
+    log(`Phone ringing from ${currentCaller}.`);
 
-      const callerAtStart = currentCaller;
-      setTimeout(()=>{
-        if(phoneRinging && currentCaller === callerAtStart){
-          if(callerAtStart === "Manager"){ stats.phoneErrors++; log("Missed Manager call (error)."); setStatsPills(); }
-          else { log("Ignored non-Manager call (ok)."); }
-          phoneRinging=false; currentCaller=null;
-          $phoneIcon.classList.remove("ring"); $phoneButtons.style.display = "none";
-          $phoneStatus.textContent = "Phone is quiet.";
+    const callerAtStart = currentCaller;
+    setTimeout(() => {
+      if (phoneRinging && currentCaller === callerAtStart) {
+        if (callerAtStart === "Manager") {
+          stats.phoneErrors++; 
+          log("Missed Manager call (error).");
+          setStatsPills();
+        } else {
+          log("Ignored non-Manager call (ok).");
         }
-      }, 6000);
-    }
+        phoneRinging = false; 
+        currentCaller = null;
+        $phoneIcon.classList.remove("ring");
+        $phoneButtons.style.display = "none";
+        $phoneStatus.textContent = "Phone is quiet.";
+      }
+    }, 6000);
   }
+}
 
   // ====== Interactions ======
   $sendReport.addEventListener("click", ()=>{
