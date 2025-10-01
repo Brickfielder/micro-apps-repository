@@ -6,40 +6,34 @@
   <meta name="theme" content="bold dense"/>
   <meta name="color-scheme" content="light"/>
   <meta name="app-slug" content="tower-control"/>
-  <!-- Optional explicit overrides (win over catalog) -->
   <meta name="app-title" content="Tower Control — Trainer"/>
   <meta name="app-desc" content="Match planes to actions under changing protocols. Timed spawns, accuracy stats, and difficulty levels."/>
 
   <title>Tower Control — Trainer</title>
   <meta name="description" content="Tower Control trainer with instructions, difficulty levels, and timed spawns."/>
 
-  <!-- Shared assets published at site root -->
+  <!-- Shared assets at site root -->
   <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3"/>
   <script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
   <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
 
   <style>
     :root{ --radar-h: 320px; }
-    /* App surface uses theme tokens; no dark fallbacks */
-    #app-root{
-      display:grid;
-      gap:clamp(12px,1.2vw,18px);
-    }
+    #app-root{ display:grid; gap:clamp(12px,1.2vw,18px); }
 
-    /* Layout: radar + side on wide screens, controls full width */
-    .tc-app{
-      display:grid;
-      gap:clamp(12px,1.2vw,18px);
-    }
+    /* Order in DOM = radar, controls, side; on desktop, keep controls under radar */
+    .tc-app{ display:grid; gap:clamp(12px,1.2vw,18px); }
     @media (min-width:1024px){
       .tc-app{
-        grid-template-areas: "radar side" "controls controls";
+        grid-template-areas:
+          "radar side"
+          "controls side";
         grid-template-columns: 2fr 1fr;
         align-items:start;
       }
-      #radar{ grid-area: radar; }
-      #side-stack{ grid-area: side; display:grid; gap:clamp(12px,1.2vw,18px); }
-      .controls{ grid-area: controls; }
+      #radar{ grid-area:radar; }
+      .controls{ grid-area:controls; }
+      #side-stack{ grid-area:side; display:grid; gap:clamp(12px,1.2vw,18px); }
       :root{ --radar-h: 440px; }
     }
     @media (min-width:768px){ :root{ --radar-h: 380px; } }
@@ -94,12 +88,10 @@
       border:2px solid var(--accent); box-shadow:0 0 0 2px color-mix(in oklab, var(--accent), transparent 75%);
     }
 
-    /* Key/Value list */
     .kv{ display:grid; grid-template-columns:auto 1fr; gap:.25rem .75rem; }
     .kv dt{ color: var(--muted); }
     .kv dd{ margin:0; }
 
-    /* Controls grid uses theme buttons */
     .controls{
       display:grid;
       grid-template-columns: repeat(2, minmax(0,1fr));
@@ -109,21 +101,33 @@
       .controls{ grid-template-columns: repeat(4, minmax(0,1fr)); }
     }
 
-    /* Table for protocols */
     table.map{ width:100%; border-collapse:separate; border-spacing:0 6px; }
     .map td{
       padding:8px 10px; border:1px solid var(--line); border-radius:10px;
       background: var(--surface);
     }
+
+    /* Tiny utilities */
+    .toolbar{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .pill{ display:inline-block; padding:6px 12px; border-radius:999px; background:var(--pill); color:var(--text); font-size:.85rem; font-weight:500; }
   </style>
 </head>
 <body>
-  <!-- frame.js injects the hero above this and wraps in .app-wrap -->
   <div id="app-root">
     <main class="tc-app" data-app-title="Tower Control" data-app-tags="executive, attention" data-app-version="trainer-1">
 
+      <!-- Radar -->
       <section class="panel radar" id="radar" aria-label="Radar display" role="img"></section>
 
+      <!-- Controls directly under radar -->
+      <section class="panel controls" aria-label="Actions">
+        <button type="button" class="button primary" data-action="clear">CLEAR</button>
+        <button type="button" class="button primary" data-action="land">LAND</button>
+        <button type="button" class="button primary" data-action="hold">HOLD</button>
+        <button type="button" class="button primary" data-action="redirect">REDIRECT</button>
+      </section>
+
+      <!-- Right column (desktop) -->
       <div id="side-stack">
         <section class="panel" id="task-panel" aria-labelledby="task-h">
           <h2 id="task-h">Active Protocols</h2>
@@ -142,6 +146,8 @@
             <button class="button primary" id="start" type="button">Start</button>
             <button class="button" id="pause" type="button">Pause</button>
             <button class="button" id="reset" type="button">Reset</button>
+            <!-- CSV -->
+            <button class="button" id="downloadCsv" type="button" title="Download session data (CSV)">Download CSV</button>
           </div>
         </section>
 
@@ -155,14 +161,6 @@
           </dl>
         </section>
       </div>
-
-      <section class="panel controls" aria-label="Actions">
-        <button type="button" class="button primary" data-action="clear">CLEAR</button>
-        <button type="button" class="button primary" data-action="land">LAND</button>
-        <button type="button" class="button primary" data-action="hold">HOLD</button>
-        <button type="button" class="button primary" data-action="redirect">REDIRECT</button>
-      </section>
-
     </main>
   </div>
 
@@ -196,7 +194,9 @@
     let cfg = DIFF.normal;
     let running = false, spawnTimer = null;
     let selected = null, planes = [], completed = 0, failed = 0;
-    let map = {}; // color -> required action
+    let map = {};               // color -> required action
+    let sessionRows = [];        // CSV rows (actions only)
+    const sessionStart = new Date();
 
     // ======= DOM =======
     const el = {
@@ -214,12 +214,14 @@
       help: document.getElementById('help'),
       showHelp: document.getElementById('show-help'),
       closeHelp: document.getElementById('close-help'),
+      downloadCsv: document.getElementById('downloadCsv'),
     };
 
     // ======= Helpers =======
     function toast(msg){ if(window.frame?.toast) frame.toast(msg); else console.log(msg); }
     function rand(min,max){ return Math.random()*(max-min)+min; }
     function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+    const fmtTime = d => new Date(d).toISOString();
 
     function setDifficulty(name){
       cfg = DIFF[name] || DIFF.normal;
@@ -227,7 +229,7 @@
     }
 
     function newRound(){
-      // one-to-one mapping of COLORS to ACTIONS (shuffle)
+      // shuffle one-to-one mapping of COLORS to ACTIONS
       const shuffled = [...ACTIONS].sort(()=>Math.random()-0.5);
       map = {};
       COLORS.forEach((c, i)=> map[c] = shuffled[i % shuffled.length]);
@@ -275,7 +277,7 @@
       const id = 'p' + Math.random().toString(36).slice(2,7);
       const color = pick(COLORS);
       const x = Math.round(rand(12,88)), y = Math.round(rand(12,88));
-      planes.push({ id, color, x, y });
+      planes.push({ id, color, x, y, bornAt: Date.now() });
       renderPlanes();
     }
 
@@ -291,8 +293,23 @@
       if(!selected){ toast('Select a plane first'); return; }
       const needed = map[selected.color];
       const ok = (action === 'clear') || (action === needed);
+
+      // CSV: log a tidy row for this action
+      sessionRows.push({
+        timestamp: fmtTime(Date.now()),
+        session_start: fmtTime(sessionStart),
+        difficulty: Object.keys(DIFF).find(k=>DIFF[k]===cfg) || 'normal',
+        plane_id: selected.id,
+        plane_color: selected.color,
+        required_action: needed,
+        chosen_action: action,
+        correct: ok ? 1 : 0,
+        onscreen_before: planes.length,
+      });
+
       if (ok){ completed++; toast(`✓ ${action.toUpperCase()} accepted for ${selected.color}`); }
       else { failed++; toast(`✕ ${action.toUpperCase()} not allowed for ${selected.color}`); }
+
       planes = planes.filter(p => p.id !== selected.id);
       selected = null;
       renderPlanes();
@@ -302,6 +319,35 @@
       running = false; stopSpawning();
       selected = null; planes = []; completed = 0; failed = 0;
       renderPlanes();
+    }
+
+    // ======= CSV Export =======
+    function toCSV(rows){
+      const headers = [
+        "timestamp","session_start","difficulty","plane_id","plane_color",
+        "required_action","chosen_action","correct","onscreen_before"
+      ];
+      const esc = v => {
+        if (v == null) return "";
+        const s = String(v);
+        return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+      };
+      const body = rows.map(r => headers.map(h => esc(r[h])).join(",")).join("\n");
+      return headers.join(",") + "\n" + body + "\n";
+    }
+
+    function downloadCSV(){
+      const csv = toCSV(sessionRows);
+      const blob = new Blob([csv], {type: "text/csv;charset=utf-8"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const stamp = new Date().toISOString().replace(/[:.]/g,'-');
+      a.href = url;
+      a.download = `tower-control_${stamp}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     }
 
     // ======= Wire UI =======
@@ -316,6 +362,7 @@
     el.diff.addEventListener('change', e=> setDifficulty(e.target.value));
     el.showHelp.addEventListener('click', ()=> el.help.showModal());
     el.closeHelp.addEventListener('click', ()=> el.help.close());
+    el.downloadCsv.addEventListener('click', downloadCSV);
 
     // ======= Init =======
     newRound();
@@ -323,7 +370,7 @@
     el.help.showModal(); // first-run instructions
 
     // Expose for hooks
-    window.app = { handleAction, setDifficulty, newRound };
+    window.app = { handleAction, setDifficulty, newRound, downloadCSV };
   })();
   </script>
 </body>
