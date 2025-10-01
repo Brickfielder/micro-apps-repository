@@ -620,7 +620,6 @@ function downloadCSV(){
   a.download = `taskflow_log_${new Date().toISOString().replace(/[:.]/g,'-')}.csv`;
   document.body.appendChild(a); a.click(); a.remove();
 }
-
 /* =========================
    Wiring
    ========================= */
@@ -661,4 +660,10 @@ function init(){
   currentDifficulty = el('difficultySelect').value;
   updateBriefing();
 }
-document.addEventListener('DOMContentLoaded', init);
+
+/* ✅ Call init immediately if DOM is already ready; otherwise wait. */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
