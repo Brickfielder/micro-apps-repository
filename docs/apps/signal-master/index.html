@@ -12,7 +12,7 @@
   <meta name="app-desc" content="Single switch. Route quickly & accurately. Rules evolve. Includes CSV export."/>
   <meta name="theme" content="bold"/>
 
-  <!-- Shared assets (frame.js will also ensure CSS if path differs) -->
+  <!-- Shared assets -->
   <link rel="stylesheet" href="/shared/theme.css"/>
   <script defer src="/shared/frame.js"></script>
   <script defer src="/shared/clinician_feedback.js"></script>
@@ -26,19 +26,10 @@
       --train-red:#ef4444;   /* Passenger */
       --train-blue:#3b82f6;  /* Cargo */
       --train-yellow:#f59e0b;/* Express */
-      --train-mirror:#6b7280;/* Mirror base */
     }
     *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
-      background:var(--paper); color:var(--text); min-height:100svh; display:flex; flex-direction:column;
-    }
-
-    /* App surface */
-    #app-root{ /* shared theme also styles this; we add internals below */
-      background: var(--card);
-    }
+    body{ margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
+          background:var(--paper); color:var(--text); min-height:100svh; display:flex; flex-direction:column; }
 
     header.topbar{ position:sticky; top:0; z-index:10; backdrop-filter:blur(6px);
       background: color-mix(in oklab, var(--paper) 80%, transparent); border-bottom:1px solid var(--line); }
@@ -74,7 +65,7 @@
     .rules{ flex:1; display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end }
     .rule{ background:var(--card); border:1px dashed var(--line); border-radius:14px; padding:10px 12px; font-size:14px; color:var(--muted) }
 
-    /* Trains + icon/shape cues */
+    /* Train visuals */
     .train{ position:absolute; transform: translate(-50%, -50%); will-change:left, top; z-index:5 }
     .car{ width:70px; height:30px; border-radius:6px; position:relative; box-shadow:0 2px 6px rgba(0,0,0,.2); display:flex; align-items:center; justify-content:center; font-size:16px }
     .car.passenger{ background:var(--train-red) }
@@ -104,7 +95,6 @@
     .end-actions{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding-top:10px; flex-wrap:wrap }
     .btn{ appearance:none; border:1px solid var(--line); background:var(--card); border-radius:12px; padding:10px 14px; font-weight:600; cursor:pointer }
     .btn.primary{ background:var(--accent); color:white; border:none }
-    .btn.ghost{ background:transparent }
     .note{ color:var(--muted); font-size:12px }
 
     @media (max-width: 640px){
@@ -117,91 +107,89 @@
   </style>
 </head>
 <body>
-  <div id="app-root">
-    <!-- top bar -->
-    <header class="topbar" aria-label="Top bar">
-      <div class="bar">
-        <div class="brand"><span aria-hidden="true">🚂</span><span>Signal Master</span></div>
-        <div class="right">
-          <div class="badge"><strong>Score:</strong>&nbsp;<span id="score">0</span></div>
-          <div class="badge">⏱ <strong>Time:</strong>&nbsp;<span id="time">3:00</span></div>
-        </div>
+  <!-- top bar -->
+  <header class="topbar" aria-label="Top bar">
+    <div class="bar">
+      <div class="brand"><span aria-hidden="true">🚂</span><span>Signal Master</span></div>
+      <div class="right">
+        <div class="badge"><strong>Score:</strong>&nbsp;<span id="score">0</span></div>
+        <div class="badge">⏱ <strong>Time:</strong>&nbsp;<span id="time">3:00</span></div>
       </div>
-    </header>
+    </div>
+  </header>
 
-    <!-- game surface -->
-    <section class="stage" aria-label="Gameplay" role="region">
-      <div class="hud">
-        <div class="left">
-          <span class="pill"><span>Level</span><small>Mirror Train</small></span>
-          <div class="legend" aria-label="Train legend">
-            <span class="swatch"><span class="dot red"></span> Passenger</span>
-            <span class="swatch"><span class="dot blue"></span> Cargo</span>
-            <span class="swatch"><span class="dot yellow"></span> Express</span>
-            <span class="swatch"><span class="dot mirror"></span> Mirror</span>
-          </div>
-        </div>
-        <div class="center" id="ruleHeadline">Rules over speed — route correctly in real time</div>
-        <div class="right">
-          <span class="badge" id="prevCorrectBadge" style="display:none">Prev correct: —</span>
-          <span class="pill">Session • 3 min</span>
+  <!-- game surface -->
+  <section class="stage" aria-label="Gameplay" role="region">
+    <div class="hud">
+      <div class="left">
+        <span class="pill"><span>Level</span><small>Mirror Train</small></span>
+        <div class="legend" aria-label="Train legend">
+          <span class="swatch"><span class="dot red"></span> Passenger</span>
+          <span class="swatch"><span class="dot blue"></span> Cargo</span>
+          <span class="swatch"><span class="dot yellow"></span> Express</span>
+          <span class="swatch"><span class="dot mirror"></span> Mirror</span>
         </div>
       </div>
+      <div class="center" id="ruleHeadline">Rules over speed — route correctly in real time</div>
+      <div class="right">
+        <span class="badge" id="prevCorrectBadge" style="display:none">Prev correct: —</span>
+        <span class="pill">Session • 3 min</span>
+      </div>
+    </div>
 
-      <!-- Track View -->
-      <div class="track-wrap" id="track" role="img" aria-label="Track with single junction">
-        <div class="overlay" id="overlay" style="display:none"><div class="banner" id="banner"></div></div>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 560" aria-hidden="true">
-          <defs>
-            <pattern id="sleepers" width="20" height="20" patternUnits="userSpaceOnUse">
-              <rect x="0" y="9" width="20" height="2" fill="currentColor" opacity="0.12"></rect>
-            </pattern>
-          </defs>
-          <g stroke="#475569" stroke-linecap="round" stroke-width="6" opacity="0.9">
-            <line x1="80"  y1="280" x2="480" y2="280"></line>
-            <line x1="480" y1="280" x2="1040" y2="210"></line> <!-- LEFT end -->
-            <line x1="480" y1="280" x2="1040" y2="350"></line> <!-- RIGHT end -->
-          </g>
-          <g fill="url(#sleepers)" stroke="none">
-            <rect x="80"  y="268" width="400" height="24"></rect>
-            <polygon points="480,268 1040,198 1040,222 480,292"></polygon>
-            <polygon points="480,268 1040,338 1040,362 480,292"></polygon>
-          </g>
-          <circle cx="480" cy="280" r="10" fill="#f24f40"></circle>
-          <g fill="#6b7280" font-family="system-ui" font-size="16">
-            <text x="1048" y="212">LEFT</text>
-            <text x="1048" y="352">RIGHT</text>
-          </g>
-        </svg>
-      </div>
+    <!-- Track View -->
+    <div class="track-wrap" id="track" role="img" aria-label="Track with single junction">
+      <div class="overlay" id="overlay" style="display:none"><div class="banner" id="banner"></div></div>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 560" aria-hidden="true">
+        <defs>
+          <pattern id="sleepers" width="20" height="20" patternUnits="userSpaceOnUse">
+            <rect x="0" y="9" width="20" height="2" fill="currentColor" opacity="0.12"></rect>
+          </pattern>
+        </defs>
+        <g stroke="#475569" stroke-linecap="round" stroke-width="6" opacity="0.9">
+          <line x1="80"  y1="280" x2="480" y2="280"></line>
+          <line x1="480" y1="280" x2="1040" y2="210"></line> <!-- LEFT end -->
+          <line x1="480" y1="280" x2="1040" y2="350"></line> <!-- RIGHT end -->
+        </g>
+        <g fill="url(#sleepers)" stroke="none">
+          <rect x="80"  y="268" width="400" height="24"></rect>
+          <polygon points="480,268 1040,198 1040,222 480,292"></polygon>
+          <polygon points="480,268 1040,338 1040,362 480,292"></polygon>
+        </g>
+        <circle cx="480" cy="280" r="10" fill="#f24f40"></circle>
+        <g fill="#6b7280" font-family="system-ui" font-size="16">
+          <text x="1048" y="212">LEFT</text>
+          <text x="1048" y="352">RIGHT</text>
+        </g>
+      </svg>
+    </div>
 
-      <!-- Controls -->
-      <div class="controls" aria-label="Controls and rules">
-        <div class="lever">
-          <span aria-hidden="true">🔀</span><strong>Main Switch:</strong>
-          <button id="btnLeft" type="button" aria-label="Set switch LEFT">LEFT</button>
-          <button id="btnRight" type="button" class="alt" aria-label="Set switch RIGHT">RIGHT</button>
-          <span class="badge" id="switchState" style="margin-left:8px">Current: RIGHT</span>
-        </div>
-        <div class="rules" aria-live="polite">
-          <div class="rule" id="rule1">Phase 1: Passenger (red 👤) → LEFT</div>
-          <div class="rule" id="rule2">Phase 1: Cargo (blue 📦) → RIGHT</div>
-        </div>
+    <!-- Controls -->
+    <div class="controls" aria-label="Controls and rules">
+      <div class="lever">
+        <span aria-hidden="true">🔀</span><strong>Main Switch:</strong>
+        <button id="btnLeft" type="button" aria-label="Set switch LEFT">LEFT</button>
+        <button id="btnRight" type="button" class="alt" aria-label="Set switch RIGHT">RIGHT</button>
+        <span class="badge" id="switchState" style="margin-left:8px">Current: RIGHT</span>
       </div>
+      <div class="rules" aria-live="polite">
+        <div class="rule" id="rule1">Phase 1: Passenger (red 👤) → LEFT</div>
+        <div class="rule" id="rule2">Phase 1: Cargo (blue 📦) → RIGHT</div>
+      </div>
+    </div>
 
-      <!-- Start overlay -->
-      <div class="overlay" id="startOverlay">
-        <div class="banner">
-          <h3>Signal Master</h3>
-          <p class="big">Single switch. Route quickly &amp; accurately. Rules evolve.</p>
-          <p><strong>Phase 1 (0–60s):</strong> Passenger (👤) → LEFT; Cargo (📦) → RIGHT.</p>
-          <p><strong>Phase 2 (60–120s):</strong> Express (⚡) appears → RIGHT.</p>
-          <p><strong>Phase 3 (120–180s):</strong> Mirror (◼️◻️) must go the <strong>opposite</strong> of the previous train’s <em>correct</em> route.<br/><small>(First Mirror defaults to RIGHT.)</small></p>
-          <button class="btn primary" id="btnStart" type="button">Start</button>
-        </div>
+    <!-- Start overlay -->
+    <div class="overlay" id="startOverlay">
+      <div class="banner">
+        <h3>Signal Master</h3>
+        <p class="big">Single switch. Route quickly &amp; accurately. Rules evolve.</p>
+        <p><strong>Phase 1 (0–60s):</strong> Passenger (👤) → LEFT; Cargo (📦) → RIGHT.</p>
+        <p><strong>Phase 2 (60–120s):</strong> Express (⚡) appears → RIGHT.</p>
+        <p><strong>Phase 3 (120–180s):</strong> Mirror (◼️◻️) must go the <strong>opposite</strong> of the previous train’s <em>correct</em> route.<br/><small>(First Mirror defaults to RIGHT.)</small></p>
+        <button class="btn primary" id="btnStart" type="button">Start</button>
       </div>
-    </section>
-  </div>
+    </div>
+  </section>
 
   <!-- Summary modal -->
   <dialog id="summary">
@@ -230,9 +218,16 @@
     </form>
   </dialog>
 
+  <!-- Always-on clinician notes (also exported in CSV) -->
+  <section id="clinician-notes" style="max-width:1180px;margin:24px auto 32px;padding:16px;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);background:var(--card)">
+    <label for="clinician-comment" style="display:block;font-weight:600;margin-bottom:8px;">Clinician comments (optional)</label>
+    <textarea id="clinician-comment" rows="4" placeholder="Enter any notes relevant to this session..." style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);font:inherit;resize:vertical"></textarea>
+    <p style="margin:8px 0 0;color:var(--muted);font-size:.9rem">This note will be added as <code>clinician_comment</code> in the exported CSV.</p>
+  </section>
+
   <script>
   (()=>{
-    // ===== Geometry =====
+    // ===== Geometry (SVG viewBox units) =====
     const START = {x:80, y:280};
     const JUNC  = {x:480, y:280};
     const LEFT_END   = {x:1040, y:210};
@@ -242,26 +237,25 @@
     let switchDir = 'RIGHT';
     let score = 0;
     let total=0, correct=0, wrong=0;
-    let reactionTimes = []; // reserved if you later track it
+    let reactionTimes = [];
     let idCounter = 0;
 
-    let remaining = 180;         // gameplay seconds only
-    let elapsedGameplay = 0;     // increases only when not paused
-    let phase = 1;               // 1,2,3
-    let isPaused = true;         // start paused
+    let remaining = 180;
+    let elapsedGameplay = 0;
+    let phase = 1;
+    let isPaused = true;
     let spawnTimer = null, tickTimer = null;
 
-    // Mirror baseline: previous train's CORRECT route
     let lastCorrectRoute = null; // 'LEFT' | 'RIGHT' | null
 
-    // Per-train event log (for CSV)
-    const events = []; // each: {seq, t_s, phase, type, player, correct, outcome, score}
+    const events = []; // {seq,t_s,phase,type,player,correct,outcome,score}
 
     // ===== DOM =====
     const scoreEl = document.getElementById('score');
     const timeEl  = document.getElementById('time');
     const switchStateEl = document.getElementById('switchState');
     const trackEl = document.getElementById('track');
+    const svgEl = trackEl.querySelector('svg');
     const overlay = document.getElementById('overlay');
     const banner  = document.getElementById('banner');
     const startOverlay = document.getElementById('startOverlay');
@@ -272,6 +266,7 @@
     const prevCorrectBadge = document.getElementById('prevCorrectBadge');
     const btnCsv = document.getElementById('btnCsv');
     const csvLink = document.getElementById('csvLink');
+    const clinicianTA = document.getElementById('clinician-comment');
 
     // ===== Controls =====
     document.getElementById('btnLeft').addEventListener('click', ()=>{ switchDir = 'LEFT'; switchStateEl.textContent = 'Current: LEFT'; });
@@ -287,6 +282,14 @@
       el.style.position='absolute'; el.style.inset='0'; el.style.background=color; el.style.opacity='0.12';
       el.style.pointerEvents='none'; el.style.transition='opacity .35s ease';
       trackEl.appendChild(el); requestAnimationFrame(()=>{ el.style.opacity='0' }); setTimeout(()=> el.remove(), 400);
+    }
+    // Map SVG viewBox coordinates -> on-screen CSS pixels
+    function toPx(pt){
+      const vb = svgEl.viewBox.baseVal;
+      const rect = svgEl.getBoundingClientRect();
+      const sx = rect.width  / vb.width;
+      const sy = rect.height / vb.height;
+      return { x: pt.x * sx, y: pt.y * sy };
     }
     function setRulesText(){
       if(phase===1){
@@ -312,7 +315,6 @@
     function spawnTrain(){
       if(isPaused) return;
 
-      // Phase-dependent type mix
       let type;
       if(phase===1){
         type = Math.random() < 0.5 ? 'Passenger' : 'Cargo';
@@ -331,7 +333,6 @@
       el.className = 'train';
       el.dataset.id = (++idCounter).toString();
       el.dataset.type = type;
-      el.style.left = START.x+'px'; el.style.top = START.y+'px';
 
       const carClass = type==='Passenger' ? 'passenger' :
                        type==='Cargo' ? 'cargo' :
@@ -340,13 +341,15 @@
       el.innerHTML = `<div class="label"><em>${type} ${type==='Passenger'?'👤':type==='Cargo'?'📦':type==='Express'?'⚡':'↔︎'}</em></div>
                       <div class="car ${carClass}"><span class="chip"></span></div>
                       <div class="w l"></div><div class="w r"></div>`;
+      const sp = toPx(START);
+      el.style.left = sp.x + 'px';
+      el.style.top  = sp.y + 'px';
       trackEl.appendChild(el);
 
       const data = { el, type, t0: performance.now() };
       animateTrain(data);
     }
 
-    // Correct side for a given type at spawn
     function correctDirectionFor(type){
       if(type==='Cargo') return 'RIGHT';
       if(type==='Passenger') return 'LEFT';
@@ -381,7 +384,6 @@
           if(t>=1){
             t = 0; seg = 1;
 
-            // Decision snapshot
             choiceMain = switchDir;
             const ok = (choiceMain === correctDir);
             total++;
@@ -389,7 +391,6 @@
             else { wrong++; score -= 20; flash('#ff1744'); }
             scoreEl.textContent = String(score);
 
-            // Log
             events.push({
               seq: total,
               t_s: elapsedGameplay,
@@ -401,20 +402,19 @@
               score
             });
 
-            // Update Mirror baseline
             lastCorrectRoute = correctDir;
             if(phase===3){ prevCorrectBadge.textContent = 'Prev correct: ' + lastCorrectRoute; }
 
             target = (choiceMain==='LEFT') ? LEFT_END : RIGHT_END;
           }
-          const p0 = pointOnLine(START, JUNC, Math.min(t,1));
+          const p0 = toPx(pointOnLine(START, JUNC, Math.min(t,1)));
           data.el.style.left = `${p0.x}px`; data.el.style.top  = `${p0.y}px`;
         } else {
           const from = JUNC;
           const len = Math.hypot(target.x-from.x, target.y-from.y);
           t += (SPEED*dt)/len;
           if(t>=1){ data.el.remove(); return; }
-          const p1 = pointOnLine(from, target, Math.min(t,1));
+          const p1 = toPx(pointOnLine(from, target, Math.min(t,1)));
           data.el.style.left = `${p1.x}px`; data.el.style.top  = `${p1.y}px`;
         }
 
@@ -479,24 +479,25 @@
       btnCsv.onclick = ()=> downloadCsv();
     }
 
-    // ===== CSV Export =====
+    // ===== CSV Export (adds clinician_comment) =====
     function csvEscape(val){
       if(val === null || val === undefined) return '';
       const s = String(val);
       return (/[",\n]/.test(s)) ? `"${s.replace(/"/g,'""')}"` : s;
     }
     function buildCsv(){
+      const comment = clinicianTA ? clinicianTA.value.trim() : '';
       const header = [
-        'event','seq','t_game_s','phase','type','player_choice','correct_choice','outcome','score_after'
+        'event','seq','t_game_s','phase','type','player_choice','correct_choice','outcome','score_after','clinician_comment'
       ];
       const rows = [header.join(',')];
       events.forEach(e=>{
         rows.push([
-          'trial', e.seq, e.t_s, e.phase, e.type, e.player, e.correct, e.outcome, e.score
+          'trial', e.seq, e.t_s, e.phase, e.type, e.player, e.correct, e.outcome, e.score, comment
         ].map(csvEscape).join(','));
       });
       rows.push([
-        'summary','',elapsedGameplay, '', '', '', '', `accuracy_${(total?Math.round(correct/total*100):0)}%`, score
+        'summary','',elapsedGameplay,'','','','','',score,comment
       ].map(csvEscape).join(','));
       return rows.join('\n');
     }
