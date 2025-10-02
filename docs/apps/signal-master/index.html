@@ -27,6 +27,15 @@
       --train-blue:#3b82f6;  /* Cargo */
       --train-yellow:#f59e0b;/* Express */
     }
+    :root { --game-width: 1180px; }
+
+.stage{ width:min(var(--game-width),100%); } /* already present */
+#clinician-notes{
+  width:min(var(--game-width),100%) !important;
+  max-width:none !important;
+  margin:24px auto 32px; /* keep your spacing */
+  box-sizing:border-box; /* include padding/borders in width */
+}
     *{box-sizing:border-box}
     body{ margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
           background:var(--paper); color:var(--text); min-height:100svh; display:flex; flex-direction:column; }
