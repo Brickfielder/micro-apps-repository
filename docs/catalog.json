@@ -54,6 +54,7 @@
     "description": "Everyday multi-tasking across common office-style tasks.",
     "emoji": "🖥️",
     "tags": ["executive", "attention"]
+     "featured": true
   },
   {
     "slug": "plan-with-coco",
@@ -68,6 +69,7 @@
     "description": "Rapid signal detection and rule switching.",
     "emoji": "🚦",
     "tags": ["attention"]
+     "featured": true
   },
   {
     "slug": "star-hunt",
