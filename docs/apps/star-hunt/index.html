@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Star Hunting (20×8, Visible, Sweep)</title>
 
+<!-- Optional hero metadata (works with your frame.js) -->
 <meta name="app-slug" content="star-hunt">
 <meta name="app-title" content="Star Hunting">
 <meta name="app-desc"  content="20×8 grid • stars visible • optional sweep guide • CSV export">
@@ -20,27 +21,46 @@
   :root{ --cols:20; --rows:8; --cell-gap:3px; }
   *{ box-sizing:border-box; }
   body{
-    margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
-    background:#f3f4f6; color:#111827; font-family:system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    margin:0; font-family:system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    background:#f3f4f6; color:#111827; min-height:100svh;
+    display:flex; align-items:center; justify-content:center; padding:20px;
   }
-  #app-root{
-    background:#fff; border:1px solid #d1d5db; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,.08);
-    padding:20px; max-width:1100px; width:96%;
+  #app-root .app{ width:min(96vw,1100px); display:grid; gap:14px; justify-items:center; }
+
+  /* Title */
+  .app-title{
+    width:100%;
+    background:#fff; border:1px solid #d1d5db; border-radius:12px;
+    padding:14px 16px;
   }
-  #app-root .app{ display:grid; gap:14px; justify-items:center; width:100%; }
   .app-title h1{ margin:0 0 4px; font-size:22px; line-height:1.2; }
   .app-title p{ margin:0; color:#6b7280; }
 
-  details.instructions{ width:100%; background:#fff8e1; border:1px solid #facc15; color:#374151; border-radius:12px; font-size:15px; line-height:1.45; padding:0; }
-  details.instructions>summary{ list-style:none; cursor:pointer; padding:12px 16px; font-weight:700; color:#b45309; }
-  details.instructions>summary::-webkit-details-marker{ display:none; }
-  details.instructions[open]>summary{ border-bottom:1px dashed #facc15; }
+  /* Collapsible instructions */
+  details.instructions{
+    width:100%;
+    background:#fff8e1; border:1px solid #facc15; color:#374151;
+    border-radius:12px; font-size:15px; line-height:1.45;
+    padding:0;
+  }
+  details.instructions > summary{
+    list-style:none; cursor:pointer; padding:12px 16px; font-weight:700; color:#b45309;
+  }
+  details.instructions > summary::-webkit-details-marker{ display:none; }
+  details.instructions[open] > summary{ border-bottom:1px dashed #facc15; }
   details.instructions .inst-body{ padding:12px 16px; }
 
-  .header{ width:100%; background:#fff; border:1px solid #d1d5db; border-radius:12px; padding:12px; display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; }
+  .header{
+    width:100%;
+    background:#ffffff; border:1px solid #d1d5db; border-radius:12px; padding:12px;
+    display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between;
+  }
   .group{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
   label{ font-size:14px; color:#374151; }
-  select,button{ background:#fff; color:#111827; border:1px solid #9ca3af; border-radius:10px; padding:8px 12px; font-size:14px; cursor:pointer; }
+  select,button{
+    background:#fff; color:#111827; border:1px solid #9ca3af; border-radius:10px;
+    padding:8px 12px; font-size:14px; cursor:pointer;
+  }
   button.primary{ background:#10b981; border:0; color:#fff; font-weight:600; }
   button.ghost{ background:#f9fafb; }
   .stats{ display:flex; gap:14px; font-size:14px; color:#374151; }
@@ -48,34 +68,50 @@
 
   .board-wrap{ width:100%; }
   .board{
-    width:100%; aspect-ratio:var(--cols)/var(--rows); margin:0 auto; display:grid; gap:var(--cell-gap);
-    grid-template-columns:repeat(var(--cols),1fr); grid-template-rows:repeat(var(--rows),1fr);
-    background:#fff; border:2px solid #d1d5db; border-radius:12px; padding:8px; position:relative;
+    width:100%; aspect-ratio:var(--cols)/var(--rows); margin:0 auto;
+    display:grid; gap:var(--cell-gap);
+    grid-template-columns:repeat(var(--cols),1fr);
+    grid-template-rows:repeat(var(--rows),1fr);
+    background:#ffffff; border:2px solid #d1d5db; border-radius:12px; padding:8px; position:relative;
     box-shadow:0 1px 0 rgba(0,0,0,.03), 0 8px 24px rgba(0,0,0,.06);
   }
   .cell{
-    background:#e5e7eb; border:1px solid #cbd5e1; border-radius:6px; display:flex; align-items:center; justify-content:center;
-    user-select:none; cursor:pointer; font-size:clamp(14px,2.6vmin,28px); transition:transform 80ms ease, border-color 140ms ease, background 140ms ease;
+    background:#e5e7eb; border:1px solid #cbd5e1; border-radius:6px;
+    display:flex; align-items:center; justify-content:center; user-select:none; cursor:pointer;
+    font-size:clamp(14px,2.6vmin,28px);
+    transition:transform 80ms ease, border-color 140ms ease, background 140ms ease;
   }
   .cell:hover{ transform:translateY(-1px); border-color:#9ca3af; }
   .cell:active{ transform:translateY(0); }
   .cell .star{ color:#f59e0b; text-shadow:0 0 6px rgba(245,158,11,.45); }
   .cell.found{ background:#d1fae5; border-color:#10b981; }
 
-  .miss{ position:absolute; pointer-events:none; z-index:5; width:28px; height:28px; transform:translate(-50%,-50%); opacity:0; animation:pop 600ms ease forwards; }
-  .miss::before,.miss::after{ content:""; position:absolute; left:50%; top:50%; width:3px; height:30px; background:#ef4444; border-radius:2px; transform-origin:center; }
+  .miss{
+    position:absolute; pointer-events:none; z-index:5; width:28px; height:28px;
+    transform:translate(-50%,-50%); opacity:0; animation:pop 600ms ease forwards;
+  }
+  .miss::before,.miss::after{ content:""; position:absolute; left:50%; top:50%;
+    width:3px; height:30px; background:#ef4444; border-radius:2px; transform-origin:center; }
   .miss::before{ transform:translate(-50%,-50%) rotate(45deg); }
-  .miss::after { transform:translate(-50%,-50%) rotate(-45deg); }
+  .miss::after{  transform:translate(-50%,-50%) rotate(-45deg); }
   @keyframes pop{ 0%{opacity:0; transform:translate(-50%,-50%) scale(.6);} 20%{opacity:1; transform:translate(-50%,-50%) scale(1);} 100%{opacity:0; transform:translate(-50%,-50%) scale(1.1);} }
 
-  .overlay{ position:absolute; inset:8px; display:none; align-items:center; justify-content:center; background:rgba(31,41,55,.72); border-radius:10px; z-index:6; text-align:center; padding:24px; }
+  .overlay{
+    position:absolute; inset:8px; display:none; align-items:center; justify-content:center;
+    background:rgba(31,41,55,.72); border-radius:10px; z-index:6; text-align:center; padding:24px;
+  }
   .overlay.show{ display:flex; }
   .overlay h2{ margin:0; font-size:clamp(18px,4.5vmin,36px); color:#fef3c7; }
   .overlay p{ margin:8px 0 16px; color:#f9fafb; }
   .overlay .row{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
 
-  .sweep{ position:absolute; top:8px; bottom:8px; left:8px; width:40px; border-radius:8px; pointer-events:none; z-index:5;
-          background:linear-gradient(180deg, rgba(59,130,246,.10), rgba(59,130,246,.16)); box-shadow:inset 0 0 0 1px rgba(59,130,246,.18); transition:left 200ms linear; }
+  .sweep{
+    position:absolute; top:8px; bottom:8px; left:8px;
+    width:40px; border-radius:8px; pointer-events:none; z-index:5;
+    background:linear-gradient(180deg, rgba(59,130,246,.10), rgba(59,130,246,.16));
+    box-shadow:inset 0 0 0 1px rgba(59,130,246,.18);
+    transition:left 200ms linear;
+  }
 
   .footer{ font-size:12px; color:#6b7280; text-align:center; }
   .kbd{ font-family:ui-monospace, monospace; background:#e5e7eb; border:1px solid #9ca3af; padding:2px 6px; border-radius:6px; color:#111827; }
@@ -84,11 +120,14 @@
 <body>
 <main id="app-root" role="main" aria-label="Star Hunting app">
   <div class="app">
+
+    <!-- Title block -->
     <header class="app-title" aria-label="App title">
       <h1>Star Hunting</h1>
       <p>20×8 grid • stars visible • optional sweep guide • CSV export</p>
     </header>
 
+    <!-- Collapsible instructions (closed by default) -->
     <details class="instructions" id="instructions">
       <summary>Instructions</summary>
       <div class="inst-body">
@@ -150,6 +189,7 @@
     <p class="footer">
       Tip: navigate with <span class="kbd">Tab</span> + <span class="kbd">Enter</span>. Stars are always visible; tap all ★’s.
     </p>
+
   </div>
 
   <script>
@@ -209,13 +249,16 @@
       sweepDiv=document.createElement('div'); sweepDiv.className='sweep'; boardEl.appendChild(sweepDiv);
 
       const overlay=document.createElement('div'); overlay.id='overlay'; overlay.className='overlay'; overlay.setAttribute('aria-hidden','true');
-      overlay.innerHTML=
-        '<div><h2>Grid completed!</h2><p>Nice. All stars clicked.</p>'+
-        '<div class="row">'+
-        '<button id="nextGrid" class="primary" type="button">Restart Grid</button>'+
-        '<button id="download2" class="ghost" type="button">Download Report</button>'+
-        '<button id="resetSession" class="ghost" type="button">New Session</button>'+
-        '</div></div>';
+      overlay.innerHTML=`
+        <div>
+          <h2>Grid completed!</h2>
+          <p>Nice. All stars clicked.</p>
+          <div class="row">
+            <button id="nextGrid" class="primary" type="button">Restart Grid</button>
+            <button id="download2" class="ghost" type="button">Download Report</button>
+            <button id="resetSession" class="ghost" type="button">New Session</button>
+          </div>
+        </div>`;
       boardEl.appendChild(overlay);
       overlay.querySelector('#nextGrid').addEventListener('click', ()=>{ hideOverlay(); nextGrid(); });
       overlay.querySelector('#download2').addEventListener('click', downloadCSV);
@@ -299,6 +342,7 @@
     function downloadCSV(){
       const headers=["grid_index","grid_cols","grid_rows","star_count","clicks_total","correct_clicks","errors","correct_pct","time_s","sweep_on","sweep_period_s","sweep_direction"];
       const rows=[headers.join(",")];
+
       let sumClicks=0,sumCorrect=0,sumErrors=0,sumTimeMs=0;
       for(const r of records){
         sumClicks+=r.clicks; sumCorrect+=r.correct; sumErrors+=r.errors; sumTimeMs+=r.timeMs;
@@ -306,8 +350,6 @@
       }
       const overallPct=sumClicks>0?(sumCorrect/sumClicks)*100:0;
       rows.push(["TOTAL","","","",sumClicks,sumCorrect,sumErrors,overallPct.toFixed(2),(sumTimeMs/1000).toFixed(2),"","",""].join(","));
-      const note=(document.getElementById('clinician-comment')?.value||"").replace(/[\r\n]+/g," ").replace(/"/g,"''");
-      if(note){ rows.push(['clinician_comment,"'+note+'"'].join(",")); }
 
       const blob=new Blob([rows.join("\n")],{type:"text/csv;charset=utf-8;"});
       const url=URL.createObjectURL(blob);
@@ -315,9 +357,11 @@
       document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },0);
     }
 
+    /* ===== Guiding Sweep ===== */
     function calcSweepGeometry(){
       const cs=getComputedStyle(boardEl);
-      gap=parseFloat(cs.gap)||0; padLeft=parseFloat(cs.paddingLeft)||8;
+      gap=parseFloat(cs.gap)||0;
+      padLeft=parseFloat(cs.paddingLeft)||8;
       const first=boardEl.querySelector('.cell');
       cellW=first ? first.getBoundingClientRect().width : 0;
       if(sweepDiv){
@@ -327,22 +371,41 @@
       }
     }
     function positionSweep(){ if(!sweepDiv) return; const left=padLeft + sweepCol*(cellW+gap); sweepDiv.style.left=left+'px'; }
-    function stepSweep(){ if(sweepDirSel.value==='rtl'){ sweepCol--; if(sweepCol<0) sweepCol=COLS-1; } else { sweepCol++; if(sweepCol>COLS-1) sweepCol=0; } positionSweep(); }
-    function startSweep(){ if(!sweepDiv) return; applySweepVisibility(true); clearInterval(sweepTimer); calcSweepGeometry(); sweepTimer=setInterval(stepSweep, Number(sweepSpeedSel.value)); }
+    function stepSweep(){
+      if(sweepDirSel.value==='rtl'){ sweepCol--; if(sweepCol<0) sweepCol=COLS-1; }
+      else{ sweepCol++; if(sweepCol>COLS-1) sweepCol=0; }
+      positionSweep();
+    }
+    function startSweep(){
+      if(!sweepDiv) return;
+      applySweepVisibility(true);
+      clearInterval(sweepTimer);
+      calcSweepGeometry();
+      sweepTimer=setInterval(stepSweep, Number(sweepSpeedSel.value));
+    }
     function stopSweep(){ clearInterval(sweepTimer); sweepTimer=null; applySweepVisibility(false); }
-    function applySweepVisibility(show){ if(!sweepDiv) return; const on=(typeof show==='boolean')?show:(sweepSel.value==='on'); sweepDiv.style.display=on?'block':'none'; }
+    function applySweepVisibility(show){
+      if(!sweepDiv) return;
+      const on=(typeof show==='boolean')?show:(sweepSel.value==='on');
+      sweepDiv.style.display=on?'block':'none';
+    }
 
+    // Events
     starsSel.addEventListener('change', ()=> resetGrid(true));
     newBtn.addEventListener('click', newSession);
     dlBtn.addEventListener('click', downloadCSV);
+
     sweepSel.addEventListener('change', ()=>{ if(sweepSel.value==='on') startSweep(); else stopSweep(); });
     sweepSpeedSel.addEventListener('change', ()=>{ if(sweepSel.value==='on') startSweep(); });
     sweepDirSel.addEventListener('change', ()=>{ if(sweepSel.value==='on') startSweep(); });
+
     window.addEventListener('resize', ()=>{ calcSweepGeometry(); positionSweep(); });
 
+    // Init
     (function init(){
       totalEl.textContent=String(STAR_COUNT);
-      placeStars(); buildBoard();
+      placeStars();
+      buildBoard();
       if(sweepSel.value==='on') startSweep();
     })();
   })();
