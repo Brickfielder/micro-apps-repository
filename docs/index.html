@@ -16,6 +16,7 @@
   body{
     font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
     color:var(--text); background:var(--bg); position:relative;
+    display:flex; flex-direction:column; min-height:100vh;
   }
 
   /* Particle canvas behind everything */
@@ -32,7 +33,7 @@
   .subtitle{margin:0;color:var(--muted);font-size:1.05rem;line-height:1.5}
 
   /* Layout */
-  main{ max-width:var(--maxw); margin:1.5rem auto 3rem; padding:0 1rem; }
+  main{ flex:1; max-width:var(--maxw); margin:1.5rem auto 3rem; padding:0 1rem; }
 
   /* Disclaimer card */
   .disclaimer{
@@ -42,65 +43,46 @@
     border-radius:var(--radius);
     padding:1rem 1.25rem;
     box-shadow:var(--shadow);
-    margin: 0 0 1rem 0;
+    margin: 0 0 1.5rem 0;
   }
-  .disclaimer h2{
-    margin:0 0 .35rem 0;
-    font-size:1.15rem;
-  }
-  .disclaimer p{
-    margin:.4rem 0;
-    color:var(--text);
-  }
-  .disclaimer .muted{
-    color:var(--muted);
-    font-size:.95rem;
-  }
+  .disclaimer h2{ margin:0 0 .35rem 0; font-size:1.15rem; }
+  .disclaimer p{ margin:.4rem 0; color:var(--text); }
+  .disclaimer .muted{ color:var(--muted); font-size:.95rem; }
 
   /* Grid */
   .grid{ display:grid; gap:1rem }
   @media(min-width:900px){ .grid{ grid-template-columns:repeat(2,1fr) } }
   @media(min-width:1200px){ .grid{ grid-template-columns:repeat(3,1fr) } }
 
-  /* Card — 3:2 aspect ratio + tidy content */
+  /* Card */
   .card{
     display:flex; flex-direction:column; justify-content:space-between;
     text-decoration:none; color:inherit;
     background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
     padding:1rem; box-shadow:var(--shadow); transition:.2s;
-    aspect-ratio: 3 / 2;          /* uniform height across the grid */
+    aspect-ratio: 3 / 2;
     min-height: 180px;
   }
   .card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-hover) }
 
-  /* Bigger title */
-  .title{
-    font-weight:700;
-    font-size:1.25rem;
-    margin-bottom:.4rem;
-    display:flex; align-items:center; gap:.5rem;
-  }
-  /* Bigger emoji */
+  .title{ font-weight:700; font-size:1.25rem; margin-bottom:.4rem;
+          display:flex; align-items:center; gap:.5rem; }
   .emoji{ font-size:1.6rem; line-height:1 }
-  /* Description text */
-  .desc{
-    color:var(--muted);
-    font-size:1rem;
-    line-height:1.4;
-    margin-bottom:.7rem;
-    overflow:hidden;
-    display:-webkit-box;
-    -webkit-line-clamp:3;
-    -webkit-box-orient:vertical;
+  .desc{ color:var(--muted); font-size:1rem; line-height:1.4; margin-bottom:.7rem;
+         overflow:hidden; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; }
+  .tag{ background:var(--pill); padding:.3rem .7rem; border-radius:9999px; font-size:.85rem; white-space:nowrap; }
+
+  /* Footer */
+  .site-footer{
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    padding: 1.2rem;
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--muted);
   }
-  /* Tags */
-  .tag{
-    background:var(--pill);
-    padding:.3rem .7rem;
-    border-radius:9999px;
-    font-size:.85rem;
-    white-space:nowrap;
-  }
+  .site-footer a{ color: var(--accent); text-decoration: none; }
+  .site-footer a:hover{ text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -110,32 +92,46 @@
 <header>
   <div class="header-inner">
     <h1>Cognitive Rehabilitation Micro-Apps</h1>
-    <p class="subtitle">Interactive, lightweight tools to support clinical practice and research in cognitive rehabilitation.</p>
+    <p class="subtitle">Interactive, lightweight tools to support assessment, practice, and research in cognitive rehabilitation.</p>
   </div>
 </header>
 
 <main>
-  <!-- Disclaimer (between header and the list of apps) -->
+  <!-- Disclaimer -->
   <section class="disclaimer" role="note" aria-label="Disclaimer">
     <h2>Disclaimer</h2>
-  <p>
-    These micro-apps are provided for demonstration, exploration, and educational purposes only. 
-    I take no responsibility for their use in any clinical or research setting. 
-    They may be adapted, revised, or removed without prior notice, and features may change based on user feedback.
-  </p>
-  <p>
-    That said, I welcome collaboration: if you are interested in exploring how these tools could be 
-    appropriately developed and applied in clinical practice or research, please feel free to get in touch.
-  </p>
+    <p>
+      These micro-apps are experimental prototypes provided for demonstration, exploration, and educational purposes only.
+      They are <strong>not medical devices</strong> and are not intended for clinical decision-making or patient care without
+      appropriate validation, governance, and supervision. Use at your own risk; I accept no liability for any use or reliance.
+    </p>
+    <p class="muted">
+      This website and the apps may be changed or withdrawn without notice, and features may be modified based on user feedback.
+    </p>
+    <p>
+      I <em>welcome collaboration</em>: if you’re interested in appropriately developing and evaluating these tools for clinical work
+      or research, please get in touch.
+    </p>
   </section>
 
   <div id="grid" class="grid" aria-live="polite"></div>
 </main>
 
-<!-- tsParticles (optional) -->
+<footer class="site-footer">
+  <p>
+    © 2025 Cognitive Rehabilitation Micro-Apps — Licensed under the 
+    <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noopener">Apache 2.0 License</a>.
+  </p>
+  <p>
+    Contact: <a href="mailto:m.mion@nhs.net">m.mion@nhs.net</a> · 
+    <a href="https://www.linkedin.com/in/marco-mion/" target="_blank" rel="noopener">LinkedIn</a>
+  </p>
+  <p id="last-updated" class="muted"></p>
+</footer>
+
+<!-- tsParticles -->
 <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
 <script>
-  /* ==== Particle network background (comment out to disable) ==== */
   tsParticles.load("tsparticles", {
     background: { color: "#f9fafb" },
     particles: {
@@ -149,22 +145,18 @@
     retina_detect: true
   });
 
-  /* ==== Helpers ==== */
   const grid = document.getElementById('grid');
-
-  // Detect repo base for GitHub Pages (e.g., "/micro-apps-repository")
   function getBasePath(){
     const parts = (location.pathname || "/").split("/").filter(Boolean);
     return parts.length ? `/${parts[0]}` : "";
   }
   const BASE = getBasePath();
 
-  // Try multiple locations for catalog.json depending on how the site is served
   async function loadCatalog(){
     const candidates = [
-      `${BASE}/catalog.json`,          // if /docs is the Pages root
-      `${BASE}/docs/catalog.json`,     // if repo root is the Pages root
-      `${BASE}/shared/catalog.json`    // optional fallback
+      `${BASE}/catalog.json`,
+      `${BASE}/docs/catalog.json`,
+      `${BASE}/shared/catalog.json`
     ];
     for (const url of candidates){
       try {
@@ -175,8 +167,6 @@
     throw new Error('catalog.json not found in expected locations');
   }
 
-  // Resolve an app URL by trying .html and folder/index.html variants,
-  // checking both /apps and /docs/apps.
   async function resolveAppUrl(slug){
     const candidates = [
       `${BASE}/apps/${slug}.html`,
@@ -192,11 +182,9 @@
         if (r.ok) return url;
       } catch(_) {}
     }
-    // default guess
     return `${BASE}/apps/${slug}.html`;
   }
 
-  // Click handler: resolve real URL at click time to avoid 404s
   grid.addEventListener('click', async (e) => {
     const a = e.target.closest('a.card');
     if (!a) return;
@@ -206,7 +194,6 @@
     location.href = url;
   });
 
-  /* ==== Build tiles ==== */
   (async () => {
     let catalog = await loadCatalog();
     if (!Array.isArray(catalog)) catalog = [];
@@ -215,7 +202,7 @@
       const a = document.createElement('a');
       a.className = 'card';
       a.setAttribute('data-slug', app.slug);
-      a.href = `${BASE}/apps/${app.slug}.html`; // provisional (click handler resolves)
+      a.href = `${BASE}/apps/${app.slug}.html`;
       a.innerHTML = `
         <div>
           <div class="title"><span class="emoji">${app.emoji ?? '🧩'}</span> ${app.title ?? app.slug}</div>
@@ -231,8 +218,13 @@
     grid.replaceChildren(...cards);
   })().catch(err => {
     console.error(err);
-    grid.innerHTML = `<p class="desc">Could not load <code>catalog.json</code>. Place it at <code>/docs/catalog.json</code> (if Pages source is “docs”) or at the site root.</p>`;
+    grid.innerHTML = `<p class="desc">Could not load <code>catalog.json</code>.</p>`;
   });
+
+  // ==== Last updated stamp ====
+  const stamp = new Date(document.lastModified);
+  document.getElementById("last-updated").textContent =
+    "Last updated: " + stamp.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
 </script>
 </body>
 </html>
