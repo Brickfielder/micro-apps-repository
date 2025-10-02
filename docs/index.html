@@ -49,7 +49,47 @@
   .disclaimer p{ margin:.4rem 0; color:var(--text); }
   .disclaimer .muted{ color:var(--muted); font-size:.95rem; }
 
-  /* Grid */
+  /* Picks */
+  .picks{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:1rem;
+    margin:0 0 1rem 0;
+  }
+  .picks h2{ margin:0 0 .5rem 0; font-size:1.15rem; }
+  .picks .picks-row{
+    display:grid; gap:1rem;
+  }
+  @media(min-width:900px){ .picks .picks-row{ grid-template-columns:repeat(2,1fr) } }
+  @media(min-width:1200px){ .picks .picks-row{ grid-template-columns:repeat(3,1fr) } }
+
+  /* Filter bar */
+  .filterbar{
+    display:flex; flex-wrap:wrap; gap:.5rem;
+    align-items:center;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:.6rem .75rem;
+    margin:0 0 1rem 0;
+  }
+  .filterbar .label{ font-weight:600; color:#0f172a; margin-right:.25rem; }
+  .chip{
+    display:inline-flex; align-items:center; gap:.35rem;
+    padding:.35rem .65rem; border-radius:9999px; border:1px solid var(--line);
+    background:var(--pill); font-size:.9rem; cursor:pointer; user-select:none;
+  }
+  .chip[data-active="true"]{
+    background: color-mix(in oklab, var(--accent), white 85%);
+    border-color: var(--accent);
+  }
+  .chip.clear{ background:#fff; }
+  .filterbar .count{ margin-left:auto; color:var(--muted); font-size:.9rem; }
+
+  /* Grid (all apps) */
   .grid{ display:grid; gap:1rem }
   @media(min-width:900px){ .grid{ grid-template-columns:repeat(2,1fr) } }
   @media(min-width:1200px){ .grid{ grid-template-columns:repeat(3,1fr) } }
@@ -114,6 +154,22 @@
     </p>
   </section>
 
+  <!-- Editor's Picks -->
+  <section id="picks" class="picks" hidden>
+    <h2>Editor’s Picks</h2>
+    <div class="picks-row" id="picksRow" aria-live="polite"></div>
+  </section>
+
+  <!-- Filters -->
+  <div class="filterbar" role="region" aria-label="Filter apps by tags">
+    <span class="label">Filter:</span>
+    <button class="chip" id="allChip" data-active="true" type="button">All</button>
+    <!-- dynamic tag chips will be inserted here -->
+    <button class="chip clear" id="clearChip" type="button" title="Clear selection">Clear</button>
+    <span class="count" id="countLabel">0 apps</span>
+  </div>
+
+  <!-- All apps -->
   <div id="grid" class="grid" aria-live="polite"></div>
 </main>
 
@@ -124,7 +180,7 @@
   </p>
   <p>
     Contact: <a href="mailto:m.mion@nhs.net">m.mion@nhs.net</a> · 
-    <a href="https://www.linkedin.com/in/drmarcomion/" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="https://www.linkedin.com/in/marco-mion/" target="_blank" rel="noopener">LinkedIn</a>
   </p>
   <p id="last-updated" class="muted"></p>
 </footer>
@@ -132,6 +188,7 @@
 <!-- tsParticles -->
 <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
 <script>
+  // ==== Particles ====
   tsParticles.load("tsparticles", {
     background: { color: "#f9fafb" },
     particles: {
@@ -145,12 +202,25 @@
     retina_detect: true
   });
 
+  // ==== Setup ====
   const grid = document.getElementById('grid');
+  const picksSection = document.getElementById('picks');
+  const picksRow = document.getElementById('picksRow');
+  const countLabel = document.getElementById('countLabel');
+  const allChip = document.getElementById('allChip');
+  const clearChip = document.getElementById('clearChip');
+
   function getBasePath(){
     const parts = (location.pathname || "/").split("/").filter(Boolean);
     return parts.length ? `/${parts[0]}` : "";
   }
   const BASE = getBasePath();
+
+  // Fallback picks (if catalog items don’t contain featured:true)
+  const EDITORS_PICKS_FALLBACK = [
+    // 👉 add slugs here if your catalog doesn’t mark items as { featured: true }
+    // 'barista-chaos', 'audio-errands'
+  ];
 
   async function loadCatalog(){
     const candidates = [
@@ -159,10 +229,7 @@
       `${BASE}/shared/catalog.json`
     ];
     for (const url of candidates){
-      try {
-        const r = await fetch(url, { cache: 'no-store' });
-        if (r.ok) return await r.json();
-      } catch(_) {}
+      try { const r = await fetch(url, { cache: 'no-store' }); if (r.ok) return await r.json(); } catch(_){}
     }
     throw new Error('catalog.json not found in expected locations');
   }
@@ -177,51 +244,143 @@
       `${BASE}/docs/apps/${slug}/`
     ];
     for (const url of candidates){
-      try {
-        const r = await fetch(url, { method:'HEAD', cache:'no-store' });
-        if (r.ok) return url;
-      } catch(_) {}
+      try { const r = await fetch(url, { method:'HEAD', cache:'no-store' }); if (r.ok) return url; } catch(_){}
     }
     return `${BASE}/apps/${slug}.html`;
   }
 
-  grid.addEventListener('click', async (e) => {
-    const a = e.target.closest('a.card');
-    if (!a) return;
-    e.preventDefault();
-    const slug = a.getAttribute('data-slug');
-    const url = await resolveAppUrl(slug);
-    location.href = url;
-  });
+  function cardHTML(app){
+    return `
+      <div>
+        <div class="title"><span class="emoji">${app.emoji ?? '🧩'}</span> ${app.title ?? app.slug}</div>
+        <p class="desc">${app.description ?? ''}</p>
+      </div>
+      ${Array.isArray(app.tags) && app.tags.length
+        ? `<div class="tags">${app.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`
+        : '' }
+    `;
+  }
 
-  (async () => {
-    let catalog = await loadCatalog();
-    if (!Array.isArray(catalog)) catalog = [];
+  // Click-through routing
+  function wireCardClicks(container){
+    container.addEventListener('click', async (e) => {
+      const a = e.target.closest('a.card'); if (!a) return;
+      e.preventDefault();
+      const slug = a.getAttribute('data-slug');
+      const url = await resolveAppUrl(slug);
+      location.href = url;
+    });
+  }
+  wireCardClicks(grid); wireCardClicks(picksRow);
 
-    const cards = catalog.map(app => {
+  // Build tag chips (unique, sorted)
+  function buildTagChips(allApps){
+    const tagSet = new Set();
+    allApps.forEach(a => (a.tags||[]).forEach(t => tagSet.add(t)));
+    const tags = Array.from(tagSet).sort((a,b)=>a.localeCompare(b));
+
+    const frag = document.createDocumentFragment();
+    tags.forEach(tag => {
+      const btn = document.createElement('button');
+      btn.className = 'chip';
+      btn.type = 'button';
+      btn.textContent = tag;
+      btn.dataset.tag = tag;
+      btn.dataset.active = 'false';
+      frag.appendChild(btn);
+    });
+
+    // Insert before the Clear chip
+    clearChip.parentNode.insertBefore(frag, clearChip);
+  }
+
+  // Rendering helpers
+  function renderCards(container, apps){
+    const nodes = apps.map(app => {
       const a = document.createElement('a');
       a.className = 'card';
       a.setAttribute('data-slug', app.slug);
       a.href = `${BASE}/apps/${app.slug}.html`;
-      a.innerHTML = `
-        <div>
-          <div class="title"><span class="emoji">${app.emoji ?? '🧩'}</span> ${app.title ?? app.slug}</div>
-          <p class="desc">${app.description ?? ''}</p>
-        </div>
-        ${Array.isArray(app.tags) && app.tags.length
-          ? `<div class="tags">${app.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`
-          : '' }
-      `;
+      a.innerHTML = cardHTML(app);
       return a;
     });
+    container.replaceChildren(...nodes);
+  }
 
-    grid.replaceChildren(...cards);
+  function updateCount(n){
+    countLabel.textContent = `${n} app${n===1?'':'s'}`;
+  }
+
+  // Tag filtering (OR logic across selected tags)
+  function getSelectedTags(){
+    return Array.from(document.querySelectorAll('.chip[data-tag][data-active="true"]')).map(el => el.dataset.tag);
+  }
+  function filterApps(apps, selected){
+    if (!selected.length) return apps;
+    return apps.filter(app => {
+      const tags = app.tags || [];
+      return selected.some(t => tags.includes(t));
+    });
+  }
+
+  (async () => {
+    // Load + render
+    let catalog = await loadCatalog();
+    if (!Array.isArray(catalog)) catalog = [];
+
+    // Picks
+    const picks = catalog.filter(a => a.featured === true);
+    const pickSlugs = new Set(picks.map(a => a.slug));
+    if (picks.length === 0 && EDITORS_PICKS_FALLBACK.length){
+      catalog.forEach(a => { if (EDITORS_PICKS_FALLBACK.includes(a.slug)) picks.push(a); });
+    }
+    if (picks.length){
+      renderCards(picksRow, picks.slice(0, 6)); // show up to 6
+      picksSection.hidden = false;
+    }
+
+    // Build filter chips & initial grid
+    buildTagChips(catalog);
+    renderCards(grid, catalog);
+    updateCount(catalog.length);
+
+    // Filter interactions
+    function refresh(){
+      const selected = getSelectedTags();
+      const filtered = filterApps(catalog, selected);
+      renderCards(grid, filtered);
+      updateCount(filtered.length);
+      allChip.dataset.active = selected.length ? 'false' : 'true';
+    }
+
+    document.querySelector('.filterbar').addEventListener('click', (e)=>{
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+
+      if (chip === allChip){
+        // reset all
+        document.querySelectorAll('.chip[data-tag]').forEach(el => el.dataset.active = 'false');
+        refresh();
+        return;
+      }
+      if (chip === clearChip){
+        document.querySelectorAll('.chip[data-tag]').forEach(el => el.dataset.active = 'false');
+        refresh();
+        return;
+      }
+      if (chip.hasAttribute('data-tag')){
+        // toggle
+        const active = chip.dataset.active === 'true';
+        chip.dataset.active = active ? 'false' : 'true';
+        refresh();
+      }
+    });
   })().catch(err => {
     console.error(err);
     grid.innerHTML = `<p class="desc">Could not load <code>catalog.json</code>.</p>`;
   });
 
-  // ==== Last updated stamp ====
+  // Last updated (document build date)
   const stamp = new Date(document.lastModified);
   document.getElementById("last-updated").textContent =
     "Last updated: " + stamp.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
