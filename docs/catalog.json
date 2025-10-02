@@ -53,8 +53,8 @@
     "title": "Office Day",
     "description": "Everyday multi-tasking across common office-style tasks.",
     "emoji": "🖥️",
-    "tags": ["executive", "attention"]
-     "featured": true,
+    "tags": ["executive", "attention"],
+     "featured": true
   },
   {
     "slug": "plan-with-coco",
@@ -68,8 +68,8 @@
     "title": "Signal Master",
     "description": "Rapid signal detection and rule switching.",
     "emoji": "🚦",
-    "tags": ["attention"]
-     "featured": true,
+    "tags": ["attention"],
+     "featured": true
   },
   {
     "slug": "star-hunt",
