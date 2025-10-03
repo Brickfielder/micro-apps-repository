@@ -108,6 +108,7 @@
       <div class="group">
         <button id="start" class="button primary">Start Task</button>
         <button id="reset" class="button">Reset</button>
+        <button id="testVoice" class="button">Test voice</button>
         <a id="downloadCsv" class="button" download="cashpoint_results.csv" href="#">Export CSV</a>
       </div>
     </section>
@@ -157,13 +158,48 @@
   // =============================
   const VOICE_PREFS = [
     v => /Libby/i.test(v.name) && /en-GB/i.test(v.lang),
+    v => /Sapi|Microsoft/i.test(v.name) && /en-GB/i.test(v.lang), // Windows voices
     v => /Siri/i.test(v.name) && /en-GB/i.test(v.lang),
     v => /en-GB/i.test(v.lang)
   ];
-  let chosenVoice = null; let ttsEnabled = true;
-  function chooseVoice(){ const voices = speechSynthesis.getVoices() || []; for(const pick of VOICE_PREFS){ const v = voices.find(pick); if(v){ chosenVoice = v; break; } } }
-  if('speechSynthesis' in window){ speechSynthesis.onvoiceschanged = chooseVoice; chooseVoice(); }
-  function speak(text){ try{ if(!ttsEnabled) return; const u = new SpeechSynthesisUtterance(text); if(chosenVoice) u.voice = chosenVoice; u.rate = 1; u.pitch = 1; u.volume = 1; speechSynthesis.cancel(); speechSynthesis.speak(u);}catch{} }
+  let chosenVoice = null; let ttsEnabled = true; let voicesReady = false;
+
+  function chooseVoice(){
+    const voices = (speechSynthesis.getVoices && speechSynthesis.getVoices()) || [];
+    voicesReady = voices.length > 0;
+    for(const pick of VOICE_PREFS){ const v = voices.find(pick); if(v){ chosenVoice = v; break; } }
+    return chosenVoice;
+  }
+
+  function waitForVoices(timeout=3000){
+    return new Promise((resolve)=>{
+      const ready = ()=>{ chooseVoice(); resolve(chosenVoice || null); };
+      let done = false;
+      const timer = setTimeout(()=>{ if(!done){ done=true; ready(); } }, timeout);
+      const check = ()=>{
+        const list = (speechSynthesis.getVoices && speechSynthesis.getVoices()) || [];
+        if(list.length>0){ if(!done){ done=true; clearTimeout(timer); ready(); } }
+        else { setTimeout(check, 100); }
+      };
+      try{
+        if('onvoiceschanged' in speechSynthesis){ speechSynthesis.onvoiceschanged = ()=>{ if(!done){ done=true; clearTimeout(timer); ready(); } }; }
+      }catch{}
+      check();
+    });
+  }
+
+  function speak(text){
+    try{
+      if(!ttsEnabled) return;
+      if(!chosenVoice) chooseVoice();
+      const u = new SpeechSynthesisUtterance(text);
+      if(chosenVoice) u.voice = chosenVoice; else u.lang = 'en-GB';
+      u.rate = 1; u.pitch = 1; u.volume = 1;
+      try{ speechSynthesis.resume && speechSynthesis.resume(); }catch{}
+      speechSynthesis.cancel();
+      speechSynthesis.speak(u);
+    }catch{}
+  }
 
   // =============================
   // Data models
@@ -236,6 +272,7 @@
 
     // controls
     el('start').addEventListener('click', startScenario);
+    el('testVoice').addEventListener('click', async ()=>{ await waitForVoices(); chooseVoice(); speak('This is a test of the voice instructions.'); });
     el('reset').addEventListener('click', resetAll);
     el('downloadCsv').addEventListener('click', downloadCsv);
 
@@ -266,12 +303,12 @@
 
     run = { scen, card, assist, testCond, step: 'await_insert', startedAt: performance.now(), pinBuffer: '', pinAttempts: 0, wrongKeys: 0, notes: [], success: false, cashDispensed: 0, receipt: 'none', spokenOnce: false };
 
-    // Ensure a voice is chosen after user interaction (Safari/iPad requirement)
+    // Ensure a voice is chosen after user interaction (Safari/Edge requirement)
+    await waitForVoices();
     chooseVoice();
     setScreen('Insert card to begin', scen.title);
     if(assist!=='assessment'){ speak(scen.title); speak('Insert your card to begin.'); }
     else { speak('You may begin.'); }
-
     maybeStartAmbience();
   }
 
