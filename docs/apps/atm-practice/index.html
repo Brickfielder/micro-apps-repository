@@ -40,7 +40,7 @@
     .atm-lower{ display:grid; grid-template-columns:1fr 280px; gap:16px; }
     .keypad{ background:linear-gradient(180deg,#f8fafc,#f1f5f9); border:1px solid #cbd5e1; border-radius:12px; padding:14px; }
     .keys{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-    .keys .button{ padding:14px 0; font-size:1.1rem; border:1px solid #c7cfdb; background:linear-gradient(180deg,#f9fafb,#e5e7eb); box-shadow:inset 0 1px 0 rgba(255,255,255,.9); }
+    .keys .button{ padding:14px 0; font-size:1.1rem; border:1px solid #c7cfdb; background:linear-gradient(180deg,#f9fafb,#e5e7eb); box-shadow:inset 0 1px 0 rgba(255,255,255,.9); cursor:pointer; }
     .keys .fn-cancel{ background:linear-gradient(180deg,#fee2e2,#fecaca); border-color:#fca5a5; }
     .keys .fn-clear{ background:linear-gradient(180deg,#fef9c3,#fef08a); border-color:#facc15; }
     .keys .fn-enter{ background:linear-gradient(180deg,#dcfce7,#bbf7d0); border-color:#34d399; }
@@ -100,11 +100,11 @@
         </select>
       </div>
       <div class="group">
-        <button id="start" class="button primary">Start Task</button>
-        <button id="reset" class="button">Reset</button>
-        <button id="testVoice" class="button">Test voice</button>
+        <button id="start" class="button primary" type="button">Start Task</button>
+        <button id="reset" class="button" type="button">Reset</button>
+        <button id="testVoice" class="button" type="button">Test voice</button>
         <span class="pill">Voice: <strong>en-GB (default)</strong></span>
-        <a id="downloadCsv" class="button" download="cashpoint_results.csv" href="#">Export CSV</a>
+        <a id="downloadCsv" class="button" href="#" download="cashpoint_results.csv">Export CSV</a>
       </div>
     </section>
 
@@ -165,7 +165,6 @@
       speechSynthesis.speak(u);
     }catch(_){}
   }
-  // Prime on first user gesture (Edge/Chrome quirk)
   ['click','keydown','touchstart'].forEach(function(evt){
     window.addEventListener(evt, primeTTS, { once:true, capture:true });
   });
@@ -191,13 +190,29 @@
 
   /* ===== UI bootstrap ===== */
   function bootstrap(){
-    // cards
-    for(var i=0;i<cards.length;i++){ var c=cards[i]; var o=document.createElement('option'); o.value=c.id; o.textContent=c.label; $card.appendChild(o); }
-    // keypad
+    // Cards — ensure a default is selected
+    for(var i=0;i<cards.length;i++){
+      var c=cards[i]; var o=document.createElement('option'); o.value=c.id; o.textContent=c.label;
+      if(i===0) o.selected = true;
+      $card.appendChild(o);
+    }
+    if(!$card.value){ $card.value = cards[0].id; }
+
+    // Keypad (explicit type="button")
     var $keys=el('keys');
-    KEYS.forEach(function(k){ var b=document.createElement('button'); b.className='button'; b.textContent=k; b.dataset.key=k; $keys.appendChild(b); });
+    KEYS.forEach(function(k){
+      var b=document.createElement('button');
+      b.className='button';
+      b.type='button';
+      b.textContent=k;
+      b.dataset.key=k;
+      if(k==='Clear') b.classList.add('fn-clear');
+      if(k==='Enter') b.classList.add('fn-enter');
+      $keys.appendChild(b);
+    });
     $keys.addEventListener('click', onKeypadClick);
-    // slots & controls
+
+    // Slots & controls
     el('slot-card').addEventListener('click', onCardSlot);
     el('slot-cash').addEventListener('click', onCashSlot);
     el('slot-receipt').addEventListener('click', onReceiptSlot);
@@ -215,7 +230,7 @@
 
   /* ===== Engine ===== */
   function setScreen(text,title){ if(title) $screenTitle.textContent=title; $screenText.textContent=text; $screenButtons.innerHTML=''; }
-  function showButtons(labels){ $screenButtons.innerHTML=''; labels.forEach(function(l){ var b=document.createElement('button'); b.className='button'; b.textContent=l.label; if(l.id) b.dataset.id=l.id; if(l.hint && run && run.assist==='guided') b.classList.add('pulse'); b.addEventListener('click', function(){ if(l.onClick) l.onClick(); }); $screenButtons.appendChild(b); }); }
+  function showButtons(labels){ $screenButtons.innerHTML=''; labels.forEach(function(l){ var b=document.createElement('button'); b.className='button'; b.type='button'; b.textContent=l.label; if(l.id) b.dataset.id=l.id; if(l.hint && run && run.assist==='guided') b.classList.add('pulse'); b.addEventListener('click', function(){ if(l.onClick) l.onClick(); }); $screenButtons.appendChild(b); }); }
 
   function resetUI(){ $screenButtons.innerHTML=''; $screenText.innerHTML='Choose a scenario and press <em>Start Task</em>.'; $screenTitle.textContent='Ready'; $pinEcho.innerHTML=''; $cashStack.style.height='0px'; $receiptPaper.style.height='0px'; }
   function resetAll(){ stopAllAmbience(); run=null; resetUI(); }
@@ -455,13 +470,29 @@
     csvRows.push([new Date().toISOString(),'',(run&&run.scen&&run.scen.id)||'',(run&&run.scen&&run.scen.title)||'',(run&&run.card&&run.card.id)||'',(run&&run.assist)||'',!!success,(run&&run.pinAttempts)||0,(run&&run.wrongKeys)||0,tTotal,(run&&run.receipt)||'none',(run&&run.cashDispensed)||0,((run&&run.notes)||[]).join('; '),(run&&run.declineReason)||'' ]);
   }
   function toCsv(rows){ return rows.map(function(r){ return r.map(function(v){ return '"'+String(v).replace(/"/g,'""')+'"'; }).join(','); }).join('\r\n'); }
-  function downloadCsv(e){ if(e) e.preventDefault(); var csv=toCsv(csvRows); var blob=new Blob([csv],{type:'text/csv;charset=utf-8'}); var url=URL.createObjectURL(blob); var a=e&&e.currentTarget ? e.currentTarget : el('downloadCsv'); a.href=url; a.click(); }
+
+  // Robust CSV download (temp anchor)
+  function downloadCsv(e){
+    if(e) e.preventDefault();
+    var csv=toCsv(csvRows);
+    var blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url; a.download='cashpoint_results.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  }
 
   /* ===== Start ===== */
   function startScenario(){
     resetUI();
     var scen=scenarios[$scenario.value];
-    var card=null; for(var i=0;i<cards.length;i++){ if(cards[i].id===$card.value){ card=cards[i]; break; } }
+    // Guard: ensure a valid card is selected
+    if(!$card.value){ $card.value = cards[0].id; }
+    var card = cards.find(function(c){ return c.id === $card.value; }) || cards[0];
+
     var assist=$assist.value, testCond=$testCond.value;
 
     // Zero voice in Assessment mode
