@@ -58,6 +58,31 @@
 
     /* Responsive: single column always; widen keypad on narrow screens */
     @media (max-width: 720px){ .lower{ grid-template-columns: 1fr; } }
+  
+    /* === ATM CHASSIS LOOK === */
+    .atm-card{ background: linear-gradient(180deg,#e7ebf1,#d9e0e8 36%,#e7edf4); border:1px solid #c6d0dc; box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 14px 28px rgba(2,6,23,.08); position:relative; }
+    .chassis{ position:relative; height:56px; border-radius:12px; margin-bottom:12px; background: linear-gradient(180deg,#cad3dd,#bfc8d3); border:1px solid #b2bcc8; box-shadow: inset 0 1px 0 rgba(255,255,255,.5); display:flex; align-items:center; justify-content:center; }
+    .chassis .brand{ font-weight:700; letter-spacing:.08em; color:#2d3748; text-shadow:0 1px 0 rgba(255,255,255,.4); }
+    .chassis .cam{ position:absolute; right:14px; top:10px; width:28px; height:28px; background:radial-gradient(circle at 50% 50%,#1f2937 0,#0b1220 55%,#0b1220 100%); border-radius:50%; box-shadow: inset 0 0 6px rgba(255,255,255,.15); }
+    .chassis .cam .lens{ position:absolute; left:9px; top:9px; width:10px; height:10px; background:radial-gradient(circle at 40% 40%,#3b82f6 0,#1d4ed8 60%,#0b1220 100%); border-radius:50%; }
+    .chassis .cam .led{ position:absolute; right:-2px; top:11px; width:8px; height:8px; background:#10b981; border-radius:50%; box-shadow:0 0 8px #10b981; }
+    .chassis .grill{ position:absolute; left:14px; top:16px; width:120px; height:8px; background: repeating-linear-gradient(90deg, rgba(0,0,0,.18) 0 8px, rgba(255,255,255,.2) 8px 10px); border-radius:6px; opacity:.7; }
+
+    .screen-bezel{ border-radius:14px; padding:10px; background:linear-gradient(180deg,#1e293b,#0f172a); box-shadow: inset 0 2px 10px rgba(0,0,0,.65), 0 1px 0 rgba(255,255,255,.15); border:1px solid #111827; }
+    .screen{ background: linear-gradient(180deg,#0d2338 0,#0a2034 100%); border:1px solid #10283f; border-radius:10px; min-height:200px; position:relative; }
+
+    /* Slot cutouts */
+    .slot{ background: linear-gradient(180deg,#0b1220,#0a0f1a); border:1px solid #101827; }
+    #slot-cash .cash{ background: #e0f2fe; border-color:#93c5fd; }
+    #slot-receipt .paper{ background: #fff; border-color:#cbd5e1; }
+
+    /* Key look */
+    .keys .button{ border:1px solid #c7cfdb; background:linear-gradient(180deg,#f8fafc,#eef2f7); box-shadow:0 1px 0 rgba(255,255,255,.8) inset; }
+    .keys .fn-cancel{ background:linear-gradient(180deg,#fde2e2,#fbd5d5); border-color:#f5b5b5; }
+    .keys .fn-clear{ background:linear-gradient(180deg,#fef9c3,#fef08a); border-color:#fde68a; }
+    .keys .fn-enter{ background:linear-gradient(180deg,#dcfce7,#bbf7d0); border-color:#a7f3d0; }
+    .keys .button:active{ transform: translateY(1px); filter:brightness(.96); }
+
   </style>
 </head>
 <body>
@@ -146,6 +171,7 @@
     </section>
 
     <!-- (Clinician feedback panel auto-inserted below by clinician_feedback.js) -->
+    <!-- ATM visual enhanced: metallic chassis, camera, grill, bezel -->
   </div>
 
   <!-- Optional ambience loops (drop your mp3 next to this file, keep names) -->
