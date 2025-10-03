@@ -134,6 +134,7 @@
         <button id="start" class="button primary">Start Task</button>
         <button id="reset" class="button">Reset</button>
         <button id="testVoice" class="button">Test voice</button>
+        <span id="voiceStatus" class="pill" title="Current TTS voice">Voice: <strong id="voiceName">uninitialised</strong></span>
         <a id="downloadCsv" class="button" download="cashpoint_results.csv" href="#">Export CSV</a>
       </div>
     </section>
@@ -214,7 +215,9 @@
     });
   }
 
-  function speak(text){
+  function setVoiceStatus(){ const name = chosenVoice?.name || 'default'; try{ document.getElementById('voiceName').textContent = name; }catch{} }
+
+  function speak(text,{flush=false}={}){
     try{
       if(!ttsEnabled) return;
       if(!chosenVoice) chooseVoice();
@@ -222,6 +225,11 @@
       if(chosenVoice) u.voice = chosenVoice; else u.lang = 'en-GB';
       u.rate = 1; u.pitch = 1; u.volume = 1;
       try{ speechSynthesis.resume && speechSynthesis.resume(); }catch{}
+      if(flush){ try{ speechSynthesis.cancel(); }catch{} }
+      speechSynthesis.speak(u);
+    }catch{}
+  }
+  function speakSeq(lines){ if(!lines || !lines.length) return; let i=0; const next=()=>{ if(i>=lines.length) return; const u=new SpeechSynthesisUtterance(lines[i++]); if(chosenVoice) u.voice=chosenVoice; else u.lang='en-GB'; u.rate=1; u.pitch=1; u.volume=1; u.onend=()=> setTimeout(next, 60); try{ speechSynthesis.resume && speechSynthesis.resume(); }catch{} speechSynthesis.speak(u); }; next(); }
       speechSynthesis.cancel();
       speechSynthesis.speak(u);
     }catch{}
@@ -298,7 +306,7 @@
 
     // controls
     el('start').addEventListener('click', startScenario);
-    el('testVoice').addEventListener('click', async ()=>{ await waitForVoices(); chooseVoice(); speak('This is a test of the voice instructions.'); });
+    el('testVoice').addEventListener('click', async ()=>{ await waitForVoices(); chooseVoice(); setVoiceStatus(); speak('This is a test of the voice instructions.',{flush:true}); });
     el('reset').addEventListener('click', resetAll);
     el('downloadCsv').addEventListener('click', downloadCsv);
 
@@ -331,10 +339,10 @@
 
     // Ensure a voice is chosen after user interaction (Safari/Edge requirement)
     await waitForVoices();
-    chooseVoice();
+    chooseVoice(); setVoiceStatus();
     setScreen('Insert card to begin', scen.title);
-    if(assist!=='assessment'){ speak(scen.title); speak('Insert your card to begin.'); }
-    else { speak('You may begin.'); }
+    if(assist!=='assessment'){ speakSeq([scen.title,'Insert your card to begin.']); }
+    else { speak('You may begin.',{flush:true}); }
     maybeStartAmbience();
   }
 
