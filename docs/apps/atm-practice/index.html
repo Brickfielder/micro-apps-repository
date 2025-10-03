@@ -151,46 +151,77 @@
   <audio id="amb-cafe" src="ambient_cafe_loop.mp3" preload="auto" loop></audio>
   <audio id="amb-street" src="ambient_street_loop.mp3" preload="auto" loop></audio>
 
-  <script>
-  // =============================
-  // Voice: Libby (EN-GB) → Siri (en-GB) → any en-GB
-  // =============================
-  const VOICE_PREFS = [
-    v => /Libby/i.test(v.name) && /en-GB/i.test(v.lang),
-    v => /Siri/i.test(v.name) && /en-GB/i.test(v.lang),
-    v => /en-GB/i.test(v.lang)
-  ];
-  let chosenVoice = null; let ttsEnabled = true;
-  function chooseVoice(){ const voices = speechSynthesis.getVoices() || []; for(const pick of VOICE_PREFS){ const v = voices.find(pick); if(v){ chosenVoice = v; break; } } }
-  if('speechSynthesis' in window){ speechSynthesis.onvoiceschanged = chooseVoice; chooseVoice(); }
-  function speak(text){ try{ if(!ttsEnabled) return; const u = new SpeechSynthesisUtterance(text); if(chosenVoice) u.voice = chosenVoice; u.rate = 1; u.pitch = 1; u.volume = 1; speechSynthesis.cancel(); speechSynthesis.speak(u);}catch{} }
+<script>
+/* ===== Desktop speech helper (with ambience ducking) ===== */
+const VOICE_PREFS = ["Serena","Daniel","Google UK English Female","Google UK English Male"];
+let chosenVoice = null, voicesReady = false;
 
-  // =============================
-  // Data models
-  // =============================
-  const cards = [
-    { id:'A', label:'Card A', pin:'5241' },
-    { id:'B', label:'Card B', pin:'7309' },
-    { id:'C', label:'Card C', pin:'1086' }
-  ];
+// If you used my ambience object earlier, expose a simple volume setter:
+function setAmbienceVolume(v){
+  try {
+    if (window.ambience) Object.values(ambience).forEach(a => { if(a) a.volume = v; });
+  } catch(e){}
+}
 
-  const scenarios = {
-    withdraw20: {
-      id:'withdraw20', title:'Withdraw £20 — printed receipt',
-      kind:'withdraw', amount:20, receipt:'printed'
-    },
-    balance_screen: {
-      id:'balance_screen', title:'Check balance — on screen',
-      kind:'balance', receipt:'screen'
-    },
-    topup10: {
-      id:'topup10', title:'Mobile top-up £10',
-      kind:'topup', amount:10
-    },
-    change_pin: {
-      id:'change_pin', title:'Change PIN', kind:'change_pin'
-    }
-  };
+function pickVoice(){
+  const voices = speechSynthesis.getVoices() || [];
+  // exact name match first
+  for (const name of VOICE_PREFS){
+    const v = voices.find(x => x.name === name);
+    if (v) return v;
+  }
+  // then any en-GB, then any English, then first available
+  return voices.find(v => (v.lang||"").toLowerCase().startsWith("en-gb"))
+      || voices.find(v => (v.lang||"").toLowerCase().startsWith("en"))
+      || voices[0] || null;
+}
+
+function initVoices(){
+  chosenVoice = pickVoice();
+  voicesReady = !!chosenVoice || (speechSynthesis.getVoices()||[]).length > 0;
+}
+
+if ('speechSynthesis' in window){
+  speechSynthesis.onvoiceschanged = initVoices;
+  // Some desktop Chrome builds need a small delay
+  setTimeout(initVoices, 200);
+}
+
+/** Speak text; safe to call after any user click (desktop). */
+function say(text, opts={}){
+  if (!('speechSynthesis' in window)) return;
+  if (!voicesReady) { setTimeout(()=>say(text, opts), 200); return; }
+
+  const u = new SpeechSynthesisUtterance(text);
+  u.voice = chosenVoice;
+  u.lang  = (chosenVoice && chosenVoice.lang) || "en-GB";
+  u.rate  = opts.rate  ?? 0.95;
+  u.pitch = opts.pitch ?? 1.0;
+  u.volume= opts.volume?? 1.0;
+
+  // duck ambience while speaking
+  const restore = () => setAmbienceVolume(0.6);
+  u.onstart = () => setAmbienceVolume(0.15);
+  u.onend   = restore;
+  u.onerror = restore;
+
+  speechSynthesis.speak(u);
+}
+
+/* Optional: a tiny self-test button you can keep or remove */
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.querySelector('#speechTest');
+  if(btn){
+    btn.addEventListener('click', () => {
+      console.log('Voices:', speechSynthesis.getVoices().map(v=>v.name));
+      say("Speech is working. This is your Cash Point Coach.");
+    }, {once:false});
+  }
+});
+</script>
+
+<button id="speechTest" class="btn">Test voice</button>
+
 
   // =============================
   // State
