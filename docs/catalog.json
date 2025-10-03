@@ -6,6 +6,12 @@
   "emoji": "🎧",
   "tags": ["attention", "executive"]
 },
+  "slug": "atm-practice",
+  "title": "Cash Point Coach",
+  "description": "CashPoint Coach — Practise ATM skills: insert card, enter PIN, withdraw, check balance, top-up, change PIN.",
+  "emoji": "💳",
+  "tags": ["attention", "executive"]
+},
   {
     "slug": "barista-chaos",
     "title": "Barista Chaos",
