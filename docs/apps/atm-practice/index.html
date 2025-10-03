@@ -290,7 +290,7 @@
   // =============================
   // Scenario engine
   // =============================
-  function startScenario(){
+  async function startScenario(){
     resetUI();
     const scen = scenarios[$scenario.value];
     const card = cards.find(c=>c.id===$card.value);
