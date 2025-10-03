@@ -41,6 +41,13 @@
     "emoji": "🧠",
     "tags": ["visuospatial", "memory"]
   },
+   {
+    "slug": "market-manager",
+    "title": "Market Manager",
+    "description": "Scan items, process payments, handle interruptions.",
+    "emoji": "📋",
+    "tags": ["attention", "executive", "memory"]
+  },
   {
     "slug": "maze-explorer",
     "title": "Maze Explorer",
