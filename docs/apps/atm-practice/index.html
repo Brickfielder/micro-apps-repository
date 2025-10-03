@@ -18,7 +18,7 @@
   <style>
     :root{ color-scheme: light; }
     body { margin: 0; }
-    #app-root { display:flex; flex-direction:column; gap:14px; }
+    #app-root { display:flex; flex-direction:column; gap:14px; padding:16px; }
     .toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
     .toolbar .group { display:flex; align-items:center; gap:8px; }
     .toolbar select, .toolbar input[type="text"], .toolbar input[type="number"]{ min-height:36px; }
@@ -143,31 +143,103 @@
   <audio id="amb-street" src="ambient_street_loop.mp3" preload="auto" loop></audio>
 
   <script>
-  // ===== Speech (Edge/Windows-safe, no optional chaining) =====
-  var chosenVoice=null, ttsEnabled=true;
-  function chooseVoice(){
-    var voices=(speechSynthesis.getVoices&&speechSynthesis.getVoices())||[];
-    var prefs=[
-      function(v){return /Libby/i.test(v.name)&&/en-GB/i.test(v.lang);},
-      function(v){return /Microsoft|Sapi/i.test(v.name)&&/en-GB/i.test(v.lang);},
-      function(v){return /Siri/i.test(v.name)&&/en-GB/i.test(v.lang);},
-      function(v){return /en-GB/i.test(v.lang);}];
-    for(var i=0;i<prefs.length;i++){ var pick=voices.find(prefs[i]); if(pick){ chosenVoice=pick; break; } }
-    return chosenVoice;
+  // ===== Speech (hardened for Edge/Windows) =====
+  var chosenVoice = null, ttsEnabled = true, _unlockDone = false, _lastUtter = null;
+
+  function _pickVoice() {
+    var voices = (window.speechSynthesis && speechSynthesis.getVoices && speechSynthesis.getVoices()) || [];
+    if (!voices.length) return null;
+    var prefs = [
+      function(v){ return /Libby/i.test(v.name) && /en-GB/i.test(v.lang); },
+      function(v){ return /(Microsoft|SAPI)/i.test(v.name) && /en-GB/i.test(v.lang); },
+      function(v){ return /Siri/i.test(v.name) && /en-GB/i.test(v.lang); },
+      function(v){ return /en-GB/i.test(v.lang); }
+    ];
+    for (var i=0;i<prefs.length;i++){
+      var pick = voices.find(prefs[i]);
+      if (pick) return pick;
+    }
+    return voices[0] || null;
   }
-  function waitForVoices(timeout){
-    timeout = typeof timeout==='number'? timeout: 3000;
+
+  function waitForVoices(timeoutMs){
+    timeoutMs = (typeof timeoutMs === 'number') ? timeoutMs : 5000;
     return new Promise(function(resolve){
-      var done=false; function finish(){ if(done) return; done=true; chooseVoice(); resolve(chosenVoice||null); }
-      var list=(speechSynthesis.getVoices&&speechSynthesis.getVoices())||[];
-      if(list.length>0){ finish(); return; }
-      try{ speechSynthesis.onvoiceschanged=function(){ finish(); }; }catch(e){}
-      setTimeout(finish, timeout);
+      var start = Date.now();
+      (function tick(){
+        var voices = (speechSynthesis.getVoices && speechSynthesis.getVoices()) || [];
+        if (voices.length || (Date.now() - start) > timeoutMs) resolve(voices);
+        else setTimeout(tick, 100);
+      })();
     });
   }
-  function setVoiceStatus(){ var n=(chosenVoice&&chosenVoice.name)? chosenVoice.name: 'default'; try{ document.getElementById('voiceName').textContent=n; }catch(e){} }
-  function speak(text, flush){ try{ if(!ttsEnabled) return; if(!chosenVoice) chooseVoice(); var u=new SpeechSynthesisUtterance(text); if(chosenVoice) u.voice=chosenVoice; else u.lang='en-GB'; u.rate=1; u.pitch=1; u.volume=1; try{ if(speechSynthesis.resume) speechSynthesis.resume(); }catch(e){} if(flush){ try{ speechSynthesis.cancel(); }catch(e){} } speechSynthesis.speak(u);}catch(e){} }
-  function speakSeq(lines){ if(!lines||!lines.length) return; var i=0; function next(){ if(i>=lines.length) return; var u=new SpeechSynthesisUtterance(lines[i++]); if(chosenVoice) u.voice=chosenVoice; else u.lang='en-GB'; u.rate=1; u.pitch=1; u.volume=1; u.onend=function(){ setTimeout(next,70); }; try{ if(speechSynthesis.resume) speechSynthesis.resume(); }catch(e){} speechSynthesis.speak(u);} next(); }
+
+  function unlockTTS(){
+    if (_unlockDone) return;
+    _unlockDone = true;
+    try { speechSynthesis.cancel(); } catch(_){}
+    try {
+      var u = new SpeechSynthesisUtterance(" ");
+      u.volume = 0;
+      speechSynthesis.speak(u);
+      setTimeout(function(){ try{ speechSynthesis.cancel(); }catch(_){} }, 50);
+    } catch(_){}
+  }
+
+  function setVoiceStatus(){
+    var n = (chosenVoice && chosenVoice.name) ? chosenVoice.name : 'default (en-GB)';
+    var el = document.getElementById('voiceName');
+    if (el) el.textContent = n;
+  }
+
+  function initTTS(){
+    ['click','keydown','touchstart'].forEach(function(evt){
+      window.addEventListener(evt, unlockTTS, { once:true, capture:true });
+    });
+    waitForVoices().then(function(){
+      chosenVoice = _pickVoice();
+      setVoiceStatus();
+    });
+    try {
+      speechSynthesis.onvoiceschanged = function(){
+        if (!chosenVoice) { chosenVoice = _pickVoice(); setVoiceStatus(); }
+      };
+    } catch(_){}
+  }
+
+  function speak(text, flush){
+    try{
+      if(!ttsEnabled || !text) return;
+      if (flush) { try{ speechSynthesis.cancel(); }catch(_){} }
+      if (!chosenVoice) chosenVoice = _pickVoice();
+      var u = new SpeechSynthesisUtterance(text);
+      if (chosenVoice) u.voice = chosenVoice; else u.lang = 'en-GB';
+      u.rate = 1; u.pitch = 1; u.volume = 1;
+      _lastUtter = u;
+      try{ if (speechSynthesis.resume) speechSynthesis.resume(); }catch(_){}
+      speechSynthesis.speak(u);
+    } catch(_){}
+  }
+
+  function speakSeq(lines){
+    if(!lines || !lines.length) return;
+    var i = 0;
+    function next(){
+      if(i >= lines.length) return;
+      var txt = lines[i++];
+      try{ speechSynthesis.cancel(); }catch(_){}
+      var u = new SpeechSynthesisUtterance(txt);
+      if (chosenVoice) u.voice = chosenVoice; else u.lang = 'en-GB';
+      u.rate = 1; u.pitch = 1; u.volume = 1;
+      u.onend = function(){ setTimeout(next, 60); };
+      _lastUtter = u;
+      try{ if (speechSynthesis.resume) speechSynthesis.resume(); }catch(_){}
+      speechSynthesis.speak(u);
+    }
+    next();
+  }
+
+  initTTS();
 
   // ===== Data =====
   var cards=[{id:'A',label:'Card A',pin:'5241'},{id:'B',label:'Card B',pin:'7309'},{id:'C',label:'Card C',pin:'1086'}];
@@ -200,7 +272,12 @@
     el('start').addEventListener('click', startScenario);
     el('reset').addEventListener('click', resetAll);
     el('downloadCsv').addEventListener('click', downloadCsv);
-    el('testVoice').addEventListener('click', function(){ waitForVoices().then(function(){ chooseVoice(); setVoiceStatus(); speak('This is a test of the voice instructions.', true); }); });
+    el('testVoice').addEventListener('click', function(){
+      waitForVoices().then(function(){
+        chosenVoice = _pickVoice(); setVoiceStatus();
+        speak('This is a test of the voice instructions.', true);
+      });
+    });
     $ambVol.addEventListener('input', function(){ setAmbienceVolume(parseFloat($ambVol.value)); });
   }
 
@@ -232,20 +309,100 @@
   function handleConfirmPinKey(k){ if(k==='Clear'){ confirmPinBuffer=''; $pinEcho.innerHTML='<span class="badge">Confirm cleared</span>'; return; } if(k==='Cancel'){ run.step='menu'; proceed(); return; } if(k==='Enter'){ if(confirmPinBuffer===run.newPin){ run.card.pin=run.newPin; run.newPin=null; confirmPinBuffer=''; run.step='eject_ready'; setScreen('PIN changed. Take your card.','Success'); if(run.assist!=='assessment'){ speak('Your PIN has been changed. Take your card.'); } } else { confirmPinBuffer=''; setScreen('PINs do not match. Try again.','Mismatch'); if(run.assist!=='assessment'){ speak('The two PINs do not match. Please try again.'); } } return; } if(/^[0-9]$/.test(k)){ if(confirmPinBuffer.length<4){ confirmPinBuffer+=k; $pinEcho.innerHTML='<span class="badge">Confirm: '+new Array(confirmPinBuffer.length+1).join('•')+'</span>'; } } }
 
   function proceed(){ if(!run) return; switch(run.step){
-    case 'menu': setScreen('Choose an option','Main menu'); showButtons([{id:'m_withdraw',label:'Cash withdrawal',onClick:function(){run.step='withdraw_options'; proceed();},hint:true},{id:'m_balance',label:'Balance enquiry',onClick:function(){run.step='balance_options'; proceed();}},{id:'m_topup',label:'Mobile top-up',onClick:function(){run.step='topup_network'; proceed();}},{id:'m_change_pin',label:'Change PIN',onClick:function(){run.step='change_pin_new'; setScreen('Enter your new 4-digit PIN, then press Enter.','New PIN'); if(run.assist!=='assessment'){ speak('Enter your new four digit PIN, then press enter.'); }}}]); if(run.assist!=='assessment'){ speak('Choose an option.'); } break;
-    case 'withdraw_options': setScreen('Choose an amount','Cash withdrawal'); var quick=[10,20,30,50]; var labels=[]; quick.forEach(function(q){ labels.push({label:'£'+q, onClick:function(){ run.pendingAmount=q; run.step='account_choice'; proceed(); }, hint: run.scen.kind==='withdraw' && run.scen.amount===q}); }); labels.push({label:'Other amount', onClick:function(){ run.step='amount_entry'; amountBuffer=''; setScreen('Enter amount in multiples of £10, then press Enter.','Enter amount'); if(run.assist!=='assessment'){ speak('Enter amount in multiples of ten pounds, then press enter.'); } }}); showButtons(labels); break;
-    case 'account_choice': setScreen('Select account','Account'); showButtons([{label:'Current account',onClick:function(){ run.accountType='Current account'; run.step='receipt_choice'; proceed(); },hint:true},{label:'Savings account',onClick:function(){ run.accountType='Savings account'; run.step='receipt_choice'; proceed(); }}]); break;
-    case 'receipt_choice': setScreen('Receipt options','Receipt'); showButtons([{label:'Printed receipt',onClick:function(){ run.receipt='printed'; run.step='confirm_operation'; proceed(); }, hint: run.scen.receipt==='printed'},{label:'No receipt',onClick:function(){ run.receipt='none'; run.step='confirm_operation'; proceed(); }}]); break;
-    case 'balance_options': setScreen('Show balance','Balance enquiry'); showButtons([{label:'On-screen',onClick:function(){ run.receipt='screen'; run.step='show_balance'; proceed(); }, hint: run.scen.receipt==='screen'},{label:'Printed receipt',onClick:function(){ run.receipt='printed'; run.step='print_balance'; proceed(); }}]); break;
-    case 'topup_network': setScreen('Choose your network','Mobile top-up'); showButtons([{label:'O2',onClick:function(){ run.network='O2'; run.step='topup_amount'; proceed(); }},{label:'EE',onClick:function(){ run.network='EE'; run.step='topup_amount'; proceed(); }},{label:'Vodafone',onClick:function(){ run.network='Vodafone'; run.step='topup_amount'; proceed(); }},{label:'Three',onClick:function(){ run.network='Three'; run.step='topup_amount'; proceed(); }}]); break;
-    case 'topup_amount': setScreen('Choose top-up amount','Amount'); showButtons([{label:'£10',onClick:function(){ run.pendingAmount=10; run.step='confirm_operation'; proceed(); }, hint: run.scen.kind==='topup' && run.scen.amount===10},{label:'£20',onClick:function(){ run.pendingAmount=20; run.step='confirm_operation'; proceed(); }}]); break;
-    case 'confirm_operation': var text=''; if(run.scen.kind==='withdraw'){ var acct=run.accountType||'Current account'; text='Withdraw £'+run.pendingAmount+' from your '+acct+(run.receipt==='printed'?' with printed receipt':'')+'?'; } else if(run.scen.kind==='balance'){ text='Show balance '+(run.receipt==='printed'?'on paper':'on screen')+'?'; } else if(run.scen.kind==='topup'){ text='Top-up '+run.network+' for £'+run.pendingAmount+'?'; } setScreen(text,'Confirm'); showButtons([{label:'Confirm',onClick:function(){ run.step=dispenseOrShow(); proceed(); }, hint:true},{label:'Cancel',onClick:function(){ run.step='menu'; proceed(); }}]); break;
-    case 'declined_insufficient': setScreen('Unable to dispense cash — insufficient funds.','Transaction declined'); showButtons([{label:'Choose a different amount',onClick:function(){ run.step='withdraw_options'; proceed(); },hint:true},{label:'Cancel',onClick:function(){ run.step='eject_ready'; proceed(); }}]); if(run.assist!=='assessment'){ speak('Unable to dispense cash. You have insufficient funds for this transaction.'); } break;
-    case 'show_balance': setScreen('Your balance is £1,234.56','Balance enquiry'); if(run.receipt==='screen'){ run.step='eject_ready'; } break;
-    case 'print_balance': setScreen('Printing balance…','Balance enquiry'); showReceiptPaper('BALANCE: £1234.56'); run.step='collect_receipt'; break;
-    case 'collect_cash': setScreen('Please take your cash.','Dispensed'); showCashNotes(run.pendingAmount||20); break;
-    case 'collect_receipt': setScreen('Please take your receipt.','Receipt'); showReceiptPaper('RECEIPT'); break;
-    case 'eject_ready': setScreen('Please take your card.','Ejecting card'); if(run.assist!=='assessment'){ speak('Please take your card.'); } break;
+    case 'menu': setScreen('Choose an option','Main menu'); showButtons([
+      {id:'m_withdraw',label:'Cash withdrawal',onClick:function(){run.step='withdraw_options'; proceed();},hint:true},
+      {id:'m_balance',label:'Balance enquiry',onClick:function(){run.step='balance_options'; proceed();}},
+      {id:'m_topup',label:'Mobile top-up',onClick:function(){run.step='topup_network'; proceed();}},
+      {id:'m_change_pin',label:'Change PIN',onClick:function(){run.step='change_pin_new'; setScreen('Enter your new 4-digit PIN, then press Enter.','New PIN'); if(run.assist!=='assessment'){ speak('Enter your new four digit PIN, then press enter.'); }}}]);
+      if(run.assist!=='assessment'){ speak('Choose an option.'); } break;
+
+    case 'withdraw_options':
+      setScreen('Choose an amount','Cash withdrawal');
+      var quick=[10,20,30,50]; var labels=[];
+      quick.forEach(function(q){ labels.push({label:'£'+q, onClick:function(){ run.pendingAmount=q; run.step='account_choice'; proceed(); }, hint: run.scen.kind==='withdraw' && run.scen.amount===q}); });
+      labels.push({label:'Other amount', onClick:function(){ run.step='amount_entry'; amountBuffer=''; setScreen('Enter amount in multiples of £10, then press Enter.','Enter amount'); if(run.assist!=='assessment'){ speak('Enter amount in multiples of ten pounds, then press enter.'); } }});
+      showButtons(labels); break;
+
+    case 'account_choice':
+      setScreen('Select account','Account');
+      showButtons([
+        {label:'Current account',onClick:function(){ run.accountType='Current account'; run.step='receipt_choice'; proceed(); },hint:true},
+        {label:'Savings account',onClick:function(){ run.accountType='Savings account'; run.step='receipt_choice'; proceed(); }}
+      ]); break;
+
+    case 'receipt_choice':
+      setScreen('Receipt options','Receipt');
+      showButtons([
+        {label:'Printed receipt',onClick:function(){ run.receipt='printed'; run.step='confirm_operation'; proceed(); }, hint: run.scen.receipt==='printed'},
+        {label:'No receipt',onClick:function(){ run.receipt='none'; run.step='confirm_operation'; proceed(); }}
+      ]); break;
+
+    case 'balance_options':
+      setScreen('Show balance','Balance enquiry');
+      showButtons([
+        {label:'On-screen',onClick:function(){ run.receipt='screen'; run.step='show_balance'; proceed(); }, hint: run.scen.receipt==='screen'},
+        {label:'Printed receipt',onClick:function(){ run.receipt='printed'; run.step='print_balance'; proceed(); }}
+      ]); break;
+
+    case 'topup_network':
+      setScreen('Choose your network','Mobile top-up');
+      showButtons([
+        {label:'O2',onClick:function(){ run.network='O2'; run.step='topup_amount'; proceed(); }},
+        {label:'EE',onClick:function(){ run.network='EE'; run.step='topup_amount'; proceed(); }},
+        {label:'Vodafone',onClick:function(){ run.network='Vodafone'; run.step='topup_amount'; proceed(); }},
+        {label:'Three',onClick:function(){ run.network='Three'; run.step='topup_amount'; proceed(); }}
+      ]); break;
+
+    case 'topup_amount':
+      setScreen('Choose top-up amount','Amount');
+      showButtons([
+        {label:'£10',onClick:function(){ run.pendingAmount=10; run.step='confirm_operation'; proceed(); }, hint: run.scen.kind==='topup' && run.scen.amount===10},
+        {label:'£20',onClick:function(){ run.pendingAmount=20; run.step='confirm_operation'; proceed(); }}
+      ]); break;
+
+    case 'confirm_operation':
+      var text='';
+      if(run.scen.kind==='withdraw'){
+        var acct=run.accountType||'Current account';
+        text='Withdraw £'+run.pendingAmount+' from your '+acct+(run.receipt==='printed'?' with printed receipt':'')+'?';
+      } else if(run.scen.kind==='balance'){
+        text='Show balance '+(run.receipt==='printed'?'on paper':'on screen')+'?';
+      } else if(run.scen.kind==='topup'){
+        text='Top-up '+run.network+' for £'+run.pendingAmount+'?';
+      }
+      setScreen(text,'Confirm');
+      showButtons([
+        {label:'Confirm',onClick:function(){ run.step=dispenseOrShow(); proceed(); }, hint:true},
+        {label:'Cancel',onClick:function(){ run.step='menu'; proceed(); }}
+      ]); break;
+
+    case 'declined_insufficient':
+      setScreen('Unable to dispense cash — insufficient funds.','Transaction declined');
+      showButtons([
+        {label:'Choose a different amount',onClick:function(){ run.step='withdraw_options'; proceed(); },hint:true},
+        {label:'Cancel',onClick:function(){ run.step='eject_ready'; proceed(); }}
+      ]);
+      if(run.assist!=='assessment'){ speak('Unable to dispense cash. You have insufficient funds for this transaction.'); }
+      break;
+
+    case 'show_balance':
+      setScreen('Your balance is £1,234.56','Balance enquiry');
+      if(run.receipt==='screen'){ run.step='eject_ready'; }
+      break;
+
+    case 'print_balance':
+      setScreen('Printing balance…','Balance enquiry'); showReceiptPaper('BALANCE: £1234.56'); run.step='collect_receipt'; break;
+
+    case 'collect_cash':
+      setScreen('Please take your cash.','Dispensed'); showCashNotes(run.pendingAmount||20); break;
+
+    case 'collect_receipt':
+      setScreen('Please take your receipt.','Receipt'); showReceiptPaper('RECEIPT'); break;
+
+    case 'eject_ready':
+      setScreen('Please take your card.','Ejecting card');
+      if(run.assist!=='assessment'){ speak('Please take your card.'); }
+      break;
   }}
   function dispenseOrShow(){ if(run.scen.kind==='withdraw'){ if(run.testCond==='insufficient'){ run.declineReason='insufficient_funds'; return 'declined_insufficient'; } return 'collect_cash'; } if(run.scen.kind==='balance'){ return run.receipt==='printed' ? 'print_balance' : 'show_balance'; } if(run.scen.kind==='topup'){ return 'eject_ready'; } return 'eject_ready'; }
   function showCashNotes(amount){ $cashStack.style.height = Math.min(60, 12 + Math.floor((amount||10)/10)*6) + 'px'; }
@@ -255,10 +412,31 @@
   function downloadCsv(e){ if(e) e.preventDefault(); var csv=toCsv(csvRows); var blob=new Blob([csv],{type:'text/csv;charset=utf-8'}); var url=URL.createObjectURL(blob); var a=e&&e.currentTarget ? e.currentTarget : el('downloadCsv'); a.href=url; a.click(); }
 
   // ===== Start =====
-  function startScenario(){ resetUI(); var scen=scenarios[$scenario.value]; var card=null; for(var i=0;i<cards.length;i++){ if(cards[i].id===$card.value){ card=cards[i]; break; } } var assist=$assist.value; var testCond=$testCond.value; $pinBadge.classList.toggle('hidden', assist==='assessment'); $pinText.textContent=card.pin; run={scen:scen, card:card, assist:assist, testCond:testCond, step:'await_insert', startedAt:performance.now(), pinBuffer:'', pinAttempts:0, wrongKeys:0, notes:[], success:false, cashDispensed:0, receipt:'none'}; waitForVoices().then(function(){ chooseVoice(); setVoiceStatus(); setScreen('Insert card to begin', scen.title); if(assist!=='assessment'){ speakSeq([scen.title,'Insert your card to begin.']); } else { speak('You may begin.', true); } }); maybeStartAmbience(); }
+  function startScenario(){
+    resetUI();
+    var scen=scenarios[$scenario.value];
+    var card=null; for(var i=0;i<cards.length;i++){ if(cards[i].id===$card.value){ card=cards[i]; break; } }
+    var assist=$assist.value; var testCond=$testCond.value;
 
-  // init
-  (function(){ bootstrap(); waitForVoices(function(){ chooseVoice(); setVoiceStatus(); }); })();
+    // Zero voice in Assessment mode
+    ttsEnabled = (assist !== 'assessment');
+
+    $pinBadge.classList.toggle('hidden', assist==='assessment');
+    $pinText.textContent=card.pin;
+
+    run={scen:scen, card:card, assist:assist, testCond:testCond, step:'await_insert', startedAt:performance.now(), pinBuffer:'', pinAttempts:0, wrongKeys:0, notes:[], success:false, cashDispensed:0, receipt:'none'};
+
+    waitForVoices().then(function(){
+      chosenVoice = _pickVoice(); setVoiceStatus();
+      setScreen('Insert card to begin', scen.title);
+      // Do not speak anything at scenario start if assessment; Standard/Guided will speak below:
+      if(assist!=='assessment'){ speakSeq([scen.title,'Insert your card to begin.']); }
+    });
+
+    maybeStartAmbience();
+  }
+
+  (function(){ bootstrap(); })();
   </script>
 </body>
 </html>
