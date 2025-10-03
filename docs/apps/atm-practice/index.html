@@ -1,387 +1,544 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Cash Point Coach — ATM Practice</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CashPoint Coach — ATM Practice</title>
 
-  <!-- Identify the app for the shared frame -->
-  <meta name="app-slug" content="atm-practice">
-  <meta name="app-title" content="Cash Point Coach">
-  <meta name="app-desc" content="Practise ATM skills: insert card, enter PIN, choose withdrawal, check balance, handle insufficient funds.">
-  <meta name="theme" content="bold">
+  <!-- Micro-Apps shared assets -->
+  <meta name="app-slug" content="cashpoint-coach" />
+  <meta name="app-title" content="CashPoint Coach — ATM Practice" />
+  <meta name="app-desc" content="Practice common ATM tasks with spoken instructions and per-card PINs." />
+  <meta name="theme" content="bold" />
 
-  <!-- Shared assets (adjust the base path to your repo if needed) -->
-  <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3">
+  <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3" />
   <script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
   <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
 
   <style>
-    :root{ --atm:#0f172a; --screen:#0b1220; --edge:#1f2937; --btn:#e5e7eb; --accent:#2563eb; --ok:#16a34a; --warn:#b45309; }
-    body { background: var(--bg, #f7f8fb); }
-    .app { max-width: 980px; margin: 0 auto; padding: 16px; display: grid; gap: 12px; }
-    .row { display:grid; gap:12px; grid-template-columns: 1fr; }
-    .controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center }
-    .select, .btn { appearance:none; border:1px solid #d1d5db; background:#fff; padding:10px 12px; border-radius:10px; cursor:pointer; font:inherit }
-    .btn.primary{ background:var(--accent); color:#fff; border-color:transparent }
-    .btn.ghost{ background:#f3f4f6 }
-    .pill { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; background:#eef2ff; border:1px solid #e5e7eb; font-size:14px }
-    .atm { background:var(--atm); color:#e5e7eb; border-radius:16px; padding:16px; box-shadow: 0 10px 30px rgba(0,0,0,.15); }
-    .atm-inner { display:grid; grid-template-columns: 1fr 300px; gap:16px; }
-    .screen { background:var(--screen); border-radius:14px; padding:16px; min-height:240px; display:grid; grid-template-rows:auto 1fr auto; gap:12px; }
-    .screen h3{ margin:0; color:#dbeafe }
-    .screen .display{ background:#0c182e; border:1px solid #1f3a6d; border-radius:10px; padding:12px; color:#c7d2fe; min-height:100px }
-    .keypad, .actions { display:grid; gap:10px }
-    .keypad { grid-template-columns: repeat(3, 1fr); }
-    .key { padding:16px 0; border-radius:12px; background:#111827; color:#e5e7eb; border:1px solid #374151; font-weight:600; font-size:18px; cursor:pointer }
-    .key.wide { grid-column: span 3; }
-    .actions .btn { width:100% }
-    .status { display:flex; gap:8px; flex-wrap:wrap }
-    .sr-only{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden }
-    @media (max-width: 900px){
-      .atm-inner{ grid-template-columns: 1fr; }
-    }
+    :root{ color-scheme: light; }
+    body { margin: 0; }
+    #app-root { display:flex; flex-direction:column; gap:14px; }
+    .toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
+    .toolbar .group { display:flex; align-items:center; gap:8px; }
+    .toolbar select, .toolbar input[type="text"], .toolbar input[type="number"]{ min-height:36px; }
+    .atm-card { background: var(--card,#fff); border:1px solid var(--line,#e5e7eb); border-radius:16px; padding:16px; box-shadow: var(--shadow,0 10px 30px rgba(2,6,23,.08)); }
+    .atm { display:grid; grid-template-columns: 1fr; gap:14px; }
+
+    /* Screen area */
+    .screen { border:1px solid var(--line,#e5e7eb); border-radius:14px; padding:14px; background: #0b253a; color:#e8f1ff; min-height:180px; position:relative; }
+    .screen h2 { margin:0 0 8px 0; font-size:1.1rem; color:#93c5fd; }
+    .screen .text { font-size:1rem; }
+    .screen .buttons { margin-top:12px; display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px; }
+    .screen .buttons .button { background:#eaf2ff; color:#0b253a; border:1px solid #cfe0ff; }
+    .pulse { box-shadow: 0 0 0 0 rgba(99,102,241,.6); animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%{ box-shadow: 0 0 0 0 rgba(99,102,241,.6);} 70%{ box-shadow: 0 0 0 10px rgba(99,102,241,0);} 100%{ box-shadow: 0 0 0 0 rgba(99,102,241,0);} }
+
+    /* Lower area: keypad + slots */
+    .lower { display:grid; grid-template-columns: 1fr 300px; gap:14px; align-items:start; }
+    .keypad { border:1px solid var(--line,#e5e7eb); border-radius:14px; padding:12px; background: var(--paper,#f8fafc); }
+    .keys { display:grid; grid-template-columns: repeat(3,1fr); gap:8px; }
+    .keys .button { padding:14px 0; font-size:1.1rem; }
+    .keys .fn-cancel{ background:#fee2e2; }
+    .keys .fn-clear{ background:#fef9c3; }
+    .keys .fn-enter{ background:#dcfce7; }
+
+    .slots { border:1px solid var(--line,#e5e7eb); border-radius:14px; padding:12px; background: var(--paper,#f8fafc); display:flex; flex-direction:column; gap:10px; }
+    .slot { padding:10px 14px; border:1px dashed var(--line,#e5e7eb); border-radius:10px; cursor:pointer; background:#fff; }
+    .slot .label { display:block; font-weight:600; }
+    .slot .paper, .slot .cash { height:0; overflow:hidden; transition: height .3s ease; background:#fff; border:1px solid #cbd5e1; border-radius:6px; margin-top:8px; }
+
+    .pill { background: var(--pill,#eef2ff); border:1px solid #c7d2fe; border-radius:999px; padding:4px 10px; display:inline-flex; align-items:center; gap:8px; }
+    .badge { background: var(--chip,#eef2ff); border:1px solid #c7d2fe; border-radius:8px; padding:4px 8px; font-size:.9rem; }
+
+    .helper { color: var(--muted,#6b7280); font-size:.95rem; }
+    .stack { display:flex; flex-wrap:wrap; gap:8px; }
+    .hidden { display:none !important; }
+    .sr { position:absolute; left:-10000px; top:auto; width:1px; height:1px; overflow:hidden; }
+
+    /* Responsive: single column always; widen keypad on narrow screens */
+    @media (max-width: 720px){ .lower{ grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
-  <div class="app">
-
-    <!-- Hero & shared frame header are injected by frame.js using meta tags -->
-
-    <!-- Quick session controls -->
-    <div class="row card">
-      <div class="controls">
-        <button id="startSession" class="btn primary">Start session</button>
-        <button id="speechTest" class="btn ghost">Test voice</button>
-        <span class="pill">Ambience
-          <select id="ambienceSelect" class="select" aria-label="Ambience">
-            <option value="off">Off</option>
-            <option value="cafe">Cafe</option>
-            <option value="street">Street</option>
-          </select>
-        </span>
-        <span class="pill">Volume
-          <input id="ambVol" type="range" min="0" max="1" step="0.05" value="0.6" aria-label="Ambience volume">
-        </span>
-        <span class="pill" id="voiceName">Voice: <em>loading…</em></span>
+  <div id="app-root">
+    <!-- Toolbar: scenario, card, assistance, ambience, controls -->
+    <section class="toolbar">
+      <div class="group">
+        <label for="scenario">Scenario</label>
+        <select id="scenario">
+          <option value="withdraw20">Withdraw £20 — printed receipt</option>
+          <option value="balance_screen">Check balance — on screen</option>
+          <option value="topup10">Mobile top-up £10</option>
+          <option value="change_pin">Change PIN</option>
+        </select>
       </div>
-      <p class="muted">Tip: you can use either the on-screen buttons or your mouse to follow the steps. Spoken prompts will guide the sequence.</p>
-    </div>
-
-    <!-- ATM body -->
-    <div class="atm">
-      <div class="atm-inner">
-        <section class="screen" aria-live="polite">
-          <h3>ATM Screen</h3>
-          <div id="display" class="display">Welcome. Press <strong>Start session</strong> to begin.</div>
-          <div class="status">
-            <span class="pill" id="scenarioPill">Scenario: Standard withdrawal</span>
-            <span class="pill" id="balancePill">Balance: £250.00</span>
-            <span class="pill" id="cashPill">Dispensed: £0</span>
-          </div>
-        </section>
-
-        <aside>
-          <div class="actions">
-            <button class="btn" id="insertCardBtn">Insert card</button>
-            <button class="btn" id="enterPinBtn" disabled>Enter PIN</button>
-            <button class="btn" id="withdrawBtn" disabled>Withdraw cash</button>
-            <button class="btn" id="balanceBtn" disabled>Show balance</button>
-            <button class="btn" id="printBtn" disabled>Print receipt</button>
-            <button class="btn" id="ejectBtn" disabled>Eject card</button>
-          </div>
-          <div style="height:12px"></div>
-          <div class="keypad" aria-label="PIN keypad">
-            <button class="key">1</button><button class="key">2</button><button class="key">3</button>
-            <button class="key">4</button><button class="key">5</button><button class="key">6</button>
-            <button class="key">7</button><button class="key">8</button><button class="key">9</button>
-            <button class="key wide">0</button>
-          </div>
-        </aside>
+      <div class="group">
+        <label for="card">Card</label>
+        <select id="card"></select>
+        <span id="pinBadge" class="pill hidden" title="Training: visible PIN">
+          <span>PIN:</span><strong id="pinText">0000</strong>
+        </span>
       </div>
-    </div>
+      <div class="group">
+        <label for="assist">Mode</label>
+        <select id="assist">
+          <option value="guided">Guided</option>
+          <option value="standard" selected>Standard</option>
+          <option value="assessment">Assessment</option>
+        </select>
+      </div>
+      <div class="group">
+        <label for="ambienceSel">Ambience</label>
+        <select id="ambienceSel">
+          <option value="off" selected>Off</option>
+          <option value="cafe">Cafe (loop)</option>
+          <option value="street">Street (loop)</option>
+        </select>
+        <label for="ambVol" class="sr">Volume</label>
+        <input id="ambVol" type="range" min="0" max="1" step="0.05" value="0.35" />
+      </div>
+      <div class="group">
+        <label for="testCond">Test condition</label>
+        <select id="testCond">
+          <option value="normal" selected>Normal</option>
+          <option value="insufficient">Insufficient funds</option>
+        </select>
+      </div>
+      <div class="group">
+        <button id="start" class="button primary">Start Task</button>
+        <button id="reset" class="button">Reset</button>
+        <a id="downloadCsv" class="button" download="cashpoint_results.csv" href="#">Export CSV</a>
+      </div>
+    </section>
 
-    <!-- Clinician feedback (shared script will enhance this) -->
-    <div class="card" data-clinician-feedback>
-      <h3>Clinician notes</h3>
-      <p class="muted">Use this space to note strategies, supports used, and any difficulties observed.</p>
-      <textarea rows="4" style="width:100%; border:1px solid #e5e7eb; border-radius:12px; padding:10px"></textarea>
-    </div>
+    <section class="atm-card">
+      <div class="atm">
+        <div id="screen" class="screen" aria-live="polite" aria-atomic="true">
+          <h2 id="screenTitle">Ready</h2>
+          <div id="screenText" class="text">Choose a scenario and press <em>Start Task</em>.</div>
+          <div id="screenButtons" class="buttons"></div>
+        </div>
+
+        <div class="lower">
+          <div class="keypad">
+            <div class="stack helper" id="pinEcho"></div>
+            <div class="keys" id="keys"></div>
+            <div class="helper">Use the keypad for PINs and amounts; then press <b>Enter</b>.</div>
+          </div>
+          <div class="slots">
+            <div class="slot" id="slot-card" role="button" aria-label="Card slot">
+              <span class="label">Card slot</span>
+              <div class="helper">Tap to insert/eject card</div>
+            </div>
+            <div class="slot" id="slot-cash" role="button" aria-label="Cash dispenser">
+              <span class="label">Cash dispenser</span>
+              <div id="cashStack" class="cash"></div>
+            </div>
+            <div class="slot" id="slot-receipt" role="button" aria-label="Receipt slot">
+              <span class="label">Receipt slot</span>
+              <div id="receiptPaper" class="paper"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- (Clinician feedback panel auto-inserted below by clinician_feedback.js) -->
   </div>
 
+  <!-- Optional ambience loops (drop your mp3 next to this file, keep names) -->
+  <audio id="amb-cafe" src="ambient_cafe_loop.mp3" preload="auto" loop></audio>
+  <audio id="amb-street" src="ambient_street_loop.mp3" preload="auto" loop></audio>
+
   <script>
-  /* ========================
-     Ambience (local files + safe fallback)
-     Put MP3s at: apps/atm-practice/audio/ambient_cafe_loop.mp3 and ambient_street_loop.mp3
-  =========================*/
-  const ambience = {};
-  const LOCAL = {
-    cafe: './audio/ambient_cafe_loop.mp3',
-    street: './audio/ambient_street_loop.mp3'
+  // =============================
+  // Voice: Libby (EN-GB) → Siri (en-GB) → any en-GB
+  // =============================
+  const VOICE_PREFS = [
+    v => /Libby/i.test(v.name) && /en-GB/i.test(v.lang),
+    v => /Siri/i.test(v.name) && /en-GB/i.test(v.lang),
+    v => /en-GB/i.test(v.lang)
+  ];
+  let chosenVoice = null; let ttsEnabled = true;
+  function chooseVoice(){ const voices = speechSynthesis.getVoices() || []; for(const pick of VOICE_PREFS){ const v = voices.find(pick); if(v){ chosenVoice = v; break; } } }
+  if('speechSynthesis' in window){ speechSynthesis.onvoiceschanged = chooseVoice; chooseVoice(); }
+  function speak(text){ try{ if(!ttsEnabled) return; const u = new SpeechSynthesisUtterance(text); if(chosenVoice) u.voice = chosenVoice; u.rate = 1; u.pitch = 1; u.volume = 1; speechSynthesis.cancel(); speechSynthesis.speak(u);}catch{} }
+
+  // =============================
+  // Data models
+  // =============================
+  const cards = [
+    { id:'A', label:'Card A', pin:'5241' },
+    { id:'B', label:'Card B', pin:'7309' },
+    { id:'C', label:'Card C', pin:'1086' }
+  ];
+
+  const scenarios = {
+    withdraw20: {
+      id:'withdraw20', title:'Withdraw £20 — printed receipt',
+      kind:'withdraw', amount:20, receipt:'printed'
+    },
+    balance_screen: {
+      id:'balance_screen', title:'Check balance — on screen',
+      kind:'balance', receipt:'screen'
+    },
+    topup10: {
+      id:'topup10', title:'Mobile top-up £10',
+      kind:'topup', amount:10
+    },
+    change_pin: {
+      id:'change_pin', title:'Change PIN', kind:'change_pin'
+    }
   };
 
-  function makeAudio(src){
-    try{
-      const a = new Audio(src);
-      a.loop = true; a.preload = 'auto'; a.crossOrigin = 'anonymous';
-      return a;
-    }catch(e){ return null; }
+  // =============================
+  // State
+  // =============================
+  const el = id => document.getElementById(id);
+  const $scenario = el('scenario');
+  const $card = el('card');
+  const $assist = el('assist');
+  const $pinBadge = el('pinBadge');
+  const $pinText = el('pinText');
+  const $screenTitle = el('screenTitle');
+  const $screenText = el('screenText');
+  const $screenButtons = el('screenButtons');
+  const $pinEcho = el('pinEcho');
+  const $ambSel = el('ambienceSel');
+  const $ambVol = el('ambVol');
+  const $testCond = el('testCond');
+  const ambAudio = { cafe: el('amb-cafe'), street: el('amb-street') };
+
+  const $cashStack = el('cashStack');
+  const $receiptPaper = el('receiptPaper');
+
+  const KEYS = ['1','2','3','4','5','6','7','8','9','Clear','0','Enter'];
+
+  let run = null; // current run state
+  let csvRows = [['timestamp_iso','participant_id','scenario_id','scenario_title','card_id','assist','success','pin_attempts','wrong_keys','t_total_ms','receipt','cash_dispensed','notes_auto','decline_reason']];
+
+  // =============================
+  // UI bootstrap
+  // =============================
+  function bootstrap(){
+    // cards
+    for(const c of cards){ const o = document.createElement('option'); o.value = c.id; o.textContent = `${c.label}`; $card.appendChild(o); }
+    // keypad
+    const $keys = el('keys');
+    KEYS.forEach(k=>{ const b = document.createElement('button'); b.className = 'button'; b.textContent = k; b.dataset.key = k; $keys.appendChild(b); });
+    $keys.addEventListener('click', onKeypadClick);
+
+    // slots
+    el('slot-card').addEventListener('click', onCardSlot);
+    el('slot-cash').addEventListener('click', onCashSlot);
+    el('slot-receipt').addEventListener('click', onReceiptSlot);
+
+    // controls
+    el('start').addEventListener('click', startScenario);
+    el('reset').addEventListener('click', resetAll);
+    el('downloadCsv').addEventListener('click', downloadCsv);
+
+    // ambience
+    $ambVol.addEventListener('input', ()=> setAmbienceVolume(parseFloat($ambVol.value)) );
   }
 
-  ambience.cafe = makeAudio(LOCAL.cafe);
-  ambience.street = makeAudio(LOCAL.street);
+  // =============================
+  // Ambience helpers
+  // =============================
+  function stopAllAmbience(){ Object.values(ambAudio).forEach(a=>{ try{ a.pause(); a.currentTime = 0; }catch{} }); }
+  function setAmbienceVolume(v){ Object.values(ambAudio).forEach(a=>{ if(a){ a.volume = v; } }); }
+  function maybeStartAmbience(){ stopAllAmbience(); const sel = $ambSel.value; if(sel==='off') return; const a = ambAudio[sel]; if(!a) return; a.volume = parseFloat($ambVol.value||'0.35'); a.play().catch(()=>{}); }
 
-  // Minimal pink-noise fallback (if files missing or blocked)
-  let audioCtx=null, noiseNode=null, noiseGain=null;
-  function startNoise(){
-    if(audioCtx) return;
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if(!AC) return;
-    audioCtx = new AC();
-    const bufferSize = 2 * audioCtx.sampleRate;
-    const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const out = noiseBuffer.getChannelData(0);
-    let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
-    for(let i=0;i<bufferSize;i++){
-      const white = Math.random()*2-1;
-      b0 = 0.99886*b0 + white*0.0555179;
-      b1 = 0.99332*b1 + white*0.0750759;
-      b2 = 0.96900*b2 + white*0.1538520;
-      b3 = 0.86650*b3 + white*0.3104856;
-      b4 = 0.55000*b4 + white*0.5329522;
-      b5 = -0.7616*b5 - white*0.0168980;
-      out[i] = (b0+b1+b2+b3+b4+b5+b6 + white*0.5362)*0.02;
-      b6 = white*0.115926;
-    }
-    noiseNode = audioCtx.createBufferSource();
-    noiseNode.buffer = noiseBuffer;
-    noiseNode.loop = true;
-    noiseGain = audioCtx.createGain();
-    noiseGain.gain.value = 0.2;
-    noiseNode.connect(noiseGain).connect(audioCtx.destination);
-    noiseNode.start();
-  }
-  function stopNoise(){
-    try{ noiseNode?.stop(); }catch(e){}
-    try{ noiseNode?.disconnect(); }catch(e){}
-    noiseNode=null;
-    try{ audioCtx?.close(); }catch(e){}
-    audioCtx=null; noiseGain=null;
-  }
+  // =============================
+  // Scenario engine
+  // =============================
+  function startScenario(){
+    resetUI();
+    const scen = scenarios[$scenario.value];
+    const card = cards.find(c=>c.id===$card.value);
+    const assist = $assist.value;
+    const testCond = $testCond.value;
 
-  function setAmbienceVolume(v){
-    try{
-      Object.values(ambience).forEach(a => { if(a){ a.volume = v; }});
-      if(noiseGain) noiseGain.gain.value = v * 0.35;
-    }catch(e){}
-  }
-  function playAmbience(mode){
-    Object.values(ambience).forEach(a => { if(a){ a.pause(); a.currentTime = 0; }});
-    stopNoise();
-    if(mode==='off') return;
-    const a = ambience[mode];
-    if(a){
-      a.play().catch(()=>startNoise());
-    }else{
-      startNoise();
-    }
-  }
+    // Assessment: hide visible PIN + suppress step-by-step speech
+    $pinBadge.classList.toggle('hidden', assist !== 'guided');
+    $pinText.textContent = card.pin;
 
-  // UI bindings for ambience
-  document.addEventListener('DOMContentLoaded', ()=>{
-    const sel = document.getElementById('ambienceSelect');
-    const vol = document.getElementById('ambVol');
-    sel.addEventListener('change', ()=> playAmbience(sel.value));
-    vol.addEventListener('input', ()=> setAmbienceVolume(parseFloat(vol.value)));
-    setAmbienceVolume(parseFloat(vol.value));
-  });
-
-  /* ========================
-     Speech: Prefer Microsoft Lilly Online (Natural), with fallbacks
-  =========================*/
-  const LILLY_CANDIDATES = [
-    "Microsoft Lilly Online (Natural) - English (United Kingdom)",
-    "Microsoft Lilly Online (Natural) – English (United Kingdom)",
-    "Lilly Online (Natural)", "Lilly"
-  ];
-  const NEAR_VARIANTS = [
-    "Microsoft Libby Online (Natural) - English (United Kingdom)",
-    "Libby Online (Natural)",
-    "Microsoft Lily Online (Natural) - English (United Kingdom)",
-    "Lily Online (Natural)"
-  ];
-  let SPEECH = { voice: null, ready:false };
-
-  function pickBestVoice(){
-    const voices = speechSynthesis.getVoices() || [];
-    // exact Lilly first
-    for(const n of LILLY_CANDIDATES){ const v = voices.find(x=>x.name===n); if(v) return v; }
-    // near variants (en-GB preferred)
-    const fuzzy = voices.find(v=>{
-      const n=(v.name||"").toLowerCase(), g=(v.lang||"").toLowerCase().startsWith("en-gb");
-      return g && (n.includes("lilly")||n.includes("libby")||n.includes("lily"));
-    });
-    if(fuzzy) return fuzzy;
-    // Microsoft Online Natural en-GB
-    const msGb = voices.find(v=>{
-      const n=(v.name||"").toLowerCase(), g=(v.lang||"").toLowerCase().startsWith("en-gb");
-      return g && n.includes("microsoft") && n.includes("online") && n.includes("natural");
-    });
-    if(msGb) return msGb;
-    // any en-GB → any English → first
-    return voices.find(v=>(v.lang||"").toLowerCase().startsWith("en-gb")) ||
-           voices.find(v=>(v.lang||"").toLowerCase().startsWith("en")) ||
-           voices[0] || null;
-  }
-
-  function waitForVoices(timeoutMs=4000){
-    return new Promise(resolve=>{
-      const t0=performance.now();
-      const tick=()=>{
-        const ok=(speechSynthesis.getVoices()||[]).length>0;
-        if(ok || performance.now()-t0>timeoutMs) return resolve();
-        setTimeout(tick,100);
-      };
-      speechSynthesis.onvoiceschanged = ()=> resolve();
-      tick();
-    });
-  }
-
-  async function initSpeech(){
-    if(!('speechSynthesis' in window)) return;
-    await waitForVoices();
-    SPEECH.voice = pickBestVoice();
-    SPEECH.ready = true;
-    const vLabel = document.querySelector('#voiceName em');
-    if(vLabel) vLabel.textContent = SPEECH.voice ? `${SPEECH.voice.name}` : 'system default';
-  }
-  initSpeech();
-
-  function say(text, {rate=0.95, pitch=1.0, volume=1.0} = {}){
-    if(!('speechSynthesis' in window)) return;
-    const run=()=>{
-      const u=new SpeechSynthesisUtterance(text);
-      u.voice=SPEECH.voice||null;
-      u.lang=(SPEECH.voice && SPEECH.voice.lang) || "en-GB";
-      u.rate=rate; u.pitch=pitch; u.volume=volume;
-      u.onstart=()=> setAmbienceVolume(0.15);
-      const restore=()=> setAmbienceVolume(parseFloat(document.getElementById('ambVol').value));
-      u.onend=restore; u.onerror=restore;
-      speechSynthesis.speak(u);
+    run = {
+      scen, card, assist, testCond,
+      step: 'await_insert',
+      startedAt: performance.now(),
+      pinBuffer: '', pinAttempts: 0,
+      wrongKeys: 0,
+      notes: [],
+      success: false,
+      cashDispensed: 0,
+      receipt: 'none',
+      spokenOnce: false
     };
-    if(SPEECH.ready) run(); else setTimeout(()=>{ if(!SPEECH.ready) initSpeech().then(run); else run(); }, 250);
+
+    setScreen('Insert card to begin', scen.title);
+    if(assist!=='assessment'){ speak(scen.title); speak('Insert your card to begin.'); }
+    else { speak('You may begin.'); }
+
+    maybeStartAmbience();
   }
 
-  // Quick test button
-  document.addEventListener('DOMContentLoaded', ()=>{
-    document.getElementById('speechTest')?.addEventListener('click', ()=>{
-      console.log('Voices:', speechSynthesis.getVoices().map(v=>v.name));
-      say("Speech is working. This is Lilly, your Cash Point Coach.");
-    });
-  });
-
-  /* ========================
-     Minimal ATM flow (demo)
-  =========================*/
-  const display = ()=> document.getElementById('display');
-  const btn = id => document.getElementById(id);
-  let state = { card:false, pinOk:false, balance:250, dispensed:0 };
-
-  function refreshPills(){
-    document.getElementById('balancePill').textContent = `Balance: £${state.balance.toFixed(2)}`;
-    document.getElementById('cashPill').textContent = `Dispensed: £${state.dispensed}`;
-  }
-  function setButtons(){
-    btn('enterPinBtn').disabled = !state.card;
-    btn('withdrawBtn').disabled = !(state.card && state.pinOk);
-    btn('balanceBtn').disabled = !state.card;
-    btn('printBtn').disabled = !state.card;
-    btn('ejectBtn').disabled = !state.card;
+  function resetUI(){
+    ttsEnabled = true;
+    $screenButtons.innerHTML = '';
+    $screenText.innerHTML = 'Choose a scenario and press <em>Start Task</em>.';
+    $screenTitle.textContent = 'Ready';
+    $pinEcho.innerHTML = '';
+    $cashStack.style.height = '0px';
+    $receiptPaper.style.height = '0px';
   }
 
-  function startSession(){
-    state = { card:false, pinOk:false, balance:250, dispensed:0 };
-    refreshPills(); setButtons();
-    display().innerHTML = "Welcome. Insert your card to begin.";
-    say("Welcome to Cash Point Coach. When you are ready, insert your card.");
+  function resetAll(){ stopAllAmbience(); run = null; resetUI(); }
+
+  function setScreen(text, title){ if(title) $screenTitle.textContent = title; $screenText.textContent = text; $screenButtons.innerHTML = ''; }
+  function showButtons(labels){ $screenButtons.innerHTML = ''; labels.forEach(l=>{ const b=document.createElement('button'); b.className='button'; b.textContent=l.label; if(l.id) b.dataset.id=l.id; if(l.hint && run?.assist==='guided') b.classList.add('pulse'); b.addEventListener('click', ()=> l.onClick && l.onClick()); $screenButtons.appendChild(b); }); }
+
+  function onCardSlot(){ if(!run) return; if(run.step==='await_insert'){ run.step='pin'; setScreen('Enter your 4‑digit PIN, then press Enter.','PIN required'); if(run.assist==='guided'){ $pinEcho.innerHTML = `<span class="badge">Enter PIN for ${run.card.label}</span>`; } else { $pinEcho.innerHTML = ''; }
+      if(run.assist!=='assessment'){ speak('Enter your four digit PIN, then press Enter.'); } return; }
+    if(run.step==='eject_ready'){ run.step='done'; setScreen('Thank you.','Complete'); if(run.assist!=='assessment'){ speak('Scenario complete.'); } finalizeRun(true); }
   }
 
-  document.addEventListener('DOMContentLoaded', ()=>{
-    btn('startSession').addEventListener('click', ()=> startSession(), {once:false});
+  function onCashSlot(){ if(!run) return; if(run.step==='collect_cash'){ $cashStack.style.height = '0px'; run.step = (run.scen.kind==='balance') ? 'eject_ready' : 'collect_receipt'; proceed(); } }
+  function onReceiptSlot(){ if(!run) return; if(run.step==='collect_receipt'){ $receiptPaper.style.height = '0px'; run.step='eject_ready'; proceed(); } }
 
-    btn('insertCardBtn').addEventListener('click', ()=>{
-      state.card = true; setButtons();
-      display().innerHTML = "Card detected. Please enter your four digit PIN using the keypad.";
-      say("Card detected. Please enter your four digit PIN using the keypad.");
-    });
+  function onKeypadClick(ev){ const k = ev.target?.dataset?.key; if(!k || !run) return; if(['Clear','Cancel','Enter'].indexOf(k)===-1 && !/^[0-9]$/.test(k)){ return; }
+    switch(run.step){
+      case 'pin':
+        handlePinKey(k); break;
+      case 'amount_entry':
+        handleAmountKey(k); break;
+      case 'change_pin_new':
+        handleNewPinKey(k); break;
+      case 'change_pin_confirm':
+        handleConfirmPinKey(k); break;
+      default:
+        if(/^[0-9]$/.test(k)) run.wrongKeys++;
+    }
+  }
 
-    // Simple PIN capture (not secure; demo only)
-    let pinBuffer = "";
-    document.querySelectorAll('.keypad .key').forEach(k=>{
-      k.addEventListener('click', ()=>{
-        if(!state.card) return;
-        if(pinBuffer.length>=4) return;
-        pinBuffer += k.textContent.trim();
-        display().innerHTML = `PIN: ${"•".repeat(pinBuffer.length)}${"&nbsp;".repeat(4-pinBuffer.length)}`;
-        if(pinBuffer.length===4){
-          setTimeout(()=>{
-            state.pinOk = (pinBuffer === "1234"); // demo PIN
-            pinBuffer = "";
-            if(state.pinOk){
-              display().innerHTML = "PIN accepted. Choose an option: Withdraw cash, Show balance, or Print receipt.";
-              say("PIN accepted. Choose withdraw cash, show balance, or print receipt.");
-              setButtons();
-            } else {
-              display().innerHTML = "PIN incorrect. Try again or eject your card.";
-              say("The PIN is incorrect. Please try again, or eject your card.");
-            }
-          }, 200);
-        }
-      });
-    });
-
-    btn('enterPinBtn').addEventListener('click', ()=>{
-      if(!state.card){ return; }
-      display().innerHTML = "Enter your four digit PIN on the keypad.";
-      say("Please enter your four digit PIN now.");
-    });
-
-    btn('withdrawBtn').addEventListener('click', ()=>{
-      if(!(state.card && state.pinOk)) return;
-      // Demo: attempt to withdraw £50, with insufficient funds branch at < £50
-      if(state.balance < 50){
-        display().innerHTML = "Insufficient funds for £50. Choose a smaller amount or check your balance.";
-        say("Insufficient funds for fifty pounds. Choose a smaller amount or check your balance.");
-        return;
+  function handlePinKey(k){
+    if(k==='Clear'){ run.pinBuffer=''; $pinEcho.innerHTML = `<span class='badge'>PIN cleared</span>`; return; }
+    if(k==='Cancel'){ run.step='eject_ready'; proceed(); return; }
+    if(k==='Enter'){
+      if(run.pinBuffer===run.card.pin){ run.step='menu'; $pinEcho.innerHTML=''; proceed(); }
+      else {
+        run.pinAttempts++; run.pinBuffer=''; setScreen('Incorrect PIN. Try again.','PIN incorrect'); if(run.assist!=='assessment'){ speak('Incorrect PIN. Try again.'); }
+        if(run.pinAttempts>=3){ setScreen('Card retained. Please seek assistance.','Card retained'); if(run.assist!=='assessment'){ speak('Card retained. Please seek assistance.'); } finalizeRun(false); run=null; }
       }
-      state.balance -= 50; state.dispensed += 50; refreshPills();
-      display().innerHTML = "Dispensing £50. Please take your cash. Would you like a receipt?";
-      say("Dispensing fifty pounds. Please take your cash. Would you like a receipt?");
-    });
+      return;
+    }
+    // digit
+    run.pinBuffer += k; $pinEcho.innerHTML = `<span class='badge'>PIN: ${'•'.repeat(run.pinBuffer.length)}</span>`;
+  }
 
-    btn('balanceBtn').addEventListener('click', ()=>{
-      if(!state.card) return;
-      display().innerHTML = `Your available balance is £${state.balance.toFixed(2)}.`;
-      say(`Your available balance is ${state.balance} pounds.`);
-    });
+  // amount entry (for other amount or top-up phone digits if needed later)
+  let amountBuffer = '';
+  function handleAmountKey(k){
+    if(k==='Clear'){ amountBuffer=''; setScreen('Amount cleared. Enter amount then press Enter.','Enter amount'); return; }
+    if(k==='Cancel'){ // back to amount choices
+      run.step = run.scen.kind==='withdraw' ? 'withdraw_options' : 'topup_amount';
+      proceed(); return; }
+    if(k==='Enter'){
+      const v = parseInt(amountBuffer,10);
+      if(!v || v%10!==0){ setScreen('Enter a multiple of £10 (e.g., 10, 20, 30).','Invalid amount'); if(run.assist!=='assessment'){ speak('Please enter a multiple of 10 pounds.'); } return; }
+      run.pendingAmount = v; amountBuffer='';
+      // next: confirm
+      run.step = 'account_choice'; proceed(); return;
+    }
+    // digit
+    amountBuffer += k; setScreen(`£${amountBuffer}`,'Enter amount');
+  }
 
-    btn('printBtn').addEventListener('click', ()=>{
-      if(!state.card) return;
-      display().innerHTML = "Printing receipt. Would you like to perform another transaction, or eject your card?";
-      say("Printing receipt. Would you like another transaction, or would you like to eject your card?");
-    });
+  // change PIN handlers
+  let newPinBuffer=''; let confirmPinBuffer='';
+  function handleNewPinKey(k){
+    if(k==='Clear'){ newPinBuffer=''; $pinEcho.innerHTML = `<span class='badge'>New PIN cleared</span>`; return; }
+    if(k==='Cancel'){ run.step='menu'; proceed(); return; }
+    if(k==='Enter'){
+      if(newPinBuffer.length!==4){ setScreen('Please enter a 4‑digit PIN, then press Enter.','New PIN'); return; }
+      run.newPin = newPinBuffer; newPinBuffer=''; run.step='change_pin_confirm'; setScreen('Re‑enter your new PIN to confirm, then press Enter.','Confirm new PIN'); if(run.assist!=='assessment'){ speak('Re enter your new PIN to confirm, then press enter.'); } return;
+    }
+    if(/^[0-9]$/.test(k)){
+      if(newPinBuffer.length<4){ newPinBuffer += k; $pinEcho.innerHTML = `<span class='badge'>New PIN: ${'•'.repeat(newPinBuffer.length)}</span>`; }
+    }
+  }
+  function handleConfirmPinKey(k){
+    if(k==='Clear'){ confirmPinBuffer=''; $pinEcho.innerHTML = `<span class='badge'>Confirm cleared</span>`; return; }
+    if(k==='Cancel'){ run.step='menu'; proceed(); return; }
+    if(k==='Enter'){
+      if(confirmPinBuffer===run.newPin){
+        // apply change (in-memory only)
+        run.card.pin = run.newPin; run.newPin=null; confirmPinBuffer='';
+        run.step='eject_ready'; setScreen('PIN changed. Take your card.','Success'); if(run.assist!=='assessment'){ speak('Your PIN has been changed. Take your card.'); }
+      } else { confirmPinBuffer=''; setScreen('PINs do not match. Try again.','Mismatch'); if(run.assist!=='assessment'){ speak('The two PINs do not match. Please try again.'); } }
+      return;
+    }
+    if(/^[0-9]$/.test(k)){
+      if(confirmPinBuffer.length<4){ confirmPinBuffer += k; $pinEcho.innerHTML = `<span class='badge'>Confirm: ${'•'.repeat(confirmPinBuffer.length)}</span>`; }
+    }
+  }
 
-    btn('ejectBtn').addEventListener('click', ()=>{
-      if(!state.card) return;
-      display().innerHTML = "Please take your card. Thank you for using Cash Point Coach.";
-      say("Please take your card. Thank you for using Cash Point Coach.");
-      state.card=false; state.pinOk=false; setButtons();
-    });
+  function proceed(){ if(!run) return; switch(run.step){
+      case 'menu': {
+        setScreen('Choose an option','Main menu');
+        const buttons = [
+          {id:'m_withdraw', label:'Cash withdrawal', onClick:()=>{ run.step='withdraw_options'; proceed(); }, hint:true},
+          {id:'m_balance', label:'Balance enquiry', onClick:()=>{ run.step='balance_options'; proceed(); }},
+          {id:'m_topup', label:'Mobile top‑up', onClick:()=>{ run.step='topup_network'; proceed(); }},
+          {id:'m_change_pin', label:'Change PIN', onClick:()=>{ run.step='change_pin_new'; setScreen('Enter your new 4‑digit PIN, then press Enter.','New PIN'); if(run.assist!=='assessment'){ speak('Enter your new four digit PIN, then press enter.'); } }}
+        ];
+        showButtons(buttons);
+        if(run.assist!=='assessment'){ speak('Choose an option.'); }
+      } break;
 
-    // boot
-    refreshPills(); setButtons();
-    display().innerHTML = "Welcome. Press Start session to begin.";
-  });
+      case 'withdraw_options': {
+        setScreen('Choose an amount','Cash withdrawal');
+        const quick = [10,20,30,50];
+        const labels = quick.map(q=>({label:`£${q}`, onClick:()=>{ run.pendingAmount=q; run.step='account_choice'; proceed(); }, hint: run.scen.kind==='withdraw' && run.scen.amount===q }));
+        labels.push({label:'Other amount', onClick:()=>{ run.step='amount_entry'; amountBuffer=''; setScreen('Enter amount in multiples of £10, then press Enter.','Enter amount'); if(run.assist!=='assessment'){ speak('Enter amount in multiples of ten pounds, then press enter.'); } }});
+        showButtons(labels);
+      } break;
+
+      case 'account_choice': {
+        setScreen('Select account','Account');
+        showButtons([
+          {label:'Current account', onClick:()=>{ run.accountType='Current account'; run.step='receipt_choice'; proceed(); }, hint:true},
+          {label:'Savings account', onClick:()=>{ run.accountType='Savings account'; run.step='receipt_choice'; proceed(); }}
+        ]);
+      } break;
+
+      case 'receipt_choice': {
+        setScreen('Receipt options','Receipt');
+        showButtons([
+          {label:'Printed receipt', onClick:()=>{ run.receipt='printed'; run.step='confirm_operation'; proceed(); }, hint: run.scen.receipt==='printed' },
+          {label:'No receipt', onClick:()=>{ run.receipt='none'; run.step='confirm_operation'; proceed(); }}
+        ]);
+      } break;
+
+      case 'balance_options': {
+        setScreen('Show balance','Balance enquiry');
+        showButtons([
+          {label:'On‑screen', onClick:()=>{ run.receipt='screen'; run.step='show_balance'; proceed(); }, hint: run.scen.receipt==='screen' },
+          {label:'Printed receipt', onClick:()=>{ run.receipt='printed'; run.step='print_balance'; proceed(); }}
+        ]);
+      } break;
+
+      case 'topup_network': {
+        setScreen('Choose your network','Mobile top‑up');
+        showButtons([
+          {label:'O2', onClick:()=>{ run.network='O2'; run.step='topup_amount'; proceed(); }},
+          {label:'EE', onClick:()=>{ run.network='EE'; run.step='topup_amount'; proceed(); }},
+          {label:'Vodafone', onClick:()=>{ run.network='Vodafone'; run.step='topup_amount'; proceed(); }},
+          {label:'Three', onClick:()=>{ run.network='Three'; run.step='topup_amount'; proceed(); }}
+        ]);
+      } break;
+
+      case 'topup_amount': {
+        setScreen('Choose top‑up amount','Amount');
+        showButtons([
+          {label:'£10', onClick:()=>{ run.pendingAmount=10; run.step='confirm_operation'; proceed(); }, hint: run.scen.kind==='topup' && run.scen.amount===10 },
+          {label:'£20', onClick:()=>{ run.pendingAmount=20; run.step='confirm_operation'; proceed(); }}
+        ]);
+      } break;
+
+      case 'confirm_operation': {
+        let text = '';
+        if(run.scen.kind==='withdraw'){
+        const acct = run.accountType || 'Current account';
+        text = `Withdraw £${run.pendingAmount} from your ${acct}${run.receipt==='printed'?' with printed receipt':''}?`;
+      }
+        else if(run.scen.kind==='balance') text = `Show balance ${run.receipt==='printed'?'on paper':'on screen'}?`;
+        else if(run.scen.kind==='topup') text = `Top‑up ${run.network} for £${run.pendingAmount}?`;
+        else if(run.stepBeforeConfirm==='change_pin') text = 'Confirm PIN change?';
+        setScreen(text,'Confirm');
+        showButtons([
+          {label:'Confirm', onClick:()=>{ run.step = dispenseOrShow(); proceed(); }, hint: true},
+          {label:'Cancel', onClick:()=>{ run.step='menu'; proceed(); }}
+        ]);
+      } break;
+
+      case 'declined_insufficient': {
+        setScreen('Unable to dispense cash — insufficient funds.','Transaction declined');
+        showButtons([
+          {label:'Choose a different amount', onClick:()=>{ run.step='withdraw_options'; proceed(); }, hint:true},
+          {label:'Cancel', onClick:()=>{ run.step='eject_ready'; proceed(); }}
+        ]);
+        if(run.assist!=='assessment'){ speak('Unable to dispense cash. You have insufficient funds for this transaction.'); }
+      } break;
+
+      case 'show_balance': {
+        setScreen('Your balance is £1,234.56','Balance enquiry');
+        if(run.receipt==='screen'){ run.step = 'eject_ready'; }
+      } break;
+
+      case 'print_balance': {
+        setScreen('Printing balance…','Balance enquiry');
+        showReceiptPaper('BALANCE: £1234.56');
+        run.step='collect_receipt';
+      } break;
+
+      case 'collect_cash': {
+        setScreen('Please take your cash.','Dispensed');
+        showCashNotes( run.pendingAmount || 20 );
+      } break;
+
+      case 'collect_receipt': {
+        setScreen('Please take your receipt.','Receipt');
+        showReceiptPaper('RECEIPT');
+      } break;
+
+      case 'eject_ready': {
+        setScreen('Please take your card.','Ejecting card');
+        if(run.assist!=='assessment'){ speak('Please take your card.'); }
+      } break;
+
+      default: break;
+    }
+  }
+
+  function dispenseOrShow(){
+    if(run.scen.kind==='withdraw'){
+      if(run.testCond==='insufficient'){ run.declineReason = 'insufficient_funds'; return 'declined_insufficient'; }
+      return 'collect_cash';
+    }
+    if(run.scen.kind==='balance'){ return run.receipt==='printed' ? 'print_balance' : 'show_balance'; }
+    if(run.scen.kind==='topup'){ return 'eject_ready'; }
+    return 'eject_ready';
+  }
+
+  function showCashNotes(amount){ $cashStack.style.height = Math.min(60, 12 + Math.floor((amount||10)/10)*6) + 'px'; }
+  function showReceiptPaper(text){ $receiptPaper.style.height = '40px'; }
+
+  function finalizeRun(success){
+    stopAllAmbience();
+    const tTotal = Math.round(performance.now() - (run?.startedAt||performance.now()));
+    csvRows.push([
+      new Date().toISOString(), '', run?.scen?.id||'', run?.scen?.title||'', run?.card?.id||'', run?.assist||'', !!success, run?.pinAttempts||0, run?.wrongKeys||0, tTotal, run?.receipt||'none', run?.cashDispensed||0, (run?.notes||[]).join('; ')
+    , run?.declineReason||'']);
+  }
+
+  // proceed transitions triggered from slots and button flows
+  function onReceiptSlot(){ if(!run) return; if(run.step==='collect_receipt'){ $receiptPaper.style.height='0px'; run.step='eject_ready'; proceed(); } }
+
+  // Card insert/eject handled earlier
+  function onCashSlot(){ if(!run) return; if(run.step==='collect_cash'){ $cashStack.style.height='0px'; if(run.receipt==='printed'){ run.step='collect_receipt'; } else { run.step='eject_ready'; } proceed(); } }
+
+  // =============================
+  // CSV
+  // =============================
+  function toCsv(rows){ return rows.map(r=> r.map(v=> `"${String(v).replace(/"/g,'""')}"`).join(',') ).join('\r\n'); }
+  function downloadCsv(e){ if(e) e.preventDefault(); const csv = toCsv(csvRows); const blob = new Blob([csv], {type:'text/csv;charset=utf-8'}); const url = URL.createObjectURL(blob); const a = e?.currentTarget || el('downloadCsv'); a.href = url; a.click(); }
+
+  // =============================
+  // Init
+  // =============================
+  bootstrap();
   </script>
 </body>
 </html>
