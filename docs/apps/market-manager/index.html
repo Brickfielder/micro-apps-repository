@@ -1,347 +1,847 @@
 <!DOCTYPE html>
-<html lang="en-GB">
+<html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Market Manager — Price & Stock Practice</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <!-- Identify the app to the shared frame -->
-  <meta name="app-slug" content="market-manager"/>
-  <!-- Optional overrides for catalog title/desc -->
-  <meta name="app-title" content="Market Manager"/>
-  <meta name="app-desc" content="Adjust prices and stock, respond to demand, and export a session CSV for review."/>
-  <!-- Toggles: 'bold' and/or 'dense' -->
-  <meta name="theme" content="bold"/>
+  <title>Market Manager — Shopping Under Pressure</title>
+  <meta name="description" content="Process customers quickly while handling interruptions and remembering special instructions." />
 
-  <!-- Micro-Apps shared assets (the frame auto-detects /shared or /docs/shared) -->
-  <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3"/>
+  <!-- Micro-Apps hero injection -->
+  <meta name="app-slug" content="market-manager" />
+  <meta name="app-title" content="Market Manager — Shopping Under Pressure" />
+  <meta name="app-desc" content="Working memory, mental arithmetic, and task switching under realistic retail pressure." />
+  <meta name="theme" content="bold" />
+
+  <!-- Shared assets (repo layout) -->
+  <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3" />
   <script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
   <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
 
   <style>
-    /* App-specific styling (kept light; base look from shared theme) */
-    .grid { display:grid; gap:14px; }
-    .cols-2 { grid-template-columns: 1fr 1fr; }
-    @media (max-width: 860px){ .cols-2 { grid-template-columns: 1fr; } }
+    :root{ color-scheme: light; }
 
-    .card{
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: clamp(14px, 1.6vw, 22px);
+    /* Local tweaks (theme.css provides base layout & hero) */
+    body{ margin:0; background:#f7f8fb; color:#1f2937; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+
+    /* Controls bar */
+    .app-controls{
+      display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between;
+      background:#fff; border:1px solid #e5e7eb; border-radius:16px;
+      box-shadow:0 1px 2px rgba(16,24,40,.06), 0 8px 24px rgba(16,24,40,.08);
+      padding:12px 14px; margin-bottom:12px;
     }
-    .row{ display:grid; grid-template-columns: 1fr 110px 110px 110px 110px auto; gap:10px; align-items:center; }
-    .row.header{ font-weight:700; color:#0f172a; }
-    .row + .row{ margin-top:10px; }
-    .pill{ margin:0; }
-    .muted{ color: var(--muted); }
+    .btns{ display:flex; gap:10px; flex-wrap:wrap; }
+    button{
+      appearance:none; border:0; border-radius:12px; padding:10px 14px; font-weight:700; cursor:pointer;
+      background:#ff7a6e; color:#fff; box-shadow:0 6px 14px rgba(0,0,0,.12);
+      transition:transform .06s ease, box-shadow .2s ease;
+    }
+    button:disabled{ opacity:.4; cursor:not-allowed; }
+    button.secondary{ background:#f0f1f6; color:#ff7a6e; box-shadow:none; }
+    button.ghost{ background:transparent; border:2px solid #e5e7eb; color:#1f2937; box-shadow:none; }
+    button:active:not(:disabled){ transform: translateY(1px); }
 
-    .toolbar { justify-content: space-between; }
-    .toolbar .right { display:flex; gap:10px; flex-wrap:wrap; }
+    /* Grid */
+    .grid{ display:grid; grid-template-columns: 1.2fr 0.8fr; gap:16px; }
+    .card{
+      background:#fff; border:1px solid #e5e7eb; border-radius:16px;
+      box-shadow:0 1px 2px rgba(16,24,40,.06), 0 8px 24px rgba(16,24,40,.08);
+      padding:16px;
+    }
+    .card h2{ margin:0 0 8px 0; font-size:18px; }
+    .muted{ color:#6b7280; font-size:14px; }
+    .divider{ height:1px; background:#e5e7eb; margin:12px 0; }
 
-    .totals{ display:flex; gap:16px; flex-wrap:wrap; }
-    .totals .pill{ background:#eef2ff; }
-    @media (prefers-color-scheme: dark){ .totals .pill{ background:#1f2937; } }
+    /* Timer */
+    .flex{ display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+    .timer{ font-size:20px; font-weight:900; letter-spacing:.5px; }
 
-    .note { font-size:.95rem; color:var(--muted); }
-    .wide{ width:100% }
-    .center { text-align:center; }
+    /* Customer queue */
+    .queue{ display:flex; gap:10px; overflow-x:auto; padding:10px 0; }
+    .customer-card{
+      min-width:140px; background:#fafbff; border:2px solid #e5e7eb; border-radius:12px;
+      padding:12px; text-align:center; cursor:pointer; transition:border-color .2s;
+    }
+    .customer-card:hover{ border-color:#ff7a6e; }
+    .customer-card.active{ border-color:#ff7a6e; background:#fff6f5; }
+    .customer-icon{ font-size:32px; margin-bottom:6px; }
+
+    /* Checkout area */
+    .checkout{ background:#fafbff; border:2px dashed #e5e7eb; border-radius:12px; padding:16px; min-height:200px; }
+    .items-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(80px, 1fr)); gap:10px; margin-top:10px; }
+    .item{
+      background:#fff; border:2px solid #e5e7eb; border-radius:10px; padding:8px;
+      text-align:center; cursor:pointer; transition:all .15s;
+    }
+    .item:hover{ border-color:#ff7a6e; transform:translateY(-2px); }
+    .item.scanned{ opacity:.5; border-color:#10b981; background:#ecfdf5; }
+    .item.expired{ border-color:#ef4444; }
+    .item.suspicious{ border-color:#f59e0b; animation:pulse 1s infinite; }
+    @keyframes pulse{ 0%, 100%{ opacity:1; } 50%{ opacity:.7; } }
+    .item-icon{ font-size:24px; }
+    .item-name{ font-size:11px; font-weight:600; margin-top:4px; }
+    .item-price{ font-size:10px; color:#6b7280; }
+    .badge{
+      display:inline-block; padding:2px 6px; border-radius:4px;
+      font-size:10px; font-weight:800; margin-top:4px;
+    }
+    .badge.expired{ background:#fee; color:#991b1b; }
+    .badge.suspicious{ background:#fef3c7; color:#92400e; }
+
+    /* Register display */
+    .register{
+      background:#0f172a; color:#e2e8f0; border-radius:10px; padding:12px;
+      font-family: ui-monospace, monospace; margin-top:12px;
+    }
+    .register-line{ display:flex; justify-content:space-between; padding:4px 0; }
+    .register-total{ border-top:2px solid #334155; padding-top:8px; margin-top:8px; font-size:18px; font-weight:900; }
+
+    /* Actions */
+    .action-btns{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+
+    /* Interruptions */
+    .interrupt{
+      background:#fff6d8; border:2px solid #fbbf24; border-radius:12px;
+      padding:12px; margin-top:12px; animation:fadeIn .3s;
+    }
+    @keyframes fadeIn{ from{ opacity:0; transform:translateY(-10px); } to{ opacity:1; transform:translateY(0); } }
+    .interrupt.manager{ background:#dbeafe; border-color:#3b82f6; }
+    .interrupt.security{ background:#fee; border-color:#ef4444; }
+
+    /* Stats */
+    .statbar{ display:flex; gap:12px; flex-wrap:wrap; }
+    .pill{
+      background:#f0f1f6; border-radius:999px; padding:8px 12px;
+      font-weight:700; font-size:13px;
+    }
+    .pill.good{ background:#e8fbf2; color:#087a4a; }
+    .pill.bad{ background:#ffefef; color:#992f2f; }
+
+    /* Log */
+    .log{
+      max-height:200px; overflow:auto; background:#0f1222; color:#e9ecff;
+      border-radius:12px; padding:10px;
+      font-family: ui-monospace, monospace; font-size:12px;
+    }
+
+    /* Modals */
+    .modal-backdrop{
+      position:fixed; inset:0; background:rgba(20,20,30,.55);
+      display:none; align-items:center; justify-content:center; padding:16px; z-index:10;
+    }
+    .modal{
+      background:white; border-radius:16px;
+      box-shadow:0 8px 24px rgba(0,0,0,.2);
+      max-width:700px; width:min(700px, 96vw); padding:20px;
+    }
+    .modal h3{ margin:0 0 12px 0; }
+
+    /* Instructions */
+    details.app-instructions{ margin: 8px 0 16px; }
+    details.app-instructions > summary{
+      list-style:none; cursor:pointer; font-weight:800; padding:10px 12px; border-radius:10px;
+      background:#f0f1f6; color:#ff7a6e; border:1px solid #e5e7eb;
+    }
+    details.app-instructions[open]{ background:transparent; }
+    details.app-instructions .content{
+      padding:12px; background:#fff; border:1px solid #e5e7eb;
+      border-radius:12px; margin-top:8px;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px){
+      .grid{ grid-template-columns:1fr; }
+    }
   </style>
 </head>
 <body>
-  <div id="app-root">
-    <!-- Toolbar -->
-    <div class="toolbar">
-      <div>
-        <span class="pill">Session: <span id="sessionId"></span></span>
-        <span class="pill">Week <span id="weekNo">1</span></span>
-      </div>
-      <div class="right">
-        <button class="button" id="resetBtn">Reset</button>
-        <a id="downloadCsv" class="button primary" href="#" download="market_manager_session.csv">Download CSV</a>
-      </div>
-    </div>
 
-    <!-- Totals summary -->
-    <div class="card totals">
-      <span class="pill">Cash: £<span id="cash">100.00</span></span>
-      <span class="pill">Revenue (wk): £<span id="revWeek">0.00</span></span>
-      <span class="pill">Profit (wk): £<span id="profitWeek">0.00</span></span>
-      <span class="pill">Customer Satisfaction: <span id="csat">—</span></span>
-    </div>
-
+  <!-- The shared frame injects the page hero above this root -->
+  <main id="app-root">
     <!-- Controls -->
-    <div class="card">
-      <div class="grid cols-2">
-        <div>
-          <label for="demand">Baseline demand (customers / week)</label>
-          <input id="demand" type="range" min="10" max="120" value="60" />
-          <div class="helper">Current: <strong><span id="demandVal">60</span></strong></div>
-        </div>
-        <div>
-          <label for="elasticity">Price elasticity (higher = more sensitive)</label>
-          <input id="elasticity" type="range" min="0" max="200" value="90" />
-          <div class="helper">Current: <strong><span id="elasticityVal">0.90</span></strong></div>
-        </div>
+    <div class="app-controls" role="toolbar">
+      <div class="left">
+        <span class="pill">Prototype</span>
       </div>
-      <p class="note">Tip: Run one week at a time. Adjust price/stock per item; demand shifts with price and random events.</p>
-      <div class="center">
-        <button class="button primary" id="runWeekBtn">Run one week</button>
+      <div class="btns">
+        <button id="startBtn">Start shift</button>
+        <button id="downloadBtn" class="secondary">Download CSV</button>
+        <button id="difficultyBtn" class="ghost">Difficulty</button>
+        <button id="helpBtn" class="ghost">How to play</button>
       </div>
     </div>
 
-    <!-- Products table -->
-    <div class="card">
-      <div class="row header">
-        <div>Item</div>
-        <div>Price (£)</div>
-        <div>Cost (£)</div>
-        <div>Stock</div>
-        <div>Restock</div>
-        <div>Actions</div>
+    <!-- Instructions -->
+    <details class="app-instructions">
+      <summary>How to play (quick)</summary>
+      <div class="content">
+        <ol>
+          <li><strong>Start shift</strong> to begin serving customers.</li>
+          <li>Click a customer from the queue to serve them.</li>
+          <li>Scan items by clicking them (watch for expired/suspicious items!).</li>
+          <li>Click <strong>Complete sale</strong> when done scanning.</li>
+          <li>Handle interruptions: answer manager questions, flag security alerts.</li>
+          <li>Work quickly and accurately — difficulty adapts based on performance!</li>
+        </ol>
       </div>
-      <div id="rows"></div>
-      <hr style="margin:16px 0; border-color:var(--line)"/>
-      <div class="grid cols-2">
+    </details>
+
+    <!-- Main grid -->
+    <section class="grid">
+      <!-- LEFT: Checkout -->
+      <div class="card">
+        <div class="flex">
+          <h2>Checkout Station</h2>
+          <div class="timer" id="timer">03:00</div>
+        </div>
+        <p class="muted">Scan items, process payments, handle interruptions.</p>
+
+        <div class="divider"></div>
+
         <div>
-          <label for="newName">Add new item</label>
-          <input id="newName" type="text" placeholder="e.g. Apples"/>
+          <strong>Customer Queue</strong>
+          <div class="queue" id="queue"></div>
         </div>
-        <div class="grid" style="grid-template-columns: repeat(4, 1fr); gap:10px;">
-          <input id="newPrice" type="number" step="0.05" placeholder="Price"/>
-          <input id="newCost"  type="number" step="0.05" placeholder="Cost"/>
-          <input id="newStock" type="number" step="1" placeholder="Stock"/>
-          <button id="addItemBtn" class="button">Add</button>
+
+        <div class="divider"></div>
+
+        <div class="checkout">
+          <div id="customerInfo" class="muted">Select a customer to begin checkout...</div>
+          <div id="itemsGrid" class="items-grid"></div>
+
+          <div class="register" id="register" style="display:none;">
+            <div id="registerItems"></div>
+            <div class="register-total">
+              TOTAL: $<span id="registerTotal">0.00</span>
+            </div>
+          </div>
+
+          <div class="action-btns">
+            <button id="completeSaleBtn" class="secondary" disabled>Complete sale</button>
+            <button id="flagSecurityBtn" class="ghost" disabled>🚨 Flag security issue</button>
+          </div>
         </div>
+
+        <!-- Interruptions appear here -->
+        <div id="interruptBox"></div>
+      </div>
+
+      <!-- RIGHT: Stats & Log -->
+      <div class="card">
+        <h2>Shift Status</h2>
+        <div id="briefingBox" class="muted" style="background:#fff6d8; padding:10px; border-radius:8px;">
+          <strong>Welcome!</strong> Click <em>Start shift</em> to begin your shift at the checkout.
+        </div>
+
+        <div class="divider"></div>
+        <div id="statsPills" class="statbar"></div>
+
+        <div class="divider"></div>
+        <div id="log" class="log"></div>
+      </div>
+    </section>
+
+    <!-- Clinician notes (left in place; shared script will skip if present) -->
+    <section id="clinician-notes">
+      <label for="clinician-comment" style="display:block;font-weight:600;margin-bottom:8px;">
+        Clinician comments (optional)
+      </label>
+      <textarea id="clinician-comment" rows="4"
+        placeholder="Enter any notes relevant to this session..."
+        data-csv-key="clinician_comment"></textarea>
+      <p style="margin:8px 0 0; color:#6b7280; font-size:0.9rem;">
+        This note will be added as <code>clinician_comment</code> in the exported CSV.
+      </p>
+    </section>
+  </main>
+
+  <!-- Help Modal -->
+  <div id="helpBackdrop" class="modal-backdrop" role="dialog">
+    <div class="modal">
+      <h3>How to play</h3>
+      <ol>
+        <li><strong>Start shift</strong> to begin. You have 3 minutes.</li>
+        <li>Click a customer from the queue to serve them.</li>
+        <li>Click items to scan them (prices appear briefly).</li>
+        <li>Watch for <span style="color:#ef4444">expired items</span> (don't scan!) and <span style="color:#f59e0b">suspicious customers</span> (flag them).</li>
+        <li>Click <strong>Complete sale</strong> when finished scanning.</li>
+        <li>Handle interruptions: manager questions require memory, security alerts need quick action.</li>
+        <li>Scoring tracks accuracy, speed, and memory performance.</li>
+      </ol>
+      <div class="btns" style="justify-content:flex-end; margin-top:16px;">
+        <button id="closeHelpBtn">Close</button>
       </div>
     </div>
+  </div>
 
-    <!-- Session log (compact) -->
-    <div class="card">
-      <label>Weekly log</label>
-      <textarea id="log" rows="6" readonly class="wide" style="resize:vertical"></textarea>
-      <p class="helper">CSV export includes each week’s metrics + any clinician note you add below.</p>
+  <!-- Difficulty Modal -->
+  <div id="difficultyBackdrop" class="modal-backdrop" role="dialog">
+    <div class="modal">
+      <h3>Difficulty Settings</h3>
+      <p class="muted">Changes apply to the next shift. Lock to prevent auto-adaptation.</p>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px;">
+        <div style="background:#f9fafb; padding:12px; border-radius:8px;">
+          <label for="itemsPerCustomer">Items per customer</label>
+          <input id="itemsPerCustomer" type="range" min="3" max="8" step="1" style="width:100%"/>
+          <output id="itemsPerCustomerOut">4</output>
+        </div>
+        <div style="background:#f9fafb; padding:12px; border-radius:8px;">
+          <label for="customerInterval">Customer interval (s)</label>
+          <input id="customerInterval" type="range" min="15" max="45" step="5" style="width:100%"/>
+          <output id="customerIntervalOut">25</output>
+        </div>
+        <div style="background:#f9fafb; padding:12px; border-radius:8px;">
+          <label for="expiredRate">Expired item rate</label>
+          <input id="expiredRate" type="range" min="0" max="0.3" step="0.05" style="width:100%"/>
+          <output id="expiredRateOut">0.10</output>
+        </div>
+        <div style="background:#f9fafb; padding:12px; border-radius:8px;">
+          <label for="suspiciousRate">Suspicious customer rate</label>
+          <input id="suspiciousRate" type="range" min="0" max="0.4" step="0.05" style="width:100%"/>
+          <output id="suspiciousRateOut">0.15</output>
+        </div>
+        <div style="background:#f9fafb; padding:12px; border-radius:8px;">
+          <label for="interruptRate">Interruption frequency</label>
+          <input id="interruptRate" type="range" min="0.05" max="0.35" step="0.05" style="width:100%"/>
+          <output id="interruptRateOut">0.15</output>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div style="display:flex; gap:12px; align-items:center;">
+        <label style="flex:1;">
+          <input id="lockAdapt" type="checkbox"/> Lock difficulty (disable auto-adapt)
+        </label>
+        <div class="btns">
+          <button id="saveDiffBtn">Save</button>
+          <button id="resetDiffBtn" class="ghost">Reset</button>
+          <button id="closeDiffBtn" class="ghost">Close</button>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
-    // ---------- Model ----------
-    const fmt = n => (Math.round(Number(n) * 100) / 100).toFixed(2);
-    const state = {
-      week: 1,
-      cash: 100,
-      demand: 60,
-      elasticity: 0.9,
-      items: [
-        { id: 'apples',  name:'Apples',  price: 0.80, cost: 0.40, stock: 40, restock: 20 },
-        { id: 'bananas', name:'Bananas', price: 0.70, cost: 0.35, stock: 36, restock: 18 },
-        { id: 'bread',   name:'Bread',   price: 1.20, cost: 0.70, stock: 20, restock: 10 },
-        { id: 'milk',    name:'Milk',    price: 1.00, cost: 0.60, stock: 24, restock: 12 },
-      ],
-      logs: [],
-      sessionId: Math.random().toString(36).slice(2, 8).toUpperCase()
+  // ====== Configuration ======
+  const SHIFT_SECONDS = 180;
+  const DEFAULTS = {
+    itemsPerCustomer: 4,
+    customerInterval: 25,
+    expiredRate: 0.10,
+    suspiciousRate: 0.15,
+    interruptRate: 0.15,
+    lockAdapt: false
+  };
+
+  let difficulty = Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem("marketManagerDifficulty")||"{}"));
+
+  // ====== State ======
+  let shift = null;
+  let stats = null;
+  let csvRows = [];
+  let timers = [];
+  let customerQueue = [];
+  let currentCustomer = null;
+  let scannedItems = [];
+  let totalPrice = 0;
+  let customerIdCounter = 0;
+  let activeInterrupt = null;
+  let memoryTracking = { milkCount: 0, breadCount: 0 };
+
+  // ====== DOM ======
+  const el = id => document.getElementById(id);
+  const $start = el("startBtn"), $download = el("downloadBtn");
+  const $help = el("helpBtn"), $difficultyBtn = el("difficultyBtn");
+  const $timer = el("timer"), $queue = el("queue");
+  const $customerInfo = el("customerInfo"), $itemsGrid = el("itemsGrid");
+  const $register = el("register"), $registerItems = el("registerItems"), $registerTotal = el("registerTotal");
+  const $completeSale = el("completeSaleBtn"), $flagSecurity = el("flagSecurityBtn");
+  const $interruptBox = el("interruptBox");
+  const $briefing = el("briefingBox"), $statsPills = el("statsPills");
+  const logEl = el("log");
+
+  // ====== Items database ======
+  const ITEMS = [
+    { name: "Milk", icon: "🥛", basePrice: 3.49 },
+    { name: "Bread", icon: "🍞", basePrice: 2.99 },
+    { name: "Eggs", icon: "🥚", basePrice: 4.29 },
+    { name: "Cheese", icon: "🧀", basePrice: 5.99 },
+    { name: "Apple", icon: "🍎", basePrice: 1.29 },
+    { name: "Banana", icon: "🍌", basePrice: 0.89 },
+    { name: "Cereal", icon: "🥣", basePrice: 4.49 },
+    { name: "Coffee", icon: "☕", basePrice: 8.99 },
+    { name: "Juice", icon: "🧃", basePrice: 3.79 },
+    { name: "Pasta", icon: "🍝", basePrice: 2.49 },
+    { name: "Chips", icon: "🥔", basePrice: 3.99 },
+    { name: "Soda", icon: "🥤", basePrice: 1.99 },
+  ];
+
+  // ====== Utilities ======
+  const rnd = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+  const fmt = s => { const m = Math.floor(s/60), r = s%60; return (m<10?"0"+m:m)+":"+(r<10?"0"+r:r); };
+  const clearTimers = () => { timers.forEach(clearInterval); timers = []; };
+
+  function log(msg) {
+    const t = shift ? fmt(shift.elapsed) : "00:00";
+    const line = `[${t}] ${msg}`;
+    logEl.textContent += (logEl.textContent ? "\n" : "") + line;
+    logEl.scrollTop = logEl.scrollHeight;
+    csvRows.push([Date.now(), t, msg]);
+  }
+
+  function setStatsPills() {
+    $statsPills.innerHTML = "";
+    const mk = (label, val, mod) => {
+      const s = document.createElement("div");
+      s.className = "pill" + (mod ? " " + mod : "");
+      s.textContent = `${label}: ${val}`;
+      $statsPills.appendChild(s);
     };
+    if (!stats) return;
+    mk("Customers", stats.customersServed);
+    mk("Scan accuracy", `${stats.scanCorrect}/${stats.scanCorrect + stats.scanErrors}`, stats.scanErrors === 0 ? "good" : "");
+    mk("Sales complete", stats.salesComplete, "good");
+    mk("Memory recalls", `${stats.memoryCorrect}/${stats.memoryCorrect + stats.memoryErrors}`, stats.memoryErrors === 0 ? "good" : "");
+    mk("Security flags", stats.securityCorrect, "good");
+  }
 
-    // ---------- UI refs ----------
-    const el = id => document.getElementById(id);
-    const rows = el('rows');
-    el('sessionId').textContent = state.sessionId;
+  function updateTimerUI() {
+    if (!shift) return;
+    const remaining = Math.max(0, SHIFT_SECONDS - shift.elapsed);
+    $timer.textContent = fmt(remaining);
+    if (remaining <= 0) endShift();
+  }
 
-    // ---------- Render product rows ----------
-    function renderRows(){
-      rows.innerHTML = '';
-      state.items.forEach((it, idx) => {
-        const row = document.createElement('div');
-        row.className = 'row';
-        row.innerHTML = `
-          <div><strong>${it.name}</strong><div class="muted">On hand: <span id="${it.id}-onhand">${it.stock}</span></div></div>
-          <input id="${it.id}-price" type="number" step="0.05" value="${fmt(it.price)}"/>
-          <input id="${it.id}-cost"  type="number" step="0.05" value="${fmt(it.cost)}"/>
-          <input id="${it.id}-stock" type="number" step="1" value="${it.stock}"/>
-          <input id="${it.id}-restock" type="number" step="1" value="${it.restock}"/>
-          <div style="display:flex; gap:8px;">
-            <button class="button" data-act="apply" data-id="${it.id}">Apply</button>
-            <button class="button" data-act="remove" data-id="${it.id}">Remove</button>
-          </div>
-        `;
-        rows.appendChild(row);
+  // ====== Customer generation ======
+  function generateCustomer() {
+    const id = ++customerIdCounter;
+    const itemCount = Math.max(3, Math.min(8, difficulty.itemsPerCustomer + rnd(-1, 1)));
+    const items = [];
+    const suspicious = Math.random() < difficulty.suspiciousRate;
+
+    for (let i = 0; i < itemCount; i++) {
+      const itemData = ITEMS[rnd(0, ITEMS.length - 1)];
+      const price = itemData.basePrice + (Math.random() * 0.4 - 0.2);
+      const expired = Math.random() < difficulty.expiredRate;
+      items.push({
+        ...itemData,
+        price: Math.round(price * 100) / 100,
+        expired,
+        scanned: false
       });
     }
 
-    function syncControls(){
-      el('weekNo').textContent = state.week;
-      el('cash').textContent = fmt(state.cash);
-      el('demand').value = state.demand;
-      el('demandVal').textContent = state.demand;
-      el('elasticity').value = Math.round(state.elasticity * 100);
-      el('elasticityVal').textContent = state.elasticity.toFixed(2);
+    return { id, items, suspicious, startTime: Date.now() };
+  }
+
+  function addCustomerToQueue() {
+    if (!shift) return;
+    const customer = generateCustomer();
+    customerQueue.push(customer);
+    renderQueue();
+    log(`Customer #${customer.id} joined queue (${customer.items.length} items${customer.suspicious ? ', SUSPICIOUS' : ''})`);
+  }
+
+  function renderQueue() {
+    $queue.innerHTML = "";
+    customerQueue.forEach(c => {
+      const card = document.createElement("div");
+      card.className = "customer-card" + (currentCustomer?.id === c.id ? " active" : "");
+      card.innerHTML = `
+        <div class="customer-icon">${c.suspicious ? "🕵️" : "🧑"}</div>
+        <div style="font-weight:700; font-size:12px;">Customer #${c.id}</div>
+        <div style="font-size:11px; color:#6b7280;">${c.items.length} items</div>
+      `;
+      card.onclick = () => selectCustomer(c);
+      $queue.appendChild(card);
+    });
+  }
+
+  // ====== Checkout process ======
+  function selectCustomer(customer) {
+    if (currentCustomer) {
+      log("Complete current customer first!");
+      return;
     }
 
-    // ---------- Interactions ----------
-    rows.addEventListener('click', (ev)=>{
-      const btn = ev.target.closest('button[data-act]');
-      if(!btn) return;
-      const id = btn.getAttribute('data-id');
-      const it = state.items.find(x=>x.id === id);
-      if(!it) return;
+    currentCustomer = customer;
+    scannedItems = [];
+    totalPrice = 0;
 
-      if(btn.dataset.act === 'apply'){
-        it.price   = parseFloat(el(`${id}-price`).value || it.price);
-        it.cost    = parseFloat(el(`${id}-cost`).value  || it.cost);
-        it.stock   = Math.max(0, Math.round(parseFloat(el(`${id}-stock`).value || it.stock)));
-        it.restock = Math.max(0, Math.round(parseFloat(el(`${id}-restock`).value || it.restock)));
-        el(`${id}-onhand`).textContent = it.stock;
-      } else if(btn.dataset.act === 'remove'){
-        state.items = state.items.filter(x=>x.id !== id);
-        renderRows();
-      }
+    $customerInfo.innerHTML = `<strong>Serving Customer #${customer.id}</strong> ${customer.suspicious ? '🕵️ <span style="color:#f59e0b;">SUSPICIOUS</span>' : ''}`;
+    $itemsGrid.innerHTML = "";
+    $register.style.display = "block";
+    $registerItems.innerHTML = "";
+    $registerTotal.textContent = "0.00";
+    $completeSale.disabled = true;
+    $flagSecurity.disabled = !customer.suspicious;
+
+    customer.items.forEach((item, idx) => {
+      const itemDiv = document.createElement("div");
+      itemDiv.className = "item" + (item.expired ? " expired" : "") + (customer.suspicious ? " suspicious" : "");
+      itemDiv.innerHTML = `
+        <div class="item-icon">${item.icon}</div>
+        <div class="item-name">${item.name}</div>
+        <div class="item-price" style="${item.scanned ? 'opacity:0.3' : ''}">$${item.price.toFixed(2)}</div>
+        ${item.expired ? '<div class="badge expired">EXPIRED</div>' : ''}
+      `;
+      itemDiv.onclick = () => scanItem(item, idx, itemDiv);
+      $itemsGrid.appendChild(itemDiv);
     });
 
-    el('addItemBtn').addEventListener('click', ()=>{
-      const name  = (el('newName').value || '').trim();
-      const price = parseFloat(el('newPrice').value || '1');
-      const cost  = parseFloat(el('newCost').value  || '0.5');
-      const stock = Math.max(0, Math.round(parseFloat(el('newStock').value || '10')));
-      if(!name) return;
-      const id = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
-      state.items.push({ id, name, price, cost, stock, restock: Math.max(0, Math.round(stock/2)) });
-      el('newName').value=''; el('newPrice').value=''; el('newCost').value=''; el('newStock').value='';
-      renderRows();
-    });
+    renderQueue();
+    log(`Started serving Customer #${customer.id}`);
+  }
 
-    el('demand').addEventListener('input', e=>{
-      state.demand = parseInt(e.target.value,10);
-      el('demandVal').textContent = state.demand;
-    });
-    el('elasticity').addEventListener('input', e=>{
-      state.elasticity = parseInt(e.target.value,10) / 100;
-      el('elasticityVal').textContent = state.elasticity.toFixed(2);
-    });
+  function scanItem(item, idx, itemDiv) {
+    if (item.scanned) return;
 
-    el('resetBtn').addEventListener('click', ()=>{
-      state.week = 1; state.cash = 100; state.logs.length = 0;
-      state.demand = 60; state.elasticity = 0.9;
-      state.items = [
-        { id: 'apples',  name:'Apples',  price: 0.80, cost: 0.40, stock: 40, restock: 20 },
-        { id: 'bananas', name:'Bananas', price: 0.70, cost: 0.35, stock: 36, restock: 18 },
-        { id: 'bread',   name:'Bread',   price: 1.20, cost: 0.70, stock: 20, restock: 10 },
-        { id: 'milk',    name:'Milk',    price: 1.00, cost: 0.60, stock: 24, restock: 12 },
-      ];
-      renderRows(); syncControls(); updateWeekSummary(0,0,0,'Reset');
-      el('log').value = '';
-    });
-
-    // ---------- Simulation ----------
-    function randn(){ // ~N(0,1) via Box-Muller
-      let u=0,v=0; while(u===0) u=Math.random(); while(v===0) v=Math.random();
-      return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+    if (item.expired) {
+      stats.scanErrors++;
+      log(`ERROR: Scanned EXPIRED ${item.name}!`);
+      setStatsPills();
+      return;
     }
 
-    function simulateWeek(){
-      // Demand shock (events/weather/etc.)
-      const shock = 1 + (randn() * 0.15);
-      const baseCustomers = Math.max(0, Math.round(state.demand * shock));
+    item.scanned = true;
+    scannedItems.push(item);
+    totalPrice += item.price;
+    itemDiv.classList.add("scanned");
+    stats.scanCorrect++;
 
-      // Price “index” (simple mean of item prices / costs ratio)
-      const meanMarkup = state.items.length
-        ? state.items.reduce((a,it)=>a + (it.price/Math.max(0.01,it.cost)),0)/state.items.length
-        : 1.5;
+    // Track for memory questions
+    if (item.name === "Milk") memoryTracking.milkCount++;
+    if (item.name === "Bread") memoryTracking.breadCount++;
 
-      // Price sensitivity factor (elasticity)
-      const priceFactor = Math.max(0.2, 2.0 - (state.elasticity * (meanMarkup - 1)));
-      const customers = Math.max(0, Math.round(baseCustomers * priceFactor));
+    const line = document.createElement("div");
+    line.className = "register-line";
+    line.innerHTML = `<span>${item.name}</span><span>$${item.price.toFixed(2)}</span>`;
+    $registerItems.appendChild(line);
+    $registerTotal.textContent = totalPrice.toFixed(2);
 
-      // Allocate baskets to items (biased to lower price vs cost)
-      let revenue = 0, cogs = 0, soldTotal = 0, stockouts = 0;
-      const mix = [...state.items];
-      mix.sort((a,b)=> (a.price/a.cost) - (b.price/b.cost)); // cheaper (relative) sells earlier
+    log(`Scanned ${item.name} ($${item.price.toFixed(2)})`);
+    setStatsPills();
 
-      let buyers = customers;
-      for(const it of mix){
-        if(buyers <= 0) break;
-        const desire = Math.max(0, Math.round(buyers * (1 / mix.length) * (1.3 - (it.price/Math.max(0.01,it.cost))*0.15)));
-        const canSell = Math.min(it.stock, desire);
-        it.stock -= canSell;
-        revenue += canSell * it.price;
-        cogs    += canSell * it.cost;
-        soldTotal += canSell;
-        buyers -= Math.round(desire * 0.9); // many buy once
-        if(canSell < desire) stockouts++;
-      }
+    // Check if all non-expired items scanned
+    const allScanned = currentCustomer.items.filter(i => !i.expired).every(i => i.scanned);
+    $completeSale.disabled = !allScanned;
+  }
 
-      // Restock using “restock” targets if we can afford it
-      let restockSpend = 0, unitsRestocked = 0;
-      for(const it of state.items){
-        const want = Math.max(0, it.restock);
-        if(want <= 0) continue;
-        const spend = want * it.cost;
-        if(spend <= state.cash){
-          it.stock += want; restockSpend += spend; unitsRestocked += want; state.cash -= spend;
-        }
-      }
+  $completeSale.addEventListener("click", () => {
+    if (!currentCustomer) return;
 
-      const profit = revenue - cogs;
-      state.cash += revenue;
+    const timeSpent = (Date.now() - currentCustomer.startTime) / 1000;
+    stats.customersServed++;
+    stats.salesComplete++;
 
-      // Proxy “satisfaction”: fewer stockouts & reasonable markup
-      const csat = Math.max(0, 100 - (stockouts*8) - Math.max(0, (meanMarkup-1.7)*25));
-      return { customers, revenue, cogs, profit, soldTotal, stockouts, restockSpend, unitsRestocked, csat: Math.round(csat) };
+    if (currentCustomer.suspicious && !currentCustomer.flagged) {
+      stats.scanErrors++;
+      log(`WARNING: Failed to flag suspicious Customer #${currentCustomer.id}!`);
     }
 
-    function updateWeekSummary(rev, prof, csat, label){
-      el('revWeek').textContent = fmt(rev);
-      el('profitWeek').textContent = fmt(prof);
-      el('csat').textContent = (csat===0 && label==='Reset') ? '—' : (csat + '/100');
+    log(`Completed sale for Customer #${currentCustomer.id} (${timeSpent.toFixed(1)}s, $${totalPrice.toFixed(2)})`);
+
+    customerQueue = customerQueue.filter(c => c.id !== currentCustomer.id);
+    currentCustomer = null;
+    scannedItems = [];
+    totalPrice = 0;
+
+    $customerInfo.innerHTML = "Select next customer...";
+    $itemsGrid.innerHTML = "";
+    $register.style.display = "none";
+    $completeSale.disabled = true;
+    $flagSecurity.disabled = true;
+
+    renderQueue();
+    setStatsPills();
+  });
+
+  $flagSecurity.addEventListener("click", () => {
+    if (!currentCustomer || !currentCustomer.suspicious) return;
+
+    currentCustomer.flagged = true;
+    stats.securityCorrect++;
+    log(`✓ Flagged suspicious Customer #${currentCustomer.id}`);
+    $flagSecurity.disabled = true;
+    setStatsPills();
+  });
+
+  // ====== Interruptions ======
+  function maybeCreateInterrupt() {
+    if (!shift || activeInterrupt) return;
+    if (Math.random() > difficulty.interruptRate) return;
+
+    const type = Math.random() < 0.6 ? "manager" : "security";
+
+    if (type === "manager") {
+      createManagerQuestion();
+    } else {
+      createSecurityAlert();
+    }
+  }
+
+  function createManagerQuestion() {
+    const questions = [
+      { q: "How many customers have bought MILK so far?", answer: memoryTracking.milkCount },
+      { q: "How many customers have bought BREAD so far?", answer: memoryTracking.breadCount },
+    ];
+    const selected = questions[rnd(0, questions.length - 1)];
+
+    activeInterrupt = { type: "manager", ...selected };
+
+    const div = document.createElement("div");
+    div.className = "interrupt manager";
+    div.innerHTML = `
+      <strong>📞 Manager calling:</strong>
+      <p style="margin:8px 0;">"${selected.q}"</p>
+      <div style="display:flex; gap:8px;">
+        <input type="number" id="managerAnswer" min="0" style="width:80px; padding:6px;" />
+        <button onclick="answerManager()" class="secondary">Submit</button>
+        <button onclick="dismissInterrupt()" class="ghost">Ignore</button>
+      </div>
+    `;
+    $interruptBox.innerHTML = "";
+    $interruptBox.appendChild(div);
+    log("Manager is calling with a question!");
+  }
+
+  function createSecurityAlert() {
+    const item = ITEMS[rnd(0, ITEMS.length - 1)];
+    activeInterrupt = { type: "security", item: item.name };
+
+    const div = document.createElement("div");
+    div.className = "interrupt security";
+    div.innerHTML = `
+      <strong>🚨 Security Alert:</strong>
+      <p style="margin:8px 0;">"Watch for customers with <strong>${item.name}</strong> - flag if you see it!"</p>
+      <button onclick="dismissInterrupt()" class="secondary">Acknowledged</button>
+    `;
+    $interruptBox.innerHTML = "";
+    $interruptBox.appendChild(div);
+    log(`Security alert: Watch for ${item.name}`);
+  }
+
+  window.answerManager = function() {
+    if (!activeInterrupt || activeInterrupt.type !== "manager") return;
+
+    const input = document.getElementById("managerAnswer");
+    const answer = parseInt(input.value) || 0;
+
+    if (answer === activeInterrupt.answer) {
+      stats.memoryCorrect++;
+      log(`✓ Correct answer to manager: ${answer}`);
+    } else {
+      stats.memoryErrors++;
+      log(`✗ Wrong answer to manager: ${answer} (correct: ${activeInterrupt.answer})`);
     }
 
-    el('runWeekBtn').addEventListener('click', ()=>{
-      const res = simulateWeek();
-      state.week++;
-      syncControls();
-      updateWeekSummary(res.revenue, res.profit, res.csat);
+    dismissInterrupt();
+    setStatsPills();
+  };
 
-      const line = [
-        new Date().toISOString(),
-        state.sessionId,
-        state.week-1,
-        state.demand,
-        state.elasticity.toFixed(2),
-        res.customers,
-        res.soldTotal,
-        res.stockouts,
-        res.revenue.toFixed(2),
-        res.cogs.toFixed(2),
-        res.profit.toFixed(2),
-        res.restockSpend.toFixed(2),
-        res.unitsRestocked,
-        res.csat
-      ].join(',');
+  window.dismissInterrupt = function() {
+    activeInterrupt = null;
+    $interruptBox.innerHTML = "";
+  };
 
-      if(state.logs.length === 0){
-        state.logs.push('timestamp,session_id,week,demand,elasticity,customers,sold,stockouts,revenue,cogs,profit,restock_spend,units_restocked,csat');
-      }
-      state.logs.push(line);
-      el('log').value = state.logs.join('\n');
+  // ====== Shift control ======
+  function startShift() {
+    shift = { startedAt: Date.now(), elapsed: 0 };
+    stats = {
+      customersServed: 0,
+      scanCorrect: 0,
+      scanErrors: 0,
+      salesComplete: 0,
+      memoryCorrect: 0,
+      memoryErrors: 0,
+      securityCorrect: 0
+    };
+    csvRows = [["epoch", "clock", "event"]];
+    customerQueue = [];
+    currentCustomer = null;
+    customerIdCounter = 0;
+    memoryTracking = { milkCount: 0, breadCount: 0 };
+    activeInterrupt = null;
+
+    $start.disabled = true;
+    $briefing.innerHTML = "<strong>Shift active!</strong> Serve customers quickly and accurately.";
+    $customerInfo.innerHTML = "Waiting for customers...";
+    $itemsGrid.innerHTML = "";
+    $register.style.display = "none";
+    $interruptBox.innerHTML = "";
+    logEl.textContent = "";
+
+    log("Shift started");
+    setStatsPills();
+    updateTimerUI();
+
+    // Add first customer immediately
+    setTimeout(() => addCustomerToQueue(), 2000);
+
+    // Timer tick
+    timers.push(setInterval(() => {
+      shift.elapsed = Math.min(SHIFT_SECONDS, Math.floor((Date.now() - shift.startedAt) / 1000));
+      updateTimerUI();
+    }, 1000));
+
+    // Customer spawner
+    timers.push(setInterval(() => {
+      if (customerQueue.length < 5) addCustomerToQueue();
+    }, difficulty.customerInterval * 1000));
+
+    // Interrupt spawner
+    timers.push(setInterval(maybeCreateInterrupt, 20000));
+  }
+
+  function endShift() {
+    clearTimers();
+    $start.disabled = false;
+    $timer.textContent = "00:00";
+
+    log("Shift ended");
+    $briefing.innerHTML = "<strong>Shift complete!</strong> Review your performance above.";
+
+    if (!difficulty.lockAdapt) {
+      adaptDifficulty();
+    } else {
+      log("Difficulty locked: auto-adaptation disabled");
+    }
+
+    persistDifficulty();
+    setStatsPills();
+  }
+
+  function adaptDifficulty() {
+    const accuracy = stats.scanCorrect / Math.max(1, stats.scanCorrect + stats.scanErrors);
+    const memoryAccuracy = stats.memoryCorrect / Math.max(1, stats.memoryCorrect + stats.memoryErrors);
+    const avgScore = (accuracy + memoryAccuracy) / 2;
+
+    if (avgScore >= 0.85 && stats.customersServed >= 5) {
+      // Increase difficulty
+      difficulty.itemsPerCustomer = Math.min(8, difficulty.itemsPerCustomer + 1);
+      difficulty.customerInterval = Math.max(15, difficulty.customerInterval - 3);
+      difficulty.expiredRate = Math.min(0.3, difficulty.expiredRate + 0.05);
+      difficulty.suspiciousRate = Math.min(0.4, difficulty.suspiciousRate + 0.05);
+      difficulty.interruptRate = Math.min(0.35, difficulty.interruptRate + 0.05);
+      log("Performance excellent - difficulty increased");
+    } else if (avgScore < 0.6 || stats.customersServed < 3) {
+      // Decrease difficulty
+      difficulty.itemsPerCustomer = Math.max(3, difficulty.itemsPerCustomer - 1);
+      difficulty.customerInterval = Math.min(45, difficulty.customerInterval + 3);
+      difficulty.expiredRate = Math.max(0, difficulty.expiredRate - 0.05);
+      difficulty.suspiciousRate = Math.max(0, difficulty.suspiciousRate - 0.05);
+      difficulty.interruptRate = Math.max(0.05, difficulty.interruptRate - 0.05);
+      log("Difficulty eased to support learning");
+    } else {
+      log("Difficulty unchanged");
+    }
+  }
+
+  function persistDifficulty() {
+    localStorage.setItem("marketManagerDifficulty", JSON.stringify(difficulty));
+  }
+
+  // ====== CSV Download ======
+  function getClinicianComment() {
+    const ta = document.getElementById("clinician-comment");
+    return ta ? ta.value : "";
+  }
+
+  $download.addEventListener("click", () => {
+    const note = getClinicianComment();
+    if (note) {
+      csvRows.push([Date.now(), fmt(shift ? shift.elapsed : 0), "clinician_comment: " + note]);
+    }
+
+    const csv = csvRows
+      .map(r => r.map(x => '"' + String(x).replaceAll('"', '""') + '"').join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "market_manager_log.csv";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+
+  // ====== Modals ======
+  document.getElementById("startBtn").addEventListener("click", startShift);
+
+  document.getElementById("helpBtn").addEventListener("click", () => {
+    document.getElementById("helpBackdrop").style.display = "flex";
+  });
+  document.getElementById("closeHelpBtn").addEventListener("click", () => {
+    document.getElementById("helpBackdrop").style.display = "none";
+  });
+
+  document.getElementById("difficultyBtn").addEventListener("click", () => {
+    hydrateDiffUI();
+    document.getElementById("difficultyBackdrop").style.display = "flex";
+  });
+  document.getElementById("closeDiffBtn").addEventListener("click", () => {
+    document.getElementById("difficultyBackdrop").style.display = "none";
+  });
+
+  // ====== Difficulty panel ======
+  function hydrateDiffUI() {
+    document.getElementById("itemsPerCustomer").value = difficulty.itemsPerCustomer;
+    document.getElementById("itemsPerCustomerOut").textContent = difficulty.itemsPerCustomer;
+    document.getElementById("customerInterval").value = difficulty.customerInterval;
+    document.getElementById("customerIntervalOut").textContent = difficulty.customerInterval;
+    document.getElementById("expiredRate").value = difficulty.expiredRate;
+    document.getElementById("expiredRateOut").textContent = difficulty.expiredRate.toFixed(2);
+    document.getElementById("suspiciousRate").value = difficulty.suspiciousRate;
+    document.getElementById("suspiciousRateOut").textContent = difficulty.suspiciousRate.toFixed(2);
+    document.getElementById("interruptRate").value = difficulty.interruptRate;
+    document.getElementById("interruptRateOut").textContent = difficulty.interruptRate.toFixed(2);
+    document.getElementById("lockAdapt").checked = !!difficulty.lockAdapt;
+  }
+
+  function attachRange(range, out, transform = v => v) {
+    range.addEventListener("input", () => {
+      out.textContent = transform(Number(range.value));
     });
+  }
 
-    // ---------- Download CSV (clinician_feedback.js will append clinician_comment) ----------
-    el('downloadCsv').addEventListener('click', (e)=>{
-      e.preventDefault();
-      if(state.logs.length === 0){
-        alert('No session data yet. Run at least one week.');
-        return;
-      }
-      const csv = state.logs.join('\n');
-      const href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-      const a = e.currentTarget;
-      a.setAttribute('href', href);
-      a.click(); // clinician_feedback.js augments and re-triggers
-    });
+  attachRange(document.getElementById("itemsPerCustomer"), document.getElementById("itemsPerCustomerOut"));
+  attachRange(document.getElementById("customerInterval"), document.getElementById("customerIntervalOut"));
+  attachRange(document.getElementById("expiredRate"), document.getElementById("expiredRateOut"), v => v.toFixed(2));
+  attachRange(document.getElementById("suspiciousRate"), document.getElementById("suspiciousRateOut"), v => v.toFixed(2));
+  attachRange(document.getElementById("interruptRate"), document.getElementById("interruptRateOut"), v => v.toFixed(2));
 
-    // ---------- Boot ----------
-    renderRows();
-    syncControls();
+  document.getElementById("saveDiffBtn").addEventListener("click", () => {
+    difficulty.itemsPerCustomer = Number(document.getElementById("itemsPerCustomer").value);
+    difficulty.customerInterval = Number(document.getElementById("customerInterval").value);
+    difficulty.expiredRate = Number(document.getElementById("expiredRate").value);
+    difficulty.suspiciousRate = Number(document.getElementById("suspiciousRate").value);
+    difficulty.interruptRate = Number(document.getElementById("interruptRate").value);
+    difficulty.lockAdapt = !!document.getElementById("lockAdapt").checked;
+    persistDifficulty();
+    log("Difficulty settings saved (apply next shift)");
+    document.getElementById("difficultyBackdrop").style.display = "none";
+  });
+
+  document.getElementById("resetDiffBtn").addEventListener("click", () => {
+    difficulty = { ...DEFAULTS };
+    persistDifficulty();
+    hydrateDiffUI();
+    log("Difficulty reset to defaults");
+  });
+
+  // ESC to close modals
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      document.getElementById("helpBackdrop").style.display = "none";
+      document.getElementById("difficultyBackdrop").style.display = "none";
+    }
+  });
+
+  // Initial UI
+  setStatsPills();
   </script>
 </body>
 </html>
