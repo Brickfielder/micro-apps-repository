@@ -261,22 +261,13 @@
     const testCond = $testCond.value;
 
     // Assessment: hide visible PIN + suppress step-by-step speech
-    $pinBadge.classList.toggle('hidden', assist !== 'guided');
+    $pinBadge.classList.toggle('hidden', assist === 'assessment');
     $pinText.textContent = card.pin;
 
-    run = {
-      scen, card, assist, testCond,
-      step: 'await_insert',
-      startedAt: performance.now(),
-      pinBuffer: '', pinAttempts: 0,
-      wrongKeys: 0,
-      notes: [],
-      success: false,
-      cashDispensed: 0,
-      receipt: 'none',
-      spokenOnce: false
-    };
+    run = { scen, card, assist, testCond, step: 'await_insert', startedAt: performance.now(), pinBuffer: '', pinAttempts: 0, wrongKeys: 0, notes: [], success: false, cashDispensed: 0, receipt: 'none', spokenOnce: false };
 
+    // Ensure a voice is chosen after user interaction (Safari/iPad requirement)
+    chooseVoice();
     setScreen('Insert card to begin', scen.title);
     if(assist!=='assessment'){ speak(scen.title); speak('Insert your card to begin.'); }
     else { speak('You may begin.'); }
