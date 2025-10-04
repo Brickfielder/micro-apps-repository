@@ -95,8 +95,15 @@
   {
     "slug": "taskflow",
     "title": "Taskflow",
-    "description": "Build and follow procedural flows with checkpoints.",
+    "description": "Manage cooking, texts, and shopping under time pressure.",
     "emoji": "🔁",
+    "tags": ["executive", "memory"]
+  },
+   {
+    "slug": "task-juggler",
+    "title": "Task Juggler",
+    "description": "Build and follow procedural flows with checkpoints.",
+    "emoji": "⏰",
     "tags": ["executive", "memory"]
   },
   {
