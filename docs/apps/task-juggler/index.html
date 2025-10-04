@@ -1,692 +1,649 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Task Juggler — Executive Function Training</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Task Juggler — Live Desk (Complete v1)</title>
 
-  <!-- Shared assets -->
-  <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3">
-  <script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
-  <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
+<link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3">
+<script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
+<script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
 
-  <!-- Frame config -->
-  <meta name="theme" content="bold dense">
-  <meta name="app-slug" content="task-juggler">
-  <meta name="app-title" content="Task Juggler — Executive Function Training">
-  <meta name="app-desc" content="Manage overlapping tasks under time pressure to train executive function, task-switching, and divided attention.">
+<meta name="theme" content="bold dense">
+<meta name="app-slug" content="task-juggler">
+<meta name="app-title" content="Task Juggler — Executive Function Training">
+<meta name="app-desc" content="Live, overlapping streams with rule-shifts, prospective memory, strategy constraints, adaptive difficulty, and rich metrics.">
 
-  <style>
-    /* App-scoped styles */
-    .tj-wrap{max-width:1200px;margin:0 auto}
-    .tj-grid{display:grid;grid-template-columns:360px 1fr;gap:16px}
-    @media (max-width:900px){ .tj-grid{grid-template-columns:1fr} }
-    .tj-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
-    .tj-sectionTitle{font-weight:800;margin:0 0 8px;font-size:22px}
-    .tj-label{font-weight:600;font-size:14px;color:var(--muted);margin:6px 0}
-    .tj-row{display:flex;gap:10px;flex-wrap:wrap}
-    .tj-pill{display:inline-flex;align-items:center;gap:8px;background:var(--pill);padding:6px 10px;border-radius:999px;font-size:12px;color:var(--muted)}
-    .tj-btn{cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;font:inherit;transition:all .15s}
-    .tj-btn.primary{background:var(--accent);border-color:var(--accent-600);color:#fff}
-    .tj-btn.primary:hover{background:var(--accent-600)}
-    .tj-btn.ghost{background:var(--surface)}
-    .tj-btn.ghost:hover{background:color-mix(in oklab, var(--surface), var(--line) 12%)}
-    .tj-btn.success{background:#16a34a;color:#fff;border-color:transparent}
-    .tj-btn.warn{background:#ef4444;color:#fff;border-color:transparent}
-    .tj-btn:disabled{opacity:.6;cursor:not-allowed}
-    .tj-stat{display:inline-block;margin-right:10px;border-radius:999px;padding:6px 10px;background:#eef2ff;color:#1e3a8a;font-size:12px}
-    @media (prefers-color-scheme: dark){ .tj-stat{background:#0c2250;color:#cfe3fc} }
+<style>
+  .tj-wrap{max-width:1200px;margin:0 auto}
+  .tj-grid{display:grid;grid-template-columns:360px 1fr;gap:16px}
+  @media (max-width:900px){ .tj-grid{grid-template-columns:1fr} }
+  .tj-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+  .tj-sectionTitle{font-weight:800;margin:0 0 8px;font-size:22px}
+  .tj-label{font-weight:600;font-size:14px;color:var(--muted);margin:6px 0}
+  .tj-row{display:flex;gap:10px;flex-wrap:wrap}
+  .tj-btn{cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;font:inherit;transition:all .15s}
+  .tj-btn.primary{background:var(--accent);border-color:var(--accent-600);color:#fff}
+  .tj-btn.primary:hover{background:var(--accent-600)}
+  .tj-btn.ghost{background:var(--surface)}
+  .tj-btn.ghost:hover{background:color-mix(in oklab, var(--surface), var(--line) 12%)}
+  .tj-btn.success{background:#16a34a;color:#fff;border-color:transparent}
+  .tj-stat{display:inline-block;margin-right:10px;border-radius:999px;padding:6px 10px;background:#eef2ff;color:#1e3a8a;font-size:12px}
+  @media (prefers-color-scheme: dark){ .tj-stat{background:#0c2250;color:#cfe3fc} }
 
-    /* Timer display */
-    .timer-display{font-size:48px;font-weight:900;text-align:center;margin:12px 0;color:var(--accent);font-variant-numeric:tabular-nums}
-    .timer-display.warning{color:#ef4444;animation:pulse 1s infinite}
-    @keyframes pulse{0%,100%{opacity:1} 50%{opacity:.6}}
+  .timer-display{font-size:42px;font-weight:900;text-align:center;margin:8px 0;color:var(--accent);font-variant-numeric:tabular-nums}
+  .timer-display.warning{color:#ef4444;animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{opacity:1} 50%{opacity:.6}}
 
-    /* Task panels */
-    .task-panel{border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;background:var(--surface)}
-    .task-panel.urgent{border-color:var(--accent);border-width:2px;background:color-mix(in oklab, var(--accent), white 95%)}
-    .task-panel.complete{opacity:.5;background:color-mix(in oklab, #16a34a, white 90%)}
-    .task-title{font-weight:700;margin-bottom:6px}
-    .task-action{margin-top:8px}
+  .panel{border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;background:var(--surface)}
+  .urgent{border-color:var(--accent);border-width:2px;background:color-mix(in oklab, var(--accent), white 95%)}
+  .muted{opacity:.6}
+  .task-title{font-weight:700;margin-bottom:6px}
+  .helper{font-size:12px;color:var(--muted)}
 
-    /* Message bubble */
-    .msg-bubble{background:#e8f1fb;border:1px solid #cfe3fc;border-radius:12px;padding:10px 12px;margin:8px 0;display:flex;align-items:center;gap:10px}
-    .msg-bubble.replied{opacity:.5;background:#f0fdf4}
-    .msg-sender{font-weight:700;font-size:13px}
-    .msg-text{flex:1;font-size:14px}
+  .msg-bubble{background:#e8f1fb;border:1px solid #cfe3fc;border-radius:12px;padding:10px 12px;margin:8px 0;display:flex;align-items:center;gap:10px}
+  .msg-sender{font-weight:700;font-size:13px}
+  .msg-text{flex:1;font-size:14px}
 
-    /* Shopping list */
-    .shop-list{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
-    .shop-item{background:var(--pill);padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600}
+  .pill{display:inline-flex;align-items:center;gap:8px;background:var(--pill);padding:8px 12px;border-radius:999px;font-size:13px;font-weight:600}
 
-    /* Distractor (reuse Stroop from Memory in Action) */
-    .stroop-word{font-size:28px;font-weight:800;margin:8px 0}
-    .stroop-grid{display:flex;gap:8px;flex-wrap:wrap}
-    .stroop-score{margin-top:6px}
+  .pip{position:fixed;inset:auto 16px 16px auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;box-shadow:var(--shadow);z-index:50}
+  .pip-word{font-size:24px;font-weight:900;margin-bottom:8px;text-align:center}
+  .pip-grid{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
 
-    /* Recall */
-    .cue{margin-top:8px;padding:10px;border:1px dashed var(--line);border-radius:10px;background:var(--pill)}
-    .mc{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-    .mc .tj-btn{padding:6px 10px;font-size:13px;border-radius:999px}
+  .note{background:var(--paper);border:1px dashed var(--line);border-radius:12px;padding:8px;margin-top:8px}
+  .note small{display:block;color:var(--muted);margin-top:4px}
 
-    .hidden{display:none}
-  </style>
+  .lock{pointer-events:none;opacity:.35}
+  .hidden{display:none}
+</style>
 </head>
 <body>
-  <main id="app-root">
-    <div class="tj-wrap">
-      <div class="tj-grid">
-        <!-- Left: Settings -->
-        <div class="tj-card">
-          <div class="tj-sectionTitle">Settings</div>
+<main class="tj-wrap">
+  <div class="tj-grid">
+    <!-- LEFT: Controls -->
+    <div class="tj-card">
+      <div class="tj-sectionTitle">Session</div>
 
-          <label class="tj-label">Complexity level</label>
-          <select id="complexitySel">
-            <option value="2">Level 1 — 2 tasks (easier)</option>
-            <option value="3" selected>Level 2 — 3 tasks (moderate)</option>
-            <option value="4">Level 3 — 4 tasks (harder)</option>
-          </select>
+      <label class="tj-label">Duration</label>
+      <select id="timeSel">
+        <option value="180">3 minutes</option>
+        <option value="240" selected>4 minutes</option>
+        <option value="300">5 minutes</option>
+      </select>
 
-          <label class="tj-label" style="margin-top:8px">Time limit</label>
-          <select id="timeSel">
-            <option value="180">3 minutes (easier)</option>
-            <option value="240" selected>4 minutes (moderate)</option>
-            <option value="300">5 minutes (harder)</option>
-          </select>
+      <label class="tj-label" style="margin-top:8px">Strategy</label>
+      <select id="strategySel">
+        <option value="none" selected>None</option>
+        <option value="prioritisation">Prioritisation</option>
+        <option value="external">External aids (2 notes, costly)</option>
+        <option value="chunking">Chunking (batch windows)</option>
+        <option value="timeblock">Time-blocking (panels gated)</option>
+      </select>
+      <div id="strategyInfo" class="helper" style="margin-top:4px">No constraints applied.</div>
 
-          <div class="tj-row" style="margin-top:8px">
-            <div style="flex:1">
-              <label class="tj-label">Voice</label>
-              <select id="voiceSel"><option>Loading voices…</option></select>
-            </div>
-          </div>
+      <label class="tj-label" style="margin-top:8px">Shopping memory exposure</label>
+      <select id="memExposure">
+        <option value="6">6 s</option>
+        <option value="8" selected>8 s</option>
+        <option value="12">12 s</option>
+      </select>
 
-          <div class="tj-row" style="margin-top:8px">
-            <div style="flex:1"><label class="tj-label">Rate</label><input id="voiceRate" type="range" min="0.7" max="1.2" step="0.05" value="0.95"/></div>
-            <div style="flex:1"><label class="tj-label">Volume</label><input id="voiceVol" type="range" min="0" max="1" step="0.05" value="1"/></div>
-          </div>
+      <div class="tj-row" style="margin-top:12px">
+        <button id="btnStart" class="tj-btn primary">Start</button>
+        <button id="btnDownload" class="tj-btn ghost" disabled>Download CSV</button>
+        <button id="btnReset" class="tj-btn ghost">Reset</button>
+      </div>
 
-          <div class="tj-row" style="margin-top:12px">
-            <button class="tj-btn primary" id="btnStart">Start session</button>
-            <button class="tj-btn ghost" id="btnStopVoice" disabled>Stop voice</button>
-            <button class="tj-btn ghost" id="btnReset">Reset</button>
-          </div>
+      <div style="margin-top:12px">
+        <span class="tj-stat" id="statTime">Time: 4 min</span>
+        <span class="tj-stat" id="statLoad">Load: baseline</span>
+        <span class="tj-stat" id="ruleBadge">Rule: Family→Yes | Non-family→Later</span>
+        <span class="tj-stat" id="pmBadge">PM: ⭐ Tom before reply</span>
+      </div>
 
-          <div class="tj-row" style="margin-top:8px">
-            <button class="tj-btn ghost" id="btnDownload">Download CSV</button>
-          </div>
+      <div class="tj-card" style="margin-top:12px">
+        <div class="tj-sectionTitle" style="font-size:16px">Live metrics</div>
+        <div class="helper" id="liveMetrics">Switch median: — | On-time: — | Inhibition: 0 | PM hits: 0 | Pip acc: —</div>
+      </div>
 
-          <div style="margin-top:12px">
-            <span class="tj-stat" id="statLevel">Level: 2</span>
-            <span class="tj-stat" id="statTime">Time: 4 min</span>
-          </div>
+      <!-- External aids (if chosen) -->
+      <div id="notesBox" class="note hidden">
+        <div class="tj-label">Notes (max 2; opening costs 1s)</div>
+        <textarea id="note1" rows="2" placeholder="Note 1"></textarea>
+        <textarea id="note2" rows="2" placeholder="Note 2" style="margin-top:6px"></textarea>
+        <small id="noteInfo">Opens: 0 | Chars: 0</small>
+      </div>
+    </div>
+
+    <!-- RIGHT: Live Desk -->
+    <div class="tj-card">
+      <div class="tj-sectionTitle">Live Desk</div>
+      <div class="pill">Everything overlaps; handle conflicts, rule-shifts, and the PM cue.</div>
+
+      <div class="timer-display" id="timerDisplay">4:00</div>
+
+      <div id="desk">
+        <div class="panel" id="recipePanel">
+          <div class="task-title">🍝 Recipe</div>
+          <div class="helper">Perform steps during their windows.</div>
+          <div id="recipeList"></div>
         </div>
 
-        <!-- Right: Task area -->
-        <div class="tj-card">
-          <div class="tj-sectionTitle">Task area</div>
-          <div class="tj-pill">Strategy → <strong>Active Tasks</strong> → Distractor → Recall</div>
+        <div class="panel" id="messagesPanel">
+          <div class="task-title">💬 Messages <span class="helper">(⭐ Tom before replying)</span></div>
+          <div id="messagesList"></div>
+        </div>
 
-          <!-- Strategy -->
-          <section id="strategyCard" style="margin-top:12px">
-            <label class="tj-label">Choose your strategy</label>
-            <div class="tj-row" role="group">
-              <button class="tj-btn ghost" data-strategy="Prioritization">🎯 Prioritization</button>
-              <button class="tj-btn ghost" data-strategy="External aids">📋 External aids</button>
-              <button class="tj-btn ghost" data-strategy="Chunking">🧩 Chunking</button>
-              <button class="tj-btn ghost" data-strategy="Time blocking">⏱️ Time blocking</button>
-              <button class="tj-btn ghost" data-strategy="None">🙋 No strategy</button>
-            </div>
-            <div id="strategyInfo" style="margin-top:10px">
-              <div class="tj-pill">Tip: If you repeat the same strategy 3×, I'll suggest variety.</div>
-            </div>
-          </section>
+        <div class="panel" id="shoppingPanel">
+          <div class="task-title">🛒 Shopping Memory</div>
+          <div class="helper">Memorise the list, then accept/reject probes (lures included).</div>
+          <div id="shoppingExposure" style="margin:8px 0;display:flex;gap:8px;flex-wrap:wrap"></div>
+          <div id="shoppingStream"></div>
+        </div>
 
-          <!-- Active phase -->
-          <section id="activeCard" class="hidden" style="margin-top:12px">
-            <div class="timer-display" id="timerDisplay">4:00</div>
-            
-            <div id="taskContainer"></div>
-
-            <div class="tj-row" style="margin-top:12px;justify-content:center">
-              <button class="tj-btn ghost" id="btnPause">Pause</button>
-            </div>
-          </section>
-
-          <!-- Distractor -->
-          <section id="distractorCard" class="hidden" style="margin-top:12px">
-            <label class="tj-label">Distractor task</label>
-            <div class="helper">Complete the Stroop task to continue (12 trials).</div>
-            <div class="stroop-word" id="stroopWord">BLUE</div>
-            <div class="stroop-grid" id="stroopBtns"></div>
-            <div class="stroop-score helper" id="stroopScore">0/12</div>
-          </section>
-
-          <!-- Recall -->
-          <section id="recallCard" class="hidden" style="margin-top:12px">
-            <label class="tj-label">Recall — 5 Questions</label>
-            <div class="helper">Answer freely. If stuck, click "Show hint", then "More" for options.</div>
-            <div id="recallInputs" style="margin-top:8px"></div>
-            <div class="tj-row" style="margin-top:10px">
-              <button class="tj-btn primary" id="btnCheck">Check answers</button>
-            </div>
-          </section>
-
-          <!-- Feedback -->
-          <section id="feedbackCard" class="hidden" style="margin-top:12px">
-            <label class="tj-label">Feedback</label>
-            <div id="feedbackZone"></div>
-            <div class="tj-row" style="margin-top:10px">
-              <button class="tj-btn success" id="btnRestart">Start another session</button>
-            </div>
-          </section>
+        <div class="panel" id="timersPanel">
+          <div class="task-title">⏰ Timers</div>
+          <div class="helper">Acknowledge important alerts promptly.</div>
+          <div id="timersList"></div>
         </div>
       </div>
     </div>
-  </main>
+  </div>
+</main>
 
-  <script>
-  (function(){
-    const $ = s => document.querySelector(s);
-    const $$ = s => Array.from(document.querySelectorAll(s));
-    const log = (msg)=>{ try{ console.debug('[TaskJuggler]', msg); }catch(e){} };
+<!-- Micro Stroop “pip” -->
+<div class="pip hidden" id="pip">
+  <div class="pip-word" id="pipWord">BLUE</div>
+  <div class="pip-grid" id="pipBtns"></div>
+</div>
 
-    const complexitySel=$('#complexitySel'), timeSel=$('#timeSel'), voiceSel=$('#voiceSel');
-    const vRate=$('#voiceRate'), vVol=$('#voiceVol');
-    const btnStart=$('#btnStart'), btnStopVoice=$('#btnStopVoice'), btnReset=$('#btnReset'), btnDownload=$('#btnDownload'), btnPause=$('#btnPause');
-    const strategyCard=$('#strategyCard'), activeCard=$('#activeCard'), distractorCard=$('#distractorCard'), recallCard=$('#recallCard'), feedbackCard=$('#feedbackCard');
-    const timerDisplay=$('#timerDisplay'), taskContainer=$('#taskContainer');
-    const stroopWord=$('#stroopWord'), stroopBtns=$('#stroopBtns'), stroopScore=$('#stroopScore');
-    const recallInputs=$('#recallInputs'), btnCheck=$('#btnCheck'), btnRestart=$('#btnRestart');
+<script>
+(function(){
+  const $ = s => document.querySelector(s);
+  const el = {
+    timeSel: $('#timeSel'), strategySel: $('#strategySel'), strategyInfo: $('#strategyInfo'),
+    memExposure: $('#memExposure'),
+    btnStart: $('#btnStart'), btnDownload: $('#btnDownload'), btnReset: $('#btnReset'),
+    statTime: $('#statTime'), statLoad: $('#statLoad'), live: $('#liveMetrics'),
+    ruleBadge: $('#ruleBadge'), pmBadge: $('#pmBadge'),
+    timer: $('#timerDisplay'),
+    recipeList: $('#recipeList'), messagesList: $('#messagesList'),
+    shoppingExposure: $('#shoppingExposure'), shoppingStream: $('#shoppingStream'),
+    timersList: $('#timersList'),
+    pip: $('#pip'), pipWord: $('#pipWord'), pipBtns: $('#pipBtns'),
+    recipePanel: $('#recipePanel'), messagesPanel: $('#messagesPanel'),
+    shoppingPanel: $('#shoppingPanel'), timersPanel: $('#timersPanel'),
+    notesBox: $('#notesBox'), note1: $('#note1'), note2: $('#note2'), noteInfo: $('#noteInfo')
+  };
 
-    let currentStrategy=null, lastStrategies=[];
-    let sessionLog=[];
-    let timeRemaining=0, timerInterval=null, paused=false;
-    let currentScenario=null;
+  // ---------- Session clock & queue ----------
+  let T=0, Tlimit=240, running=false;
+  let queue=[]; // {at, kind, payload}
+  const now = ()=>T;
+  function schedule(kind,payload,inSec){ queue.push({at: now()+inSec, kind, payload}); queue.sort((a,b)=>a.at-b.at); }
+  function drain(){ while(queue.length && queue[0].at<=now()) dispatch(queue.shift()); }
 
-    const STRATEGY_DETAILS={
-      Prioritization:{title:"Prioritization",desc:"Identify urgent vs. non-urgent tasks. Focus on time-sensitive items first (e.g., timer alarms, recipe steps).",
-               examples:["Handle recipe steps immediately","Delay non-urgent texts","Check timers frequently"]},
-      "External aids":{title:"External aids",desc:"Use mental notes, finger counting, or verbal rehearsal to track tasks. Imagine writing a quick list.",
-               examples:["Repeat shopping items aloud","Count completed tasks on fingers","Mentally note message sender names"]},
-      Chunking:{title:"Chunking",desc:"Group related tasks (e.g., all messages, all recipe steps, all shopping items) to reduce cognitive load.",
-               examples:["Group all texts together","Batch recipe steps by type","Link shopping items by category"]},
-      "Time blocking":{title:"Time blocking",desc:"Allocate mental time slots: 'First 2 min for recipe, then messages, then shopping review.'",
-               examples:["0-2min: recipe focus","2-3min: respond to messages","3-4min: review shopping list"]},
-      None:{title:"No strategy",desc:"Proceed without a compensatory strategy — useful as a baseline to compare performance.",examples:["—"]}
-    };
+  // ---------- Audio pings ----------
+  const AudioCtx = window.AudioContext || window.webkitAudioContext; let ac=null;
+  function ping(freq=880, dur=0.06){ try{ ac=ac||new AudioCtx(); const o=ac.createOscillator(), g=ac.createGain(); o.frequency.value=freq; g.gain.value=0.05; o.connect(g); g.connect(ac.destination); o.start(); setTimeout(()=>o.stop(), dur*1000);}catch(e){} }
 
-    const show = el => el.classList.remove("hidden");
-    const hide = el => el.classList.add("hidden");
-    const norm = s => (s || "").toLowerCase().replace(/[^a-z0-9\s]/g,"").trim();
+  // ---------- Data seeds ----------
+  const recipeSteps = [
+    {id:0, text:"Boil water", window:[20,50]},
+    {id:1, text:"Add pasta", window:[70,110]},
+    {id:2, text:"Stir pasta", window:[130,170]},
+    {id:3, text:"Check doneness", window:[190,230]},
+  ];
+  const messagePool = [
+    {sender:"Anna", family:true, text:"Can you grab milk?"},
+    {sender:"Tom", family:false, text:"Are we still on for 6?"},
+    {sender:"Sarah", family:false, text:"Did you see my email?"},
+    {sender:"Chris", family:true, text:"Can you call me later?"}
+  ];
+  const baseList = ["Bread","Eggs","Butter","Milk"];
+  const lureList = ["Peanut butter","Cream","Coffee","Apples","Bread","Butter"]; // includes repeats
 
-    function maybeNudge(choice){
-      lastStrategies.push(choice);
-      if(lastStrategies.length>3) lastStrategies.shift();
-      if(lastStrategies.length===3 && lastStrategies.every(s=>s===choice)){
-        log("Tip: try a different strategy this round (you chose "+choice+" three times).");
-      }
-      return choice;
-    }
+  // Rules & PM hook
+  let rule = { family: 'Yes', nonFamily: 'Later' };  // shifts mid-session
+  const pmCue = { sender:'Tom', requiresStar:true, windowMs: 4000 };
 
-    // Voice functions
-    function pickVoice(){
-      if(!("speechSynthesis" in window)) return null;
-      const voices = speechSynthesis.getVoices() || [];
-      const libby = voices.find(v => /libby/i.test(v.name) && /(online|natural|neural)/i.test(v.name));
-      const anyLibby = libby || voices.find(v => /libby/i.test(v.name));
-      return anyLibby
-          || voices.find(v => /^en-GB/.test(v.lang))
-          || voices.find(v => /^en/.test(v.lang))
-          || voices[0]
-          || null;
-    }
-    function stopSpeak(){ if("speechSynthesis" in window){ speechSynthesis.cancel(); } }
-    function speak(text){
-      if(!("speechSynthesis" in window)) return { onend:cb=>cb&&cb() };
-      const u=new SpeechSynthesisUtterance(text);
-      const v=pickVoice(); if(v) u.voice=v;
-      u.rate=parseFloat(vRate.value); u.volume=parseFloat(vVol.value);
-      u.lang=(v && v.lang) || "en-GB";
-      speechSynthesis.cancel();
-      speechSynthesis.speak(u);
-      return u;
-    }
+  // Strategies
+  let strategy = 'none';
+  let chunkWindowOpen=false, chunkEndsAt=0;
+  let timeBlocks=[ [0,9999,'all'] ]; // updated if timeblock
+  let noteOpens=0, noteChars=0;
 
-    function populateVoices(){
-      if(!("speechSynthesis" in window)) { 
-        voiceSel.innerHTML='<option>Speech not supported</option>'; 
-        return true; 
-      }
-      const voices = speechSynthesis.getVoices();
-      if(!voices || voices.length===0) return false;
-      const libbyList = voices.filter(v => /libby/i.test(v.name) && /(online|natural|neural)/i.test(v.name));
-      voiceSel.innerHTML = "";
-      if (libbyList.length) {
-        libbyList.forEach(v => {
-          const o = document.createElement("option");
-          o.value = v.name;
-          o.textContent = v.name + " — " + v.lang;
-          voiceSel.appendChild(o);
-        });
-        voiceSel.value = libbyList[0].name;
-        return true;
-      }
-      const fallback = voices.find(v => /^en-GB/.test(v.lang)) || voices[0];
-      if (fallback) {
-        const o = document.createElement("option");
-        o.value = fallback.name;
-        o.textContent = fallback.name + " — " + fallback.lang;
-        voiceSel.appendChild(o);
-        voiceSel.value = fallback.name;
-      }
-      return true;
-    }
-    function initVoices(){
-      if(populateVoices()) return;
-      if("speechSynthesis" in window){
-        speechSynthesis.onvoiceschanged = ()=>populateVoices();
-        let tries=0; const int=setInterval(()=>{
-          tries++; if(populateVoices() || tries>20){ clearInterval(int); }
-        }, 100);
-      }
-    }
-    initVoices();
+  // Adaptation
+  let difficulty = 1; // 1..4
+  function setLoadLabel(){ el.statLoad.textContent = `Load: ${['baseline','↑','↑↑','↑↑↑'][difficulty-1]}`; }
 
-    // Scenarios
-    function generateScenario(complexity){
-      const numTasks = parseInt(complexity, 10);
-      const recipe = {
-        type: 'recipe',
-        title: '🍝 Recipe: Pasta',
-        steps: [
-          {time: 30, text: "Boil water for pasta", action: "done"},
-          {time: 90, text: "Add pasta to boiling water", action: "done"},
-          {time: 150, text: "Stir the pasta", action: "done"},
-          {time: 210, text: "Check if pasta is al dente", action: "done"}
-        ],
-        completed: []
-      };
+  // Metrics
+  const metrics = {
+    actions:[], switchCosts:[], lastPanel:null, lastActTs:0,
+    deadlines:{onTime:0, early:0, late:0, lateMs:0},
+    inhibErrors:0, memoryErrors:0,
+    pmHits:0, pmMisses:0, pmFalse:0,
+    pips:{hits:0,total:0},
+    strategy:'none', strategyAdherence:0, noteOpens:0, noteChars:0,
+    adaptations:0,
+    log:[]
+  };
+  function logAction(panel){
+    const tPerf = performance.now();
+    if(metrics.lastPanel && metrics.lastPanel!==panel) metrics.switchCosts.push(tPerf - metrics.lastActTs);
+    metrics.lastPanel = panel; metrics.lastActTs = tPerf;
+    metrics.actions.push({t:now(), panel});
+    updateLive();
+  }
 
-      const messages = {
-        type: 'messages',
-        title: '💬 Messages',
-        items: [
-          {time: 45, sender: "Anna", text: "Can you grab milk?", replies: ["Yes", "No", "Later"]},
-          {time: 120, sender: "Tom", text: "Are we still meeting at 6?", replies: ["Yes", "No", "Maybe"]},
-          {time: 180, sender: "Sarah", text: "Did you see my email?", replies: ["Yes", "No", "Not yet"]}
-        ],
-        replied: []
-      };
+  // ---------- Rendering ----------
+  function ts(s){ const m=Math.floor(s/60), x=s%60; return `${m}:${String(x).padStart(2,'0')}`; }
+  function updateTimer(){ const rem=Tlimit-now(); el.timer.textContent=ts(rem); rem<=30?el.timer.classList.add('warning'):el.timer.classList.remove('warning'); }
 
-      const shopping = {
-        type: 'shopping',
-        title: '🛒 Shopping list',
-        items: ["Bread", "Eggs", "Butter"]
-      };
-
-      const timer = {
-        type: 'timer',
-        title: '⏰ Kitchen timer',
-        alerts: [
-          {time: 60, text: "Oven ready — check now!"},
-          {time: 150, text: "Sauce needs stirring!"}
-        ],
-        acknowledged: []
-      };
-
-      let tasks = [recipe, messages, shopping];
-      if(numTasks >= 4) tasks.push(timer);
-
-      return {tasks, questions: generateQuestions(tasks)};
-    }
-
-    function generateQuestions(tasks){
-      const qs = [];
-      const recipe = tasks.find(t=>t.type==='recipe');
-      const msgs = tasks.find(t=>t.type==='messages');
-      const shop = tasks.find(t=>t.type==='shopping');
-      const timer = tasks.find(t=>t.type==='timer');
-
-      if(recipe){
-        qs.push({
-          prompt: "What was the first recipe step?",
-          ans: ["boil water", "boil", "water"],
-          hints: ["Related to water.", "Preparing water for cooking."],
-          cue: {mc: ["Boil water", "Add pasta", "Stir pasta", "Check doneness"]}
-        });
-      }
-      if(msgs){
-        qs.push({
-          prompt: "Who asked about milk?",
-          ans: ["anna"],
-          hints: ["A woman's name.", "Starts with A."],
-          cue: {mc: ["Anna", "Tom", "Sarah", "Marco"]}
-        });
-      }
-      if(shop){
-        qs.push({
-          prompt: "Name one shopping item.",
-          ans: ["bread", "eggs", "butter"],
-          hints: ["Three items: a spread, a protein, and a staple.", "One is a dairy product."],
-          cue: {mc: ["Bread", "Milk", "Coffee", "Apples"]}
-        });
-      }
-      if(msgs && msgs.items.length > 1){
-        qs.push({
-          prompt: "Who asked about meeting at 6?",
-          ans: ["tom"],
-          hints: ["A man's name.", "Three letters."],
-          cue: {mc: ["Tom", "Anna", "Sarah", "Chris"]}
-        });
-      }
-      if(timer){
-        qs.push({
-          prompt: "What needed stirring?",
-          ans: ["sauce"],
-          hints: ["A liquid part of the meal.", "Usually poured over pasta."],
-          cue: {mc: ["Sauce", "Pasta", "Oven", "Water"]}
-        });
-      }
-
-      return qs.slice(0, 5);
-    }
-
-    // Render tasks
-    function renderTasks(){
-      taskContainer.innerHTML = "";
-      currentScenario.tasks.forEach((task, idx) => {
-        const panel = document.createElement("div");
-        panel.className = "task-panel";
-        panel.id = "task-"+idx;
-
-        if(task.type === 'recipe'){
-          panel.innerHTML = `<div class="task-title">${task.title}</div>`;
-          const list = document.createElement("div");
-          task.steps.forEach((step, si) => {
-            const complete = task.completed.includes(si);
-            const item = document.createElement("div");
-            item.className = "task-action";
-            item.innerHTML = `
-              <span style="${complete?'text-decoration:line-through;opacity:.5':''}">
-                ${complete?'✅':''} ${step.text}
-              </span>
-              ${!complete ? `<button class="tj-btn ghost" style="margin-left:8px;padding:4px 8px;font-size:12px" data-task="recipe" data-step="${si}">Mark done</button>` : ''}
-            `;
-            list.appendChild(item);
-          });
-          panel.appendChild(list);
-        }
-
-        if(task.type === 'messages'){
-          panel.innerHTML = `<div class="task-title">${task.title}</div>`;
-          task.items.forEach((msg, mi) => {
-            const replied = task.replied.includes(mi);
-            const bubble = document.createElement("div");
-            bubble.className = "msg-bubble" + (replied ? " replied" : "");
-            bubble.innerHTML = `
-              <div style="flex:1">
-                <div class="msg-sender">${msg.sender}</div>
-                <div class="msg-text">${msg.text}</div>
-              </div>
-              ${!replied ? `<div style="display:flex;gap:4px;flex-wrap:wrap">
-                ${msg.replies.map((r, ri)=>`<button class="tj-btn ghost" style="padding:4px 8px;font-size:11px" data-task="messages" data-msg="${mi}" data-reply="${ri}">${r}</button>`).join('')}
-              </div>` : ''}
-            `;
-            panel.appendChild(bubble);
-          });
-        }
-
-        if(task.type === 'shopping'){
-          panel.innerHTML = `<div class="task-title">${task.title}</div><div class="helper">Memorize these items for recall later.</div><div class="shop-list"></div>`;
-          const list = panel.querySelector(".shop-list");
-          task.items.forEach(item => {
-            const span = document.createElement("span");
-            span.className = "shop-item";
-            span.textContent = item;
-            list.appendChild(span);
-          });
-        }
-
-        if(task.type === 'timer'){
-          panel.innerHTML = `<div class="task-title">${task.title}</div><div class="helper">Alerts will appear during the session.</div>`;
-        }
-
-        taskContainer.appendChild(panel);
-      });
-
-      // Event delegation
-      taskContainer.addEventListener("click", (e) => {
-        const btn = e.target.closest("button[data-task]");
-        if(!btn) return;
-        const taskType = btn.getAttribute("data-task");
-        const task = currentScenario.tasks.find(t=>t.type===taskType);
-
-        if(taskType === 'recipe'){
-          const si = parseInt(btn.getAttribute("data-step"), 10);
-          if(!task.completed.includes(si)){
-            task.completed.push(si);
-            renderTasks();
-          }
-        }
-
-        if(taskType === 'messages'){
-          const mi = parseInt(btn.getAttribute("data-msg"), 10);
-          if(!task.replied.includes(mi)){
-            task.replied.push(mi);
-            renderTasks();
-          }
-        }
-      });
-    }
-
-    // Timer
-    function startTimer(seconds){
-      timeRemaining = seconds;
-      updateTimerDisplay();
-      timerInterval = setInterval(()=>{
-        if(paused) return;
-        timeRemaining--;
-        updateTimerDisplay();
-        checkTimerEvents();
-        if(timeRemaining <= 0){
-          clearInterval(timerInterval);
-          log("Time's up!");
-          endActivePhase();
-        }
-      }, 1000);
-    }
-
-    function updateTimerDisplay(){
-      const mins = Math.floor(timeRemaining / 60);
-      const secs = timeRemaining % 60;
-      timerDisplay.textContent = `${mins}:${secs.toString().padStart(2,'0')}`;
-      if(timeRemaining <= 30){
-        timerDisplay.classList.add("warning");
-      } else {
-        timerDisplay.classList.remove("warning");
-      }
-    }
-
-    function checkTimerEvents(){
-      const totalTime = parseInt(timeSel.value, 10);
-      const elapsed = totalTime - timeRemaining;
-
-      currentScenario.tasks.forEach(task => {
-        if(task.type === 'recipe'){
-          task.steps.forEach((step, si) => {
-            if(elapsed === step.time && !task.completed.includes(si)){
-              speak("Recipe step: " + step.text);
-              const panel = document.getElementById("task-0");
-              if(panel) panel.classList.add("urgent");
-              setTimeout(()=>panel && panel.classList.remove("urgent"), 3000);
-            }
-          });
-        }
-        if(task.type === 'messages'){
-          task.items.forEach((msg, mi) => {
-            if(elapsed === msg.time && !task.replied.includes(mi)){
-              speak("New message from " + msg.sender + ": " + msg.text);
-              renderTasks();
-            }
-          });
-        }
-        if(task.type === 'timer'){
-          task.alerts.forEach((alert, ai) => {
-            if(elapsed === alert.time && !task.acknowledged.includes(ai)){
-              speak("Timer alert: " + alert.text);
-              task.acknowledged.push(ai);
-            }
-          });
-        }
-      });
-    }
-
-    function endActivePhase(){
-      clearInterval(timerInterval);
-      hide(activeCard);
-      show(distractorCard);
-      startStroop();
-    }
-
-    // Stroop (reuse from Memory in Action)
-    const COLORS=[{name:"RED", css:"red"},{name:"GREEN", css:"green"},{name:"BLUE", css:"blue"},{name:"YELLOW", css:"goldenrod"}];
-    let stroopTrials=12, stroopIdx=0, stroopCorrect=0;
-    function stroopNext(){
-      if(stroopIdx>=stroopTrials){ log("Stroop finished. Proceed to recall."); showRecall(); return; }
-      stroopIdx++; const word=COLORS[Math.floor(Math.random()*COLORS.length)]; const ink=COLORS[Math.floor(Math.random()*COLORS.length)];
-      stroopWord.textContent=word.name; stroopWord.style.color=ink.css;
-      stroopBtns.innerHTML=""; COLORS.forEach(c=>{ const b=document.createElement("button"); b.className="tj-btn ghost"; b.textContent=c.name; b.onclick=()=>{ if(c.name===ink.name){ stroopCorrect++; } stroopScore.textContent=stroopCorrect+"/"+stroopTrials; stroopNext(); }; stroopBtns.appendChild(b); });
-    }
-    function startStroop(){ stroopIdx=0; stroopCorrect=0; stroopScore.textContent="0/"+stroopTrials; stroopNext(); }
-
-    // Recall
-    function renderRecall(qs){
-      recallInputs.innerHTML="";
-      qs.forEach((q,i)=>{
-        const wrap=document.createElement("div");
-        wrap.innerHTML='<label class="tj-label">'+(i+1)+". "+q.prompt+'</label><input type="text" data-qi="'+i+'" />'
-          +'<div class="tj-row" style="margin-top:6px"><button class="tj-btn ghost showCue" data-qi="'+i+'">Show hint</button></div>'
-          +'<div class="cue hidden" id="cue-'+i+'"></div>';
-        recallInputs.appendChild(wrap);
-        const cueEl=wrap.querySelector("#cue-"+i);
-        const h1=document.createElement("div"); h1.className="helper"; h1.id="h1-"+i; h1.textContent=(q.hints && q.hints[0]) ? q.hints[0] : "Hint available.";
-        const h2=document.createElement("div"); h2.className="helper hidden"; h2.id="h2-"+i; h2.style.marginTop="4px"; h2.textContent=(q.hints && q.hints[1]) ? q.hints[1] : "More detail available.";
-        const mc=document.createElement("div"); mc.className="mc hidden"; mc.id="mc-"+i;
-        (q.cue.mc||[]).forEach(opt=>{ const b=document.createElement("button"); b.className="tj-btn ghost"; b.textContent=opt; b.onclick=()=>{ wrap.querySelector("input").value=opt; }; mc.appendChild(b); });
-        cueEl.appendChild(h1); cueEl.appendChild(h2); cueEl.appendChild(mc);
-      });
-      $(".showCue").forEach(btn=> btn.addEventListener("click",()=>{
-        const i=btn.getAttribute("data-qi");
-        const cue=document.getElementById("cue-"+i);
-        const h2=document.getElementById("h2-"+i);
-        const mc=document.getElementById("mc-"+i);
-        if(cue.classList.contains("hidden")){ cue.classList.remove("hidden"); btn.textContent="More"; }
-        else if(h2.classList.contains("hidden")){ h2.classList.remove("hidden"); btn.textContent="Options"; }
-        else if(mc.classList.contains("hidden")){ mc.classList.remove("hidden"); btn.textContent="Hide cues"; }
-        else { cue.classList.add("hidden"); h2.classList.add("hidden"); mc.classList.add("hidden"); btn.textContent="Show hint"; }
-      }));
-    }
-
-    function showRecall(){ hide(distractorCard); show(recallCard); renderRecall(currentScenario.questions); }
-
-    function grade(qs){
-      let correct=0,total=qs.length,details=[];
-      Array.from(recallInputs.querySelectorAll("input")).forEach((inp,i)=>{
-        const val=norm(inp.value);
-        const ok=qs[i].ans.some(a=> val.includes(norm(a)));
-        if(ok) correct++;
-        details.push({prompt:qs[i].prompt, text:inp.value || "(blank)", ok});
-      });
-      return {correct,total,details};
-    }
-
-    // Event handlers
-    btnStart.onclick=()=>{
-      hide(strategyCard);
-      show(activeCard);
-      const complexity = complexitySel.value;
-      const timeLimit = parseInt(timeSel.value, 10);
-      currentScenario = generateScenario(complexity);
-      renderTasks();
-      startTimer(timeLimit);
-      log("Session started.");
-      btnStopVoice.disabled=false;
-    };
-
-    $("#strategyCard").addEventListener("click",(e)=>{
-      const b=e.target.closest("button[data-strategy]");
-      if(!b) return;
-      currentStrategy=maybeNudge(b.getAttribute("data-strategy"));
-      const info=STRATEGY_DETAILS[currentStrategy];
-      if(info){
-        const ex=info.examples.map(x=>"• "+x).join("<br>");
-        $("#strategyInfo").innerHTML='<div class="tj-pill">'+info.title+": "+info.desc+'</div><div class="helper" style="margin-top:6px"><strong>Examples</strong><br>'+ex+"</div>";
-      }
-      log("Strategy: "+currentStrategy);
+  function renderRecipe(){
+    el.recipeList.innerHTML = "";
+    recipeSteps.forEach(st=>{
+      const within = (now()>=st.window[0] && now()<=st.window[1]);
+      const row = document.createElement('div');
+      row.className = "panel " + (within?'urgent':'');
+      row.style.margin="8px 0";
+      row.innerHTML = `<div><strong>${st.text}</strong> <span class="helper">[${ts(st.window[0])}–${ts(st.window[1])}]</span></div>
+        <div class="tj-row" style="margin-top:6px">
+          <button class="tj-btn ghost" data-act="doStep" data-id="${st.id}">Do it</button>
+        </div>`;
+      el.recipeList.appendChild(row);
     });
+  }
 
-    btnPause.onclick=()=>{
-      paused=!paused;
-      btnPause.textContent=paused?"Resume":"Pause";
-    };
+  function renderMessage(msg){
+    const bubble = document.createElement('div');
+    bubble.className = "msg-bubble";
+    bubble.dataset.id = msg.id;
+    bubble.dataset.sender = msg.sender;
+    bubble.dataset.family = msg.family? '1':'0';
+    bubble.innerHTML = `
+      <div style="flex:1">
+        <div class="msg-sender">${msg.sender} ${msg.sender==='Tom'?'⭐':''}</div>
+        <div class="msg-text">${msg.text}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <button class="tj-btn ghost" data-act="star" data-id="${msg.id}">Star</button>
+        ${["Yes","No","Later"].map(x=>`<button class="tj-btn ghost" data-act="reply" data-id="${msg.id}" data-ans="${x}">${x}</button>`).join('')}
+      </div>`;
+    el.messagesList.prepend(bubble);
+  }
 
-    btnStopVoice.onclick=()=>stopSpeak();
-    btnReset.onclick=()=>{ stopSpeak(); location.reload(); };
+  function renderShoppingExposure(list){
+    el.shoppingExposure.innerHTML = "";
+    list.forEach(x=>{
+      const sp=document.createElement('span'); sp.className="pill"; sp.textContent=x; el.shoppingExposure.appendChild(sp);
+    });
+  }
 
-    btnCheck.onclick=()=>{
-      const g=grade(currentScenario.questions);
-      hide(recallCard); show(feedbackCard);
-      const pct=Math.round((g.correct/g.total)*100);
-      let html='<div class="tj-pill">Accuracy: '+g.correct+'/'+g.total+' ('+pct+'%) — Strategy: '+(currentStrategy||"—")+'</div>';
-      g.details.forEach((d, i)=>{
-        const corr = (currentScenario.questions[i].ans || []).join(" / ");
-        html+='<div style="margin-top:6px">'+(d.ok?'✅':'❌')+' <em>'+d.prompt+'</em> — <strong>'+d.text+'</strong>'+(d.ok?"":'<div class="helper" style="margin-top:2px">Correct: '+corr+"</div>")+"</div>";
+  function renderShoppingProbe(name){
+    const row = document.createElement('div');
+    row.style.margin="8px 0";
+    row.innerHTML = `<span class="pill">${name}</span>
+      <div class="tj-row" style="display:inline-flex;margin-left:8px;vertical-align:middle">
+        <button class="tj-btn ghost" data-act="shopAccept" data-name="${name}">Accept</button>
+        <button class="tj-btn ghost" data-act="shopReject" data-name="${name}">Reject</button>
+      </div>`;
+    el.shoppingStream.prepend(row);
+  }
+
+  function renderTimerAlert(alert){
+    const row = document.createElement('div');
+    row.className="msg-bubble";
+    row.innerHTML = `<div style="flex:1">
+      <div class="msg-sender">Timer</div>
+      <div class="msg-text">${alert.text}</div>
+    </div>
+    <button class="tj-btn ghost" data-act="ack" data-id="${alert.id}">Acknowledge</button>`;
+    el.timersList.prepend(row);
+  }
+
+  // ---------- Pip (micro Stroop) ----------
+  const COLORS=[{name:"RED", css:"red"},{name:"GREEN", css:"green"},{name:"BLUE", css:"blue"},{name:"YELLOW", css:"goldenrod"}];
+  function showPip(){
+    const word = COLORS[Math.floor(Math.random()*COLORS.length)];
+    const ink  = COLORS[Math.floor(Math.random()*COLORS.length)];
+    el.pipWord.textContent=word.name; el.pipWord.style.color=ink.css;
+    el.pipBtns.innerHTML=""; COLORS.forEach(c=>{ const b=document.createElement('button'); b.className="tj-btn ghost"; b.textContent=c.name;
+      b.onclick=()=>{ metrics.pips.total++; if(c.name===ink.name) metrics.pips.hits++; hidePip(); updateLive(); };
+      el.pipBtns.appendChild(b);
+    });
+    metrics.pips.total++;
+    el.pip.classList.remove('hidden');
+    setTimeout(()=>{ hidePip(); }, 1400);
+  }
+  function hidePip(){ el.pip.classList.add('hidden'); }
+
+  // ---------- Strategy constraints ----------
+  function applyStrategy(){
+    strategy = el.strategySel.value;
+    metrics.strategy = strategy;
+    el.notesBox.classList.toggle('hidden', strategy!=='external');
+    if(strategy==='none') el.strategyInfo.textContent = 'No constraints applied.';
+    if(strategy==='prioritisation') el.strategyInfo.textContent = 'Actions scored: On-deadline high bonus; early small bonus; late penalty. Queue ok; switching costs visible.';
+    if(strategy==='external') el.strategyInfo.textContent = 'Two notes max. Opening notes costs 1s each; chars tracked.';
+    if(strategy==='chunking') el.strategyInfo.textContent = 'Batch window: committing in one panel locks others for 6s (inhibition).';
+    if(strategy==='timeblock') el.strategyInfo.textContent = 'Panels gated by time: 0–60s Recipe; 60–120s Messages; 120–180s Mixed; then open.';
+    // time blocks
+    if(strategy==='timeblock'){
+      timeBlocks = [[0,60,'recipe'],[60,120,'messages'],[120,180,'mixed'],[180,9999,'all']];
+    } else timeBlocks = [[0,9999,'all']];
+  }
+  function gatePanels(){
+    const t=now();
+    const block = timeBlocks.find(b=>t>=b[0] && t<b[1]) || timeBlocks[0];
+    const mode = block[2];
+    const lockMsgs = mode!=='messages' && mode!=='mixed' && mode!=='all';
+    const lockRec  = mode!=='recipe'   && mode!=='mixed' && mode!=='all';
+    const lockShop = mode==='recipe' || mode==='messages'; // early blocks constrain probes handling
+    el.messagesPanel.classList.toggle('lock', lockMsgs);
+    el.recipePanel.classList.toggle('lock', lockRec);
+    el.shoppingPanel.classList.toggle('lock', lockShop);
+    el.timersPanel.classList.toggle('lock', false);
+  }
+
+  // notes costs
+  function openNotesCost(){
+    if(strategy!=='external') return;
+    noteOpens++; metrics.noteOpens = noteOpens;
+    // time penalty
+    T = Math.min(T+1, Tlimit-1); // add 1s
+    el.noteInfo.textContent = `Opens: ${noteOpens} | Chars: ${noteChars}`;
+    updateTimer();
+  }
+  el.note1?.addEventListener('focus', openNotesCost);
+  el.note2?.addEventListener('focus', openNotesCost);
+  el.note1?.addEventListener('input', ()=>{ noteChars = (el.note1.value+el.note2.value).length; metrics.noteChars = noteChars; el.noteInfo.textContent = `Opens: ${noteOpens} | Chars: ${noteChars}`; });
+  el.note2?.addEventListener('input', ()=>{ noteChars = (el.note1.value+el.note2.value).length; metrics.noteChars = noteChars; el.noteInfo.textContent = `Opens: ${noteOpens} | Chars: ${noteChars}`; });
+
+  // chunking lock
+  function maybeOpenChunk(panel){
+    if(strategy!=='chunking') return;
+    if(!chunkWindowOpen){
+      chunkWindowOpen = true; chunkEndsAt = now()+6;
+      // lock other panels
+      [el.recipePanel, el.messagesPanel, el.shoppingPanel, el.timersPanel].forEach(p=>{
+        const id = p.id.includes(panel)? false : true;
+        p.classList.toggle('lock', id);
       });
-      document.getElementById("feedbackZone").innerHTML=html;
-      sessionLog.push({
-        timestamp:new Date().toISOString(),
-        complexity:complexitySel.value,
-        timeLimit:timeSel.value,
-        strategy:currentStrategy,
-        correct:g.correct,
-        total:g.total,
-        percent:pct
-      });
-      log("Recall checked — "+g.correct+"/"+g.total+".");
-    };
+      schedule('chunkClose', {}, 6);
+    }
+  }
+  function closeChunk(){
+    chunkWindowOpen=false;
+    [el.recipePanel, el.messagesPanel, el.shoppingPanel, el.timersPanel].forEach(p=>p.classList.remove('lock'));
+  }
 
-    btnRestart.onclick=()=>{ location.reload(); };
+  // ---------- Event handling ----------
+  const sessionData = { shoppingTrue:[], shoppingTrueSet:new Set(), seenTomAt:null, starredTomAt:null };
+  document.addEventListener('click', (e)=>{
+    const b = e.target.closest('[data-act]'); if(!b) return;
+    const act = b.getAttribute('data-act'); if(b.closest('.lock')) return;
+    // panel id for metrics
+    let panel = 'other';
+    if(act.startsWith('doStep')) panel='recipe';
+    if(act==='reply' || act==='star') panel='messages';
+    if(act.startsWith('shop')) panel='shopping';
+    if(act==='ack') panel='timers';
+    logAction(panel);
 
-    // CSV download
-    btnDownload.onclick=()=>{
-      if(sessionLog.length===0){ log("Nothing to download yet."); return; }
-      const escape=v=>('"' + String(v).replace(/"/g,'""') + '"');
-      const header=Object.keys(sessionLog[0]).join(",");
-      const lines=sessionLog.map(r=>Object.values(r).map(escape).join(","));
-      let csv = [header, ...lines].join("\n");
-      if (typeof window.__augmentCSV === "function") {
-        try { csv = window.__augmentCSV(csv) || csv; } catch(e){ /* ignore */ }
+    if(strategy==='chunking'){ maybeOpenChunk(panel); }
+
+    if(act==='doStep'){
+      const id = +b.getAttribute('data-id');
+      const step = recipeSteps.find(s=>s.id===id);
+      const t = now(); const [a,bw] = step.window;
+      if(t < a) metrics.deadlines.early++;
+      else if(t > bw){ metrics.deadlines.late++; metrics.deadlines.lateMs += (t-bw)*1000; }
+      else metrics.deadlines.onTime++;
+      b.disabled=true; b.textContent='Done';
+      // prioritisation bonus is accounted in CSV as on-time pct; (full scoring could be added if needed)
+      renderRecipe();
+      return;
+    }
+
+    if(act==='star'){
+      const id=b.getAttribute('data-id'); const node = el.messagesList.querySelector(`.msg-bubble[data-id="${id}"]`);
+      if(node){
+        node.dataset.starred = '1';
+        const sender = node.dataset.sender;
+        if(sender==='Tom'){ sessionData.starredTomAt = performance.now(); }
+        node.querySelector('[data-act="star"]').classList.add('muted');
       }
-      const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement("a");
-      a.href=url; a.download="task_juggler_sessions.csv";
-      document.body.appendChild(a); a.click(); a.remove();
-      URL.revokeObjectURL(url);
+      return;
+    }
+
+    if(act==='reply'){
+      const id=b.getAttribute('data-id'), ans=b.getAttribute('data-ans');
+      const node = el.messagesList.querySelector(`.msg-bubble[data-id="${id}"]`);
+      if(!node) return;
+      const isFamily = node.dataset.family==='1';
+      const should = isFamily ? rule.family : rule.nonFamily;
+      // PM check for Tom
+      const sender = node.dataset.sender;
+      if(sender==='Tom'){
+        const starred = node.dataset.starred==='1';
+        if(!starred){
+          metrics.pmMisses++;
+        }else{
+          // check timing
+          const dt = performance.now() - (sessionData.seenTomAt||performance.now());
+          if(dt <= pmCue.windowMs) metrics.pmHits++; else metrics.pmMisses++;
+        }
+      }
+
+      if(ans!==should){ metrics.inhibErrors++; } // wrong-rule reply = inhibition error (rule adherence)
+      node.style.opacity=0.6;
+      return;
+    }
+
+    if(act==='shopAccept' || act==='shopReject'){
+      const name=b.getAttribute('data-name');
+      const isTrue = sessionData.shoppingTrueSet.has(name);
+      const accept = act==='shopAccept';
+      if((accept && !isTrue) || (!accept && isTrue)){
+        metrics.inhibErrors++;
+        if(isTrue) metrics.memoryErrors++;
+      }
+      b.closest('div').parentElement.style.opacity=0.6;
+      return;
+    }
+
+    if(act==='ack'){
+      const node=b.closest('.msg-bubble'); if(node) node.style.opacity=0.6;
+      return;
+    }
+  });
+
+  // ---------- Rule shifts & PM hook ----------
+  function shiftRule(){
+    // flip non-family rule after mid-session
+    rule.nonFamily = (rule.nonFamily==='Later' ? 'No' : 'Later');
+    el.ruleBadge.textContent = `Rule: Family→${rule.family} | Non-family→${rule.nonFamily}`;
+    ping(520,0.08);
+  }
+
+  // ---------- Generators ----------
+  function seedSession(){
+    // reset UI
+    el.messagesList.innerHTML=""; el.shoppingStream.innerHTML=""; el.timersList.innerHTML=""; el.shoppingExposure.innerHTML="";
+    renderRecipe();
+
+    // shopping memory
+    const pick = (arr,n)=>arr.slice().sort(()=>Math.random()-0.5).slice(0,n);
+    sessionData.shoppingTrue = pick(baseList, 3 + (Math.random()<0.5?1:0));
+    sessionData.shoppingTrueSet = new Set(sessionData.shoppingTrue);
+    renderShoppingExposure(sessionData.shoppingTrue);
+    schedule('hideExposure', {}, Math.round(+el.memExposure.value));
+
+    // recipe pings
+    recipeSteps.forEach(st=> schedule('ping', {panel:'recipe'}, st.window[0]) );
+
+    // messages
+    const mcount = 4 + Math.floor(Math.random()*3) + (difficulty>2?1:0);
+    for(let i=0;i<mcount;i++){
+      const msg = Object.assign({id:'m'+i}, messagePool[Math.floor(Math.random()*messagePool.length)]);
+      const t = 12 + Math.floor(Math.random()*(Tlimit-18));
+      schedule('message', msg, t);
+    }
+
+    // timers
+    const timers = [{id:'t1',text:'Oven ready — check now!'},{id:'t2',text:'Sauce needs stirring!'},{id:'t3',text:'Lower heat to simmer.'}];
+    const tcount = 2 + (difficulty>2?1:0);
+    for(let i=0;i<tcount;i++){
+      const alert=timers[i]; const t= 25 + Math.floor(Math.random()*(Tlimit-30));
+      schedule('timer', alert, t);
+    }
+
+    // shopping probes
+    const totalProbes = 6 + (difficulty>3?2:0);
+    for(let i=0;i<totalProbes;i++){
+      const isTrue = Math.random()<0.5;
+      const name = isTrue ? sessionData.shoppingTrue[Math.floor(Math.random()*sessionData.shoppingTrue.length)]
+                          : lureList[Math.floor(Math.random()*lureList.length)];
+      const t = 18 + Math.floor(Math.random()*(Tlimit-22));
+      schedule('shopProbe', {name}, t);
+    }
+
+    // pips
+    for(let t=14; t<Tlimit-5; t += (difficulty>=3?9:12) + Math.floor(Math.random()*10)){
+      schedule('pip', {}, t);
+    }
+
+    // rule shift mid-session
+    schedule('ruleShift', {}, Math.floor(Tlimit/2));
+
+    // time-block gating applies if selected
+  }
+
+  // ---------- Dispatch ----------
+  function dispatch(e){
+    switch(e.kind){
+      case 'hideExposure':
+        el.shoppingExposure.innerHTML = '<div class="helper">List hidden.</div>'; break;
+      case 'ping':
+        ping(1100,0.05); break;
+      case 'message':
+        renderMessage(e.payload);
+        if(e.payload.sender==='Tom'){ sessionData.seenTomAt = performance.now(); }
+        ping(880,0.05); break;
+      case 'timer':
+        renderTimerAlert(e.payload); ping(660,0.05); break;
+      case 'shopProbe':
+        renderShoppingProbe(e.payload.name); break;
+      case 'pip':
+        showPip(); break;
+      case 'ruleShift':
+        shiftRule(); break;
+      case 'chunkClose':
+        closeChunk(); break;
+    }
+  }
+
+  // ---------- Adaptation ----------
+  function maybeAdapt(){
+    // crude: if on-time >80% and inhibition errors low, increase difficulty; if inhibition > (2/min), decrease
+    const dead = metrics.deadlines;
+    const totalDead = dead.onTime + dead.early + dead.late;
+    const onPct = totalDead? dead.onTime/totalDead : 0;
+    const errRate = metrics.inhibErrors / Math.max(1, now()/60);
+    let delta = 0;
+    if(onPct>0.8 && errRate<1 && difficulty<4) delta=+1;
+    if(errRate>2 && difficulty>1) delta=-1;
+    if(delta!==0){
+      difficulty+=delta; metrics.adaptations++;
+      setLoadLabel();
+    }
+  }
+
+  // ---------- Loop ----------
+  function step(){
+    if(!running) return;
+    T+=1; drain(); gatePanels(); updateTimer();
+    if(T>=Tlimit){ endSession(); return; }
+    if(T%15===0) maybeAdapt();
+    setTimeout(step, 1000);
+  }
+
+  // ---------- UI, CSV, live ----------
+  function updateLive(){
+    const sc = metrics.switchCosts.slice().sort((a,b)=>a-b);
+    const med = sc.length ? Math.round(sc[Math.floor(sc.length/2)]) : '—';
+    const dead = metrics.deadlines; const totalDead = dead.onTime+dead.early+dead.late;
+    const onPct = totalDead? Math.round(dead.onTime/totalDead*100): '—';
+    const pipAcc = metrics.pips.total? Math.round(metrics.pips.hits/metrics.pips.total*100): '—';
+    el.live.textContent = `Switch median: ${med} ms | On-time: ${onPct}% | Inhibition: ${metrics.inhibErrors} | PM hits: ${metrics.pmHits} | Pip acc: ${pipAcc}%`;
+  }
+
+  function startSession(){
+    // reset metrics
+    Object.assign(metrics, {
+      actions:[], switchCosts:[], lastPanel:null, lastActTs:performance.now(),
+      deadlines:{onTime:0, early:0, late:0, lateMs:0}, inhibErrors:0, memoryErrors:0,
+      pmHits:0, pmMisses:0, pmFalse:0, pips:{hits:0,total:0}, strategy: strategy, strategyAdherence:0,
+      noteOpens:0, noteChars:0, adaptations:0, log:[...metrics.log] // keep historical rows if multiple runs
+    });
+    noteOpens=0; noteChars=0;
+    difficulty=1; setLoadLabel();
+    rule = {family:'Yes', nonFamily:'Later'}; el.ruleBadge.textContent=`Rule: Family→Yes | Non-family→Later`;
+    sessionData.seenTomAt=null; sessionData.starredTomAt=null;
+    T=0; Tlimit=parseInt(el.timeSel.value,10); running=true; queue.length=0;
+    el.btnStart.disabled=true; el.btnDownload.disabled=true;
+    renderRecipe(); seedSession(); step();
+  }
+
+  function endSession(){
+    running=false; el.btnStart.disabled=false; el.btnDownload.disabled=false;
+    const sc = metrics.switchCosts.slice().sort((a,b)=>a-b);
+    const scMed = sc.length ? Math.round(sc[Math.floor(sc.length/2)]) : '';
+    const d=metrics.deadlines; const totalDead=d.onTime+d.early+d.late;
+    const onPct = totalDead? Math.round(d.onTime/totalDead*100) : '';
+    const pipAcc = metrics.pips.total? Math.round(metrics.pips.hits/metrics.pips.total*100) : '';
+    const row = {
+      timestamp:new Date().toISOString(),
+      duration_s:Tlimit,
+      strategy:metrics.strategy,
+      difficulty_final:difficulty,
+      switch_median_ms:scMed,
+      deadlines_on_time:d.onTime, deadlines_early:d.early, deadlines_late:d.late,
+      deadlines_on_time_pct:onPct, deadlines_late_ms_total:d.lateMs,
+      inhib_errors:metrics.inhibErrors, memory_errors:metrics.memoryErrors,
+      pm_hits:metrics.pmHits, pm_misses:metrics.pmMisses,
+      pip_hits:metrics.pips.hits, pip_total:metrics.pips.total, pip_acc_pct:pipAcc,
+      note_opens:metrics.noteOpens, note_chars:metrics.noteChars,
+      adaptations:metrics.adaptations
     };
+    metrics.log.push(row);
+    updateLive(); ping(520,0.08);
+  }
 
-    // Update stat display
-    complexitySel.addEventListener("change",()=>{
-      $("#statLevel").textContent="Level: "+complexitySel.value;
-    });
-    timeSel.addEventListener("change",()=>{
-      const mins = Math.floor(parseInt(timeSel.value,10)/60);
-      $("#statTime").textContent="Time: "+mins+" min";
-    });
+  function downloadCSV(){
+    if(!metrics.log.length) return;
+    const keys = Object.keys(metrics.log[0]);
+    const esc = v => '"' + String(v).replace(/"/g,'""') + '"';
+    const lines = [keys.join(',')].concat(metrics.log.map(r=>keys.map(k=>esc(r[k]??'')).join(',')));
+    const csv = lines.join('\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+    const url = URL.createObjectURL(blob); const a=document.createElement('a');
+    a.href=url; a.download='task_juggler_complete_v1.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  }
 
-    log("Ready. Pick a strategy and press Start session.");
-  })();
-  </script>
+  function onStrategyChange(){ applyStrategy(); }
+
+  el.btnStart.addEventListener('click', startSession);
+  el.btnReset.addEventListener('click', ()=>location.reload());
+  el.btnDownload.addEventListener('click', downloadCSV);
+  el.timeSel.addEventListener('change', ()=>{ el.statTime.textContent=`Time: ${Math.floor(+el.timeSel.value/60)} min`; });
+  el.strategySel.addEventListener('change', onStrategyChange);
+
+  // init
+  applyStrategy(); renderRecipe(); updateTimer(); updateLive(); setLoadLabel();
+})();
+</script>
 </body>
 </html>
