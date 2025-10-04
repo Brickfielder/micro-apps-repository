@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Task Juggler — Executive Function Training</title>
+
+  <!-- Shared assets -->
+  <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3">
+  <script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
+  <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
+
+  <!-- Frame config -->
+  <meta name="theme" content="bold dense">
+  <meta name="app-slug" content="task-juggler">
+  <meta name="app-title" content="Task Juggler — Executive Function Training">
+  <meta name="app-desc" content="Manage overlapping tasks under time pressure to train executive function, task-switching, and divided attention.">
+
+  <style>
+    /* App-scoped styles */
+    .tj-wrap{max-width:1200px;margin:0 auto}
+    .tj-grid{display:grid;grid-template-columns:360px 1fr;gap:16px}
+    @media (max-width:900px){ .tj-grid{grid-template-columns:1fr} }
+    .tj-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+    .tj-sectionTitle{font-weight:800;margin:0 0 8px;font-size:22px}
+    .tj-label{font-weight:600;font-size:14px;color:var(--muted);margin:6px 0}
+    .tj-row{display:flex;gap:10px;flex-wrap:wrap}
+    .tj-pill{display:inline-flex;align-items:center;gap:8px;background:var(--pill);padding:6px 10px;border-radius:999px;font-size:12px;color:var(--muted)}
+    .tj-btn{cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;font:inherit;transition:all .15s}
+    .tj-btn.primary{background:var(--accent);border-color:var(--accent-600);color:#fff}
+    .tj-btn.primary:hover{background:var(--accent-600)}
+    .tj-btn.ghost{background:var(--surface)}
+    .tj-btn.ghost:hover{background:color-mix(in oklab, var(--surface), var(--line) 12%)}
+    .tj-btn.success{background:#16a34a;color:#fff;border-color:transparent}
+    .tj-btn.warn{background:#ef4444;color:#fff;border-color:transparent}
+    .tj-btn:disabled{opacity:.6;cursor:not-allowed}
+    .tj-stat{display:inline-block;margin-right:10px;border-radius:999px;padding:6px 10px;background:#eef2ff;color:#1e3a8a;font-size:12px}
+    @media (prefers-color-scheme: dark){ .tj-stat{background:#0c2250;color:#cfe3fc} }
+
+    /* Timer display */
+    .timer-display{font-size:48px;font-weight:900;text-align:center;margin:12px 0;color:var(--accent);font-variant-numeric:tabular-nums}
+    .timer-display.warning{color:#ef4444;animation:pulse 1s infinite}
+    @keyframes pulse{0%,100%{opacity:1} 50%{opacity:.6}}
+
+    /* Task panels */
+    .task-panel{border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;background:var(--surface)}
+    .task-panel.urgent{border-color:var(--accent);border-width:2px;background:color-mix(in oklab, var(--accent), white 95%)}
+    .task-panel.complete{opacity:.5;background:color-mix(in oklab, #16a34a, white 90%)}
+    .task-title{font-weight:700;margin-bottom:6px}
+    .task-action{margin-top:8px}
+
+    /* Message bubble */
+    .msg-bubble{background:#e8f1fb;border:1px solid #cfe3fc;border-radius:12px;padding:10px 12px;margin:8px 0;display:flex;align-items:center;gap:10px}
+    .msg-bubble.replied{opacity:.5;background:#f0fdf4}
+    .msg-sender{font-weight:700;font-size:13px}
+    .msg-text{flex:1;font-size:14px}
+
+    /* Shopping list */
+    .shop-list{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+    .shop-item{background:var(--pill);padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600}
+
+    /* Distractor (reuse Stroop from Memory in Action) */
+    .stroop-word{font-size:28px;font-weight:800;margin:8px 0}
+    .stroop-grid{display:flex;gap:8px;flex-wrap:wrap}
+    .stroop-score{margin-top:6px}
+
+    /* Recall */
+    .cue{margin-top:8px;padding:10px;border:1px dashed var(--line);border-radius:10px;background:var(--pill)}
+    .mc{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+    .mc .tj-btn{padding:6px 10px;font-size:13px;border-radius:999px}
+
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+  <main id="app-root">
+    <div class="tj-wrap">
+      <div class="tj-grid">
+        <!-- Left: Settings -->
+        <div class="tj-card">
+          <div class="tj-sectionTitle">Settings</div>
+
+          <label class="tj-label">Complexity level</label>
+          <select id="complexitySel">
+            <option value="2">Level 1 — 2 tasks (easier)</option>
+            <option value="3" selected>Level 2 — 3 tasks (moderate)</option>
+            <option value="4">Level 3 — 4 tasks (harder)</option>
+          </select>
+
+          <label class="tj-label" style="margin-top:8px">Time limit</label>
+          <select id="timeSel">
+            <option value="180">3 minutes (easier)</option>
+            <option value="240" selected>4 minutes (moderate)</option>
+            <option value="300">5 minutes (harder)</option>
+          </select>
+
+          <div class="tj-row" style="margin-top:8px">
+            <div style="flex:1">
+              <label class="tj-label">Voice</label>
+              <select id="voiceSel"><option>Loading voices…</option></select>
+            </div>
+          </div>
+
+          <div class="tj-row" style="margin-top:8px">
+            <div style="flex:1"><label class="tj-label">Rate</label><input id="voiceRate" type="range" min="0.7" max="1.2" step="0.05" value="0.95"/></div>
+            <div style="flex:1"><label class="tj-label">Volume</label><input id="voiceVol" type="range" min="0" max="1" step="0.05" value="1"/></div>
+          </div>
+
+          <div class="tj-row" style="margin-top:12px">
+            <button class="tj-btn primary" id="btnStart">Start session</button>
+            <button class="tj-btn ghost" id="btnStopVoice" disabled>Stop voice</button>
+            <button class="tj-btn ghost" id="btnReset">Reset</button>
+          </div>
+
+          <div class="tj-row" style="margin-top:8px">
+            <button class="tj-btn ghost" id="btnDownload">Download CSV</button>
+          </div>
+
+          <div style="margin-top:12px">
+            <span class="tj-stat" id="statLevel">Level: 2</span>
+            <span class="tj-stat" id="statTime">Time: 4 min</span>
+          </div>
+        </div>
+
+        <!-- Right: Task area -->
+        <div class="tj-card">
+          <div class="tj-sectionTitle">Task area</div>
+          <div class="tj-pill">Strategy → <strong>Active Tasks</strong> → Distractor → Recall</div>
+
+          <!-- Strategy -->
+          <section id="strategyCard" style="margin-top:12px">
+            <label class="tj-label">Choose your strategy</label>
+            <div class="tj-row" role="group">
+              <button class="tj-btn ghost" data-strategy="Prioritization">🎯 Prioritization</button>
+              <button class="tj-btn ghost" data-strategy="External aids">📋 External aids</button>
+              <button class="tj-btn ghost" data-strategy="Chunking">🧩 Chunking</button>
+              <button class="tj-btn ghost" data-strategy="Time blocking">⏱️ Time blocking</button>
+              <button class="tj-btn ghost" data-strategy="None">🙋 No strategy</button>
+            </div>
+            <div id="strategyInfo" style="margin-top:10px">
+              <div class="tj-pill">Tip: If you repeat the same strategy 3×, I'll suggest variety.</div>
+            </div>
+          </section>
+
+          <!-- Active phase -->
+          <section id="activeCard" class="hidden" style="margin-top:12px">
+            <div class="timer-display" id="timerDisplay">4:00</div>
+            
+            <div id="taskContainer"></div>
+
+            <div class="tj-row" style="margin-top:12px;justify-content:center">
+              <button class="tj-btn ghost" id="btnPause">Pause</button>
+            </div>
+          </section>
+
+          <!-- Distractor -->
+          <section id="distractorCard" class="hidden" style="margin-top:12px">
+            <label class="tj-label">Distractor task</label>
+            <div class="helper">Complete the Stroop task to continue (12 trials).</div>
+            <div class="stroop-word" id="stroopWord">BLUE</div>
+            <div class="stroop-grid" id="stroopBtns"></div>
+            <div class="stroop-score helper" id="stroopScore">0/12</div>
+          </section>
+
+          <!-- Recall -->
+          <section id="recallCard" class="hidden" style="margin-top:12px">
+            <label class="tj-label">Recall — 5 Questions</label>
+            <div class="helper">Answer freely. If stuck, click "Show hint", then "More" for options.</div>
+            <div id="recallInputs" style="margin-top:8px"></div>
+            <div class="tj-row" style="margin-top:10px">
+              <button class="tj-btn primary" id="btnCheck">Check answers</button>
+            </div>
+          </section>
+
+          <!-- Feedback -->
+          <section id="feedbackCard" class="hidden" style="margin-top:12px">
+            <label class="tj-label">Feedback</label>
+            <div id="feedbackZone"></div>
+            <div class="tj-row" style="margin-top:10px">
+              <button class="tj-btn success" id="btnRestart">Start another session</button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+  (function(){
+    const $ = s => document.querySelector(s);
+    const $$ = s => Array.from(document.querySelectorAll(s));
+    const log = (msg)=>{ try{ console.debug('[TaskJuggler]', msg); }catch(e){} };
+
+    const complexitySel=$('#complexitySel'), timeSel=$('#timeSel'), voiceSel=$('#voiceSel');
+    const vRate=$('#voiceRate'), vVol=$('#voiceVol');
+    const btnStart=$('#btnStart'), btnStopVoice=$('#btnStopVoice'), btnReset=$('#btnReset'), btnDownload=$('#btnDownload'), btnPause=$('#btnPause');
+    const strategyCard=$('#strategyCard'), activeCard=$('#activeCard'), distractorCard=$('#distractorCard'), recallCard=$('#recallCard'), feedbackCard=$('#feedbackCard');
+    const timerDisplay=$('#timerDisplay'), taskContainer=$('#taskContainer');
+    const stroopWord=$('#stroopWord'), stroopBtns=$('#stroopBtns'), stroopScore=$('#stroopScore');
+    const recallInputs=$('#recallInputs'), btnCheck=$('#btnCheck'), btnRestart=$('#btnRestart');
+
+    let currentStrategy=null, lastStrategies=[];
+    let sessionLog=[];
+    let timeRemaining=0, timerInterval=null, paused=false;
+    let currentScenario=null;
+
+    const STRATEGY_DETAILS={
+      Prioritization:{title:"Prioritization",desc:"Identify urgent vs. non-urgent tasks. Focus on time-sensitive items first (e.g., timer alarms, recipe steps).",
+               examples:["Handle recipe steps immediately","Delay non-urgent texts","Check timers frequently"]},
+      "External aids":{title:"External aids",desc:"Use mental notes, finger counting, or verbal rehearsal to track tasks. Imagine writing a quick list.",
+               examples:["Repeat shopping items aloud","Count completed tasks on fingers","Mentally note message sender names"]},
+      Chunking:{title:"Chunking",desc:"Group related tasks (e.g., all messages, all recipe steps, all shopping items) to reduce cognitive load.",
+               examples:["Group all texts together","Batch recipe steps by type","Link shopping items by category"]},
+      "Time blocking":{title:"Time blocking",desc:"Allocate mental time slots: 'First 2 min for recipe, then messages, then shopping review.'",
+               examples:["0-2min: recipe focus","2-3min: respond to messages","3-4min: review shopping list"]},
+      None:{title:"No strategy",desc:"Proceed without a compensatory strategy — useful as a baseline to compare performance.",examples:["—"]}
+    };
+
+    const show = el => el.classList.remove("hidden");
+    const hide = el => el.classList.add("hidden");
+    const norm = s => (s || "").toLowerCase().replace(/[^a-z0-9\s]/g,"").trim();
+
+    function maybeNudge(choice){
+      lastStrategies.push(choice);
+      if(lastStrategies.length>3) lastStrategies.shift();
+      if(lastStrategies.length===3 && lastStrategies.every(s=>s===choice)){
+        log("Tip: try a different strategy this round (you chose "+choice+" three times).");
+      }
+      return choice;
+    }
+
+    // Voice functions
+    function pickVoice(){
+      if(!("speechSynthesis" in window)) return null;
+      const voices = speechSynthesis.getVoices() || [];
+      const libby = voices.find(v => /libby/i.test(v.name) && /(online|natural|neural)/i.test(v.name));
+      const anyLibby = libby || voices.find(v => /libby/i.test(v.name));
+      return anyLibby
+          || voices.find(v => /^en-GB/.test(v.lang))
+          || voices.find(v => /^en/.test(v.lang))
+          || voices[0]
+          || null;
+    }
+    function stopSpeak(){ if("speechSynthesis" in window){ speechSynthesis.cancel(); } }
+    function speak(text){
+      if(!("speechSynthesis" in window)) return { onend:cb=>cb&&cb() };
+      const u=new SpeechSynthesisUtterance(text);
+      const v=pickVoice(); if(v) u.voice=v;
+      u.rate=parseFloat(vRate.value); u.volume=parseFloat(vVol.value);
+      u.lang=(v && v.lang) || "en-GB";
+      speechSynthesis.cancel();
+      speechSynthesis.speak(u);
+      return u;
+    }
+
+    function populateVoices(){
+      if(!("speechSynthesis" in window)) { 
+        voiceSel.innerHTML='<option>Speech not supported</option>'; 
+        return true; 
+      }
+      const voices = speechSynthesis.getVoices();
+      if(!voices || voices.length===0) return false;
+      const libbyList = voices.filter(v => /libby/i.test(v.name) && /(online|natural|neural)/i.test(v.name));
+      voiceSel.innerHTML = "";
+      if (libbyList.length) {
+        libbyList.forEach(v => {
+          const o = document.createElement("option");
+          o.value = v.name;
+          o.textContent = v.name + " — " + v.lang;
+          voiceSel.appendChild(o);
+        });
+        voiceSel.value = libbyList[0].name;
+        return true;
+      }
+      const fallback = voices.find(v => /^en-GB/.test(v.lang)) || voices[0];
+      if (fallback) {
+        const o = document.createElement("option");
+        o.value = fallback.name;
+        o.textContent = fallback.name + " — " + fallback.lang;
+        voiceSel.appendChild(o);
+        voiceSel.value = fallback.name;
+      }
+      return true;
+    }
+    function initVoices(){
+      if(populateVoices()) return;
+      if("speechSynthesis" in window){
+        speechSynthesis.onvoiceschanged = ()=>populateVoices();
+        let tries=0; const int=setInterval(()=>{
+          tries++; if(populateVoices() || tries>20){ clearInterval(int); }
+        }, 100);
+      }
+    }
+    initVoices();
+
+    // Scenarios
+    function generateScenario(complexity){
+      const numTasks = parseInt(complexity, 10);
+      const recipe = {
+        type: 'recipe',
+        title: '🍝 Recipe: Pasta',
+        steps: [
+          {time: 30, text: "Boil water for pasta", action: "done"},
+          {time: 90, text: "Add pasta to boiling water", action: "done"},
+          {time: 150, text: "Stir the pasta", action: "done"},
+          {time: 210, text: "Check if pasta is al dente", action: "done"}
+        ],
+        completed: []
+      };
+
+      const messages = {
+        type: 'messages',
+        title: '💬 Messages',
+        items: [
+          {time: 45, sender: "Anna", text: "Can you grab milk?", replies: ["Yes", "No", "Later"]},
+          {time: 120, sender: "Tom", text: "Are we still meeting at 6?", replies: ["Yes", "No", "Maybe"]},
+          {time: 180, sender: "Sarah", text: "Did you see my email?", replies: ["Yes", "No", "Not yet"]}
+        ],
+        replied: []
+      };
+
+      const shopping = {
+        type: 'shopping',
+        title: '🛒 Shopping list',
+        items: ["Bread", "Eggs", "Butter"]
+      };
+
+      const timer = {
+        type: 'timer',
+        title: '⏰ Kitchen timer',
+        alerts: [
+          {time: 60, text: "Oven ready — check now!"},
+          {time: 150, text: "Sauce needs stirring!"}
+        ],
+        acknowledged: []
+      };
+
+      let tasks = [recipe, messages, shopping];
+      if(numTasks >= 4) tasks.push(timer);
+
+      return {tasks, questions: generateQuestions(tasks)};
+    }
+
+    function generateQuestions(tasks){
+      const qs = [];
+      const recipe = tasks.find(t=>t.type==='recipe');
+      const msgs = tasks.find(t=>t.type==='messages');
+      const shop = tasks.find(t=>t.type==='shopping');
+      const timer = tasks.find(t=>t.type==='timer');
+
+      if(recipe){
+        qs.push({
+          prompt: "What was the first recipe step?",
+          ans: ["boil water", "boil", "water"],
+          hints: ["Related to water.", "Preparing water for cooking."],
+          cue: {mc: ["Boil water", "Add pasta", "Stir pasta", "Check doneness"]}
+        });
+      }
+      if(msgs){
+        qs.push({
+          prompt: "Who asked about milk?",
+          ans: ["anna"],
+          hints: ["A woman's name.", "Starts with A."],
+          cue: {mc: ["Anna", "Tom", "Sarah", "Marco"]}
+        });
+      }
+      if(shop){
+        qs.push({
+          prompt: "Name one shopping item.",
+          ans: ["bread", "eggs", "butter"],
+          hints: ["Three items: a spread, a protein, and a staple.", "One is a dairy product."],
+          cue: {mc: ["Bread", "Milk", "Coffee", "Apples"]}
+        });
+      }
+      if(msgs && msgs.items.length > 1){
+        qs.push({
+          prompt: "Who asked about meeting at 6?",
+          ans: ["tom"],
+          hints: ["A man's name.", "Three letters."],
+          cue: {mc: ["Tom", "Anna", "Sarah", "Chris"]}
+        });
+      }
+      if(timer){
+        qs.push({
+          prompt: "What needed stirring?",
+          ans: ["sauce"],
+          hints: ["A liquid part of the meal.", "Usually poured over pasta."],
+          cue: {mc: ["Sauce", "Pasta", "Oven", "Water"]}
+        });
+      }
+
+      return qs.slice(0, 5);
+    }
+
+    // Render tasks
+    function renderTasks(){
+      taskContainer.innerHTML = "";
+      currentScenario.tasks.forEach((task, idx) => {
+        const panel = document.createElement("div");
+        panel.className = "task-panel";
+        panel.id = "task-"+idx;
+
+        if(task.type === 'recipe'){
+          panel.innerHTML = `<div class="task-title">${task.title}</div>`;
+          const list = document.createElement("div");
+          task.steps.forEach((step, si) => {
+            const complete = task.completed.includes(si);
+            const item = document.createElement("div");
+            item.className = "task-action";
+            item.innerHTML = `
+              <span style="${complete?'text-decoration:line-through;opacity:.5':''}">
+                ${complete?'✅':''} ${step.text}
+              </span>
+              ${!complete ? `<button class="tj-btn ghost" style="margin-left:8px;padding:4px 8px;font-size:12px" data-task="recipe" data-step="${si}">Mark done</button>` : ''}
+            `;
+            list.appendChild(item);
+          });
+          panel.appendChild(list);
+        }
+
+        if(task.type === 'messages'){
+          panel.innerHTML = `<div class="task-title">${task.title}</div>`;
+          task.items.forEach((msg, mi) => {
+            const replied = task.replied.includes(mi);
+            const bubble = document.createElement("div");
+            bubble.className = "msg-bubble" + (replied ? " replied" : "");
+            bubble.innerHTML = `
+              <div style="flex:1">
+                <div class="msg-sender">${msg.sender}</div>
+                <div class="msg-text">${msg.text}</div>
+              </div>
+              ${!replied ? `<div style="display:flex;gap:4px;flex-wrap:wrap">
+                ${msg.replies.map((r, ri)=>`<button class="tj-btn ghost" style="padding:4px 8px;font-size:11px" data-task="messages" data-msg="${mi}" data-reply="${ri}">${r}</button>`).join('')}
+              </div>` : ''}
+            `;
+            panel.appendChild(bubble);
+          });
+        }
+
+        if(task.type === 'shopping'){
+          panel.innerHTML = `<div class="task-title">${task.title}</div><div class="helper">Memorize these items for recall later.</div><div class="shop-list"></div>`;
+          const list = panel.querySelector(".shop-list");
+          task.items.forEach(item => {
+            const span = document.createElement("span");
+            span.className = "shop-item";
+            span.textContent = item;
+            list.appendChild(span);
+          });
+        }
+
+        if(task.type === 'timer'){
+          panel.innerHTML = `<div class="task-title">${task.title}</div><div class="helper">Alerts will appear during the session.</div>`;
+        }
+
+        taskContainer.appendChild(panel);
+      });
+
+      // Event delegation
+      taskContainer.addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-task]");
+        if(!btn) return;
+        const taskType = btn.getAttribute("data-task");
+        const task = currentScenario.tasks.find(t=>t.type===taskType);
+
+        if(taskType === 'recipe'){
+          const si = parseInt(btn.getAttribute("data-step"), 10);
+          if(!task.completed.includes(si)){
+            task.completed.push(si);
+            renderTasks();
+          }
+        }
+
+        if(taskType === 'messages'){
+          const mi = parseInt(btn.getAttribute("data-msg"), 10);
+          if(!task.replied.includes(mi)){
+            task.replied.push(mi);
+            renderTasks();
+          }
+        }
+      });
+    }
+
+    // Timer
+    function startTimer(seconds){
+      timeRemaining = seconds;
+      updateTimerDisplay();
+      timerInterval = setInterval(()=>{
+        if(paused) return;
+        timeRemaining--;
+        updateTimerDisplay();
+        checkTimerEvents();
+        if(timeRemaining <= 0){
+          clearInterval(timerInterval);
+          log("Time's up!");
+          endActivePhase();
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay(){
+      const mins = Math.floor(timeRemaining / 60);
+      const secs = timeRemaining % 60;
+      timerDisplay.textContent = `${mins}:${secs.toString().padStart(2,'0')}`;
+      if(timeRemaining <= 30){
+        timerDisplay.classList.add("warning");
+      } else {
+        timerDisplay.classList.remove("warning");
+      }
+    }
+
+    function checkTimerEvents(){
+      const totalTime = parseInt(timeSel.value, 10);
+      const elapsed = totalTime - timeRemaining;
+
+      currentScenario.tasks.forEach(task => {
+        if(task.type === 'recipe'){
+          task.steps.forEach((step, si) => {
+            if(elapsed === step.time && !task.completed.includes(si)){
+              speak("Recipe step: " + step.text);
+              const panel = document.getElementById("task-0");
+              if(panel) panel.classList.add("urgent");
+              setTimeout(()=>panel && panel.classList.remove("urgent"), 3000);
+            }
+          });
+        }
+        if(task.type === 'messages'){
+          task.items.forEach((msg, mi) => {
+            if(elapsed === msg.time && !task.replied.includes(mi)){
+              speak("New message from " + msg.sender + ": " + msg.text);
+              renderTasks();
+            }
+          });
+        }
+        if(task.type === 'timer'){
+          task.alerts.forEach((alert, ai) => {
+            if(elapsed === alert.time && !task.acknowledged.includes(ai)){
+              speak("Timer alert: " + alert.text);
+              task.acknowledged.push(ai);
+            }
+          });
+        }
+      });
+    }
+
+    function endActivePhase(){
+      clearInterval(timerInterval);
+      hide(activeCard);
+      show(distractorCard);
+      startStroop();
+    }
+
+    // Stroop (reuse from Memory in Action)
+    const COLORS=[{name:"RED", css:"red"},{name:"GREEN", css:"green"},{name:"BLUE", css:"blue"},{name:"YELLOW", css:"goldenrod"}];
+    let stroopTrials=12, stroopIdx=0, stroopCorrect=0;
+    function stroopNext(){
+      if(stroopIdx>=stroopTrials){ log("Stroop finished. Proceed to recall."); showRecall(); return; }
+      stroopIdx++; const word=COLORS[Math.floor(Math.random()*COLORS.length)]; const ink=COLORS[Math.floor(Math.random()*COLORS.length)];
+      stroopWord.textContent=word.name; stroopWord.style.color=ink.css;
+      stroopBtns.innerHTML=""; COLORS.forEach(c=>{ const b=document.createElement("button"); b.className="tj-btn ghost"; b.textContent=c.name; b.onclick=()=>{ if(c.name===ink.name){ stroopCorrect++; } stroopScore.textContent=stroopCorrect+"/"+stroopTrials; stroopNext(); }; stroopBtns.appendChild(b); });
+    }
+    function startStroop(){ stroopIdx=0; stroopCorrect=0; stroopScore.textContent="0/"+stroopTrials; stroopNext(); }
+
+    // Recall
+    function renderRecall(qs){
+      recallInputs.innerHTML="";
+      qs.forEach((q,i)=>{
+        const wrap=document.createElement("div");
+        wrap.innerHTML='<label class="tj-label">'+(i+1)+". "+q.prompt+'</label><input type="text" data-qi="'+i+'" />'
+          +'<div class="tj-row" style="margin-top:6px"><button class="tj-btn ghost showCue" data-qi="'+i+'">Show hint</button></div>'
+          +'<div class="cue hidden" id="cue-'+i+'"></div>';
+        recallInputs.appendChild(wrap);
+        const cueEl=wrap.querySelector("#cue-"+i);
+        const h1=document.createElement("div"); h1.className="helper"; h1.id="h1-"+i; h1.textContent=(q.hints && q.hints[0]) ? q.hints[0] : "Hint available.";
+        const h2=document.createElement("div"); h2.className="helper hidden"; h2.id="h2-"+i; h2.style.marginTop="4px"; h2.textContent=(q.hints && q.hints[1]) ? q.hints[1] : "More detail available.";
+        const mc=document.createElement("div"); mc.className="mc hidden"; mc.id="mc-"+i;
+        (q.cue.mc||[]).forEach(opt=>{ const b=document.createElement("button"); b.className="tj-btn ghost"; b.textContent=opt; b.onclick=()=>{ wrap.querySelector("input").value=opt; }; mc.appendChild(b); });
+        cueEl.appendChild(h1); cueEl.appendChild(h2); cueEl.appendChild(mc);
+      });
+      $(".showCue").forEach(btn=> btn.addEventListener("click",()=>{
+        const i=btn.getAttribute("data-qi");
+        const cue=document.getElementById("cue-"+i);
+        const h2=document.getElementById("h2-"+i);
+        const mc=document.getElementById("mc-"+i);
+        if(cue.classList.contains("hidden")){ cue.classList.remove("hidden"); btn.textContent="More"; }
+        else if(h2.classList.contains("hidden")){ h2.classList.remove("hidden"); btn.textContent="Options"; }
+        else if(mc.classList.contains("hidden")){ mc.classList.remove("hidden"); btn.textContent="Hide cues"; }
+        else { cue.classList.add("hidden"); h2.classList.add("hidden"); mc.classList.add("hidden"); btn.textContent="Show hint"; }
+      }));
+    }
+
+    function showRecall(){ hide(distractorCard); show(recallCard); renderRecall(currentScenario.questions); }
+
+    function grade(qs){
+      let correct=0,total=qs.length,details=[];
+      Array.from(recallInputs.querySelectorAll("input")).forEach((inp,i)=>{
+        const val=norm(inp.value);
+        const ok=qs[i].ans.some(a=> val.includes(norm(a)));
+        if(ok) correct++;
+        details.push({prompt:qs[i].prompt, text:inp.value || "(blank)", ok});
+      });
+      return {correct,total,details};
+    }
+
+    // Event handlers
+    btnStart.onclick=()=>{
+      hide(strategyCard);
+      show(activeCard);
+      const complexity = complexitySel.value;
+      const timeLimit = parseInt(timeSel.value, 10);
+      currentScenario = generateScenario(complexity);
+      renderTasks();
+      startTimer(timeLimit);
+      log("Session started.");
+      btnStopVoice.disabled=false;
+    };
+
+    $("#strategyCard").addEventListener("click",(e)=>{
+      const b=e.target.closest("button[data-strategy]");
+      if(!b) return;
+      currentStrategy=maybeNudge(b.getAttribute("data-strategy"));
+      const info=STRATEGY_DETAILS[currentStrategy];
+      if(info){
+        const ex=info.examples.map(x=>"• "+x).join("<br>");
+        $("#strategyInfo").innerHTML='<div class="tj-pill">'+info.title+": "+info.desc+'</div><div class="helper" style="margin-top:6px"><strong>Examples</strong><br>'+ex+"</div>";
+      }
+      log("Strategy: "+currentStrategy);
+    });
+
+    btnPause.onclick=()=>{
+      paused=!paused;
+      btnPause.textContent=paused?"Resume":"Pause";
+    };
+
+    btnStopVoice.onclick=()=>stopSpeak();
+    btnReset.onclick=()=>{ stopSpeak(); location.reload(); };
+
+    btnCheck.onclick=()=>{
+      const g=grade(currentScenario.questions);
+      hide(recallCard); show(feedbackCard);
+      const pct=Math.round((g.correct/g.total)*100);
+      let html='<div class="tj-pill">Accuracy: '+g.correct+'/'+g.total+' ('+pct+'%) — Strategy: '+(currentStrategy||"—")+'</div>';
+      g.details.forEach((d, i)=>{
+        const corr = (currentScenario.questions[i].ans || []).join(" / ");
+        html+='<div style="margin-top:6px">'+(d.ok?'✅':'❌')+' <em>'+d.prompt+'</em> — <strong>'+d.text+'</strong>'+(d.ok?"":'<div class="helper" style="margin-top:2px">Correct: '+corr+"</div>")+"</div>";
+      });
+      document.getElementById("feedbackZone").innerHTML=html;
+      sessionLog.push({
+        timestamp:new Date().toISOString(),
+        complexity:complexitySel.value,
+        timeLimit:timeSel.value,
+        strategy:currentStrategy,
+        correct:g.correct,
+        total:g.total,
+        percent:pct
+      });
+      log("Recall checked — "+g.correct+"/"+g.total+".");
+    };
+
+    btnRestart.onclick=()=>{ location.reload(); };
+
+    // CSV download
+    btnDownload.onclick=()=>{
+      if(sessionLog.length===0){ log("Nothing to download yet."); return; }
+      const escape=v=>('"' + String(v).replace(/"/g,'""') + '"');
+      const header=Object.keys(sessionLog[0]).join(",");
+      const lines=sessionLog.map(r=>Object.values(r).map(escape).join(","));
+      let csv = [header, ...lines].join("\n");
+      if (typeof window.__augmentCSV === "function") {
+        try { csv = window.__augmentCSV(csv) || csv; } catch(e){ /* ignore */ }
+      }
+      const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");
+      a.href=url; a.download="task_juggler_sessions.csv";
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    };
+
+    // Update stat display
+    complexitySel.addEventListener("change",()=>{
+      $("#statLevel").textContent="Level: "+complexitySel.value;
+    });
+    timeSel.addEventListener("change",()=>{
+      const mins = Math.floor(parseInt(timeSel.value,10)/60);
+      $("#statTime").textContent="Time: "+mins+" min";
+    });
+
+    log("Ready. Pick a strategy and press Start session.");
+  })();
+  </script>
+</body>
+</html>
