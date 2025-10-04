@@ -104,14 +104,6 @@
 
     /* Instructions */
     details.app-instructions{ margin: 8px 0 16px; }
-    details.app-instructions > summary{
-      list-style:none; cursor:pointer; font-weight:800; padding:10px 12px; border-radius:10px;
-      background:#f0f1f6; color:#ff7a6e; border:1px solid #e5e7eb;
-    }
-    details.app-instructions[open]{ background:transparent; }
-    details.app-instructions .content{
-      padding:12px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; margin-top:8px;
-    }
 
     @media (max-width: 900px){ .grid{ grid-template-columns:1fr; } }
 
@@ -121,6 +113,25 @@
       box-shadow:0 1px 2px rgba(16,24,40,.06), 0 8px 24px rgba(16,24,40,.08); padding:16px;
     }
     #clinician-comment{ width:100%; padding:10px; border-radius:8px; border:1px solid #e5e7eb; font:inherit; resize:vertical; }
+
+    /* === Modal baseline (NEW) === */
+    .modal-backdrop{
+      display:none;                /* hidden by default; JS toggles to flex */
+      position:fixed; inset:0;     /* sit over the entire viewport */
+      background:rgba(15,23,42,.45);
+      align-items:center; justify-content:center;
+      z-index:1000;                /* above panels */
+    }
+    .modal{
+      background:#fff;
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      box-shadow:0 12px 30px rgba(0,0,0,.18);
+      width:min(92vw,720px);
+      max-height:80vh; overflow:auto;
+      padding:16px;
+    }
+    body.has-modal{ overflow:hidden; }  /* lock page scroll when a modal is open */
   </style>
 </head>
 <body>
@@ -193,7 +204,7 @@
   </main>
 
   <!-- Help Modal -->
-  <div id="helpBackdrop" class="modal-backdrop" role="dialog">
+  <div id="helpBackdrop" class="modal-backdrop" role="dialog" aria-hidden="true">
     <div class="modal">
       <h3>How to play</h3>
       <ol>
@@ -211,7 +222,7 @@
   </div>
 
   <!-- Difficulty Modal -->
-  <div id="difficultyBackdrop" class="modal-backdrop" role="dialog">
+  <div id="difficultyBackdrop" class="modal-backdrop" role="dialog" aria-hidden="true">
     <div class="modal">
       <h3>Difficulty Settings</h3>
       <p class="muted">Changes apply to the next shift. Lock to prevent auto-adaptation.</p>
@@ -711,22 +722,43 @@
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   });
 
+  // ====== Modal helpers (NEW) ======
+  function openModal(id){
+    document.body.classList.add('has-modal');
+    const m = document.getElementById(id);
+    if(m){ m.style.display = 'flex'; m.setAttribute('aria-hidden','false'); }
+  }
+  function closeModal(id){
+    const m = document.getElementById(id);
+    if(m){ m.style.display = 'none'; m.setAttribute('aria-hidden','true'); }
+    const anyOpen = [...document.querySelectorAll('.modal-backdrop')]
+      .some(x => x.style.display !== 'none');
+    if(!anyOpen) document.body.classList.remove('has-modal');
+  }
+
   // ====== Wire UI ======
   el("startBtn").addEventListener("click", startShift);
 
-  el("helpBtn").addEventListener("click", () => {
-    el("helpBackdrop").style.display = "flex";
-  });
-  el("closeHelpBtn").addEventListener("click", () => {
-    el("helpBackdrop").style.display = "none";
-  });
+  // OPEN/CLOSE with helpers (replaces inline style toggles)
+  el("helpBtn").addEventListener("click", () => openModal("helpBackdrop"));
+  el("closeHelpBtn").addEventListener("click", () => closeModal("helpBackdrop"));
 
   el("difficultyBtn").addEventListener("click", () => {
     hydrateDiffUI();
-    el("difficultyBackdrop").style.display = "flex";
+    openModal("difficultyBackdrop");
   });
-  el("closeDiffBtn").addEventListener("click", () => {
-    el("difficultyBackdrop").style.display = "none";
+  el("closeDiffBtn").addEventListener("click", () => closeModal("difficultyBackdrop"));
+
+  // Close with ESC and backdrop click
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeModal("helpBackdrop");
+      closeModal("difficultyBackdrop");
+    }
+  });
+  // Delegate backdrop clicks
+  document.querySelectorAll('.modal-backdrop').forEach(b => {
+    b.addEventListener('click', (e) => { if(e.target === b){ closeModal(b.id); } });
   });
 
   function hydrateDiffUI() {
@@ -761,7 +793,7 @@
     difficulty.lockAdapt = !!el("lockAdapt").checked;
     persistDifficulty();
     log("Difficulty settings saved (apply next shift)");
-    el("difficultyBackdrop").style.display = "none";
+    closeModal("difficultyBackdrop");
   });
 
   el("resetDiffBtn").addEventListener("click", () => {
@@ -771,13 +803,7 @@
     log("Difficulty reset to defaults");
   });
 
-  // ESC to close modals
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      el("helpBackdrop").style.display = "none";
-      el("difficultyBackdrop").style.display = "none";
-    }
-  });
+  // ESC to close modals already handled above
 
   // Initial UI
   setStatsPills();
