@@ -521,27 +521,37 @@ function ensureLogged(){
 
 function downloadCSV(){
   try{
-    ensureLogged(); // snapshot even if session still running
+    ensureLogged(); // snapshot even if mid-session
+
     const keys = Object.keys(metrics.log[0]);
     const esc = v => '"' + String(v).replace(/"/g,'""') + '"';
-    const lines = [keys.join(',')].concat(metrics.log.map(r=>keys.map(k=>esc(r[k]??'')).join(',')));
-    const csv = '\uFEFF' + lines.join('\n'); // BOM for Excel
-    const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+    const lines = [keys.join(',')].concat(metrics.log.map(r=>keys.map(k=>esc(r[k] ?? '')).join(',')));
+    const csv  = '\uFEFF' + lines.join('\n'); // BOM for Excel
+    const blob = new Blob([csv], { type:'text/csv;charset=utf-8' });
 
-    // Edge(legacy)/IE fallback
+    // Legacy Edge/IE
     if (window.navigator && window.navigator.msSaveOrOpenBlob) {
       window.navigator.msSaveOrOpenBlob(blob, 'task_juggler_session.csv');
       return;
     }
 
     const url = URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;
-    a.download='task_juggler_session.csv';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url), 0);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'task_juggler_session.csv';
+
+    // ✅ robust root (frame.js can null body)
+    const root = document.body || document.documentElement;
+    if (root && root.appendChild) {
+      root.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 0);
+    } else {
+      // last-ditch fallback (no DOM root available)
+      window.open(url, '_blank');
+      setTimeout(()=>URL.revokeObjectURL(url), 1000);
+    }
   }catch(err){
     console.error('CSV download failed:', err);
     alert('CSV download failed. See console for details.');
