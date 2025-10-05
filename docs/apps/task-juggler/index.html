@@ -84,7 +84,7 @@
 
       <div class="tj-row" style="margin-top:12px">
         <button id="btnStart" class="tj-btn primary">Start</button>
-        <button id="btnDownload" class="tj-btn ghost" disabled>Download CSV</button>
+        <button id="btnDownload" class="tj-btn ghost">Download CSV</button>
         <button id="btnReset" class="tj-btn ghost">Reset</button>
       </div>
 
@@ -492,51 +492,61 @@
   }
 
   // ---------- CSV helpers ----------
-  function snapshotRow(){
-    const sc = metrics.switchCosts.slice().sort((a,b)=>a-b);
-    const scMed = sc.length ? Math.round(sc[Math.floor(sc.length/2)]) : '';
-    const d=metrics.deadlines; const totalDead=d.onTime+d.early+d.late;
-    const onPct = totalDead? Math.round(d.onTime/totalDead*100) : '';
-    const pipAcc = metrics.pips.total? Math.round(metrics.pips.hits/metrics.pips.total*100) : '';
-    return {
-      timestamp:new Date().toISOString(),
-      duration_s:Tlimit,
-      elapsed_s: now(),
-      strategy:metrics.strategy,
-      difficulty_final:difficulty,
-      switch_median_ms:scMed,
-      deadlines_on_time:d.onTime, deadlines_early:d.early, deadlines_late:d.late,
-      deadlines_on_time_pct:onPct, deadlines_late_ms_total:d.lateMs,
-      inhib_errors:metrics.inhibErrors,
-      pm_hits:metrics.pmHits, pm_misses:metrics.pmMisses,
-      pip_hits:metrics.pips.hits, pip_total:metrics.pips.total, pip_acc_pct:pipAcc,
-      note_opens:metrics.noteOpens, note_chars:metrics.noteChars,
-      adaptations:metrics.adaptations
-    };
-  }
+function snapshotRow(){
+  const sc = metrics.switchCosts.slice().sort((a,b)=>a-b);
+  const scMed = sc.length ? Math.round(sc[Math.floor(sc.length/2)]) : '';
+  const d=metrics.deadlines; const totalDead=d.onTime+d.early+d.late;
+  const onPct = totalDead? Math.round(d.onTime/totalDead*100) : '';
+  const pipAcc = metrics.pips.total? Math.round(metrics.pips.hits/metrics.pips.total*100) : '';
+  return {
+    timestamp:new Date().toISOString(),
+    duration_s:Tlimit,
+    elapsed_s: now(),
+    strategy:metrics.strategy,
+    difficulty_final:difficulty,
+    switch_median_ms:scMed,
+    deadlines_on_time:d.onTime, deadlines_early:d.early, deadlines_late:d.late,
+    deadlines_on_time_pct:onPct, deadlines_late_ms_total:d.lateMs,
+    inhib_errors:metrics.inhibErrors,
+    pm_hits:metrics.pmHits, pm_misses:metrics.pmMisses,
+    pip_hits:metrics.pips.hits, pip_total:metrics.pips.total, pip_acc_pct:pipAcc,
+    note_opens:metrics.noteOpens, note_chars:metrics.noteChars,
+    adaptations:metrics.adaptations
+  };
+}
 
-  function ensureLogged(){
-    if(!metrics.log.length){ metrics.log.push(snapshotRow()); }
-  }
+function ensureLogged(){
+  if(!metrics.log.length){ metrics.log.push(snapshotRow()); }
+}
 
-  function downloadCSV(){
-    try{
-      ensureLogged();
-      const keys = Object.keys(metrics.log[0]);
-      const esc = v => '"' + String(v).replace(/"/g,'""') + '"';
-      const lines = [keys.join(',')].concat(metrics.log.map(r=>keys.map(k=>esc(r[k]??'')).join(',')));
-      const csv = '\uFEFF' + lines.join('\n'); // BOM for Excel
-      const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
-      const url = URL.createObjectURL(blob);
-      const a=document.createElement('a');
-      a.href=url; a.download='task_juggler_session.csv';
-      document.body.appendChild(a); a.click(); a.remove();
-      URL.revokeObjectURL(url);
-    }catch(err){
-      console.error('CSV download failed:', err);
-      alert('CSV download failed. See console for details.');
+function downloadCSV(){
+  try{
+    ensureLogged(); // snapshot even if session still running
+    const keys = Object.keys(metrics.log[0]);
+    const esc = v => '"' + String(v).replace(/"/g,'""') + '"';
+    const lines = [keys.join(',')].concat(metrics.log.map(r=>keys.map(k=>esc(r[k]??'')).join(',')));
+    const csv = '\uFEFF' + lines.join('\n'); // BOM for Excel
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+
+    // Edge(legacy)/IE fallback
+    if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+      window.navigator.msSaveOrOpenBlob(blob, 'task_juggler_session.csv');
+      return;
     }
+
+    const url = URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download='task_juggler_session.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 0);
+  }catch(err){
+    console.error('CSV download failed:', err);
+    alert('CSV download failed. See console for details.');
   }
+}
 
   // ---------- UI, live ----------
   function updateLive(){
@@ -560,7 +570,7 @@
     difficulty=1; setLoadLabel();
     sessionData.seenTomAt=null; sessionData.starredTomAt=null; sessionData.tomSent=false;
     T=0; Tlimit=parseInt(el.timeSel.value,10); running=true; queue.length=0;
-    el.btnStart.disabled=true; el.btnDownload.disabled=true;
+    el.btnStart.disabled=true;
     renderRecipe(); seedSession(); updateTimer(); step();
   }
 
