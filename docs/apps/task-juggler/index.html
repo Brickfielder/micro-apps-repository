@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Task Juggler — Live Desk (Complete v1)</title>
+<title>Task Juggler — Live Desk (Streamlined)</title>
 
 <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3">
 <script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
@@ -12,7 +12,7 @@
 <meta name="theme" content="bold dense">
 <meta name="app-slug" content="task-juggler">
 <meta name="app-title" content="Task Juggler — Executive Function Training">
-<meta name="app-desc" content="Live, overlapping streams with rule-shifts, prospective memory, strategy constraints, adaptive difficulty, and rich metrics.">
+<meta name="app-desc" content="Overlapping streams with prospective memory (Tom ⭐), strategy constraints, adaptive difficulty, and rich metrics.">
 
 <style>
   .tj-wrap{max-width:1200px;margin:0 auto}
@@ -27,7 +27,6 @@
   .tj-btn.primary:hover{background:var(--accent-600)}
   .tj-btn.ghost{background:var(--surface)}
   .tj-btn.ghost:hover{background:color-mix(in oklab, var(--surface), var(--line) 12%)}
-  .tj-btn.success{background:#16a34a;color:#fff;border-color:transparent}
   .tj-stat{display:inline-block;margin-right:10px;border-radius:999px;padding:6px 10px;background:#eef2ff;color:#1e3a8a;font-size:12px}
   @media (prefers-color-scheme: dark){ .tj-stat{background:#0c2250;color:#cfe3fc} }
 
@@ -47,8 +46,6 @@
   .msg-bubble{background:#e8f1fb;border:1px solid #cfe3fc;border-radius:12px;padding:10px 12px;margin:8px 0;display:flex;align-items:center;gap:10px}
   .msg-sender{font-weight:700;font-size:13px}
   .msg-text{flex:1;font-size:14px}
-
-  .pill{display:inline-flex;align-items:center;gap:8px;background:var(--pill);padding:8px 12px;border-radius:999px;font-size:13px;font-weight:600}
 
   .pip{position:fixed;inset:auto 16px 16px auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;box-shadow:var(--shadow);z-index:50}
   .pip-word{font-size:24px;font-weight:900;margin-bottom:8px;text-align:center}
@@ -85,13 +82,6 @@
       </select>
       <div id="strategyInfo" class="helper" style="margin-top:4px">No constraints applied.</div>
 
-      <label class="tj-label" style="margin-top:8px">Shopping memory exposure</label>
-      <select id="memExposure">
-        <option value="6">6 s</option>
-        <option value="8" selected>8 s</option>
-        <option value="12">12 s</option>
-      </select>
-
       <div class="tj-row" style="margin-top:12px">
         <button id="btnStart" class="tj-btn primary">Start</button>
         <button id="btnDownload" class="tj-btn ghost" disabled>Download CSV</button>
@@ -101,8 +91,7 @@
       <div style="margin-top:12px">
         <span class="tj-stat" id="statTime">Time: 4 min</span>
         <span class="tj-stat" id="statLoad">Load: baseline</span>
-        <span class="tj-stat" id="ruleBadge">Rule: Family→Yes | Non-family→Later</span>
-        <span class="tj-stat" id="pmBadge">PM: ⭐ Tom before reply</span>
+        <span class="tj-stat" id="pmBadge">PM: ⭐ Star Tom before replying</span>
       </div>
 
       <div class="tj-card" style="margin-top:12px">
@@ -122,7 +111,7 @@
     <!-- RIGHT: Live Desk -->
     <div class="tj-card">
       <div class="tj-sectionTitle">Live Desk</div>
-      <div class="pill">Everything overlaps; handle conflicts, rule-shifts, and the PM cue.</div>
+      <div class="pill">Handle overlapping tasks, timers, Tom’s PM cue, and 7-second Stroop.</div>
 
       <!-- Dual clocks: countdown + elapsed -->
       <div class="timers-duo">
@@ -139,20 +128,13 @@
       <div id="desk">
         <div class="panel" id="recipePanel">
           <div class="task-title">🍝 Recipe</div>
-          <div class="helper">Perform steps during their windows.</div>
+          <div class="helper">Do each step within its time window.</div>
           <div id="recipeList"></div>
         </div>
 
         <div class="panel" id="messagesPanel">
           <div class="task-title">💬 Messages <span class="helper">(⭐ Tom before replying)</span></div>
           <div id="messagesList"></div>
-        </div>
-
-        <div class="panel" id="shoppingPanel">
-          <div class="task-title">🛒 Shopping Memory</div>
-          <div class="helper">Memorise the list, then accept/reject probes (lures included).</div>
-          <div id="shoppingExposure" style="margin:8px 0;display:flex;gap:8px;flex-wrap:wrap"></div>
-          <div id="shoppingStream"></div>
         </div>
 
         <div class="panel" id="timersPanel">
@@ -176,17 +158,15 @@
   const $ = s => document.querySelector(s);
   const el = {
     timeSel: $('#timeSel'), strategySel: $('#strategySel'), strategyInfo: $('#strategyInfo'),
-    memExposure: $('#memExposure'),
     btnStart: $('#btnStart'), btnDownload: $('#btnDownload'), btnReset: $('#btnReset'),
     statTime: $('#statTime'), statLoad: $('#statLoad'), live: $('#liveMetrics'),
-    ruleBadge: $('#ruleBadge'), pmBadge: $('#pmBadge'),
+    pmBadge: $('#pmBadge'),
     timer: $('#timerDisplay'), elapsed: $('#elapsedDisplay'),
     recipeList: $('#recipeList'), messagesList: $('#messagesList'),
-    shoppingExposure: $('#shoppingExposure'), shoppingStream: $('#shoppingStream'),
     timersList: $('#timersList'),
     pip: $('#pip'), pipWord: $('#pipWord'), pipBtns: $('#pipBtns'),
     recipePanel: $('#recipePanel'), messagesPanel: $('#messagesPanel'),
-    shoppingPanel: $('#shoppingPanel'), timersPanel: $('#timersPanel'),
+    timersPanel: $('#timersPanel'),
     notesBox: $('#notesBox'), note1: $('#note1'), note2: $('#note2'), noteInfo: $('#noteInfo')
   };
 
@@ -214,16 +194,10 @@
     {sender:"Sarah", family:false, text:"Did you see my email?"},
     {sender:"Chris", family:true, text:"Can you call me later?"}
   ];
-  const baseList = ["Bread","Eggs","Butter","Milk"];
-  const lureList = ["Peanut butter","Cream","Coffee","Apples","Bread","Butter"]; // includes repeats
-
-  // Rules & PM hook
-  let rule = { family: 'Yes', nonFamily: 'Later' };  // shifts mid-session
-  const pmCue = { sender:'Tom', requiresStar:true, windowMs: 4000 };
 
   // Strategies
   let strategy = 'none';
-  let chunkWindowOpen=false, chunkEndsAt=0;
+  let chunkWindowOpen=false;
   let timeBlocks=[ [0,9999,'all'] ];
   let noteOpens=0, noteChars=0;
 
@@ -235,10 +209,10 @@
   const metrics = {
     actions:[], switchCosts:[], lastPanel:null, lastActTs:0,
     deadlines:{onTime:0, early:0, late:0, lateMs:0},
-    inhibErrors:0, memoryErrors:0,
-    pmHits:0, pmMisses:0, pmFalse:0,
+    inhibErrors:0,
+    pmHits:0, pmMisses:0,
     pips:{hits:0,total:0},
-    strategy:'none', strategyAdherence:0, noteOpens:0, noteChars:0,
+    strategy:'none', noteOpens:0, noteChars:0,
     adaptations:0,
     log:[]
   };
@@ -292,24 +266,6 @@
     el.messagesList.prepend(bubble);
   }
 
-  function renderShoppingExposure(list){
-    el.shoppingExposure.innerHTML = "";
-    list.forEach(x=>{
-      const sp=document.createElement('span'); sp.className="pill"; sp.textContent=x; el.shoppingExposure.appendChild(sp);
-    });
-  }
-
-  function renderShoppingProbe(name){
-    const row = document.createElement('div');
-    row.style.margin="8px 0";
-    row.innerHTML = `<span class="pill">${name}</span>
-      <div class="tj-row" style="display:inline-flex;margin-left:8px;vertical-align:middle">
-        <button class="tj-btn ghost" data-act="shopAccept" data-name="${name}">Accept</button>
-        <button class="tj-btn ghost" data-act="shopReject" data-name="${name}">Reject</button>
-      </div>`;
-    el.shoppingStream.prepend(row);
-  }
-
   function renderTimerAlert(alert){
     const row = document.createElement('div');
     row.className="msg-bubble";
@@ -342,7 +298,6 @@
       el.pipBtns.appendChild(b);
     });
     el.pip.classList.remove('hidden');
-    // keep visible for 7 seconds; if no response, count a miss
     setTimeout(()=>{
       if(!answered){ metrics.pips.total++; updateLive(); }
       hidePip();
@@ -356,7 +311,7 @@
     metrics.strategy = strategy;
     el.notesBox.classList.toggle('hidden', strategy!=='external');
     if(strategy==='none') el.strategyInfo.textContent = 'No constraints applied.';
-    if(strategy==='prioritisation') el.strategyInfo.textContent = 'Actions scored: On-deadline high bonus; early small bonus; late penalty. Queue ok; switching costs visible.';
+    if(strategy==='prioritisation') el.strategyInfo.textContent = 'Deadlines: on-time bonus; early small; late penalty.';
     if(strategy==='external') el.strategyInfo.textContent = 'Two notes max. Opening notes costs 1s each; chars tracked.';
     if(strategy==='chunking') el.strategyInfo.textContent = 'Batch window: committing in one panel locks others for 6s (inhibition).';
     if(strategy==='timeblock') el.strategyInfo.textContent = 'Panels gated by time: 0–60s Recipe; 60–120s Messages; 120–180s Mixed; then open.';
@@ -370,10 +325,8 @@
     const mode = block[2];
     const lockMsgs = mode!=='messages' && mode!=='mixed' && mode!=='all';
     const lockRec  = mode!=='recipe'   && mode!=='mixed' && mode!=='all';
-    const lockShop = mode==='recipe' || mode==='messages';
     el.messagesPanel.classList.toggle('lock', lockMsgs);
     el.recipePanel.classList.toggle('lock', lockRec);
-    el.shoppingPanel.classList.toggle('lock', lockShop);
     el.timersPanel.classList.toggle('lock', false);
   }
 
@@ -394,8 +347,8 @@
   function maybeOpenChunk(panel){
     if(strategy!=='chunking') return;
     if(!chunkWindowOpen){
-      chunkWindowOpen = true; chunkEndsAt = now()+6;
-      [el.recipePanel, el.messagesPanel, el.shoppingPanel, el.timersPanel].forEach(p=>{
+      chunkWindowOpen = true;
+      [el.recipePanel, el.messagesPanel, el.timersPanel].forEach(p=>{
         const lockOthers = !p.id.includes(panel);
         p.classList.toggle('lock', lockOthers);
       });
@@ -404,19 +357,17 @@
   }
   function closeChunk(){
     chunkWindowOpen=false;
-    [el.recipePanel, el.messagesPanel, el.shoppingPanel, el.timersPanel].forEach(p=>p.classList.remove('lock'));
+    [el.recipePanel, el.messagesPanel, el.timersPanel].forEach(p=>p.classList.remove('lock'));
   }
 
   // ---------- Event handling ----------
-  const sessionData = { shoppingTrue:[], shoppingTrueSet:new Set(), seenTomAt:null, starredTomAt:null };
+  const sessionData = { seenTomAt:null, starredTomAt:null, tomSent:false };
   document.addEventListener('click', (e)=>{
     const b = e.target.closest('[data-act]'); if(!b) return;
     const act = b.getAttribute('data-act'); if(b.closest('.lock')) return;
-    // panel id for metrics
     let panel = 'other';
     if(act.startsWith('doStep')) panel='recipe';
     if(act==='reply' || act==='star') panel='messages';
-    if(act.startsWith('shop')) panel='shopping';
     if(act==='ack') panel='timers';
     logAction(panel);
 
@@ -446,36 +397,20 @@
     }
 
     if(act==='reply'){
-      const id=b.getAttribute('data-id'), ans=b.getAttribute('data-ans');
+      const id=b.getAttribute('data-id');
       const node = el.messagesList.querySelector(`.msg-bubble[data-id="${id}"]`);
       if(!node) return;
-      const isFamily = node.dataset.family==='1';
-      const should = isFamily ? rule.family : rule.nonFamily;
-      // PM check for Tom
+      // PM check for Tom (no rule grading)
       const sender = node.dataset.sender;
       if(sender==='Tom'){
         const starred = node.dataset.starred==='1';
-        if(!starred){
-          metrics.pmMisses++;
-        }else{
+        if(!starred){ metrics.pmMisses++; }
+        else{
           const dt = performance.now() - (sessionData.seenTomAt||performance.now());
-          if(dt <= pmCue.windowMs) metrics.pmHits++; else metrics.pmMisses++;
+          if(dt <= 4000) metrics.pmHits++; else metrics.pmMisses++;
         }
       }
-      if(ans!==should){ metrics.inhibErrors++; }
       node.style.opacity=0.6;
-      return;
-    }
-
-    if(act==='shopAccept' || act==='shopReject'){
-      const name=b.getAttribute('data-name');
-      const isTrue = sessionData.shoppingTrueSet.has(name);
-      const accept = act==='shopAccept';
-      if((accept && !isTrue) || (!accept && isTrue)){
-        metrics.inhibErrors++;
-        if(isTrue) metrics.memoryErrors++;
-      }
-      b.closest('div').parentElement.style.opacity=0.6;
       return;
     }
 
@@ -485,37 +420,18 @@
     }
   });
 
-  // ---------- Rule shifts & PM hook ----------
-  function shiftRule(){
-    rule.nonFamily = (rule.nonFamily==='Later' ? 'No' : 'Later');
-    el.ruleBadge.textContent = `Rule: Family→${rule.family} | Non-family→${rule.nonFamily}`;
-    ping(520,0.08);
-  }
-
   // ---------- Generators ----------
   function seedSession(){
     // reset UI
-    el.messagesList.innerHTML=""; el.shoppingStream.innerHTML=""; el.timersList.innerHTML=""; el.shoppingExposure.innerHTML="";
+    el.messagesList.innerHTML=""; el.timersList.innerHTML="";
     renderRecipe();
-
-    // shopping memory
-    const pick = (arr,n)=>arr.slice().sort(()=>Math.random()-0.5).slice(0,n);
-    sessionData.shoppingTrue = pick(baseList, 3 + (Math.random()<0.5?1:0));
-    sessionData.shoppingTrueSet = new Set(sessionData.shoppingTrue);
-    renderShoppingExposure(sessionData.shoppingTrue);
-    schedule('hideExposure', {}, Math.round(+el.memExposure.value));
-
-    // recipe pings
-    recipeSteps.forEach(st=> schedule('ping', {panel:'recipe'}, st.window[0]) );
 
     // messages: exactly one Tom, others from non-Tom senders
     const nonTomPool = messagePool.filter(m=>m.sender!=='Tom');
     const mcount = 4 + Math.floor(Math.random()*3) + (difficulty>2?1:0);
-    // one Tom
     const tomMsg = {id:'mT', sender:'Tom', family:false, text: messagePool.find(m=>m.sender==='Tom').text};
     const tomTime = 12 + Math.floor(Math.random()*(Tlimit-18));
     schedule('message', tomMsg, tomTime);
-    // remaining from non-Tom
     for(let i=0;i<mcount-1;i++){
       const base = nonTomPool[Math.floor(Math.random()*nonTomPool.length)];
       const msg = Object.assign({id:'m'+i}, base);
@@ -531,44 +447,24 @@
       schedule('timer', alert, t);
     }
 
-    // shopping probes
-    const totalProbes = 6 + (difficulty>3?2:0);
-    for(let i=0;i<totalProbes;i++){
-      const isTrue = Math.random()<0.5;
-      const name = isTrue ? sessionData.shoppingTrue[Math.floor(Math.random()*sessionData.shoppingTrue.length)]
-                          : lureList[Math.floor(Math.random()*lureList.length)];
-      const t = 18 + Math.floor(Math.random()*(Tlimit-22));
-      schedule('shopProbe', {name}, t);
-    }
-
-    // pips
+    // Stroop pips
     for(let t=14; t<Tlimit-5; t += (difficulty>=3?9:12) + Math.floor(Math.random()*10)){
       schedule('pip', {}, t);
     }
-
-    // rule shift mid-session
-    schedule('ruleShift', {}, Math.floor(Tlimit/2));
   }
 
   // ---------- Dispatch ----------
   function dispatch(e){
     switch(e.kind){
-      case 'hideExposure':
-        el.shoppingExposure.innerHTML = '<div class="helper">List hidden.</div>'; break;
-      case 'ping':
-        ping(1100,0.05); break;
+      case 'ping': ping(1100,0.05); break;
       case 'message':
         renderMessage(e.payload);
         if(e.payload.sender==='Tom'){ sessionData.seenTomAt = performance.now(); }
         ping(880,0.05); break;
       case 'timer':
         renderTimerAlert(e.payload); ping(660,0.05); break;
-      case 'shopProbe':
-        renderShoppingProbe(e.payload.name); break;
       case 'pip':
         showPip(); break;
-      case 'ruleShift':
-        shiftRule(); break;
       case 'chunkClose':
         closeChunk(); break;
     }
@@ -576,17 +472,14 @@
 
   // ---------- Adaptation ----------
   function maybeAdapt(){
-    const dead = metrics.deadlines;
-    const totalDead = dead.onTime + dead.early + dead.late;
-    const onPct = totalDead? dead.onTime/totalDead : 0;
+    const d = metrics.deadlines;
+    const total = d.onTime + d.early + d.late;
+    const onPct = total? d.onTime/total : 0;
     const errRate = metrics.inhibErrors / Math.max(1, now()/60);
     let delta = 0;
     if(onPct>0.8 && errRate<1 && difficulty<4) delta=+1;
     if(errRate>2 && difficulty>1) delta=-1;
-    if(delta!==0){
-      difficulty+=delta; metrics.adaptations++;
-      setLoadLabel();
-    }
+    if(delta!==0){ difficulty+=delta; metrics.adaptations++; setLoadLabel(); }
   }
 
   // ---------- Loop ----------
@@ -598,28 +491,74 @@
     setTimeout(step, 1000);
   }
 
-  // ---------- UI, CSV, live ----------
+  // ---------- CSV helpers ----------
+  function snapshotRow(){
+    const sc = metrics.switchCosts.slice().sort((a,b)=>a-b);
+    const scMed = sc.length ? Math.round(sc[Math.floor(sc.length/2)]) : '';
+    const d=metrics.deadlines; const totalDead=d.onTime+d.early+d.late;
+    const onPct = totalDead? Math.round(d.onTime/totalDead*100) : '';
+    const pipAcc = metrics.pips.total? Math.round(metrics.pips.hits/metrics.pips.total*100) : '';
+    return {
+      timestamp:new Date().toISOString(),
+      duration_s:Tlimit,
+      elapsed_s: now(),
+      strategy:metrics.strategy,
+      difficulty_final:difficulty,
+      switch_median_ms:scMed,
+      deadlines_on_time:d.onTime, deadlines_early:d.early, deadlines_late:d.late,
+      deadlines_on_time_pct:onPct, deadlines_late_ms_total:d.lateMs,
+      inhib_errors:metrics.inhibErrors,
+      pm_hits:metrics.pmHits, pm_misses:metrics.pmMisses,
+      pip_hits:metrics.pips.hits, pip_total:metrics.pips.total, pip_acc_pct:pipAcc,
+      note_opens:metrics.noteOpens, note_chars:metrics.noteChars,
+      adaptations:metrics.adaptations
+    };
+  }
+
+  function ensureLogged(){
+    if(!metrics.log.length){ metrics.log.push(snapshotRow()); }
+  }
+
+  function downloadCSV(){
+    try{
+      ensureLogged();
+      const keys = Object.keys(metrics.log[0]);
+      const esc = v => '"' + String(v).replace(/"/g,'""') + '"';
+      const lines = [keys.join(',')].concat(metrics.log.map(r=>keys.map(k=>esc(r[k]??'')).join(',')));
+      const csv = '\uFEFF' + lines.join('\n'); // BOM for Excel
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url; a.download='task_juggler_session.csv';
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    }catch(err){
+      console.error('CSV download failed:', err);
+      alert('CSV download failed. See console for details.');
+    }
+  }
+
+  // ---------- UI, live ----------
   function updateLive(){
     const sc = metrics.switchCosts.slice().sort((a,b)=>a-b);
     const med = sc.length ? Math.round(sc[Math.floor(sc.length/2)]) : '—';
-    const dead = metrics.deadlines; const totalDead = dead.onTime+dead.early+dead.late;
-    const onPct = totalDead? Math.round(dead.onTime/totalDead*100): '—';
+    const d = metrics.deadlines; const total = d.onTime+d.early+d.late;
+    const onPct = total? Math.round(d.onTime/total*100): '—';
     const pipAcc = metrics.pips.total? Math.round(metrics.pips.hits/metrics.pips.total*100): '—';
     el.live.textContent = `Switch median: ${med} ms | On-time: ${onPct}% | Inhibition: ${metrics.inhibErrors} | PM hits: ${metrics.pmHits} | Pip acc: ${pipAcc}%`;
   }
 
   function startSession(){
-    // reset metrics
     Object.assign(metrics, {
       actions:[], switchCosts:[], lastPanel:null, lastActTs:performance.now(),
-      deadlines:{onTime:0, early:0, late:0, lateMs:0}, inhibErrors:0, memoryErrors:0,
-      pmHits:0, pmMisses:0, pmFalse:0, pips:{hits:0,total:0}, strategy: strategy, strategyAdherence:0,
-      noteOpens:0, noteChars:0, adaptations:0, log:[...metrics.log]
+      deadlines:{onTime:0, early:0, late:0, lateMs:0}, inhibErrors:0,
+      pmHits:0, pmMisses:0, pips:{hits:0,total:0},
+      strategy: strategy, noteOpens:0, noteChars:0, adaptations:0,
+      log:[]
     });
     noteOpens=0; noteChars=0;
     difficulty=1; setLoadLabel();
-    rule = {family:'Yes', nonFamily:'Later'}; el.ruleBadge.textContent=`Rule: Family→Yes | Non-family→Later`;
-    sessionData.seenTomAt=null; sessionData.starredTomAt=null;
+    sessionData.seenTomAt=null; sessionData.starredTomAt=null; sessionData.tomSent=false;
     T=0; Tlimit=parseInt(el.timeSel.value,10); running=true; queue.length=0;
     el.btnStart.disabled=true; el.btnDownload.disabled=true;
     renderRecipe(); seedSession(); updateTimer(); step();
@@ -627,39 +566,8 @@
 
   function endSession(){
     running=false; el.btnStart.disabled=false; el.btnDownload.disabled=false;
-    const sc = metrics.switchCosts.slice().sort((a,b)=>a-b);
-    const scMed = sc.length ? Math.round(sc[Math.floor(sc.length/2)]) : '';
-    const d=metrics.deadlines; const totalDead=d.onTime+d.early+d.late;
-    const onPct = totalDead? Math.round(d.onTime/totalDead*100) : '';
-    const pipAcc = metrics.pips.total? Math.round(metrics.pips.hits/metrics.pips.total*100) : '';
-    const row = {
-      timestamp:new Date().toISOString(),
-      duration_s:Tlimit,
-      strategy:metrics.strategy,
-      difficulty_final:difficulty,
-      switch_median_ms:scMed,
-      deadlines_on_time:d.onTime, deadlines_early:d.early, deadlines_late:d.late,
-      deadlines_on_time_pct:onPct, deadlines_late_ms_total:d.lateMs,
-      inhib_errors:metrics.inhibErrors, memory_errors:metrics.memoryErrors,
-      pm_hits:metrics.pmHits, pm_misses:metrics.pmMisses,
-      pip_hits:metrics.pips.hits, pip_total:metrics.pips.total, pip_acc_pct:pipAcc,
-      note_opens:metrics.noteOpens, note_chars:metrics.noteChars,
-      adaptations:metrics.adaptations
-    };
-    metrics.log.push(row);
+    metrics.log.push(snapshotRow());
     updateLive(); ping(520,0.08);
-  }
-
-  function downloadCSV(){
-    if(!metrics.log.length) return;
-    const keys = Object.keys(metrics.log[0]);
-    const esc = v => '"' + String(v).replace(/"/g,'""') + '"';
-    const lines = [keys.join(',')].concat(metrics.log.map(r=>keys.map(k=>esc(r[k]??'')).join(',')));
-    const csv = lines.join('\n');
-    const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
-    const url = URL.createObjectURL(blob); const a=document.createElement('a');
-    a.href=url; a.download='task_juggler_complete_v1.csv';
-    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
   }
 
   function onStrategyChange(){ applyStrategy(); }
