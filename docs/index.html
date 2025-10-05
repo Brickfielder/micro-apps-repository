@@ -440,5 +440,25 @@
   document.getElementById("last-updated").textContent =
     "Last updated: " + stamp.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
 </script>
+  <script>
+  (function(){
+    const key = "crma_disclaimer_hidden";
+    const sec = document.getElementById("disclaimer");
+    const btn = document.getElementById("discHideBtn");
+    if(!sec || !btn) return;
+
+    function apply(){
+      const hidden = localStorage.getItem(key) === "1";
+      sec.style.display = hidden ? "none" : "";
+      btn.textContent = hidden ? "Show disclaimer" : "Hide";
+    }
+    btn.addEventListener("click", () => {
+      const hidden = localStorage.getItem(key) === "1";
+      localStorage.setItem(key, hidden ? "0" : "1");
+      apply();
+    });
+    apply();
+  })();
+</script>
 </body>
 </html>
