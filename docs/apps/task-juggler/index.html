@@ -35,6 +35,9 @@
   .timer-display.warning{color:#ef4444;animation:pulse 1s infinite}
   @keyframes pulse{0%,100%{opacity:1} 50%{opacity:.6}}
 
+  .timers-duo{display:flex;gap:16px;justify-content:center;align-items:baseline;flex-wrap:wrap}
+  .timer-label{font-size:12px;color:var(--muted);text-align:center;margin-top:-6px}
+
   .panel{border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;background:var(--surface)}
   .urgent{border-color:var(--accent);border-width:2px;background:color-mix(in oklab, var(--accent), white 95%)}
   .muted{opacity:.6}
@@ -121,7 +124,17 @@
       <div class="tj-sectionTitle">Live Desk</div>
       <div class="pill">Everything overlaps; handle conflicts, rule-shifts, and the PM cue.</div>
 
-      <div class="timer-display" id="timerDisplay">4:00</div>
+      <!-- Dual clocks: countdown + elapsed -->
+      <div class="timers-duo">
+        <div>
+          <div class="timer-display" id="timerDisplay">4:00</div>
+          <div class="timer-label">Countdown</div>
+        </div>
+        <div>
+          <div class="timer-display" id="elapsedDisplay">0:00</div>
+          <div class="timer-label">Elapsed</div>
+        </div>
+      </div>
 
       <div id="desk">
         <div class="panel" id="recipePanel">
@@ -167,7 +180,7 @@
     btnStart: $('#btnStart'), btnDownload: $('#btnDownload'), btnReset: $('#btnReset'),
     statTime: $('#statTime'), statLoad: $('#statLoad'), live: $('#liveMetrics'),
     ruleBadge: $('#ruleBadge'), pmBadge: $('#pmBadge'),
-    timer: $('#timerDisplay'),
+    timer: $('#timerDisplay'), elapsed: $('#elapsedDisplay'),
     recipeList: $('#recipeList'), messagesList: $('#messagesList'),
     shoppingExposure: $('#shoppingExposure'), shoppingStream: $('#shoppingStream'),
     timersList: $('#timersList'),
@@ -211,7 +224,7 @@
   // Strategies
   let strategy = 'none';
   let chunkWindowOpen=false, chunkEndsAt=0;
-  let timeBlocks=[ [0,9999,'all'] ]; // updated if timeblock
+  let timeBlocks=[ [0,9999,'all'] ];
   let noteOpens=0, noteChars=0;
 
   // Adaptation
@@ -239,7 +252,12 @@
 
   // ---------- Rendering ----------
   function ts(s){ const m=Math.floor(s/60), x=s%60; return `${m}:${String(x).padStart(2,'0')}`; }
-  function updateTimer(){ const rem=Tlimit-now(); el.timer.textContent=ts(rem); rem<=30?el.timer.classList.add('warning'):el.timer.classList.remove('warning'); }
+  function updateTimer(){
+    const rem=Tlimit-now();
+    el.timer.textContent=ts(rem);
+    el.elapsed.textContent=ts(now());
+    rem<=30?el.timer.classList.add('warning'):el.timer.classList.remove('warning');
+  }
 
   function renderRecipe(){
     el.recipeList.innerHTML = "";
@@ -247,7 +265,7 @@
       const within = (now()>=st.window[0] && now()<=st.window[1]);
       const row = document.createElement('div');
       row.className = "panel " + (within?'urgent':'');
-      row.style.margin="8px 0";
+
       row.innerHTML = `<div><strong>${st.text}</strong> <span class="helper">[${ts(st.window[0])}–${ts(st.window[1])}]</span></div>
         <div class="tj-row" style="margin-top:6px">
           <button class="tj-btn ghost" data-act="doStep" data-id="${st.id}">Do it</button>
@@ -308,14 +326,27 @@
   function showPip(){
     const word = COLORS[Math.floor(Math.random()*COLORS.length)];
     const ink  = COLORS[Math.floor(Math.random()*COLORS.length)];
+    let answered = false;
     el.pipWord.textContent=word.name; el.pipWord.style.color=ink.css;
-    el.pipBtns.innerHTML=""; COLORS.forEach(c=>{ const b=document.createElement('button'); b.className="tj-btn ghost"; b.textContent=c.name;
-      b.onclick=()=>{ metrics.pips.total++; if(c.name===ink.name) metrics.pips.hits++; hidePip(); updateLive(); };
+    el.pipBtns.innerHTML="";
+    COLORS.forEach(c=>{
+      const b=document.createElement('button'); b.className="tj-btn ghost"; b.textContent=c.name;
+      b.onclick=()=>{ 
+        if (answered) return;
+        answered = true;
+        metrics.pips.total++; 
+        if(c.name===ink.name) metrics.pips.hits++; 
+        hidePip(); 
+        updateLive(); 
+      };
       el.pipBtns.appendChild(b);
     });
-    metrics.pips.total++;
     el.pip.classList.remove('hidden');
-    setTimeout(()=>{ hidePip(); }, 1400);
+    // keep visible for 7 seconds; if no response, count a miss
+    setTimeout(()=>{
+      if(!answered){ metrics.pips.total++; updateLive(); }
+      hidePip();
+    }, 7000);
   }
   function hidePip(){ el.pip.classList.add('hidden'); }
 
@@ -329,7 +360,6 @@
     if(strategy==='external') el.strategyInfo.textContent = 'Two notes max. Opening notes costs 1s each; chars tracked.';
     if(strategy==='chunking') el.strategyInfo.textContent = 'Batch window: committing in one panel locks others for 6s (inhibition).';
     if(strategy==='timeblock') el.strategyInfo.textContent = 'Panels gated by time: 0–60s Recipe; 60–120s Messages; 120–180s Mixed; then open.';
-    // time blocks
     if(strategy==='timeblock'){
       timeBlocks = [[0,60,'recipe'],[60,120,'messages'],[120,180,'mixed'],[180,9999,'all']];
     } else timeBlocks = [[0,9999,'all']];
@@ -340,7 +370,7 @@
     const mode = block[2];
     const lockMsgs = mode!=='messages' && mode!=='mixed' && mode!=='all';
     const lockRec  = mode!=='recipe'   && mode!=='mixed' && mode!=='all';
-    const lockShop = mode==='recipe' || mode==='messages'; // early blocks constrain probes handling
+    const lockShop = mode==='recipe' || mode==='messages';
     el.messagesPanel.classList.toggle('lock', lockMsgs);
     el.recipePanel.classList.toggle('lock', lockRec);
     el.shoppingPanel.classList.toggle('lock', lockShop);
@@ -351,7 +381,6 @@
   function openNotesCost(){
     if(strategy!=='external') return;
     noteOpens++; metrics.noteOpens = noteOpens;
-    // time penalty
     T = Math.min(T+1, Tlimit-1); // add 1s
     el.noteInfo.textContent = `Opens: ${noteOpens} | Chars: ${noteChars}`;
     updateTimer();
@@ -366,10 +395,9 @@
     if(strategy!=='chunking') return;
     if(!chunkWindowOpen){
       chunkWindowOpen = true; chunkEndsAt = now()+6;
-      // lock other panels
       [el.recipePanel, el.messagesPanel, el.shoppingPanel, el.timersPanel].forEach(p=>{
-        const id = p.id.includes(panel)? false : true;
-        p.classList.toggle('lock', id);
+        const lockOthers = !p.id.includes(panel);
+        p.classList.toggle('lock', lockOthers);
       });
       schedule('chunkClose', {}, 6);
     }
@@ -402,7 +430,6 @@
       else if(t > bw){ metrics.deadlines.late++; metrics.deadlines.lateMs += (t-bw)*1000; }
       else metrics.deadlines.onTime++;
       b.disabled=true; b.textContent='Done';
-      // prioritisation bonus is accounted in CSV as on-time pct; (full scoring could be added if needed)
       renderRecipe();
       return;
     }
@@ -431,13 +458,11 @@
         if(!starred){
           metrics.pmMisses++;
         }else{
-          // check timing
           const dt = performance.now() - (sessionData.seenTomAt||performance.now());
           if(dt <= pmCue.windowMs) metrics.pmHits++; else metrics.pmMisses++;
         }
       }
-
-      if(ans!==should){ metrics.inhibErrors++; } // wrong-rule reply = inhibition error (rule adherence)
+      if(ans!==should){ metrics.inhibErrors++; }
       node.style.opacity=0.6;
       return;
     }
@@ -462,7 +487,6 @@
 
   // ---------- Rule shifts & PM hook ----------
   function shiftRule(){
-    // flip non-family rule after mid-session
     rule.nonFamily = (rule.nonFamily==='Later' ? 'No' : 'Later');
     el.ruleBadge.textContent = `Rule: Family→${rule.family} | Non-family→${rule.nonFamily}`;
     ping(520,0.08);
@@ -484,10 +508,17 @@
     // recipe pings
     recipeSteps.forEach(st=> schedule('ping', {panel:'recipe'}, st.window[0]) );
 
-    // messages
+    // messages: exactly one Tom, others from non-Tom senders
+    const nonTomPool = messagePool.filter(m=>m.sender!=='Tom');
     const mcount = 4 + Math.floor(Math.random()*3) + (difficulty>2?1:0);
-    for(let i=0;i<mcount;i++){
-      const msg = Object.assign({id:'m'+i}, messagePool[Math.floor(Math.random()*messagePool.length)]);
+    // one Tom
+    const tomMsg = {id:'mT', sender:'Tom', family:false, text: messagePool.find(m=>m.sender==='Tom').text};
+    const tomTime = 12 + Math.floor(Math.random()*(Tlimit-18));
+    schedule('message', tomMsg, tomTime);
+    // remaining from non-Tom
+    for(let i=0;i<mcount-1;i++){
+      const base = nonTomPool[Math.floor(Math.random()*nonTomPool.length)];
+      const msg = Object.assign({id:'m'+i}, base);
       const t = 12 + Math.floor(Math.random()*(Tlimit-18));
       schedule('message', msg, t);
     }
@@ -517,8 +548,6 @@
 
     // rule shift mid-session
     schedule('ruleShift', {}, Math.floor(Tlimit/2));
-
-    // time-block gating applies if selected
   }
 
   // ---------- Dispatch ----------
@@ -547,7 +576,6 @@
 
   // ---------- Adaptation ----------
   function maybeAdapt(){
-    // crude: if on-time >80% and inhibition errors low, increase difficulty; if inhibition > (2/min), decrease
     const dead = metrics.deadlines;
     const totalDead = dead.onTime + dead.early + dead.late;
     const onPct = totalDead? dead.onTime/totalDead : 0;
@@ -586,7 +614,7 @@
       actions:[], switchCosts:[], lastPanel:null, lastActTs:performance.now(),
       deadlines:{onTime:0, early:0, late:0, lateMs:0}, inhibErrors:0, memoryErrors:0,
       pmHits:0, pmMisses:0, pmFalse:0, pips:{hits:0,total:0}, strategy: strategy, strategyAdherence:0,
-      noteOpens:0, noteChars:0, adaptations:0, log:[...metrics.log] // keep historical rows if multiple runs
+      noteOpens:0, noteChars:0, adaptations:0, log:[...metrics.log]
     });
     noteOpens=0; noteChars=0;
     difficulty=1; setLoadLabel();
@@ -594,7 +622,7 @@
     sessionData.seenTomAt=null; sessionData.starredTomAt=null;
     T=0; Tlimit=parseInt(el.timeSel.value,10); running=true; queue.length=0;
     el.btnStart.disabled=true; el.btnDownload.disabled=true;
-    renderRecipe(); seedSession(); step();
+    renderRecipe(); seedSession(); updateTimer(); step();
   }
 
   function endSession(){
@@ -630,7 +658,8 @@
     const csv = lines.join('\n');
     const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
     const url = URL.createObjectURL(blob); const a=document.createElement('a');
-    a.href=url; a.download='task_juggler_complete_v1.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    a.href=url; a.download='task_juggler_complete_v1.csv';
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
   }
 
   function onStrategyChange(){ applyStrategy(); }
