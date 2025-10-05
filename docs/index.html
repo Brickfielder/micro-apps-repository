@@ -36,18 +36,63 @@
   main{ flex:1; max-width:var(--maxw); margin:1.5rem auto 3rem; padding:0 1rem; }
 
   /* Disclaimer card */
-  .disclaimer{
-    background:var(--surface);
-    border:1px solid var(--line);
-    border-left:6px solid var(--accent);
-    border-radius:var(--radius);
-    padding:1rem 1.25rem;
-    box-shadow:var(--shadow);
-    margin: 0 0 1.5rem 0;
-  }
-  .disclaimer h2{ margin:0 0 .35rem 0; font-size:1.15rem; }
-  .disclaimer p{ margin:.4rem 0; color:var(--text); }
-  .disclaimer .muted{ color:var(--muted); font-size:.95rem; }
+/* Disclaimer card — refreshed */
+.disclaimer{
+  --disc-accent: var(--accent);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) - 2px);
+  padding: 0.85rem 1rem 1rem;
+  box-shadow: var(--shadow);
+  margin: 0 0 1.2rem 0;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.disclaimer::before{
+  content:"";
+  position:absolute; inset:0 0 0 auto;
+  width:6px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--disc-accent), white 0%) 0%,
+    color-mix(in oklab, var(--disc-accent), white 22%) 100%
+  );
+}
+.disc-head{
+  display:flex; align-items:center; gap:.75rem; margin-bottom:.25rem;
+}
+.disc-icon{
+  width:2.25rem; height:2.25rem; flex:0 0 auto;
+  display:grid; place-items:center;
+  border-radius:9px;
+  background: color-mix(in oklab, var(--accent), white 88%);
+  border: 1px solid color-mix(in oklab, var(--accent), white 60%);
+  font-size:1.25rem;
+}
+.disclaimer h2{
+  margin:0; font-size:clamp(1.05rem, 1.2vw + .8rem, 1.25rem); line-height:1.2;
+}
+.disclaimer p{
+  margin:.5rem 0 .35rem; color:var(--text);
+  font-size:clamp(.95rem, .4vw + .85rem, 1rem); line-height:1.55;
+}
+.disclaimer .muted{ color:var(--muted); font-size:.95rem; }
+.disclaimer .disc-actions{
+  margin-top:.6rem; display:flex; gap:.5rem; flex-wrap:wrap;
+}
+.disclaimer .chip-btn{
+  padding:.45rem .7rem; border-radius:999px; border:1px solid var(--line);
+  background: var(--pill); font-size:.9rem; cursor:pointer;
+}
+.disclaimer .chip-btn:hover{
+  background: color-mix(in oklab, var(--pill), var(--line) 14%);
+}
+@media (max-width: 560px){
+  .disclaimer{ padding:.75rem .85rem .9rem; }
+  .disc-head{ gap:.6rem; }
+  .disc-icon{ width:2rem; height:2rem; font-size:1.1rem; border-radius:8px; }
+}
 
   /* Picks */
   .picks{
@@ -137,22 +182,32 @@
 </header>
 
 <main>
-  <!-- Disclaimer -->
-  <section class="disclaimer" role="note" aria-label="Disclaimer">
-    <h2>Disclaimer</h2>
-    <p>
-      These micro-apps are experimental prototypes provided for demonstration, exploration, and educational purposes only.
-      They are <strong>not medical devices</strong> and are not intended for clinical decision-making or patient care without
-      appropriate validation, governance, and supervision. Use at your own risk; I accept no liability for any use or reliance.
-    </p>
-    <p class="muted">
-      This website and the apps may be changed or withdrawn without notice, and features may be modified based on user feedback.
-    </p>
-    <p>
-      I <em>welcome collaboration</em>: if you’re interested in appropriately developing and evaluating these tools for clinical work
-      or research, please get in touch.
-    </p>
-  </section>
+<section class="disclaimer" role="note" aria-label="Disclaimer" id="disclaimer">
+  <div class="disc-head">
+    <div class="disc-icon" aria-hidden="true">⚖️</div>
+    <div>
+      <h2>Disclaimer</h2>
+      <p class="muted" style="margin:.1rem 0 0">Experimental prototypes — not medical devices.</p>
+    </div>
+  </div>
+
+  <p>
+    These micro-apps are experimental prototypes provided for demonstration, exploration, and educational purposes only.
+    They are <strong>not medical devices</strong> and are not intended for clinical decision-making or patient care without
+    appropriate validation, governance, and supervision. Use at your own risk; no liability is accepted for any use or reliance.
+  </p>
+  <p class="muted">
+    This website and the apps may change or be withdrawn without notice; features may be modified based on user feedback.
+  </p>
+  <p>
+    I <em>welcome collaboration</em>: if you’re interested in appropriately developing and evaluating these tools for clinical work
+    or research, please get in touch.
+  </p>
+
+  <div class="disc-actions">
+    <button type="button" class="chip-btn" id="discHideBtn" aria-controls="disclaimer">Hide</button>
+  </div>
+</section>
 
   <!-- Editor's Picks -->
   <section id="picks" class="picks" hidden>
