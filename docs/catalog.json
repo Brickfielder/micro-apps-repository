@@ -121,6 +121,13 @@
     "tags": ["executive"]
   },
   {
+    "slug": "visual-neglect-trainer",
+    "title": "Visuo-Spatial Neglect Trainer",
+    "description": "Re-learn to read with simple strategies.",
+    "emoji": "✈️",
+    "tags": ["visuospatial"]
+  },
+  {
     "slug": "word-scavenger",
     "title": "Word Scavenger",
     "description": "Find words under constraints; phonemic/semantic fluency.",
