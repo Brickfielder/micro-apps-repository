@@ -17,7 +17,8 @@
 
   <style>
     :root{
-      --stripe-width: 14px;
+      /* Stripe now 4× wider (was 14px). Change here if you want. */
+      --stripe-width: 56px;
       --stripe-color: #ef3b2a;
       --sweep-duration: 3.6s;
     }
@@ -36,7 +37,7 @@
 
     .reader{
       position:relative;
-      max-width: 740px;
+      max-width: 760px;
       margin: 0 auto;
       background:
         linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.96)),
@@ -45,26 +46,33 @@
       border: 1px solid var(--line);
       box-shadow: var(--shadow);
       padding: clamp(18px, 3vw, 28px);
-      padding-left: calc(clamp(18px, 3vw, 28px) + var(--stripe-width) + 8px);
+      padding-left: calc(clamp(18px, 3vw, 28px) + var(--stripe-width) + 10px);
       overflow:hidden;
+      min-height: 56svh;
     }
     .reader .title{
-      margin: 0 0 .25rem;
+      margin: 0 0 .4rem;
       font-weight: 700;
-      font-size: 1.05rem;
+      font-size: 1.06rem;
       color:#0f172a;
       letter-spacing:.2px;
     }
+
+    /* Pages container */
+    .pages{ position: relative; }
     .page{
+      display:none;
       font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
       font-size: clamp(1rem, .3vw + .98rem, 1.1rem);
       line-height: 1.7;
       hyphens:auto;
       text-wrap: pretty;
+      min-height: 42svh;
     }
+    .page.current{ display:block; }
     .page p{ margin: 0 0 1rem; }
 
-    /* Support 1: Pulsating left stripe */
+    /* Support 1: Pulsating left stripe (now wider) */
     .left-stripe{
       pointer-events:none;
       position:absolute; inset:0 auto 0 0;
@@ -78,20 +86,23 @@
       animation: stripePulse 1300ms ease-in-out infinite;
     }
     @keyframes stripePulse{
-      0%,100%{ opacity:.85; filter:saturate(1); }
-      50%{   opacity:.45; filter:saturate(.9); }
+      0%,100%{ opacity:.9; filter:saturate(1); }
+      50%{   opacity:.55; filter:saturate(.9); }
     }
 
-    /* Support 2: Sweeping right→left light */
+    /* Support 2: Sweeping right→left “brighter” light */
     .sweep{
       pointer-events:none;
-      position:absolute; top:0; bottom:0; width:160%; left:100%;
+      position:absolute; top:0; bottom:0; width:180%; left:100%;
+      /* Brighter center band + backdrop-filter to subtly increase brightness */
       background:
         linear-gradient(90deg,
           rgba(255,255,255,0) 0%,
-          rgba(255,255,210,.65) 40%,
-          rgba(255,255,255,0) 70%);
-      mix-blend-mode: multiply;
+          rgba(255,255,220,.85) 30%,
+          rgba(255,255,255,0) 65%);
+      mix-blend-mode: normal;               /* show the bright band, not darken */
+      backdrop-filter: brightness(1.18) saturate(1.05); /* actual brightening */
+      -webkit-backdrop-filter: brightness(1.18) saturate(1.05);
       opacity:0;
     }
     .mode-sweep .sweep{
@@ -100,9 +111,35 @@
     }
     @keyframes sweepLeft{
       0%{ transform: translateX(0); }
-      100%{ transform: translateX(-260%); }
+      100%{ transform: translateX(-280%); }
     }
 
+    /* Pager controls */
+    .pager{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px; margin-top:10px; color:var(--muted);
+      font-size:.92rem;
+    }
+    .pager .hint{ opacity:.8; }
+    .pager .buttons{
+      margin-left:auto; display:flex; gap:8px;
+    }
+    .btn{
+      appearance:none; border:1px solid var(--line); background:var(--surface); color:var(--text);
+      padding:.5rem .7rem; border-radius:999px; font-weight:600; cursor:pointer;
+      box-shadow: var(--shadow);
+    }
+    .btn[disabled]{ opacity:.4; cursor:not-allowed; }
+    .btn.primary{ background:var(--accent); color:#fff; border-color:var(--accent-600); }
+    .next-fab{
+      position: fixed; right: clamp(14px, 3vw, 22px); bottom: clamp(14px, 3vw, 22px);
+      z-index: 20;
+      border-radius: 999px;
+      padding:.9rem 1rem;
+      line-height:1;
+    }
+
+    /* Focus ring for accessibility */
     .reader:focus-within{ outline: 3px solid var(--accent); outline-offset: 4px; }
   </style>
 </head>
@@ -127,46 +164,124 @@
       <div class="sweep" aria-hidden="true"></div>
 
       <h2 class="title">Short Story</h2>
-      <div class="page" id="page" tabindex="0">
-        <p>
-          On the edge of a quiet village, a boy named Leo often sat by the river after school, skipping stones and talking to himself about the day’s little dramas. One afternoon, an old man appeared on the opposite bank, fishing with a rod so worn it looked older than Leo’s grandparents. For a while, they just nodded at each other across the water, strangers bound by the same silence. Then the man called out, “You’re throwing them too flat—let the stone breathe before it flies.” Leo tried again, and the stone danced five times before sinking. The old man smiled, and from that day, they met there most evenings.
-        </p>
+
+      <div class="pages" id="pages" tabindex="0" aria-label="Story pages">
+        <!-- Page 1 -->
+        <article class="page current" data-index="0">
+          <p>
+            On the edge of a quiet village, a boy named Leo often sat by the river after school, skipping stones and talking to himself about the day’s little dramas. One afternoon, an old man appeared on the opposite bank, fishing with a rod so worn it looked older than Leo’s grandparents. For a while, they just nodded at each other across the water, strangers bound by the same silence. Then the man called out, “You’re throwing them too flat—let the stone breathe before it flies.” Leo tried again, and the stone danced five times before sinking. The old man smiled, and from that day, they met there most evenings.
+          </p>
+        </article>
+
+        <!-- Page 2 -->
+        <article class="page" data-index="1">
+          <p>
+            The old man’s name was Arthur. He had been a carpenter once, a widower now, his stories shaped by both laughter and ache. Leo would bring his homework, and Arthur would bring tales of his youth—of building boats, of losing a friend in the war, of the first time he held his newborn daughter. Sometimes, they spoke little. Sometimes, they said everything without needing words. Leo started to notice how the sun seemed to linger a little longer when Arthur laughed, how the world felt smaller and kinder when they sat side by side.
+          </p>
+        </article>
+
+        <!-- Page 3 -->
+        <article class="page" data-index="2">
+          <p>
+            When winter came and the river froze, Arthur stopped coming. Leo crossed the bridge and found the old house shuttered, the chair by the hearth empty but warm with memory. He sat by the fire, holding a small wooden boat Arthur had carved for him weeks before, its hull smooth as a wish. Years later, when Leo was grown and teaching his own son to skip stones, he told him, “Let the stone breathe before it flies.” And as the boy’s laughter echoed across the water, Leo smiled—because the river still remembered.
+          </p>
+        </article>
+      </div>
+
+      <div class="pager" aria-live="polite">
+        <span id="pageStatus" class="hint">Page 1 of 3 — swipe to navigate</span>
+        <div class="buttons">
+          <button class="btn" id="prevBtn" aria-label="Previous page" disabled="disabled">← Prev</button>
+          <button class="btn primary" id="nextBtn" aria-label="Next page">Next →</button>
+        </div>
       </div>
     </section>
+
+    <!-- Floating next arrow at bottom-right -->
+    <button class="btn primary next-fab" id="fabNext" aria-label="Next page (bottom-right)">
+      ➜
+    </button>
 
     <details>
       <summary><strong>How to use</strong></summary>
       <p class="helper">
-        Choose a support mode above. <em>Left stripe</em> adds a pulsating red cue on the left edge.
-        <em>Right→Left sweep</em> adds a gentle light that moves across the text from right to left, repeatedly.
+        Choose a support mode above. <em>Left stripe</em> adds a pulsating red cue on the left edge
+        (wider to strengthen anchoring). <em>Right→Left sweep</em> adds a brighter light that repeatedly moves
+        right to left, encouraging attention to the left side. Swipe left/right to change page,
+        or tap the bottom-right arrow.
       </p>
     </details>
   </div>
 
   <script>
     (function(){
-      const reader = document.getElementById('reader');
+      const reader  = document.getElementById('reader');
       const control = document.getElementById('modeControl');
+      const pagesEl = document.getElementById('pages');
+      const pageStatus = document.getElementById('pageStatus');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const fabNext = document.getElementById('fabNext');
 
-      const update = () => {
+      const pages = Array.from(pagesEl.querySelectorAll('.page'));
+      let index = 0;
+
+      function render(){
+        pages.forEach((p,i)=>p.classList.toggle('current', i===index));
+        pageStatus.textContent = `Page ${index+1} of ${pages.length} — swipe to navigate`;
+        prevBtn.disabled = (index===0);
+        nextBtn.disabled = (index===pages.length-1);
+        fabNext.disabled = nextBtn.disabled;
+        pagesEl.setAttribute('aria-label', `Story page ${index+1} of ${pages.length}`);
+      }
+
+      function go(delta){
+        index = Math.max(0, Math.min(pages.length-1, index + delta));
+        render();
+      }
+
+      prevBtn.addEventListener('click', ()=>go(-1));
+      nextBtn.addEventListener('click', ()=>go(1));
+      fabNext.addEventListener('click', ()=>go(1));
+
+      // Keyboard: ← →  /  1=None, 2=Stripe, 3=Sweep (mode)
+      document.addEventListener('keydown', (e) => {
+        if (e.target && /input|textarea|select/i.test(e.target.tagName)) return;
+        if (e.key === 'ArrowLeft')  go(-1);
+        if (e.key === 'ArrowRight') go(1);
+        if (e.key === '1') document.getElementById('mode-none').checked = true;
+        if (e.key === '2') document.getElementById('mode-stripe').checked = true;
+        if (e.key === '3') document.getElementById('mode-sweep').checked = true;
+        updateMode();
+      });
+
+      // Touch swipe
+      let touchStartX = 0, touchStartY = 0, touchTime = 0;
+      const SWIPE_X = 40, SWIPE_Y = 50;
+      pagesEl.addEventListener('touchstart', (e)=>{
+        const t = e.changedTouches[0];
+        touchStartX = t.clientX; touchStartY = t.clientY; touchTime = Date.now();
+      }, {passive:true});
+
+      pagesEl.addEventListener('touchend', (e)=>{
+        const t = e.changedTouches[0];
+        const dx = t.clientX - touchStartX;
+        const dy = t.clientY - touchStartY;
+        if (Math.abs(dx) > SWIPE_X && Math.abs(dy) < SWIPE_Y) {
+          if (dx < 0) go(1); else go(-1);
+        }
+      }, {passive:true});
+
+      function updateMode(){
         const mode = control.querySelector('input[name="mode"]:checked')?.value || 'none';
         reader.classList.remove('mode-none','mode-stripe','mode-sweep');
         reader.classList.add('mode-' + mode);
         reader.setAttribute('aria-label', 'Reader, support mode: ' + mode);
-      };
+      }
+      control.addEventListener('change', updateMode);
 
-      control.addEventListener('change', update);
-
-      // Keyboard quick-keys: 1=None, 2=Stripe, 3=Sweep
-      document.addEventListener('keydown', (e) => {
-        if (e.target && /input|textarea|select/i.test(e.target.tagName)) return;
-        if (e.key === '1') document.getElementById('mode-none').checked = true;
-        if (e.key === '2') document.getElementById('mode-stripe').checked = true;
-        if (e.key === '3') document.getElementById('mode-sweep').checked = true;
-        update();
-      });
-
-      update();
+      updateMode();
+      render();
     })();
   </script>
 </body>
