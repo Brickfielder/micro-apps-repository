@@ -116,11 +116,11 @@
 
     /* Support 3: Lead-words colouring (first 2 per visual line) */
     .page .wd{ display:inline; }            /* each word span */
-    .mode-firstwords .page .lead{           /* only colour when mode active */
-      color: var(--stripe-color);
-      font-weight: 700;
-    }
-
+.mode-firstwords .page .lead{
+  color: var(--stripe-color);
+  text-decoration: underline;          /* or 'underline 0.06em' if supported */
+  text-underline-offset: 0.12em;       /* keeps it readable */
+}
     /* Pager */
     .pager{
       display:flex; align-items:center; justify-content:space-between;
