@@ -8,7 +8,7 @@
   <!-- Micro-Apps shared assets -->
   <meta name="app-slug" content="neglect-reader" />
   <meta name="app-title" content="Left-Anchor Reader — Visuo-Spatial Neglect Trainer" />
-  <meta name="app-desc" content="Read a short story with optional left-attentional anchors: a pulsating red stripe or a sweeping right→left light." />
+  <meta name="app-desc" content="Read a short story with optional left-attentional anchors: a pulsating stripe, a sweeping right→left light, or red lead-words per line." />
   <meta name="theme" content="bold dense" />
 
   <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3" />
@@ -17,12 +17,12 @@
 
   <style>
     :root{
-      /* Stripe now 4× wider (was 14px). Change here if you want. */
-      --stripe-width: 56px;
-      --stripe-color: #ef3b2a;
+      --stripe-width: 56px;      /* wider anchor stripe */
+      --stripe-color: #ef3b2a;   /* anchor/red */
       --sweep-duration: 3.6s;
     }
 
+    /* Toolbar */
     .toolbar .mode-label{ font-weight:600; margin-right:6px; }
     .segmented{
       display:inline-flex; border:1px solid var(--line); border-radius:12px; overflow:hidden;
@@ -35,6 +35,7 @@
     .segmented label:last-child{ border-right:none; }
     .segmented input:checked + label{ background:var(--accent); color:#fff; border-color:var(--accent-600); }
 
+    /* Reader surface */
     .reader{
       position:relative;
       max-width: 760px;
@@ -58,7 +59,7 @@
       letter-spacing:.2px;
     }
 
-    /* Pages container */
+    /* Pages */
     .pages{ position: relative; }
     .page{
       display:none;
@@ -72,7 +73,7 @@
     .page.current{ display:block; }
     .page p{ margin: 0 0 1rem; }
 
-    /* Support 1: Pulsating left stripe (now wider) */
+    /* Support 1: Pulsating left stripe */
     .left-stripe{
       pointer-events:none;
       position:absolute; inset:0 auto 0 0;
@@ -90,18 +91,17 @@
       50%{   opacity:.55; filter:saturate(.9); }
     }
 
-    /* Support 2: Sweeping right→left “brighter” light */
+    /* Support 2: Sweeping right→left bright light */
     .sweep{
       pointer-events:none;
       position:absolute; top:0; bottom:0; width:180%; left:100%;
-      /* Brighter center band + backdrop-filter to subtly increase brightness */
       background:
         linear-gradient(90deg,
           rgba(255,255,255,0) 0%,
           rgba(255,255,220,.85) 30%,
           rgba(255,255,255,0) 65%);
-      mix-blend-mode: normal;               /* show the bright band, not darken */
-      backdrop-filter: brightness(1.18) saturate(1.05); /* actual brightening */
+      mix-blend-mode: normal;
+      backdrop-filter: brightness(1.18) saturate(1.05);
       -webkit-backdrop-filter: brightness(1.18) saturate(1.05);
       opacity:0;
     }
@@ -114,16 +114,21 @@
       100%{ transform: translateX(-280%); }
     }
 
-    /* Pager controls */
+    /* Support 3: Lead-words colouring (first 2 per visual line) */
+    .page .wd{ display:inline; }            /* each word span */
+    .mode-firstwords .page .lead{           /* only colour when mode active */
+      color: var(--stripe-color);
+      font-weight: 700;
+    }
+
+    /* Pager */
     .pager{
       display:flex; align-items:center; justify-content:space-between;
       gap:10px; margin-top:10px; color:var(--muted);
       font-size:.92rem;
     }
     .pager .hint{ opacity:.8; }
-    .pager .buttons{
-      margin-left:auto; display:flex; gap:8px;
-    }
+    .pager .buttons{ margin-left:auto; display:flex; gap:8px; }
     .btn{
       appearance:none; border:1px solid var(--line); background:var(--surface); color:var(--text);
       padding:.5rem .7rem; border-radius:999px; font-weight:600; cursor:pointer;
@@ -133,18 +138,16 @@
     .btn.primary{ background:var(--accent); color:#fff; border-color:var(--accent-600); }
     .next-fab{
       position: fixed; right: clamp(14px, 3vw, 22px); bottom: clamp(14px, 3vw, 22px);
-      z-index: 20;
-      border-radius: 999px;
-      padding:.9rem 1rem;
-      line-height:1;
+      z-index: 20; border-radius: 999px; padding:.9rem 1rem; line-height:1;
     }
 
-    /* Focus ring for accessibility */
     .reader:focus-within{ outline: 3px solid var(--accent); outline-offset: 4px; }
   </style>
 </head>
 <body>
   <div id="app-root">
+
+    <!-- Toolbar -->
     <div class="toolbar" role="group" aria-label="Support mode">
       <span class="mode-label">Support:</span>
       <div class="segmented" id="modeControl">
@@ -156,9 +159,24 @@
 
         <input type="radio" id="mode-sweep"  name="mode" value="sweep" />
         <label for="mode-sweep" title="Right-to-left sweeping light">Right→Left sweep</label>
+
+        <input type="radio" id="mode-firstwords" name="mode" value="firstwords" />
+        <label for="mode-firstwords" title="Colour the first two words on each line">Lead-words (first 2)</label>
       </div>
     </div>
 
+    <!-- How to use moved BEFORE story -->
+    <details open>
+      <summary><strong>How to use</strong></summary>
+      <p class="helper">
+        Choose a support mode above. <em>Left stripe</em> provides a wide, pulsating red anchor at the left edge.
+        <em>Right→Left sweep</em> adds a brighter light moving across the text to guide attention leftwards.
+        <em>Lead-words</em> colours the first two words of every visible line in red to create multiple left anchors.
+        Swipe left/right to change page or tap the bottom-right arrow.
+      </p>
+    </details>
+
+    <!-- Story -->
     <section class="reader mode-none" id="reader" aria-live="polite">
       <div class="left-stripe" aria-hidden="true"></div>
       <div class="sweep" aria-hidden="true"></div>
@@ -201,31 +219,22 @@
     <button class="btn primary next-fab" id="fabNext" aria-label="Next page (bottom-right)">
       ➜
     </button>
-
-    <details>
-      <summary><strong>How to use</strong></summary>
-      <p class="helper">
-        Choose a support mode above. <em>Left stripe</em> adds a pulsating red cue on the left edge
-        (wider to strengthen anchoring). <em>Right→Left sweep</em> adds a brighter light that repeatedly moves
-        right to left, encouraging attention to the left side. Swipe left/right to change page,
-        or tap the bottom-right arrow.
-      </p>
-    </details>
   </div>
 
   <script>
     (function(){
-      const reader  = document.getElementById('reader');
-      const control = document.getElementById('modeControl');
-      const pagesEl = document.getElementById('pages');
+      const reader   = document.getElementById('reader');
+      const control  = document.getElementById('modeControl');
+      const pagesEl  = document.getElementById('pages');
       const pageStatus = document.getElementById('pageStatus');
-      const prevBtn = document.getElementById('prevBtn');
-      const nextBtn = document.getElementById('nextBtn');
-      const fabNext = document.getElementById('fabNext');
+      const prevBtn  = document.getElementById('prevBtn');
+      const nextBtn  = document.getElementById('nextBtn');
+      const fabNext  = document.getElementById('fabNext');
 
       const pages = Array.from(pagesEl.querySelectorAll('.page'));
       let index = 0;
 
+      /* ---------- Paging ---------- */
       function render(){
         pages.forEach((p,i)=>p.classList.toggle('current', i===index));
         pageStatus.textContent = `Page ${index+1} of ${pages.length} — swipe to navigate`;
@@ -233,18 +242,17 @@
         nextBtn.disabled = (index===pages.length-1);
         fabNext.disabled = nextBtn.disabled;
         pagesEl.setAttribute('aria-label', `Story page ${index+1} of ${pages.length}`);
+        if (currentMode() === 'firstwords') applyLeadWords();
       }
-
       function go(delta){
         index = Math.max(0, Math.min(pages.length-1, index + delta));
         render();
       }
-
       prevBtn.addEventListener('click', ()=>go(-1));
       nextBtn.addEventListener('click', ()=>go(1));
       fabNext.addEventListener('click', ()=>go(1));
 
-      // Keyboard: ← →  /  1=None, 2=Stripe, 3=Sweep (mode)
+      // Keyboard: ← →  /  1=None, 2=Stripe, 3=Sweep, 4=Lead-words
       document.addEventListener('keydown', (e) => {
         if (e.target && /input|textarea|select/i.test(e.target.tagName)) return;
         if (e.key === 'ArrowLeft')  go(-1);
@@ -252,17 +260,17 @@
         if (e.key === '1') document.getElementById('mode-none').checked = true;
         if (e.key === '2') document.getElementById('mode-stripe').checked = true;
         if (e.key === '3') document.getElementById('mode-sweep').checked = true;
+        if (e.key === '4') document.getElementById('mode-firstwords').checked = true;
         updateMode();
       });
 
       // Touch swipe
-      let touchStartX = 0, touchStartY = 0, touchTime = 0;
+      let touchStartX = 0, touchStartY = 0;
       const SWIPE_X = 40, SWIPE_Y = 50;
       pagesEl.addEventListener('touchstart', (e)=>{
         const t = e.changedTouches[0];
-        touchStartX = t.clientX; touchStartY = t.clientY; touchTime = Date.now();
+        touchStartX = t.clientX; touchStartY = t.clientY;
       }, {passive:true});
-
       pagesEl.addEventListener('touchend', (e)=>{
         const t = e.changedTouches[0];
         const dx = t.clientX - touchStartX;
@@ -272,14 +280,124 @@
         }
       }, {passive:true});
 
+      /* ---------- Modes ---------- */
+      function currentMode(){
+        return control.querySelector('input[name="mode"]:checked')?.value || 'none';
+      }
       function updateMode(){
-        const mode = control.querySelector('input[name="mode"]:checked')?.value || 'none';
-        reader.classList.remove('mode-none','mode-stripe','mode-sweep');
+        const mode = currentMode();
+        reader.classList.remove('mode-none','mode-stripe','mode-sweep','mode-firstwords');
         reader.classList.add('mode-' + mode);
         reader.setAttribute('aria-label', 'Reader, support mode: ' + mode);
+        if (mode === 'firstwords') applyLeadWords();
+        else clearLeadWords(); // remove colouring when leaving mode
       }
       control.addEventListener('change', updateMode);
 
+      /* ---------- Lead-words (first 2 words per visual line) ---------- */
+
+      // Wrap words one-time per page
+      function ensureWrapped(page){
+        if (page.dataset.wrapped === '1') return;
+        page.dataset.wrapped = '1';
+
+        const walker = document.createTreeWalker(page, NodeFilter.SHOW_TEXT, {
+          acceptNode(node){
+            return node.parentElement && node.nodeType === 3 && node.nodeValue.trim().length
+              ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+          }
+        });
+
+        const textNodes = [];
+        while(walker.nextNode()) textNodes.push(walker.currentNode);
+
+        const wordRe = /[\w’'-]+/g; // words incl. ’ and hyphen/apostrophes
+
+        for (const tn of textNodes){
+          const frag = document.createDocumentFragment();
+          const text = tn.nodeValue;
+          let lastIndex = 0, m;
+
+          while ((m = wordRe.exec(text)) !== null){
+            const [w] = m;
+            const start = m.index;
+            const end = start + w.length;
+
+            // add any text before the word
+            if (start > lastIndex) frag.appendChild(document.createTextNode(text.slice(lastIndex, start)));
+
+            // word span
+            const span = document.createElement('span');
+            span.className = 'wd';
+            span.textContent = w;
+            frag.appendChild(span);
+            lastIndex = end;
+          }
+          // trailing text
+          if (lastIndex < text.length) frag.appendChild(document.createTextNode(text.slice(lastIndex)));
+
+          tn.parentNode.replaceChild(frag, tn);
+        }
+      }
+
+      function clearLeadWords(){
+        const page = pages[index];
+        if (!page) return;
+        page.querySelectorAll('.wd.lead').forEach(el => el.classList.remove('lead'));
+      }
+
+      function applyLeadWords(){
+        const page = pages[index];
+        if (!page) return;
+
+        ensureWrapped(page);
+        clearLeadWords();
+
+        // Only consider visible page
+        const words = Array.from(page.querySelectorAll('.wd'));
+
+        if (words.length === 0) return;
+
+        // Group by visual line using top coordinate with tolerance
+        const groups = [];
+        const TOL = 4; // px tolerance for the same line
+        let current = [];
+
+        for (const w of words){
+          const r = w.getBoundingClientRect();
+          const top = Math.round(r.top);
+          if (!current.length){
+            current.push({ el: w, top, left: r.left });
+          } else {
+            const prevTop = current[current.length - 1].top;
+            if (Math.abs(top - prevTop) <= TOL){
+              current.push({ el: w, top, left: r.left });
+            } else {
+              groups.push(current);
+              current = [{ el: w, top, left: r.left }];
+            }
+          }
+        }
+        if (current.length) groups.push(current);
+
+        // In each line group, sort by left and mark first two
+        for (const g of groups){
+          g.sort((a,b)=>a.left - b.left);
+          for (let i=0;i<Math.min(2, g.length);i++){
+            g[i].el.classList.add('lead');
+          }
+        }
+      }
+
+      // Recompute on resize/orientation if mode active
+      let resizeTimer = null;
+      window.addEventListener('resize', () => {
+        if (currentMode() !== 'firstwords') return;
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(applyLeadWords, 120);
+      });
+
+      // Init
       updateMode();
       render();
     })();
