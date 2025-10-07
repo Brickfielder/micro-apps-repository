@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Left-Anchor Reader — Visuo-Spatial Neglect Trainer</title>
+
+  <!-- Micro-Apps shared assets -->
+  <meta name="app-slug" content="neglect-reader" />
+  <meta name="app-title" content="Left-Anchor Reader — Visuo-Spatial Neglect Trainer" />
+  <meta name="app-desc" content="Read a short story with optional left-attentional anchors: a pulsating red stripe or a sweeping right→left light." />
+  <meta name="theme" content="bold dense" />
+
+  <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3" />
+  <script defer="defer" src="/micro-apps-repository/shared/frame.js?v=3"></script>
+  <script defer="defer" src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
+
+  <style>
+    :root{
+      --stripe-width: 14px;
+      --stripe-color: #ef3b2a;
+      --sweep-duration: 3.6s;
+    }
+
+    .toolbar .mode-label{ font-weight:600; margin-right:6px; }
+    .segmented{
+      display:inline-flex; border:1px solid var(--line); border-radius:12px; overflow:hidden;
+      box-shadow: var(--shadow); background:var(--surface);
+    }
+    .segmented input{ position:absolute; opacity:0; pointer-events:none; }
+    .segmented label{
+      padding:.55rem .9rem; cursor:pointer; user-select:none; border-right:1px solid var(--line);
+    }
+    .segmented label:last-child{ border-right:none; }
+    .segmented input:checked + label{ background:var(--accent); color:#fff; border-color:var(--accent-600); }
+
+    .reader{
+      position:relative;
+      max-width: 740px;
+      margin: 0 auto;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.96)),
+        var(--surface);
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      padding: clamp(18px, 3vw, 28px);
+      padding-left: calc(clamp(18px, 3vw, 28px) + var(--stripe-width) + 8px);
+      overflow:hidden;
+    }
+    .reader .title{
+      margin: 0 0 .25rem;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color:#0f172a;
+      letter-spacing:.2px;
+    }
+    .page{
+      font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+      font-size: clamp(1rem, .3vw + .98rem, 1.1rem);
+      line-height: 1.7;
+      hyphens:auto;
+      text-wrap: pretty;
+    }
+    .page p{ margin: 0 0 1rem; }
+
+    /* Support 1: Pulsating left stripe */
+    .left-stripe{
+      pointer-events:none;
+      position:absolute; inset:0 auto 0 0;
+      width: var(--stripe-width);
+      background: var(--stripe-color);
+      opacity:0; transform: translateX(-100%);
+      box-shadow: 0 0 0 2px color-mix(in oklab, var(--stripe-color), white 35%);
+    }
+    .mode-stripe .left-stripe{
+      transform:none; opacity:1;
+      animation: stripePulse 1300ms ease-in-out infinite;
+    }
+    @keyframes stripePulse{
+      0%,100%{ opacity:.85; filter:saturate(1); }
+      50%{   opacity:.45; filter:saturate(.9); }
+    }
+
+    /* Support 2: Sweeping right→left light */
+    .sweep{
+      pointer-events:none;
+      position:absolute; top:0; bottom:0; width:160%; left:100%;
+      background:
+        linear-gradient(90deg,
+          rgba(255,255,255,0) 0%,
+          rgba(255,255,210,.65) 40%,
+          rgba(255,255,255,0) 70%);
+      mix-blend-mode: multiply;
+      opacity:0;
+    }
+    .mode-sweep .sweep{
+      opacity:1;
+      animation: sweepLeft var(--sweep-duration) linear infinite;
+    }
+    @keyframes sweepLeft{
+      0%{ transform: translateX(0); }
+      100%{ transform: translateX(-260%); }
+    }
+
+    .reader:focus-within{ outline: 3px solid var(--accent); outline-offset: 4px; }
+  </style>
+</head>
+<body>
+  <div id="app-root">
+    <div class="toolbar" role="group" aria-label="Support mode">
+      <span class="mode-label">Support:</span>
+      <div class="segmented" id="modeControl">
+        <input type="radio" id="mode-none"   name="mode" value="none" checked="checked" />
+        <label for="mode-none" title="No external support">None</label>
+
+        <input type="radio" id="mode-stripe" name="mode" value="stripe" />
+        <label for="mode-stripe" title="Pulsating red stripe on the left">Left stripe</label>
+
+        <input type="radio" id="mode-sweep"  name="mode" value="sweep" />
+        <label for="mode-sweep" title="Right-to-left sweeping light">Right→Left sweep</label>
+      </div>
+    </div>
+
+    <section class="reader mode-none" id="reader" aria-live="polite">
+      <div class="left-stripe" aria-hidden="true"></div>
+      <div class="sweep" aria-hidden="true"></div>
+
+      <h2 class="title">Short Story</h2>
+      <div class="page" id="page" tabindex="0">
+        <p>
+          On the edge of a quiet village, a boy named Leo often sat by the river after school, skipping stones and talking to himself about the day’s little dramas. One afternoon, an old man appeared on the opposite bank, fishing with a rod so worn it looked older than Leo’s grandparents. For a while, they just nodded at each other across the water, strangers bound by the same silence. Then the man called out, “You’re throwing them too flat—let the stone breathe before it flies.” Leo tried again, and the stone danced five times before sinking. The old man smiled, and from that day, they met there most evenings.
+        </p>
+      </div>
+    </section>
+
+    <details>
+      <summary><strong>How to use</strong></summary>
+      <p class="helper">
+        Choose a support mode above. <em>Left stripe</em> adds a pulsating red cue on the left edge.
+        <em>Right→Left sweep</em> adds a gentle light that moves across the text from right to left, repeatedly.
+      </p>
+    </details>
+  </div>
+
+  <script>
+    (function(){
+      const reader = document.getElementById('reader');
+      const control = document.getElementById('modeControl');
+
+      const update = () => {
+        const mode = control.querySelector('input[name="mode"]:checked')?.value || 'none';
+        reader.classList.remove('mode-none','mode-stripe','mode-sweep');
+        reader.classList.add('mode-' + mode);
+        reader.setAttribute('aria-label', 'Reader, support mode: ' + mode);
+      };
+
+      control.addEventListener('change', update);
+
+      // Keyboard quick-keys: 1=None, 2=Stripe, 3=Sweep
+      document.addEventListener('keydown', (e) => {
+        if (e.target && /input|textarea|select/i.test(e.target.tagName)) return;
+        if (e.key === '1') document.getElementById('mode-none').checked = true;
+        if (e.key === '2') document.getElementById('mode-stripe').checked = true;
+        if (e.key === '3') document.getElementById('mode-sweep').checked = true;
+        update();
+      });
+
+      update();
+    })();
+  </script>
+</body>
+</html>
