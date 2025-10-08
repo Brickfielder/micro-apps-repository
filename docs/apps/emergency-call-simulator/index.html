@@ -523,6 +523,7 @@
     let digits = '';
     let micAccessGranted = false;
     let recognitionReady = false;
+    let lastPromptEndedAt = 0;
 
     const PROMPT_TEXT = 'Emergency, which service do you require? Fire, Police, or Ambulance?';
 
@@ -662,22 +663,41 @@
 
       recognitionInstance.onresult = (event) => {
         if (!recognitionEnabled) return;
-
         const result = event.results[0][0];
-        const transcript = result.transcript.trim();
-        const normalized = transcript.replace(/[^a-z]/gi, '').toLowerCase();
-        addEvent('speech_detected', {
-          transcript,
-          confidence: typeof result.confidence === 'number' ? Number(result.confidence.toFixed(2)) : undefined,
-        });
+        const transcript = (result.transcript || '').trim().toLowerCase();
+        const now = Date.now();
 
-        if (normalized === 'ambulance') {
-          recognitionSuccess = true;
-          addEvent('task_complete', { method: 'speech' });
-          finalizeSuccess();
-        } else {
-          addEvent('speech_rejected', { transcript });
+        if (lastPromptEndedAt && now - lastPromptEndedAt < 2000) {
+          addEvent('speech_ignored_prompt_overlap', {
+            transcript,
+            deltaMs: now - lastPromptEndedAt,
+          });
+          return;
         }
+
+        const normalized = typeof transcript.normalize === 'function' ? transcript.normalize('NFKD') : transcript;
+        const sanitized = normalized
+          .replace(/[^a-z\s]/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+        const words = sanitized.split(' ').filter(Boolean);
+        const containsAmbulance = words.includes('ambulance');
+        const confidence = typeof result.confidence === 'number' ? result.confidence : null;
+
+        if (!containsAmbulance) {
+          addEvent('speech_rejected_no_match', { transcript, sanitized, confidence });
+          return;
+        }
+
+        if (confidence !== null && confidence < 0.6) {
+          addEvent('speech_rejected_low_confidence', { transcript, confidence });
+          return;
+        }
+
+        addEvent('speech_detected', { transcript, sanitized, confidence });
+        recognitionSuccess = true;
+        addEvent('task_complete', { method: 'speech' });
+        finalizeSuccess();
       };
 
       recognitionInstance.onerror = (event) => {
@@ -742,12 +762,14 @@
       }
 
       const handlePostPrompt = () => {
+        lastPromptEndedAt = Date.now();
         addEvent('prompt_spoken', { count: promptCount });
 
         if (recognitionReady && !recognitionSuccess) {
+          const resumeDelay = 'speechSynthesis' in window ? 900 : 0;
           setTimeout(() => {
             recognitionEnabled = true;
-          }, 400);
+          }, resumeDelay);
         }
 
         if (promptCount === 1) {
