@@ -216,6 +216,17 @@
       box-shadow: 0 6px 16px rgba(37, 99, 235, 0.18);
     }
 
+    .final-actions {
+      margin-top: 16px;
+      display: flex;
+      justify-content: flex-start;
+    }
+
+    .final-actions button {
+      padding-left: 1.1rem;
+      padding-right: 1.1rem;
+    }
+
     .budget-banner {
       border-radius: 14px;
       background: #0ea5e9;
@@ -468,12 +479,12 @@
       <div class="intro-hero">
         <div>
           <h2 id="introTitle">Plan a grocery trip within budget</h2>
-          <p>You are supporting a patient to prepare for a shopping trip. They start with a set budget, a couple of suggested staples, and must decide how to reach the shop, what else to buy, and how to respond when things change in-store.</p>
+          <p>You are preparing for your shopping trip. You start with a set budget, a couple of suggested staples, and must decide how to reach the shop, what else to buy, and how to respond when things change in-store.</p>
           <ul>
             <li>Keep within the starting budget – transport costs count!</li>
-            <li>Add extra items beyond the suggested staples so the basket meets their needs.</li>
+            <li>Add extra items beyond the suggested staples so your basket meets your needs.</li>
             <li>When an item is missing, choose a suitable alternative or decide to leave it.</li>
-            <li>Balance the benefits of travelling by bus or taxi on the way out and coming home.</li>
+            <li>Balance the benefits of travelling by bus or taxi on your journeys there and back.</li>
           </ul>
           <button class="primary" id="startPlanning">Start planning</button>
         </div>
@@ -500,7 +511,7 @@
 
     <section class="screen screen-card" data-screen="planning" aria-labelledby="planTitle">
       <h2 id="planTitle">Step 2 · Build the shopping plan</h2>
-      <p class="hint">Patients begin with a £45.00 budget. Suggested staples are pre-selected, but they need to add at least two more items that match their goals.</p>
+      <p class="hint">You begin with a £45.00 budget. Suggested staples are pre-selected, but you need to add at least two more items that match your goals.</p>
 
       <div class="budget-banner" aria-live="polite" id="budgetBanner">
         <span>Current spend: <strong id="currentSpend">£0.00</strong></span>
@@ -510,7 +521,7 @@
       <div class="planning-layout">
         <section class="card-panel" aria-labelledby="suggestedTitle">
           <h3 class="section-title" id="suggestedTitle">Suggested staples</h3>
-          <p class="hint">Discuss whether these still work. They can be removed if they no longer fit the plan.</p>
+          <p class="hint">Discuss whether these still work. You can remove them if they no longer fit your plan.</p>
           <div class="item-grid" id="suggestedList"></div>
 
           <h3 class="section-title" id="extrasTitle">Add further essentials</h3>
@@ -542,7 +553,7 @@
 
           <h3 class="section-title">Travel to the store</h3>
           <div class="transport-options" id="transportOptions"></div>
-          <p class="hint" id="transportHint">Select how they will travel to the store.</p>
+          <p class="hint" id="transportHint">Select how you will travel to the store.</p>
 
           <div class="nav-row">
             <button type="button" class="secondary" data-nav="back">Back</button>
@@ -554,7 +565,7 @@
 
     <section class="screen screen-card" data-screen="store" aria-labelledby="storeTitle">
       <h2 id="storeTitle">Step 3 · In-store problem solving</h2>
-      <p class="hint">Work through the dilemmas the patient faces. Decide how to respond, keep an eye on the budget, and ignore tempting distractions if they would push the plan over budget.</p>
+      <p class="hint">Work through the dilemmas you face. Decide how to respond, keep an eye on the budget, and ignore tempting distractions if they would push the plan over budget.</p>
 
       <div class="budget-banner" aria-live="polite" id="storeBudget">
         <span>Updated spend: <strong id="storeSpend">£0.00</strong></span>
@@ -572,7 +583,7 @@
           <ul class="basket-list" id="storeBasket"></ul>
           <div class="distraction-card" id="distractionCard">
             <strong>Special offer:</strong>
-            <p class="hint">Limited-time deal on dark chocolate (£3.00). Add it only if the patient can justify it and the budget allows.</p>
+            <p class="hint">Limited-time deal on dark chocolate (£3.00). Add it only if you can justify it and the budget allows.</p>
             <button type="button" id="addTreat">Add dark chocolate</button>
             <p class="hint" id="treatHint"></p>
           </div>
@@ -591,7 +602,7 @@
 
     <section class="screen screen-card" data-screen="return" aria-labelledby="returnTitle">
       <h2 id="returnTitle">Step 4 · Getting home</h2>
-      <p class="hint">Choose how the patient returns. Check the remaining budget so the final cost stays within limits.</p>
+      <p class="hint">Choose how you return. Check the remaining budget so the final cost stays within limits.</p>
 
       <div class="summary-card" aria-live="polite">
         <div><strong>Total spent so far:</strong> <span id="summarySpend">£0.00</span></div>
@@ -611,6 +622,10 @@
         <h3>Plan ready to review</h3>
         <p id="finalText"></p>
         <ul id="finalList" class="basket-list"></ul>
+      </div>
+
+      <div class="final-actions">
+        <button type="button" id="downloadCsv" disabled>Download decisions (CSV)</button>
       </div>
     </section>
 
@@ -850,6 +865,7 @@
       finalText: document.getElementById('finalText'),
       finalList: document.getElementById('finalList'),
       liveRegion: document.getElementById('liveRegion'),
+      downloadCsv: document.getElementById('downloadCsv'),
       storeBudgetBanner: document.getElementById('storeBudget')
     };
 
@@ -1052,7 +1068,7 @@
       const additionalCount = state.items.filter((item) => item.source !== 'Suggested staple').length;
       const hasTransport = Boolean(state.transportOut);
       const spendOk = planningSpend() <= state.budget;
-      selectors.transportHint.textContent = hasTransport ? state.transportOut.detail : 'Select how they will travel to the store.';
+      selectors.transportHint.textContent = hasTransport ? state.transportOut.detail : 'Select how you will travel to the store.';
       selectors.transportHint.classList.toggle('warn', !hasTransport);
       selectors.toStore.disabled = !(additionalCount >= 2 && hasTransport && spendOk);
     };
@@ -1187,6 +1203,10 @@
     };
 
     const renderReturn = () => {
+      selectors.finalSummary.hidden = true;
+      if (selectors.downloadCsv) {
+        selectors.downloadCsv.disabled = true;
+      }
       const spend = planningSpend();
       selectors.summarySpend.textContent = `£${spend.toFixed(2)}`;
       selectors.summaryRemain.textContent = `£${(state.budget - spend).toFixed(2)}`;
@@ -1199,6 +1219,9 @@
       const total = totalSpend();
       const remaining = Number((state.budget - total).toFixed(2));
       selectors.finalSummary.hidden = false;
+      if (selectors.downloadCsv) {
+        selectors.downloadCsv.disabled = false;
+      }
       selectors.finalText.textContent = `Total spend £${total.toFixed(2)} (${state.transportOut.title} there, ${state.transportBack.title} back). Remaining budget: £${remaining.toFixed(2)}.`;
       selectors.finalList.innerHTML = '';
       state.items.forEach((item) => {
@@ -1212,6 +1235,61 @@
         selectors.finalList.appendChild(li);
       });
       announce('Plan ready to review.');
+    };
+
+    const buildCsvRows = () => {
+      const rows = [['Decision', 'Details', 'Cost (£)', 'Notes']];
+      if (state.transportOut) {
+        rows.push([
+          'Outbound transport',
+          state.transportOut.title,
+          state.transportOut.cost.toFixed(2),
+          state.transportOut.detail || ''
+        ]);
+      }
+      if (state.transportBack) {
+        rows.push([
+          'Return transport',
+          state.transportBack.title,
+          state.transportBack.cost.toFixed(2),
+          state.transportBack.detail || ''
+        ]);
+      }
+      state.items.forEach((item) => {
+        const note = item.note ? `${item.source} – ${item.note}` : item.source;
+        rows.push(['Item', item.name, item.price.toFixed(2), note]);
+      });
+      if (state.log.length) {
+        state.log.forEach((entry) => {
+          rows.push(['In-store decision', entry, '', '']);
+        });
+      }
+      const total = totalSpend();
+      const remaining = Number((state.budget - total).toFixed(2));
+      rows.push(['Budget summary', 'Total spend', total.toFixed(2), `Budget remaining £${remaining.toFixed(2)}`]);
+      return rows;
+    };
+
+    const downloadDecisionsCsv = () => {
+      const rows = buildCsvRows();
+      const csv = rows
+        .map((row) => row
+          .map((value) => {
+            const cell = value == null ? '' : String(value);
+            return `"${cell.replace(/"/g, '""')}"`;
+          })
+          .join(','))
+        .join('\r\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'shopping-trip-decisions.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      announce('Decisions CSV downloaded.');
     };
 
     const announce = (message) => {
@@ -1264,6 +1342,9 @@
       preselectStaples();
       setupCustomForm();
       setupTreatButton();
+      if (selectors.downloadCsv) {
+        selectors.downloadCsv.addEventListener('click', downloadDecisionsCsv);
+      }
       renderPlanning();
       initNavigation();
     };
