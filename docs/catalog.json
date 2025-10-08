@@ -114,6 +114,13 @@
     "tags": ["executive", "memory"]
   },
   {
+    "slug": "emergency-call-simulator",
+    "title": "Emergency Call Simulator",
+    "description": "Practice dialling 999 and requesting an ambulance during a mock emergency call.",
+    "emoji": "🚑",
+    "tags": ["executive", "language"]
+  },
+  {
     "slug": "tower-control",
     "title": "Tower Control",
     "description": "Stacking/ordering puzzle emphasising planning ahead.",
