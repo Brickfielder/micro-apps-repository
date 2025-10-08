@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Emergency Call Simulator</title>
+  <link rel="stylesheet" href="../shared/theme.css" />
+  <meta name="theme" content="bold dense" />
+  <meta name="app-slug" content="emergency-call-simulator" />
+  <script defer src="../shared/frame.js"></script>
+  <script defer src="../shared/clinician_feedback.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+    }
+
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      margin: 0;
+      font-family: "SF Pro Display", "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at top, #eef3ff 0%, #dde3f7 45%, #c7cbe0 100%);
+    }
+
+    .app-shell {
+      width: clamp(280px, 44vw, 360px);
+      aspect-ratio: 9 / 19.5;
+      background: linear-gradient(145deg, #0a0a0f, #1b1e2a);
+      padding: 18px;
+      border-radius: 32px;
+      box-shadow: 0 25px 40px rgba(11, 16, 29, 0.4);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .app-shell::before {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      border-radius: 24px;
+      border: 3px solid rgba(255, 255, 255, 0.12);
+      pointer-events: none;
+    }
+
+    .speaker-notch {
+      position: absolute;
+      top: 14px;
+      width: 96px;
+      height: 18px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .speaker-dot {
+      width: 36px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .camera-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(84, 144, 255, 0.8);
+      box-shadow: 0 0 6px rgba(84, 144, 255, 0.8);
+    }
+
+    .screen {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      border-radius: 24px;
+      overflow: hidden;
+      background: linear-gradient(170deg, #111827 0%, #020617 60%, #0f172a 100%);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+      display: grid;
+      place-items: stretch;
+    }
+
+    .screen-view {
+      display: none;
+      height: 100%;
+      width: 100%;
+    }
+
+    .screen-view.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 18px 0;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.8rem;
+    }
+
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.75rem;
+      letter-spacing: 0.4px;
+    }
+
+    .home-grid {
+      flex: 1;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      padding: 16px 18px 26px;
+      color: white;
+    }
+
+    .widgets {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .widget-card {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(6px);
+    }
+
+    .widget-title {
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      font-size: 0.95rem;
+    }
+
+    .widget-sub {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.75rem;
+    }
+
+    .dock {
+      margin-top: 18px;
+      border-radius: 18px;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(18px);
+      padding: 12px 16px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      align-items: center;
+    }
+
+    .app-icon {
+      aspect-ratio: 1;
+      border-radius: 22%;
+      display: grid;
+      place-items: center;
+      font-size: 1.6rem;
+      color: white;
+      background: linear-gradient(145deg, rgba(255,255,255,0.22), rgba(255,255,255,0));
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .app-icon.phone {
+      background: linear-gradient(145deg, #19b663, #0d8043);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25), 0 8px 16px rgba(13, 128, 67, 0.4);
+    }
+
+    .app-icon:active {
+      transform: scale(0.96);
+    }
+
+    .dialer {
+      flex: 1;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 18px 24px 30px;
+      color: white;
+      background: linear-gradient(165deg, rgba(12, 18, 31, 0.94) 0%, rgba(4, 11, 23, 0.98) 100%);
+    }
+
+    .dialer-display {
+      min-height: 78px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      font-size: 2.4rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+    }
+
+    .dialer-display span {
+      flex: 1;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.92);
+    }
+
+    .dialer-message {
+      font-size: 0.85rem;
+      min-height: 1.2rem;
+      color: rgba(255, 255, 255, 0.7);
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    .keypad {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .keypad button {
+      aspect-ratio: 1;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04));
+      color: white;
+      font-size: 1.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15), 0 8px 18px rgba(15, 23, 42, 0.35);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .keypad button:active {
+      transform: scale(0.94);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
+    }
+
+    .keypad button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .call-controls {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .call-button {
+      width: 66%;
+      aspect-ratio: 2.4 / 1;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(145deg, #1bc86b, #0e9a4e);
+      color: white;
+      font-weight: 600;
+      font-size: 1.2rem;
+      cursor: pointer;
+      box-shadow: 0 14px 24px rgba(30, 170, 93, 0.38);
+      transition: transform 0.2s ease;
+    }
+
+    .call-button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .call-button:active {
+      transform: scale(0.96);
+    }
+
+    .call-status {
+      margin-top: 10px;
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.75);
+      text-align: center;
+      min-height: 2.2rem;
+    }
+
+    .prompt-banner {
+      position: absolute;
+      inset: auto 16px 22px 16px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(20, 30, 48, 0.92);
+      color: white;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      box-shadow: 0 12px 24px rgba(9, 14, 24, 0.45);
+      display: none;
+    }
+
+    .prompt-banner.show {
+      display: block;
+    }
+
+    .home-indicator {
+      width: 120px;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.35);
+      margin: 12px 0 4px;
+    }
+
+    .results-panel {
+      margin-top: 18px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      color: rgba(255,255,255,0.88);
+    }
+
+    .download-button {
+      align-self: center;
+      padding: 10px 18px;
+      border-radius: 999px;
+      background: linear-gradient(145deg, #4c6ef5, #364fc7);
+      color: white;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .download-button:active {
+      transform: scale(0.96);
+    }
+
+    .download-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .fallback-note {
+      margin-top: 12px;
+      padding: 12px;
+      background: rgba(14, 23, 44, 0.65);
+      border-radius: 12px;
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    .fallback-note input {
+      margin-top: 8px;
+      width: 100%;
+      padding: 10px;
+      border-radius: 999px;
+      border: none;
+      background: rgba(255,255,255,0.08);
+      color: white;
+    }
+
+    .fallback-note button {
+      margin-top: 8px;
+      width: 100%;
+      border-radius: 999px;
+      border: none;
+      padding: 10px;
+      background: linear-gradient(145deg, #f59e0b, #d97706);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 24px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell" data-stage="home">
+    <div class="speaker-notch">
+      <span class="speaker-dot"></span>
+      <span class="camera-dot"></span>
+    </div>
+    <div class="screen">
+      <div class="prompt-banner" id="promptBanner"></div>
+      <section class="screen-view active" id="homeScreen" aria-label="Smartphone home screen">
+        <div class="status-bar">
+          <span>09:41</span>
+          <div class="status-icons">
+            <span>📶</span>
+            <span>📡</span>
+            <span>🔋 76%</span>
+          </div>
+        </div>
+        <div class="home-grid">
+          <div class="widgets">
+            <article class="widget-card">
+              <span class="widget-title">Calendar</span>
+              <span class="widget-sub">Therapy session at 3 PM</span>
+            </article>
+            <article class="widget-card">
+              <span class="widget-title">Weather</span>
+              <span class="widget-sub">12°C · Light Rain</span>
+            </article>
+            <article class="widget-card">
+              <span class="widget-title">Reminders</span>
+              <span class="widget-sub">Call pharmacy about prescription.</span>
+            </article>
+            <article class="widget-card">
+              <span class="widget-title">Notes</span>
+              <span class="widget-sub">Emergency drill practice</span>
+            </article>
+          </div>
+          <div class="dock" role="menubar" aria-label="Docked apps">
+            <div class="app-icon" aria-hidden="true">💬</div>
+            <div class="app-icon" aria-hidden="true">📷</div>
+            <div class="app-icon" aria-hidden="true">📧</div>
+            <button class="app-icon phone" id="openDialer" type="button" aria-label="Open Phone">
+              📞
+            </button>
+          </div>
+        </div>
+      </section>
+      <section class="screen-view" id="dialerScreen" aria-live="polite" aria-label="Telephone keypad">
+        <div class="status-bar">
+          <span>Call</span>
+          <div class="status-icons">
+            <span>999</span>
+            <span>🔊</span>
+          </div>
+        </div>
+        <div class="dialer">
+          <div>
+            <div class="dialer-display">
+              <span id="dialedDigits" aria-live="assertive">&nbsp;</span>
+            </div>
+            <div class="dialer-message" id="dialerMessage">Dial 999 to begin.</div>
+          </div>
+          <div class="keypad" id="keypad" role="group" aria-label="Dial pad">
+            <button type="button" data-digit="1">1</button>
+            <button type="button" data-digit="2">2</button>
+            <button type="button" data-digit="3">3</button>
+            <button type="button" data-digit="4">4</button>
+            <button type="button" data-digit="5">5</button>
+            <button type="button" data-digit="6">6</button>
+            <button type="button" data-digit="7">7</button>
+            <button type="button" data-digit="8">8</button>
+            <button type="button" data-digit="9">9</button>
+            <button type="button" data-digit="*">*</button>
+            <button type="button" data-digit="0">0</button>
+            <button type="button" data-digit="#">#</button>
+          </div>
+          <div class="call-controls">
+            <button class="call-button" id="callButton" type="button" disabled>Call</button>
+            <div class="call-status" id="callStatus" role="status"></div>
+            <div class="results-panel" id="resultsPanel" hidden>
+              <strong id="resultSummary"></strong>
+              <button class="download-button" id="downloadButton" type="button" disabled>
+                ⬇️ Download performance
+              </button>
+            </div>
+            <div class="fallback-note" id="fallbackNote" hidden>
+              <strong>Speech recognition is unavailable.</strong>
+              <p>Type the spoken response instead:</p>
+              <input type="text" id="fallbackInput" placeholder="Type 'Ambulance'" autocomplete="off" />
+              <button type="button" id="fallbackSubmit">Submit</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <div class="home-indicator" aria-hidden="true"></div>
+  </div>
+
+  <script>
+    const openDialerBtn = document.getElementById('openDialer');
+    const homeScreen = document.getElementById('homeScreen');
+    const dialerScreen = document.getElementById('dialerScreen');
+    const dialedDigitsEl = document.getElementById('dialedDigits');
+    const dialerMessage = document.getElementById('dialerMessage');
+    const keypad = document.getElementById('keypad');
+    const callButton = document.getElementById('callButton');
+    const callStatus = document.getElementById('callStatus');
+    const promptBanner = document.getElementById('promptBanner');
+    const resultsPanel = document.getElementById('resultsPanel');
+    const resultSummary = document.getElementById('resultSummary');
+    const downloadButton = document.getElementById('downloadButton');
+    const fallbackNote = document.getElementById('fallbackNote');
+    const fallbackInput = document.getElementById('fallbackInput');
+    const fallbackSubmit = document.getElementById('fallbackSubmit');
+
+    const events = [];
+    const addEvent = (type, detail = {}) => {
+      events.push({
+        timestamp: new Date().toISOString(),
+        type,
+        ...detail,
+      });
+    };
+
+    let inactivityTimer = null;
+    let callStarted = false;
+    let recognitionEnabled = false;
+    let recognitionSuccess = false;
+    let promptCount = 0;
+    let repeatTimer = null;
+    let onScreenPromptTimer = null;
+    let shutdownTimer = null;
+    let recognitionInstance = null;
+    let recognitionLoopActive = false;
+    let audioContext = null;
+    let digits = '';
+    let micAccessGranted = false;
+    let recognitionReady = false;
+
+    const PROMPT_TEXT = 'Emergency, which service do you require? Fire, Police, or Ambulance?';
+
+    const resetInactivityTimer = () => {
+      if (inactivityTimer) {
+        clearTimeout(inactivityTimer);
+      }
+      inactivityTimer = setTimeout(() => {
+        dialerMessage.textContent = 'Reminder: Please dial 999 to request emergency help.';
+        addEvent('prompt_dial', { reason: 'inactivity' });
+      }, 10000);
+    };
+
+    const showPromptBanner = (message, persist = false) => {
+      promptBanner.textContent = message;
+      promptBanner.classList.add('show');
+      if (!persist) {
+        setTimeout(() => {
+          promptBanner.classList.remove('show');
+        }, 5000);
+      }
+    };
+
+    const speakText = (text) => {
+      if (!('speechSynthesis' in window)) {
+        return Promise.resolve();
+      }
+      return new Promise((resolve) => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-GB';
+        utterance.rate = 1;
+        utterance.pitch = 1;
+        utterance.onend = resolve;
+        utterance.onerror = resolve;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utterance);
+      });
+    };
+
+    const ensureMicrophoneAccess = async () => {
+      if (micAccessGranted) {
+        return true;
+      }
+
+      if (!window.isSecureContext) {
+        showPromptBanner('Microphone access requires a secure (https) connection. Speech recognition is disabled.', true);
+        addEvent('mic_insecure_context', {});
+        fallbackNote.hidden = false;
+        return false;
+      }
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showPromptBanner('Microphone access is not supported in this browser. Use the manual input below.', true);
+        addEvent('mic_support_missing', {});
+        fallbackNote.hidden = false;
+        return false;
+      }
+
+      try {
+        addEvent('mic_permission_requested', {});
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach((track) => track.stop());
+        micAccessGranted = true;
+        fallbackNote.hidden = true;
+        addEvent('mic_permission_granted', {});
+        return true;
+      } catch (error) {
+        showPromptBanner('Microphone permission was denied. Use the manual input below or adjust your browser settings.', true);
+        addEvent('mic_permission_error', { error: error.name || error.message });
+        fallbackNote.hidden = false;
+        return false;
+      }
+    };
+
+    const playRing = () => {
+      if (!audioContext) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) {
+          return Promise.resolve();
+        }
+        audioContext = new AudioCtx();
+      }
+      const ctx = audioContext;
+      const duration = 0.8;
+      const now = ctx.currentTime + 0.05;
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(440, now);
+      gainNode.gain.setValueAtTime(0, now);
+      gainNode.gain.linearRampToValueAtTime(0.6, now + 0.05);
+      gainNode.gain.setValueAtTime(0.6, now + 0.35);
+      gainNode.gain.linearRampToValueAtTime(0.0, now + duration);
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      oscillator.start(now);
+      oscillator.stop(now + duration + 0.05);
+      return new Promise((resolve) => {
+        setTimeout(resolve, (duration + 0.1) * 1000);
+      });
+    };
+
+    const stopRecognitionLoop = () => {
+      recognitionLoopActive = false;
+      recognitionReady = false;
+      if (recognitionInstance) {
+        try {
+          recognitionInstance.onend = null;
+          recognitionInstance.stop();
+        } catch (err) {
+          // ignore
+        }
+      }
+    };
+
+    const startRecognitionLoop = () => {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        fallbackNote.hidden = false;
+        recognitionReady = false;
+        addEvent('speech_support_missing', {});
+        return;
+      }
+      if (!micAccessGranted) {
+        recognitionReady = false;
+        addEvent('speech_unavailable_no_mic', {});
+        return;
+      }
+      if (recognitionLoopActive) return;
+      recognitionLoopActive = true;
+      recognitionInstance = new SpeechRecognition();
+      recognitionInstance.lang = 'en-GB';
+      recognitionInstance.interimResults = false;
+      recognitionInstance.maxAlternatives = 1;
+      recognitionReady = true;
+      recognitionEnabled = false;
+
+      recognitionInstance.onresult = (event) => {
+        if (!recognitionEnabled) return;
+        const transcript = event.results[0][0].transcript.trim().toLowerCase();
+        addEvent('speech_detected', { transcript });
+        if (transcript.includes('ambulance')) {
+          recognitionSuccess = true;
+          addEvent('task_complete', { method: 'speech' });
+          finalizeSuccess();
+        }
+      };
+
+      recognitionInstance.onerror = (event) => {
+        addEvent('speech_error', { error: event.error });
+      };
+
+      recognitionInstance.onend = () => {
+        if (recognitionLoopActive && !recognitionSuccess) {
+          try {
+            recognitionInstance.start();
+          } catch (err) {
+            // ignore repeated start issues
+          }
+        }
+      };
+
+      try {
+        recognitionInstance.start();
+      } catch (err) {
+        addEvent('speech_error', { error: err.message });
+      }
+    };
+
+    const finalizeSuccess = () => {
+      recognitionEnabled = false;
+      stopRecognitionLoop();
+      clearTimeouts();
+      callStatus.textContent = 'Emergency services connected. Task complete.';
+      showPromptBanner('Well done — you requested an ambulance.', true);
+      resultSummary.textContent = 'Outcome: Success — Ambulance requested.';
+      resultsPanel.hidden = false;
+      downloadButton.disabled = false;
+      addEvent('session_complete', { success: true });
+    };
+
+    const finalizeFailure = (reason) => {
+      recognitionEnabled = false;
+      stopRecognitionLoop();
+      clearTimeouts();
+      callStatus.textContent = 'The call ended without reaching emergency services.';
+      showPromptBanner('Session ended. Please restart to try again.', true);
+      resultSummary.textContent = `Outcome: Not completed — ${reason}.`;
+      resultsPanel.hidden = false;
+      downloadButton.disabled = false;
+      addEvent('session_complete', { success: false, reason });
+    };
+
+    const clearTimeouts = () => {
+      [inactivityTimer, repeatTimer, onScreenPromptTimer, shutdownTimer].forEach((timer) => {
+        if (timer) {
+          clearTimeout(timer);
+        }
+      });
+      inactivityTimer = repeatTimer = onScreenPromptTimer = shutdownTimer = null;
+    };
+
+    const deliverPrompt = () => {
+      if (recognitionSuccess) return;
+      promptCount += 1;
+      if (recognitionReady) {
+        recognitionEnabled = false;
+      }
+
+      const handlePostPrompt = () => {
+        addEvent('prompt_spoken', { count: promptCount });
+
+        if (recognitionReady && !recognitionSuccess) {
+          setTimeout(() => {
+            recognitionEnabled = true;
+          }, 400);
+        }
+
+        if (promptCount === 1) {
+          if (repeatTimer) {
+            clearTimeout(repeatTimer);
+          }
+          repeatTimer = setTimeout(() => {
+            if (!recognitionSuccess) {
+              deliverPrompt();
+            }
+          }, 5000);
+        } else if (promptCount === 2) {
+          if (onScreenPromptTimer) {
+            clearTimeout(onScreenPromptTimer);
+          }
+          onScreenPromptTimer = setTimeout(() => {
+            if (!recognitionSuccess) {
+              showPromptBanner('Say "Ambulance" to request emergency medical help.');
+              addEvent('prompt_on_screen', {});
+              if (shutdownTimer) {
+                clearTimeout(shutdownTimer);
+              }
+              shutdownTimer = setTimeout(() => {
+                if (!recognitionSuccess) {
+                  finalizeFailure('No verbal response provided');
+                }
+              }, 10000);
+            }
+          }, 5000);
+        }
+      };
+
+      speakText(PROMPT_TEXT).then(handlePostPrompt);
+    };
+
+    const initiateCall = async () => {
+      callStatus.textContent = 'Dialing 999…';
+      addEvent('call_initiated', {});
+      keypad.querySelectorAll('button').forEach((btn) => (btn.disabled = true));
+      callButton.disabled = true;
+      const micReady = await ensureMicrophoneAccess();
+      if (!micReady) {
+        addEvent('mic_unavailable_for_call', {});
+      }
+      await playRing();
+      callStatus.textContent = 'Connected.';
+      addEvent('call_connected', {});
+      startRecognitionLoop();
+      deliverPrompt();
+    };
+
+    openDialerBtn.addEventListener('click', () => {
+      homeScreen.classList.remove('active');
+      dialerScreen.classList.add('active');
+      document.querySelector('.app-shell').dataset.stage = 'dialer';
+      addEvent('dialer_opened', {});
+      dialerMessage.textContent = 'Dial 999 to begin.';
+      resetInactivityTimer();
+    });
+
+    keypad.addEventListener('click', (event) => {
+      const button = event.target.closest('button');
+      if (!button || callStarted) return;
+      const digit = button.dataset.digit;
+      addEvent('digit_pressed', { digit });
+      digits = (digits + digit).slice(-3);
+      dialedDigitsEl.textContent = digits;
+      dialerMessage.textContent = '';
+      resetInactivityTimer();
+      if (digits === '999') {
+        callButton.disabled = false;
+        dialerMessage.textContent = 'Tap Call to connect to emergency services.';
+        callStatus.textContent = '';
+      } else {
+        callButton.disabled = true;
+      }
+    });
+
+    callButton.addEventListener('click', () => {
+      if (callStarted || digits !== '999') return;
+      callStarted = true;
+      addEvent('call_button_pressed', {});
+      clearTimeout(inactivityTimer);
+      initiateCall();
+    });
+
+    downloadButton.addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify({ events }, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'emergency-call-simulator-performance.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      addEvent('performance_downloaded', {});
+    });
+
+    if (fallbackSubmit) {
+      fallbackSubmit.addEventListener('click', () => {
+        const value = (fallbackInput.value || '').trim().toLowerCase();
+        addEvent('fallback_submitted', { value });
+        if (value === 'ambulance') {
+          recognitionSuccess = true;
+          addEvent('task_complete', { method: 'fallback_input' });
+          finalizeSuccess();
+        } else {
+          showPromptBanner('Please enter the word "Ambulance" to continue.');
+        }
+      });
+    }
+
+    window.addEventListener('beforeunload', () => {
+      stopRecognitionLoop();
+      if (audioContext) {
+        audioContext.close();
+      }
+    });
+  </script>
+</body>
+</html>
