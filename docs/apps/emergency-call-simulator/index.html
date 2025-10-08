@@ -521,6 +521,8 @@
     let recognitionLoopActive = false;
     let audioContext = null;
     let digits = '';
+    let micAccessGranted = false;
+    let recognitionReady = false;
 
     const PROMPT_TEXT = 'Emergency, which service do you require? Fire, Police, or Ambulance?';
 
@@ -560,6 +562,41 @@
       });
     };
 
+    const ensureMicrophoneAccess = async () => {
+      if (micAccessGranted) {
+        return true;
+      }
+
+      if (!window.isSecureContext) {
+        showPromptBanner('Microphone access requires a secure (https) connection. Speech recognition is disabled.', true);
+        addEvent('mic_insecure_context', {});
+        fallbackNote.hidden = false;
+        return false;
+      }
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showPromptBanner('Microphone access is not supported in this browser. Use the manual input below.', true);
+        addEvent('mic_support_missing', {});
+        fallbackNote.hidden = false;
+        return false;
+      }
+
+      try {
+        addEvent('mic_permission_requested', {});
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach((track) => track.stop());
+        micAccessGranted = true;
+        fallbackNote.hidden = true;
+        addEvent('mic_permission_granted', {});
+        return true;
+      } catch (error) {
+        showPromptBanner('Microphone permission was denied. Use the manual input below or adjust your browser settings.', true);
+        addEvent('mic_permission_error', { error: error.name || error.message });
+        fallbackNote.hidden = false;
+        return false;
+      }
+    };
+
     const playRing = () => {
       if (!audioContext) {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -590,6 +627,7 @@
 
     const stopRecognitionLoop = () => {
       recognitionLoopActive = false;
+      recognitionReady = false;
       if (recognitionInstance) {
         try {
           recognitionInstance.onend = null;
@@ -604,6 +642,13 @@
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
         fallbackNote.hidden = false;
+        recognitionReady = false;
+        addEvent('speech_support_missing', {});
+        return;
+      }
+      if (!micAccessGranted) {
+        recognitionReady = false;
+        addEvent('speech_unavailable_no_mic', {});
         return;
       }
       if (recognitionLoopActive) return;
@@ -612,6 +657,8 @@
       recognitionInstance.lang = 'en-GB';
       recognitionInstance.interimResults = false;
       recognitionInstance.maxAlternatives = 1;
+      recognitionReady = true;
+      recognitionEnabled = false;
 
       recognitionInstance.onresult = (event) => {
         if (!recognitionEnabled) return;
@@ -681,10 +728,18 @@
     const deliverPrompt = () => {
       if (recognitionSuccess) return;
       promptCount += 1;
-      recognitionEnabled = true;
+      if (recognitionReady) {
+        recognitionEnabled = false;
+      }
 
       const handlePostPrompt = () => {
         addEvent('prompt_spoken', { count: promptCount });
+
+        if (recognitionReady && !recognitionSuccess) {
+          setTimeout(() => {
+            recognitionEnabled = true;
+          }, 400);
+        }
 
         if (promptCount === 1) {
           if (repeatTimer) {
@@ -724,6 +779,10 @@
       addEvent('call_initiated', {});
       keypad.querySelectorAll('button').forEach((btn) => (btn.disabled = true));
       callButton.disabled = true;
+      const micReady = await ensureMicrophoneAccess();
+      if (!micReady) {
+        addEvent('mic_unavailable_for_call', {});
+      }
       await playRing();
       callStatus.textContent = 'Connected.';
       addEvent('call_connected', {});
