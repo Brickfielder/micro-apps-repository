@@ -682,29 +682,41 @@
       if (recognitionSuccess) return;
       promptCount += 1;
       recognitionEnabled = true;
-      speakText(PROMPT_TEXT).then(() => {
-        addEvent('prompt_spoken', { count: promptCount });
-      });
 
-      if (promptCount === 1) {
-        repeatTimer = setTimeout(() => {
-          if (!recognitionSuccess) {
-            deliverPrompt();
+      const handlePostPrompt = () => {
+        addEvent('prompt_spoken', { count: promptCount });
+
+        if (promptCount === 1) {
+          if (repeatTimer) {
+            clearTimeout(repeatTimer);
           }
-        }, 5000);
-      } else if (promptCount === 2) {
-        onScreenPromptTimer = setTimeout(() => {
-          if (!recognitionSuccess) {
-            showPromptBanner('Say "Ambulance" to request emergency medical help.');
-            addEvent('prompt_on_screen', {});
-            shutdownTimer = setTimeout(() => {
-              if (!recognitionSuccess) {
-                finalizeFailure('No verbal response provided');
+          repeatTimer = setTimeout(() => {
+            if (!recognitionSuccess) {
+              deliverPrompt();
+            }
+          }, 5000);
+        } else if (promptCount === 2) {
+          if (onScreenPromptTimer) {
+            clearTimeout(onScreenPromptTimer);
+          }
+          onScreenPromptTimer = setTimeout(() => {
+            if (!recognitionSuccess) {
+              showPromptBanner('Say "Ambulance" to request emergency medical help.');
+              addEvent('prompt_on_screen', {});
+              if (shutdownTimer) {
+                clearTimeout(shutdownTimer);
               }
-            }, 10000);
-          }
-        }, 5000);
-      }
+              shutdownTimer = setTimeout(() => {
+                if (!recognitionSuccess) {
+                  finalizeFailure('No verbal response provided');
+                }
+              }, 10000);
+            }
+          }, 5000);
+        }
+      };
+
+      speakText(PROMPT_TEXT).then(handlePostPrompt);
     };
 
     const initiateCall = async () => {
