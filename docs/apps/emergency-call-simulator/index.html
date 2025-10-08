@@ -662,12 +662,21 @@
 
       recognitionInstance.onresult = (event) => {
         if (!recognitionEnabled) return;
-        const transcript = event.results[0][0].transcript.trim().toLowerCase();
-        addEvent('speech_detected', { transcript });
-        if (transcript.includes('ambulance')) {
+
+        const result = event.results[0][0];
+        const transcript = result.transcript.trim();
+        const normalized = transcript.replace(/[^a-z]/gi, '').toLowerCase();
+        addEvent('speech_detected', {
+          transcript,
+          confidence: typeof result.confidence === 'number' ? Number(result.confidence.toFixed(2)) : undefined,
+        });
+
+        if (normalized === 'ambulance') {
           recognitionSuccess = true;
           addEvent('task_complete', { method: 'speech' });
           finalizeSuccess();
+        } else {
+          addEvent('speech_rejected', { transcript });
         }
       };
 
