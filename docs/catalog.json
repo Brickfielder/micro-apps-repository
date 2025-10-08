@@ -78,6 +78,13 @@
     "tags": ["executive"]
   },
   {
+    "slug": "shopping-trip-planner",
+    "title": "Shopping Trip Problem Solver",
+    "description": "Plan transport, budget, and in-store decisions for a grocery outing.",
+    "emoji": "🛒",
+    "tags": ["executive", "problem-solving"]
+  },
+  {
     "slug": "signal-master",
     "title": "Signal Master",
     "description": "Rapid signal detection and rule switching.",

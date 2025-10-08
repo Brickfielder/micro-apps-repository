@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shopping Trip Problem Solver</title>
+
+  <meta name="app-slug" content="shopping-trip-planner" />
+  <meta name="theme" content="bold dense" />
+
+  <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3" />
+  <script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
+  <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
+
+  <style>
+    :root {
+      --bus:#2563eb;
+      --taxi:#f59e0b;
+      --store:#22c55e;
+      --warn:#dc2626;
+    }
+
+    body {
+      background: var(--surface, #fff);
+    }
+
+    .frame-hero + #app-root {
+      margin-top: 16px;
+    }
+
+    #app-root {
+      max-width: min(1120px, 94vw);
+      margin: 0 auto 3rem;
+      display: grid;
+      gap: 16px;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .screen-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: clamp(1rem, 1.2vw + 0.75rem, 1.6rem);
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+    }
+
+    .screen-card h2 {
+      margin-top: 0;
+      font-size: clamp(1.4rem, 1.8vw + 1rem, 2rem);
+    }
+
+    .intro-hero {
+      display: grid;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .intro-illustration {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .intro-illustration figure {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 12px;
+      margin: 0;
+      text-align: center;
+      display: grid;
+      gap: 8px;
+    }
+
+    .intro-illustration img {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto;
+    }
+
+    .intro-illustration figcaption {
+      font-size: 0.9rem;
+      color: #475569;
+    }
+
+    .stepper {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 16px;
+      color: #475569;
+    }
+
+    .stepper .pill {
+      border-radius: 999px;
+      padding: 0.45rem 0.75rem;
+      border: 1px solid #e2e8f0;
+      background: #f1f5f9;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stepper .pill[data-active="true"] {
+      background: #eef2ff;
+      border-color: #6366f1;
+      color: #312e81;
+    }
+
+    .planning-layout {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: clamp(14px, 2vw, 24px);
+    }
+
+    @media (max-width: 960px) {
+      .planning-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card-panel {
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: clamp(0.8rem, 1vw + 0.6rem, 1.25rem);
+      background: #f8fafc;
+      display: grid;
+      gap: 16px;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .item-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .item-card {
+      border-radius: 12px;
+      border: 1px solid #dbe4f0;
+      background: #ffffff;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .item-card img {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .item-card h4 {
+      margin: 0 0 4px;
+      font-size: 1.05rem;
+    }
+
+    .item-card p {
+      margin: 0;
+      color: #475569;
+      font-size: 0.9rem;
+    }
+
+    .item-card button,
+    .nav-row button,
+    .custom-form button {
+      border: none;
+      border-radius: 999px;
+      padding: 0.45rem 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: #2563eb;
+      color: #ffffff;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+
+    .item-card button.secondary,
+    .nav-row button.secondary {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+
+    .item-card button[disabled],
+    .nav-row button[disabled],
+    .custom-form button[disabled] {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .item-card button:not([disabled]):hover,
+    .nav-row button:not([disabled]):hover,
+    .custom-form button:not([disabled]):hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.18);
+    }
+
+    .budget-banner {
+      border-radius: 14px;
+      background: #0ea5e9;
+      color: white;
+      padding: 0.85rem 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .budget-banner span {
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+
+    .budget-banner strong[data-negative="true"] {
+      color: #fee2e2;
+    }
+
+    .basket-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    .basket-item {
+      border: 1px solid #dbe4f0;
+      border-radius: 12px;
+      padding: 10px;
+      background: white;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .basket-item img {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .basket-item button {
+      background: transparent;
+      color: #dc2626;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .basket-item button:hover {
+      text-decoration: underline;
+    }
+
+    .hint {
+      color: #475569;
+      font-size: 0.92rem;
+      margin: 0;
+    }
+
+    .hint.warn {
+      color: var(--warn);
+      font-weight: 600;
+    }
+
+    .transport-options {
+      display: grid;
+      gap: 12px;
+    }
+
+    .transport-card {
+      border-radius: 12px;
+      border: 2px solid transparent;
+      background: white;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .transport-card[data-selected="true"] {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+    }
+
+    .transport-card img {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+    }
+
+    .transport-card h4 {
+      margin: 0 0 4px;
+    }
+
+    .transport-card ul {
+      margin: 4px 0 0 18px;
+      padding: 0;
+      color: #475569;
+      font-size: 0.9rem;
+    }
+
+    .custom-form {
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .custom-form label {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .custom-form input,
+    .custom-form textarea {
+      border-radius: 10px;
+      border: 1px solid #cbd5f5;
+      padding: 0.5rem 0.65rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+
+    .custom-form textarea {
+      min-height: 60px;
+      resize: vertical;
+    }
+
+    .nav-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    .nav-row button.secondary {
+      background: #e2e8f0;
+    }
+
+    .store-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: clamp(12px, 1.8vw, 24px);
+    }
+
+    @media (max-width: 960px) {
+      .store-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .issue-card {
+      border: 1px solid #fca5a5;
+      background: #fff7ed;
+      border-radius: 14px;
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .issue-card h3 {
+      margin: 0;
+      color: #9a3412;
+    }
+
+    .issue-options {
+      display: grid;
+      gap: 8px;
+    }
+
+    .issue-options button {
+      justify-self: start;
+      background: #f97316;
+      color: white;
+    }
+
+    .issue-options button.secondary {
+      background: #e2e8f0;
+      color: #1f2937;
+    }
+
+    .store-log {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      background: white;
+      padding: 12px;
+      font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+      font-size: 0.85rem;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-line;
+    }
+
+    .distraction-card {
+      border-radius: 12px;
+      border: 1px dashed #94a3b8;
+      padding: 12px;
+      background: #f1f5f9;
+      display: grid;
+      gap: 8px;
+    }
+
+    .summary-card {
+      border-radius: 14px;
+      border: 1px solid #cbd5f5;
+      background: #eef2ff;
+      padding: 16px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .final-summary {
+      border-radius: 14px;
+      border: 1px solid #d1d5db;
+      padding: 16px;
+      background: #f9fafb;
+      display: grid;
+      gap: 10px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+  <main id="app-root">
+    <div class="stepper" aria-hidden="true">
+      <span class="pill" data-step="intro" data-active="true">1 · Briefing</span>
+      <span class="pill" data-step="planning">2 · Plan the trip</span>
+      <span class="pill" data-step="store">3 · In-store problem solving</span>
+      <span class="pill" data-step="return">4 · Return home</span>
+    </div>
+
+    <section class="screen screen-card active" data-screen="intro" aria-labelledby="introTitle">
+      <div class="intro-hero">
+        <div>
+          <h2 id="introTitle">Plan a grocery trip within budget</h2>
+          <p>You are supporting a patient to prepare for a shopping trip. They start with a set budget, a couple of suggested staples, and must decide how to reach the shop, what else to buy, and how to respond when things change in-store.</p>
+          <ul>
+            <li>Keep within the starting budget – transport costs count!</li>
+            <li>Add extra items beyond the suggested staples so the basket meets their needs.</li>
+            <li>When an item is missing, choose a suitable alternative or decide to leave it.</li>
+            <li>Balance the benefits of travelling by bus or taxi on the way out and coming home.</li>
+          </ul>
+          <button class="primary" id="startPlanning">Start planning</button>
+        </div>
+        <div class="intro-illustration" aria-hidden="true">
+          <figure>
+            <img id="heroBag" alt="" />
+            <figcaption>Plan the basket</figcaption>
+          </figure>
+          <figure>
+            <img id="heroBus" alt="" />
+            <figcaption>Choose transport</figcaption>
+          </figure>
+          <figure>
+            <img id="heroProblem" alt="" />
+            <figcaption>Solve store changes</figcaption>
+          </figure>
+          <figure>
+            <img id="heroHome" alt="" />
+            <figcaption>Return confidently</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen screen-card" data-screen="planning" aria-labelledby="planTitle">
+      <h2 id="planTitle">Step 2 · Build the shopping plan</h2>
+      <p class="hint">Patients begin with a £45.00 budget. Suggested staples are pre-selected, but they need to add at least two more items that match their goals.</p>
+
+      <div class="budget-banner" aria-live="polite" id="budgetBanner">
+        <span>Current spend: <strong id="currentSpend">£0.00</strong></span>
+        <span>Remaining: <strong id="remaining" data-negative="false">£45.00</strong></span>
+      </div>
+
+      <div class="planning-layout">
+        <section class="card-panel" aria-labelledby="suggestedTitle">
+          <h3 class="section-title" id="suggestedTitle">Suggested staples</h3>
+          <p class="hint">Discuss whether these still work. They can be removed if they no longer fit the plan.</p>
+          <div class="item-grid" id="suggestedList"></div>
+
+          <h3 class="section-title" id="extrasTitle">Add further essentials</h3>
+          <p class="hint">Choose from the options or add a custom item with its price and reason.</p>
+          <div class="item-grid" id="availableItems"></div>
+
+          <form class="custom-form" id="customForm">
+            <div>
+              <label for="customName">Custom item</label>
+              <input id="customName" name="customName" type="text" placeholder="e.g. Fresh vegetables" required />
+            </div>
+            <div>
+              <label for="customPrice">Estimated price (£)</label>
+              <input id="customPrice" name="customPrice" type="number" step="0.10" min="0" required />
+            </div>
+            <div>
+              <label for="customReason">Why is it needed?</label>
+              <textarea id="customReason" name="customReason" placeholder="Supports balanced meals, replaces a missing item…"></textarea>
+            </div>
+            <button type="submit">Add custom item</button>
+            <p class="hint" id="customHint"></p>
+          </form>
+        </section>
+
+        <aside class="card-panel" aria-labelledby="basketTitle">
+          <h3 class="section-title" id="basketTitle">Current basket</h3>
+          <ul class="basket-list" id="basketList"></ul>
+          <p class="hint" id="additionalHint">Add at least two additional items.</p>
+
+          <h3 class="section-title">Travel to the store</h3>
+          <div class="transport-options" id="transportOptions"></div>
+          <p class="hint" id="transportHint">Select how they will travel to the store.</p>
+
+          <div class="nav-row">
+            <button type="button" class="secondary" data-nav="back">Back</button>
+            <button type="button" id="toStore" disabled>Continue to store</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="screen screen-card" data-screen="store" aria-labelledby="storeTitle">
+      <h2 id="storeTitle">Step 3 · In-store problem solving</h2>
+      <p class="hint">Work through the dilemmas the patient faces. Decide how to respond, keep an eye on the budget, and ignore tempting distractions if they would push the plan over budget.</p>
+
+      <div class="budget-banner" aria-live="polite" id="storeBudget">
+        <span>Updated spend: <strong id="storeSpend">£0.00</strong></span>
+        <span>Budget left after decisions: <strong id="storeRemaining">£0.00</strong></span>
+      </div>
+
+      <div class="store-grid">
+        <section class="card-panel" aria-live="polite" id="issuesColumn">
+          <h3 class="section-title">Problems to solve</h3>
+          <div id="issueContainer"></div>
+        </section>
+
+        <aside class="card-panel">
+          <h3 class="section-title">Basket check</h3>
+          <ul class="basket-list" id="storeBasket"></ul>
+          <div class="distraction-card" id="distractionCard">
+            <strong>Special offer:</strong>
+            <p class="hint">Limited-time deal on dark chocolate (£3.00). Add it only if the patient can justify it and the budget allows.</p>
+            <button type="button" id="addTreat">Add dark chocolate</button>
+            <p class="hint" id="treatHint"></p>
+          </div>
+          <div>
+            <h4 class="section-title">Decision log</h4>
+            <div class="store-log" id="storeLog" aria-live="polite"></div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="nav-row">
+        <button type="button" class="secondary" data-nav="back">Back to planning</button>
+        <button type="button" id="toReturn" disabled>Plan journey home</button>
+      </div>
+    </section>
+
+    <section class="screen screen-card" data-screen="return" aria-labelledby="returnTitle">
+      <h2 id="returnTitle">Step 4 · Getting home</h2>
+      <p class="hint">Choose how the patient returns. Check the remaining budget so the final cost stays within limits.</p>
+
+      <div class="summary-card" aria-live="polite">
+        <div><strong>Total spent so far:</strong> <span id="summarySpend">£0.00</span></div>
+        <div><strong>Budget remaining:</strong> <span id="summaryRemain">£0.00</span></div>
+        <div><strong>Items purchased:</strong> <span id="summaryItems">0</span></div>
+      </div>
+
+      <div class="transport-options" id="returnOptions"></div>
+      <p class="hint" id="returnHint">Select the journey home.</p>
+
+      <div class="nav-row">
+        <button type="button" class="secondary" data-nav="back">Back to store</button>
+        <button type="button" id="finishPlan" disabled>Finish plan</button>
+      </div>
+
+      <div class="final-summary" id="finalSummary" hidden>
+        <h3>Plan ready to review</h3>
+        <p id="finalText"></p>
+        <ul id="finalList" class="basket-list"></ul>
+      </div>
+    </section>
+
+    <p class="sr-only" aria-live="polite" id="liveRegion"></p>
+  </main>
+
+  <script>
+    const makeIcon = (emoji, bg = '#2563eb') => {
+      const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96' aria-hidden='true'>` +
+        `<rect width='96' height='96' rx='18' fill='${bg}'/>` +
+        `<text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' font-size='54'>${emoji}</text>` +
+        `</svg>`;
+      return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+    };
+
+    const transports = [
+      {
+        id: 'bus',
+        title: 'Bus 27B',
+        cost: 2.5,
+        duration: '18 minutes',
+        pros: ['Cheapest option (£2.50 each way)', 'Bus stop is 3 minutes from home'],
+        cons: ['Must catch the 10:15 or 10:45 service', 'Carry bags onto the bus'],
+        icon: makeIcon('🚌', '#2563eb'),
+        detail: 'Remember to check the timetable and leave 5 minutes early to catch the bus.'
+      },
+      {
+        id: 'taxi',
+        title: 'Local Taxi',
+        cost: 12,
+        duration: '12 minutes',
+        pros: ['Door-to-door support', 'No timetable pressure'],
+        cons: ['More expensive (£12 per trip)', 'Need to phone ahead for pick-up'],
+        icon: makeIcon('🚕', '#f59e0b'),
+        detail: 'Allow time to call the taxi and wait for the driver to arrive.'
+      }
+    ];
+
+    const inventory = (() => {
+      const items = [
+        {
+          id: 'bread',
+          name: 'Wholegrain bread',
+          price: 3.8,
+          category: 'Bakery',
+          icon: makeIcon('🍞', '#f59e0b'),
+          note: 'Great for sandwiches and toast.',
+          suggested: true,
+          issue: {
+            text: 'The bakery delivery is delayed and wholegrain loaves are sold out.',
+            options: [
+              {
+                label: 'Swap to multigrain rolls (£3.20)',
+                replacement: {
+                  name: 'Multigrain rolls (4 pack)',
+                  price: 3.2,
+                  icon: makeIcon('🥖', '#fbbf24'),
+                  note: 'Slightly cheaper and can be frozen.'
+                }
+              },
+              {
+                label: 'Skip bread this week',
+                replacement: null
+              }
+            ]
+          }
+        },
+        {
+          id: 'milk',
+          name: 'Semi-skimmed milk (2L)',
+          price: 2.1,
+          category: 'Dairy',
+          icon: makeIcon('🥛', '#38bdf8'),
+          note: 'Breakfast staple.',
+          suggested: true
+        },
+        {
+          id: 'porridge',
+          name: 'Porridge oats',
+          price: 2.4,
+          category: 'Pantry',
+          icon: makeIcon('🥣', '#60a5fa'),
+          note: 'Warm breakfast option.',
+          suggested: false
+        },
+        {
+          id: 'greens',
+          name: 'Bag of salad greens',
+          price: 2.3,
+          category: 'Produce',
+          icon: makeIcon('🥬', '#22c55e'),
+          note: 'Quick side for meals.',
+          suggested: false,
+          issue: {
+            text: 'The salad greens look wilted today.',
+            options: [
+              {
+                label: 'Swap to baby spinach (£2.60)',
+                replacement: {
+                  name: 'Baby spinach',
+                  price: 2.6,
+                  icon: makeIcon('🌿', '#16a34a'),
+                  note: 'Still works for salads or cooking.'
+                }
+              },
+              {
+                label: 'Skip leafy greens',
+                replacement: null
+              }
+            ]
+          }
+        },
+        {
+          id: 'pasta',
+          name: 'Wholewheat pasta',
+          price: 1.5,
+          category: 'Pantry',
+          icon: makeIcon('🍝', '#fb7185'),
+          note: 'Pairs with sauces already at home.',
+          suggested: false
+        },
+        {
+          id: 'eggs',
+          name: 'Free-range eggs (6)',
+          price: 2.4,
+          category: 'Protein',
+          icon: makeIcon('🥚', '#f8fafc'),
+          note: 'Versatile protein source.',
+          suggested: false
+        },
+        {
+          id: 'fruit',
+          name: 'Seasonal fruit bowl',
+          price: 4.5,
+          category: 'Produce',
+          icon: makeIcon('🍎', '#f97316'),
+          note: 'Mix of apples, pears, and oranges.',
+          suggested: false
+        },
+        {
+          id: 'yogurt',
+          name: 'Low-fat yogurt',
+          price: 2.8,
+          category: 'Dairy',
+          icon: makeIcon('🍶', '#38bdf8'),
+          note: 'Breakfast or snack option.',
+          suggested: false,
+          issue: {
+            text: 'Only flavoured yogurt remains.',
+            options: [
+              {
+                label: 'Choose natural Greek yogurt (£3.20)',
+                replacement: {
+                  name: 'Natural Greek yogurt',
+                  price: 3.2,
+                  icon: makeIcon('🥛', '#38bdf8'),
+                  note: 'Higher protein, slightly pricier.'
+                }
+              },
+              {
+                label: 'Leave yogurt for now',
+                replacement: null
+              }
+            ]
+          }
+        },
+        {
+          id: 'beans',
+          name: 'Mixed bean cans (2)',
+          price: 2.1,
+          category: 'Pantry',
+          icon: makeIcon('🫘', '#ef4444'),
+          note: 'For soups and stews.',
+          suggested: false
+        },
+        {
+          id: 'fish',
+          name: 'Tinned tuna (4 pack)',
+          price: 4.2,
+          category: 'Protein',
+          icon: makeIcon('🐟', '#0ea5e9'),
+          note: 'Protein for lunches.',
+          suggested: false
+        },
+        {
+          id: 'cleaner',
+          name: 'Multi-purpose cleaner',
+          price: 3.5,
+          category: 'Household',
+          icon: makeIcon('🧽', '#6366f1'),
+          note: 'Supports home management.',
+          suggested: false
+        }
+      ];
+      return items;
+    })();
+
+    const state = {
+      budget: 45,
+      items: [],
+      customCounter: 0,
+      transportOut: null,
+      transportBack: null,
+      log: []
+    };
+
+    const selectors = {
+      screens: document.querySelectorAll('.screen'),
+      stepper: document.querySelectorAll('.stepper .pill'),
+      budgetBanner: document.getElementById('budgetBanner'),
+      currentSpend: document.getElementById('currentSpend'),
+      remaining: document.getElementById('remaining'),
+      suggestedList: document.getElementById('suggestedList'),
+      availableItems: document.getElementById('availableItems'),
+      basketList: document.getElementById('basketList'),
+      additionalHint: document.getElementById('additionalHint'),
+      transportOptions: document.getElementById('transportOptions'),
+      transportHint: document.getElementById('transportHint'),
+      customHint: document.getElementById('customHint'),
+      toStore: document.getElementById('toStore'),
+      issueContainer: document.getElementById('issueContainer'),
+      storeBasket: document.getElementById('storeBasket'),
+      storeSpend: document.getElementById('storeSpend'),
+      storeRemaining: document.getElementById('storeRemaining'),
+      storeBudget: document.getElementById('storeBudget'),
+      storeLog: document.getElementById('storeLog'),
+      toReturn: document.getElementById('toReturn'),
+      addTreat: document.getElementById('addTreat'),
+      treatHint: document.getElementById('treatHint'),
+      returnOptions: document.getElementById('returnOptions'),
+      returnHint: document.getElementById('returnHint'),
+      finishPlan: document.getElementById('finishPlan'),
+      summarySpend: document.getElementById('summarySpend'),
+      summaryRemain: document.getElementById('summaryRemain'),
+      summaryItems: document.getElementById('summaryItems'),
+      finalSummary: document.getElementById('finalSummary'),
+      finalText: document.getElementById('finalText'),
+      finalList: document.getElementById('finalList'),
+      liveRegion: document.getElementById('liveRegion'),
+      storeBudgetBanner: document.getElementById('storeBudget')
+    };
+
+    const heroImages = {
+      heroBag: makeIcon('🛒', '#6366f1'),
+      heroBus: makeIcon('🚌', '#2563eb'),
+      heroProblem: makeIcon('🧩', '#f97316'),
+      heroHome: makeIcon('🏠', '#22c55e')
+    };
+
+    Object.entries(heroImages).forEach(([id, src]) => {
+      const el = document.getElementById(id);
+      if (el) el.src = src;
+    });
+
+    const copyItem = (item, overrides = {}) => ({
+      itemId: overrides.itemId || item.id,
+      originalId: overrides.originalId || item.id,
+      name: overrides.name || item.name,
+      price: typeof overrides.price === 'number' ? overrides.price : item.price,
+      icon: overrides.icon || item.icon,
+      note: overrides.note || item.note || '',
+      source: overrides.source || (item.suggested ? 'Suggested staple' : 'Selected item'),
+      issueResolved: overrides.issueResolved ?? !item.issue,
+      custom: overrides.custom || false
+    });
+
+    const addItemToState = (item) => {
+      if (state.items.some((entry) => entry.itemId === item.itemId && !item.custom)) {
+        return false;
+      }
+      const projected = totalSpend() + item.price;
+      if (projected > state.budget) {
+        announce(`Cannot add ${item.name}. It would exceed the budget.`);
+        return false;
+      }
+      state.items.push(item);
+      announce(`${item.name} added to the basket.`);
+      renderPlanning();
+      return true;
+    };
+
+    const removeItemFromState = (itemId) => {
+      const idx = state.items.findIndex((entry) => entry.itemId === itemId);
+      if (idx > -1) {
+        const [removed] = state.items.splice(idx, 1);
+        announce(`${removed.name} removed from the basket.`);
+        renderPlanning();
+      }
+    };
+
+    const totalSpend = () => {
+      const itemsTotal = state.items.reduce((sum, entry) => sum + entry.price, 0);
+      const transportOut = state.transportOut ? state.transportOut.cost : 0;
+      const transportBack = state.transportBack ? state.transportBack.cost : 0;
+      return Number((itemsTotal + transportOut + transportBack).toFixed(2));
+    };
+
+    const planningSpend = () => {
+      const itemsTotal = state.items.reduce((sum, entry) => sum + entry.price, 0);
+      const transportOut = state.transportOut ? state.transportOut.cost : 0;
+      return Number((itemsTotal + transportOut).toFixed(2));
+    };
+
+    const renderPlanning = () => {
+      const spend = planningSpend();
+      const remaining = Number((state.budget - spend).toFixed(2));
+      selectors.currentSpend.textContent = `£${spend.toFixed(2)}`;
+      selectors.remaining.textContent = `£${remaining.toFixed(2)}`;
+      selectors.remaining.dataset.negative = remaining < 0;
+
+      const additionalCount = state.items.filter((item) => item.source !== 'Suggested staple').length;
+      selectors.additionalHint.textContent = additionalCount >= 2
+        ? 'Great! You have at least two additional items.'
+        : `Add ${2 - additionalCount} more item(s) beyond the staples.`;
+      selectors.additionalHint.classList.toggle('warn', additionalCount < 2);
+
+      renderInventoryLists();
+      renderBasket(selectors.basketList, true);
+      renderTransportChoices(selectors.transportOptions, 'outbound');
+      updatePlanningButtons();
+    };
+
+    const renderInventoryLists = () => {
+      selectors.suggestedList.innerHTML = '';
+      selectors.availableItems.innerHTML = '';
+
+      inventory.forEach((item) => {
+        const isSelected = state.items.some((entry) => entry.originalId === item.id && !entry.custom);
+        const card = document.createElement('article');
+        card.className = 'item-card';
+        card.innerHTML = `
+          <img src="${item.icon}" alt="${item.name}">
+          <div>
+            <h4>${item.name}</h4>
+            <p>£${item.price.toFixed(2)} · ${item.note || ''}</p>
+            <button type="button" class="${isSelected ? 'secondary' : ''}">
+              ${isSelected ? 'Remove' : 'Add to basket'}
+            </button>
+          </div>`;
+
+        card.querySelector('button').addEventListener('click', () => {
+          if (isSelected) {
+            const selection = state.items.find((entry) => entry.originalId === item.id && !entry.custom);
+            if (selection) removeItemFromState(selection.itemId);
+          } else {
+            addItemToState(copyItem(item));
+          }
+        });
+
+        if (item.suggested) {
+          selectors.suggestedList.appendChild(card);
+        } else {
+          selectors.availableItems.appendChild(card);
+        }
+      });
+    };
+
+    const renderBasket = (target, showRemove) => {
+      target.innerHTML = '';
+      if (!state.items.length) {
+        const empty = document.createElement('p');
+        empty.className = 'hint';
+        empty.textContent = 'No items selected yet.';
+        target.appendChild(empty);
+        return;
+      }
+
+      state.items.forEach((item) => {
+        const li = document.createElement('li');
+        li.className = 'basket-item';
+        li.innerHTML = `
+          <img src="${item.icon}" alt="${item.name}">
+          <div>
+            <strong>${item.name}</strong><br>
+            <span class="hint">£${item.price.toFixed(2)} · ${item.source}</span>
+          </div>`;
+
+        if (showRemove) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.textContent = 'Remove';
+          btn.addEventListener('click', () => removeItemFromState(item.itemId));
+          li.appendChild(btn);
+        } else {
+          const span = document.createElement('span');
+          span.className = 'hint';
+          span.textContent = item.issueResolved ? 'Ready' : 'Check availability';
+          li.appendChild(span);
+        }
+
+        target.appendChild(li);
+      });
+    };
+
+    const renderTransportChoices = (target, phase) => {
+      target.innerHTML = '';
+      transports.forEach((mode) => {
+        const selected = phase === 'outbound'
+          ? state.transportOut && state.transportOut.id === mode.id
+          : state.transportBack && state.transportBack.id === mode.id;
+        const card = document.createElement('article');
+        card.className = 'transport-card';
+        card.dataset.selected = selected;
+        card.innerHTML = `
+          <img src="${mode.icon}" alt="${mode.title}">
+          <div>
+            <h4>${mode.title}</h4>
+            <p class="hint">£${mode.cost.toFixed(2)} · ${mode.duration}</p>
+            <ul>
+              ${mode.pros.map((p) => `<li>✔️ ${p}</li>`).join('')}
+              ${mode.cons.map((c) => `<li>⚠️ ${c}</li>`).join('')}
+            </ul>
+          </div>`;
+        card.addEventListener('click', () => {
+          if (phase === 'outbound') {
+            state.transportOut = mode;
+            announce(`${mode.title} selected for the journey to the store.`);
+            renderPlanning();
+          } else {
+            const projected = totalSpend() - (state.transportBack ? state.transportBack.cost : 0) + mode.cost;
+            if (projected > state.budget) {
+              announce(`Selecting ${mode.title} would exceed the budget. Choose the other option or adjust items.`);
+              selectors.returnHint.textContent = 'That choice exceeds the budget. Pick another option or go back to adjust items.';
+              selectors.returnHint.classList.add('warn');
+              return;
+            }
+            state.transportBack = mode;
+            selectors.returnHint.textContent = 'Return journey selected.';
+            selectors.returnHint.classList.remove('warn');
+            announce(`${mode.title} selected for the return journey.`);
+            renderReturn();
+          }
+        });
+        target.appendChild(card);
+      });
+    };
+
+    const updatePlanningButtons = () => {
+      const additionalCount = state.items.filter((item) => item.source !== 'Suggested staple').length;
+      const hasTransport = Boolean(state.transportOut);
+      const spendOk = planningSpend() <= state.budget;
+      selectors.transportHint.textContent = hasTransport ? state.transportOut.detail : 'Select how they will travel to the store.';
+      selectors.transportHint.classList.toggle('warn', !hasTransport);
+      selectors.toStore.disabled = !(additionalCount >= 2 && hasTransport && spendOk);
+    };
+
+    const setupCustomForm = () => {
+      const form = document.getElementById('customForm');
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const name = form.customName.value.trim();
+        const price = parseFloat(form.customPrice.value);
+        if (!name || Number.isNaN(price)) return;
+        const item = copyItem({
+          id: `custom-${state.customCounter}`,
+          name,
+          price,
+          icon: makeIcon('📝', '#94a3b8'),
+          note: form.customReason.value.trim(),
+          suggested: false
+        }, {
+          itemId: `custom-${state.customCounter}`,
+          originalId: `custom-${state.customCounter}`,
+          source: form.customReason.value.trim() ? form.customReason.value.trim() : 'Custom item',
+          custom: true
+        });
+        state.customCounter += 1;
+        if (addItemToState(item)) {
+          form.reset();
+          selectors.liveRegion.textContent = `${name} added.`;
+          selectors.customHint.textContent = '';
+        } else {
+          selectors.customHint.textContent = 'That would go over budget. Try adjusting other items first.';
+        }
+      });
+    };
+
+    const storeIssuesPending = () => state.items.filter((item) => {
+      const issue = inventory.find((inv) => inv.id === item.originalId)?.issue;
+      return issue && !item.issueResolved;
+    });
+
+    const renderStoreStage = () => {
+      renderBasket(selectors.storeBasket, false);
+      const spend = planningSpend();
+      selectors.storeSpend.textContent = `£${spend.toFixed(2)}`;
+      selectors.storeRemaining.textContent = `£${(state.budget - spend).toFixed(2)}`;
+
+      selectors.issueContainer.innerHTML = '';
+      const pending = storeIssuesPending();
+      if (!pending.length) {
+        const done = document.createElement('p');
+        done.className = 'hint';
+        done.textContent = 'No outstanding issues. Review the basket and continue when ready.';
+        selectors.issueContainer.appendChild(done);
+      } else {
+        pending.forEach((item) => {
+          const issue = inventory.find((inv) => inv.id === item.originalId)?.issue;
+          if (!issue) return;
+          const card = document.createElement('article');
+          card.className = 'issue-card';
+          card.innerHTML = `<h3>${item.name}</h3><p>${issue.text}</p>`;
+          const options = document.createElement('div');
+          options.className = 'issue-options';
+          issue.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = idx === 0 ? '' : 'secondary';
+            btn.textContent = opt.label;
+            btn.addEventListener('click', () => handleIssueDecision(item, opt));
+            options.appendChild(btn);
+          });
+          card.appendChild(options);
+          selectors.issueContainer.appendChild(card);
+        });
+      }
+
+      selectors.storeLog.textContent = state.log.join('\n');
+      selectors.toReturn.disabled = Boolean(storeIssuesPending().length);
+    };
+
+    const handleIssueDecision = (item, option) => {
+      const index = state.items.findIndex((entry) => entry.itemId === item.itemId);
+      if (index === -1) return;
+      if (option.replacement) {
+        const projected = planningSpend() - state.items[index].price + option.replacement.price;
+        if (projected > state.budget) {
+          announce('That swap would exceed the budget. Consider another choice.');
+          return;
+        }
+        state.items[index] = copyItem(inventory.find((inv) => inv.id === item.originalId) || option.replacement, {
+          itemId: `${item.itemId}-swap`,
+          originalId: item.originalId,
+          name: option.replacement.name,
+          price: option.replacement.price,
+          icon: option.replacement.icon,
+          note: option.replacement.note,
+          source: 'Store swap',
+          issueResolved: true
+        });
+        state.log.push(`Swapped ${item.name} → ${option.replacement.name}.`);
+        announce(`Swapped to ${option.replacement.name}.`);
+      } else {
+        state.log.push(`Removed ${item.name} due to availability.`);
+        state.items.splice(index, 1);
+        announce(`${item.name} removed.`);
+      }
+      renderStoreStage();
+    };
+
+    const setupTreatButton = () => {
+      selectors.addTreat.addEventListener('click', () => {
+        const treat = {
+          id: 'treat',
+          name: 'Dark chocolate treat',
+          price: 3,
+          category: 'Treat',
+          icon: makeIcon('🍫', '#7c3aed'),
+          note: 'Only add if it fits the plan.',
+          suggested: false
+        };
+        if (state.items.some((i) => i.originalId === 'treat')) {
+          selectors.treatHint.textContent = 'Already added. Reconsider in the basket if needed.';
+          return;
+        }
+        const added = addItemToState(copyItem(treat, { source: 'Impulse check', itemId: 'treat' }));
+        if (added) {
+          state.log.push('Considered the chocolate treat and decided to add it.');
+          renderStoreStage();
+        } else {
+          selectors.treatHint.textContent = 'Budget too tight for this extra. Maybe skip it.';
+        }
+      });
+    };
+
+    const renderReturn = () => {
+      const spend = planningSpend();
+      selectors.summarySpend.textContent = `£${spend.toFixed(2)}`;
+      selectors.summaryRemain.textContent = `£${(state.budget - spend).toFixed(2)}`;
+      selectors.summaryItems.textContent = state.items.length.toString();
+      renderTransportChoices(selectors.returnOptions, 'return');
+      selectors.finishPlan.disabled = !state.transportBack;
+    };
+
+    const finalisePlan = () => {
+      const total = totalSpend();
+      const remaining = Number((state.budget - total).toFixed(2));
+      selectors.finalSummary.hidden = false;
+      selectors.finalText.textContent = `Total spend £${total.toFixed(2)} (${state.transportOut.title} there, ${state.transportBack.title} back). Remaining budget: £${remaining.toFixed(2)}.`;
+      selectors.finalList.innerHTML = '';
+      state.items.forEach((item) => {
+        const li = document.createElement('li');
+        li.className = 'basket-item';
+        li.innerHTML = `<img src="${item.icon}" alt="${item.name}"><div><strong>${item.name}</strong><br><span class='hint'>£${item.price.toFixed(2)} · ${item.source}</span></div>`;
+        const span = document.createElement('span');
+        span.className = 'hint';
+        span.textContent = item.note ? item.note : '';
+        li.appendChild(span);
+        selectors.finalList.appendChild(li);
+      });
+      announce('Plan ready to review.');
+    };
+
+    const announce = (message) => {
+      selectors.liveRegion.textContent = message;
+    };
+
+    const updateStepper = (screenId) => {
+      selectors.stepper.forEach((pill) => {
+        pill.dataset.active = pill.dataset.step === screenId;
+      });
+    };
+
+    const showScreen = (screenId) => {
+      selectors.screens.forEach((screen) => {
+        screen.classList.toggle('active', screen.dataset.screen === screenId);
+      });
+      updateStepper(screenId);
+      if (screenId === 'planning') {
+        renderPlanning();
+      } else if (screenId === 'store') {
+        renderStoreStage();
+      } else if (screenId === 'return') {
+        renderReturn();
+      }
+    };
+
+    const initNavigation = () => {
+      document.querySelectorAll('[data-nav="back"]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const current = Array.from(selectors.screens).find((el) => el.classList.contains('active'));
+          const order = ['intro', 'planning', 'store', 'return'];
+          const idx = order.indexOf(current.dataset.screen);
+          if (idx > 0) showScreen(order[idx - 1]);
+        });
+      });
+
+      selectors.toStore.addEventListener('click', () => showScreen('store'));
+      selectors.toReturn.addEventListener('click', () => showScreen('return'));
+      selectors.finishPlan.addEventListener('click', finalisePlan);
+      document.getElementById('startPlanning').addEventListener('click', () => showScreen('planning'));
+    };
+
+    const preselectStaples = () => {
+      inventory.filter((item) => item.suggested).forEach((item) => {
+        state.items.push(copyItem(item));
+      });
+    };
+
+    const init = () => {
+      preselectStaples();
+      setupCustomForm();
+      setupTreatButton();
+      renderPlanning();
+      initNavigation();
+    };
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
