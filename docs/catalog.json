@@ -35,6 +35,13 @@
     "tags": ["social", "language"]
   },
   {
+    "slug": "email-composer-coach",
+    "title": "Email Composer Coach",
+    "description": "Draft everyday emails and receive structured coaching on clarity and tone.",
+    "emoji": "✉️",
+    "tags": ["language", "functional"]
+  },
+  {
     "slug": "errands-visual-memory",
     "title": "Errands — Visual Memory",
     "description": "Remember locations/objects while completing errands.",
