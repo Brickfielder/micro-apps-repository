@@ -28,13 +28,33 @@
 
   /* Header */
   header{
-    position:sticky; top:0; z-index:10;
     background:linear-gradient(135deg, rgba(255,255,255,0.92) 10%, rgba(255,245,243,0.9) 90%);
+  }
+  .nav-shell{
+    position:sticky; top:0; z-index:20;
+    background:linear-gradient(135deg, rgba(255,255,255,0.96) 10%, rgba(255,245,243,0.94) 90%);
     box-shadow:0 2px 14px rgba(15,23,42,.06);
     border-bottom:1px solid rgba(255,255,255,0.6);
+    backdrop-filter:blur(16px);
   }
-  .header-inner{max-width:var(--maxw);margin:0 auto;padding:1.4rem 1.25rem 2.8rem;display:flex;flex-direction:column;gap:1.75rem}
-  .topbar{display:flex;align-items:center;gap:1rem;font-size:0.95rem;color:var(--muted)}
+  .header-inner{
+    max-width:var(--maxw);
+    margin:0 auto;
+    padding:2.6rem 1.25rem 3rem;
+    display:flex;
+    flex-direction:column;
+    gap:1.75rem;
+  }
+  .topbar{
+    max-width:var(--maxw);
+    margin:0 auto;
+    padding:1.2rem 1.25rem;
+    display:flex;
+    align-items:center;
+    gap:1rem;
+    font-size:0.95rem;
+    color:var(--muted);
+  }
   .brand{display:flex;align-items:center;gap:.75rem;font-weight:700;color:var(--text);letter-spacing:-0.02em;font-size:1rem}
   .brand .badge{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;background:linear-gradient(150deg,var(--accent)0%,var(--accent-dark)90%);color:#fff;font-size:1.35rem;box-shadow:0 12px 24px rgba(240,82,69,.35)}
   .top-links{display:flex;align-items:center;gap:.75rem;margin-left:auto}
@@ -63,7 +83,7 @@
   .hero-card img{width:100%;border-radius:12px;object-fit:cover;box-shadow:0 20px 35px rgba(15,23,42,.15)}
   .hero-card p{margin:0;font-size:.95rem;color:var(--muted)}
   @media(max-width:720px){
-    .topbar{flex-direction:column;align-items:flex-start;gap:.5rem}
+    .topbar{flex-direction:column;align-items:flex-start;gap:.5rem;padding:1rem 1.1rem}
     .top-links{width:100%;justify-content:flex-start;flex-wrap:wrap}
     .hero{gap:2rem}
   }
@@ -300,7 +320,7 @@
 <div id="tsparticles"></div>
 
 <header>
-  <div class="header-inner">
+  <div class="nav-shell">
     <div class="topbar">
       <span class="brand"><span class="badge">µ</span> Cognitive Rehab Lab</span>
       <nav class="top-links" aria-label="Primary">
@@ -310,7 +330,9 @@
         <a class="cta-pill" href="mailto:m.mion@nhs.net">Partner with us</a>
       </nav>
     </div>
+  </div>
 
+  <div class="header-inner">
     <div class="hero">
       <div class="hero-copy">
         <span class="hero-eyebrow">Cognitive rehabilitation micro-experiences</span>
