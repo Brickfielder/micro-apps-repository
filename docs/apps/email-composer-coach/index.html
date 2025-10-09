@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Email Composer Coach</title>
+  <meta name="description" content="Practise writing professional emails with prompts and real-time coaching feedback." />
+
+  <link rel="stylesheet" href="../shared/theme.css" />
+  <meta name="theme" content="bold dense" />
+  <meta name="app-slug" content="email-composer-coach" />
+  <meta name="app-title" content="Email Composer Coach" />
+  <meta name="app-desc" content="Draft work and life emails, then receive structured coaching feedback." />
+  <script defer src="../shared/frame.js"></script>
+  <script defer src="../shared/clinician_feedback.js"></script>
+
+  <style>
+    :root {
+      color-scheme: light;
+    }
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: #f5f7fb;
+      color: #1f2937;
+    }
+    #app-root {
+      padding: 16px;
+    }
+    .workspace {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+    .two-col {
+      grid-template-columns: 2.1fr 1fr;
+      align-items: start;
+    }
+    .card {
+      background: #ffffff;
+      border-radius: 18px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+      padding: 18px 20px;
+    }
+    .email-shell {
+      border: 1px solid #d1d5db;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #fdfefe;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+    }
+    .email-header {
+      padding: 16px 18px;
+      background: linear-gradient(135deg, #eef2ff, #fef3c7);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .email-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .email-brand span:first-child {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: #4f46e5;
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .email-brand h1 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+    .email-main {
+      padding: 18px 20px;
+      display: grid;
+      gap: 14px;
+    }
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: #4b5563;
+      font-weight: 600;
+    }
+    input[type="text"], textarea, select {
+      width: 100%;
+      font: inherit;
+      border-radius: 12px;
+      border: 1px solid #d1d5db;
+      padding: 10px 12px;
+      background: #fff;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    textarea {
+      min-height: 220px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+      outline: none;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    .toolbar button {
+      appearance: none;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 600;
+      background: #2563eb;
+      color: #fff;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+    }
+    .toolbar button.secondary {
+      background: #f3f4f6;
+      color: #1f2937;
+      box-shadow: none;
+    }
+    .toolbar button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .toolbar button:not(:disabled):active {
+      transform: translateY(1px);
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #eef2ff;
+      color: #4338ca;
+    }
+    .coach-card h2 {
+      margin-top: 0;
+      margin-bottom: 4px;
+      font-size: 1rem;
+    }
+    .muted {
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+    .feedback-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+      list-style: none;
+      padding: 0;
+    }
+    .feedback-item {
+      border-radius: 14px;
+      padding: 12px 14px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+    }
+    .feedback-item[data-tone="positive"] {
+      border-color: #bbf7d0;
+      background: #ecfdf5;
+      color: #047857;
+    }
+    .feedback-item[data-tone="warning"] {
+      border-color: #fcd34d;
+      background: #fffbeb;
+      color: #b45309;
+    }
+    .feedback-item[data-tone="critical"] {
+      border-color: #fca5a5;
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+    .checklist {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .checklist label {
+      font-size: 0.9rem;
+      color: #374151;
+      font-weight: 500;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 8px;
+    }
+    .checklist input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #2563eb;
+    }
+    .scenario-grid {
+      display: grid;
+      gap: 10px;
+    }
+    .scenario-grid button {
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: #fff;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .scenario-grid button:hover {
+      border-color: #6366f1;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+    }
+    .scenario-grid button strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+    .split {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .split > label {
+      flex: 1 1 260px;
+    }
+    .status-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+    .status-row span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-weight: 600;
+    }
+    .status-row span[data-tone="ok"] {
+      background: #ecfdf5;
+      color: #047857;
+    }
+    .status-row span[data-tone="issue"] {
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+    .history {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .history-entry {
+      border-radius: 12px;
+      border: 1px dashed #c7d2fe;
+      padding: 10px 12px;
+      background: #eef2ff;
+      font-size: 0.85rem;
+    }
+    @media (max-width: 1024px) {
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main id="app-root">
+    <div class="workspace grid two-col">
+      <section class="card" aria-labelledby="composer-heading">
+        <div class="email-shell">
+          <div class="email-header">
+            <div class="email-brand">
+              <span>EC</span>
+              <h1 id="composer-heading">Email Composer Coach</h1>
+            </div>
+            <div class="pill" id="statusSummary">Ready to coach</div>
+          </div>
+          <div class="email-main">
+            <div class="split">
+              <label>From
+                <input type="text" id="fromInput" placeholder="you@example.com" value="you@example.com" />
+              </label>
+              <label>To
+                <input type="text" id="toInput" placeholder="recipient@organisation.com" />
+              </label>
+            </div>
+            <label>Subject line
+              <input type="text" id="subjectInput" placeholder="Clear, informative subject" />
+            </label>
+            <label>Greeting and message
+              <textarea id="bodyInput" placeholder="Introduce the reason for your email, add key details, and close clearly."></textarea>
+            </label>
+            <div class="toolbar">
+              <button id="checkButton">✓ Check my email</button>
+              <button class="secondary" id="clearButton">Reset</button>
+            </div>
+            <div class="status-row" id="statusRow" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+      <aside class="card coach-card" aria-live="polite">
+        <h2>Coaching feedback</h2>
+        <p class="muted">Write your message, then choose <strong>Check my email</strong>. The coach spots structure, clarity, and mechanics. Use the checklist to plan improvements.</p>
+        <ul class="feedback-list" id="feedbackList"></ul>
+        <div class="divider"></div>
+        <h3 style="margin-bottom:4px">Essential checklist</h3>
+        <div class="checklist">
+          <label><input type="checkbox" id="greetingCheck" /> Warm greeting</label>
+          <label><input type="checkbox" id="purposeCheck" /> Clear purpose in first sentence</label>
+          <label><input type="checkbox" id="detailsCheck" /> Key facts or requests included</label>
+          <label><input type="checkbox" id="closingCheck" /> Polite closing line</label>
+        </div>
+        <div class="divider" style="margin-top:16px"></div>
+        <h3 style="margin-bottom:4px">Scenario ideas</h3>
+        <p class="muted">Pick a scenario to auto-fill the subject and prompt.</p>
+        <div class="scenario-grid">
+          <button type="button" data-subject="Request for flexible hours" data-body="Hello [Manager Name],\n\nI hope you are well. I am writing to ask whether I could adjust my working hours for the next two months while I attend therapy appointments. I can keep the same total hours each week by starting earlier on Tuesdays and Thursdays. Please let me know if this would be possible or if you need any further information.\n\nThank you for considering my request.\nBest regards,\n[Your Name]">Workplace adjustment</button>
+          <button type="button" data-subject="Question about housing benefit payment" data-body="Dear Housing Team,\n\nI am checking that my housing benefit payment for April has been received. The online account still shows it as pending, so I wanted to confirm whether you need any more evidence from me.\n\nPlease let me know what the next steps are.\nKind regards,\n[Your Name]">Benefits query</button>
+          <button type="button" data-subject="Clarification needed on recent gas bill" data-body="Hello Customer Support,\n\nI have a question about my latest gas bill dated 2 May. The usage seems higher than usual even though I have not changed my routine. Could you review the meter readings on your side and let me know if there might be an error?\n\nI appreciate your help.\nSincerely,\n[Your Name]">Utility bill question</button>
+        </div>
+        <div class="history" id="history"></div>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    const bodyInput = document.getElementById('bodyInput');
+    const subjectInput = document.getElementById('subjectInput');
+    const toInput = document.getElementById('toInput');
+    const checkButton = document.getElementById('checkButton');
+    const clearButton = document.getElementById('clearButton');
+    const feedbackList = document.getElementById('feedbackList');
+    const statusRow = document.getElementById('statusRow');
+    const statusSummary = document.getElementById('statusSummary');
+    const checklist = {
+      greeting: document.getElementById('greetingCheck'),
+      purpose: document.getElementById('purposeCheck'),
+      details: document.getElementById('detailsCheck'),
+      closing: document.getElementById('closingCheck')
+    };
+    const history = document.getElementById('history');
+    const scenarioButtons = document.querySelectorAll('.scenario-grid button');
+
+    scenarioButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        subjectInput.value = btn.dataset.subject;
+        bodyInput.value = btn.dataset.body;
+        bodyInput.focus();
+      });
+    });
+
+    clearButton.addEventListener('click', () => {
+      toInput.value = '';
+      subjectInput.value = '';
+      bodyInput.value = '';
+      Object.values(checklist).forEach(box => box.checked = false);
+      feedbackList.innerHTML = '';
+      statusRow.innerHTML = '';
+      statusSummary.textContent = 'Ready to coach';
+      statusSummary.style.background = '#eef2ff';
+      statusSummary.style.color = '#4338ca';
+    });
+
+    function createFeedbackItem(message, tone = 'warning') {
+      const li = document.createElement('li');
+      li.className = 'feedback-item';
+      li.dataset.tone = tone;
+      li.textContent = message;
+      return li;
+    }
+
+    function sentenceSplit(text) {
+      return text
+        .split(/(?<=[.!?])\s+/)
+        .map(s => s.trim())
+        .filter(Boolean);
+    }
+
+    function countWords(text) {
+      const words = text.trim().match(/\b[\w'’-]+\b/gi);
+      return words ? words.length : 0;
+    }
+
+    function detectRepeatedWords(text) {
+      const matches = [];
+      const words = text.toLowerCase().match(/\b[\w'’-]+\b/g);
+      if (!words) return matches;
+      for (let i = 0; i < words.length - 1; i++) {
+        if (words[i] === words[i + 1] && !matches.includes(words[i])) {
+          matches.push(words[i]);
+        }
+      }
+      return matches;
+    }
+
+    function analyseEmail() {
+      const feedback = [];
+      const statuses = [];
+      Object.values(checklist).forEach(box => box.checked = false);
+      const subject = subjectInput.value.trim();
+      const body = bodyInput.value.trim();
+      const toValue = toInput.value.trim();
+      const wordCount = countWords(body);
+
+      if (!toValue) {
+        feedback.push(createFeedbackItem('Add who you are writing to in the “To” field.', 'critical'));
+        statuses.push({ label: 'Missing recipient', tone: 'issue' });
+      } else {
+        statuses.push({ label: 'Recipient added', tone: 'ok' });
+      }
+
+      if (!subject) {
+        feedback.push(createFeedbackItem('Write a subject line that tells the reader what the email is about.', 'critical'));
+        statuses.push({ label: 'No subject', tone: 'issue' });
+      } else if (subject.length < 8) {
+        feedback.push(createFeedbackItem('Make the subject a little more specific so the reader can prioritise it.', 'warning'));
+        statuses.push({ label: 'Short subject', tone: 'issue' });
+      } else {
+        statuses.push({ label: 'Subject clear', tone: 'ok' });
+      }
+
+      if (!body) {
+        feedback.push(createFeedbackItem('Write the body of your email. Start with a greeting, state your purpose, then add detail and a polite close.', 'critical'));
+        statuses.push({ label: 'Body empty', tone: 'issue' });
+      } else {
+        statuses.push({ label: `Word count: ${wordCount}`, tone: wordCount < 40 ? 'issue' : 'ok' });
+
+        if (wordCount < 40) {
+          feedback.push(createFeedbackItem('Add a little more detail so the reader has enough information to respond.', 'warning'));
+        } else if (wordCount > 180) {
+          feedback.push(createFeedbackItem('Consider trimming long sections or using shorter sentences to keep the email focused.', 'warning'));
+        }
+
+        const sentences = sentenceSplit(body);
+        const longSentences = sentences.filter(s => countWords(s) > 28);
+        if (longSentences.length) {
+          feedback.push(createFeedbackItem('Break long sentences into two shorter ones so they are easier to read.', 'warning'));
+        }
+
+        const missingPunctuation = sentences.some(s => !/[.!?]$/.test(s));
+        if (missingPunctuation) {
+          feedback.push(createFeedbackItem('End each sentence with punctuation such as a full stop or question mark.', 'warning'));
+        }
+
+        if (/  +/.test(body)) {
+          feedback.push(createFeedbackItem('Remove double spaces between words to keep the text tidy.', 'warning'));
+        }
+
+        const repeats = detectRepeatedWords(body);
+        if (repeats.length) {
+          feedback.push(createFeedbackItem(`Check for repeated words like “${repeats.join(', ')}”.`, 'warning'));
+        }
+
+        if (!/^\s*(hi|hello|dear)\b/i.test(body)) {
+          feedback.push(createFeedbackItem('Open with a friendly greeting such as “Hello” or “Dear [Name]”.', 'warning'));
+        } else {
+          checklist.greeting.checked = true;
+        }
+
+        if (/(thank|regards|sincerely|kind regards|best)/i.test(body)) {
+          checklist.closing.checked = true;
+        } else {
+          feedback.push(createFeedbackItem('Add a closing line such as “Thank you” or “Kind regards”.', 'warning'));
+        }
+
+        const firstSentence = sentences[0] || '';
+        if (firstSentence && countWords(firstSentence) >= 4) {
+          checklist.purpose.checked = true;
+        } else {
+          feedback.push(createFeedbackItem('State the reason for your email in the first sentence.', 'warning'));
+        }
+
+        if (/(\d|appointment|invoice|evidence|details|time|date|request|question|issue)/i.test(body)) {
+          checklist.details.checked = true;
+        } else {
+          feedback.push(createFeedbackItem('Add a key detail (date, time, account number, or question) to help the reader respond.', 'warning'));
+        }
+
+        if (/\n\n/.test(body)) {
+          feedback.push(createFeedbackItem('Great job using short paragraphs to separate ideas.', 'positive'));
+        }
+      }
+
+      if (!feedback.length) {
+        feedback.push(createFeedbackItem('Strong structure! Send when you are ready.', 'positive'));
+      }
+
+      feedbackList.innerHTML = '';
+      feedback.forEach(item => feedbackList.appendChild(item));
+
+      statusRow.innerHTML = '';
+      statuses.forEach(s => {
+        const span = document.createElement('span');
+        span.dataset.tone = s.tone;
+        span.textContent = s.label;
+        statusRow.appendChild(span);
+      });
+
+      const hasIssue = statuses.some(s => s.tone === 'issue');
+      statusSummary.textContent = hasIssue ? 'Needs attention' : 'Looking good';
+      statusSummary.style.background = hasIssue ? '#fef2f2' : '#ecfdf5';
+      statusSummary.style.color = hasIssue ? '#b91c1c' : '#047857';
+
+      const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const entry = document.createElement('div');
+      entry.className = 'history-entry';
+      entry.textContent = `Checked at ${timestamp} — ${statuses.map(s => s.label).join(', ')}`;
+      history.prepend(entry);
+      while (history.children.length > 3) {
+        history.removeChild(history.lastChild);
+      }
+    }
+
+    checkButton.addEventListener('click', analyseEmail);
+
+    bodyInput.addEventListener('keydown', (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'enter') {
+        event.preventDefault();
+        analyseEmail();
+      }
+    });
+  </script>
+</body>
+</html>
