@@ -215,26 +215,38 @@
       height: 18px;
       accent-color: #2563eb;
     }
-    .scenario-grid {
-      display: grid;
-      gap: 10px;
+    .attachment-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      font-size: 0.85rem;
+      color: #4b5563;
     }
-    .scenario-grid button {
-      border: 1px solid #d1d5db;
-      border-radius: 14px;
-      padding: 12px 14px;
-      background: #fff;
-      text-align: left;
-      cursor: pointer;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    .attachment-row label {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 6px;
+      font-weight: 600;
+      color: #4b5563;
     }
-    .scenario-grid button:hover {
-      border-color: #6366f1;
-      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+    .attachment-row input[type="file"] {
+      font: inherit;
     }
-    .scenario-grid button strong {
-      display: block;
-      margin-bottom: 4px;
+    .attachment-name {
+      font-weight: 600;
+      color: #1f2937;
+    }
+    .draft-status {
+      font-size: 0.8rem;
+      margin-left: auto;
+      color: #2563eb;
+    }
+    .draft-status[data-tone="success"] {
+      color: #047857;
+    }
+    .draft-status[data-tone="warning"] {
+      color: #b91c1c;
     }
     .split {
       display: flex;
@@ -281,6 +293,61 @@
       background: #eef2ff;
       font-size: 0.85rem;
     }
+    .guidance-input {
+      width: 100%;
+      min-height: 90px;
+      resize: vertical;
+      border-radius: 12px;
+      border: 1px solid #d1d5db;
+      padding: 10px 12px;
+      font: inherit;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .guidance-input:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+      outline: none;
+    }
+    .guidance-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+    .ghost-button {
+      appearance: none;
+      border: 1px solid #d1d5db;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-weight: 600;
+      background: #fff;
+      color: #1f2937;
+      cursor: pointer;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .ghost-button:hover {
+      border-color: #6366f1;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.08);
+    }
+    .guidance-list {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0 0;
+      display: grid;
+      gap: 8px;
+    }
+    .guidance-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.85rem;
+      color: #374151;
+    }
+    .guidance-item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: #2563eb;
+    }
     @media (max-width: 1024px) {
       .two-col {
         grid-template-columns: 1fr;
@@ -315,9 +382,17 @@
             <label>Greeting and message
               <textarea id="bodyInput" placeholder="Introduce the reason for your email, add key details, and close clearly."></textarea>
             </label>
+            <div class="attachment-row">
+              <label for="attachmentInput">Attachment
+                <input type="file" id="attachmentInput" />
+              </label>
+              <span class="attachment-name" id="attachmentName">No file chosen</span>
+            </div>
             <div class="toolbar">
               <button id="checkButton">✓ Check my email</button>
+              <button class="secondary" id="saveDraftButton" type="button">Save draft</button>
               <button class="secondary" id="clearButton">Reset</button>
+              <span class="draft-status" id="draftStatus" aria-live="polite"></span>
             </div>
             <div class="status-row" id="statusRow" aria-live="polite"></div>
           </div>
@@ -336,27 +411,31 @@
           <label><input type="checkbox" id="closingCheck" /> Polite closing line</label>
         </div>
         <div class="divider" style="margin-top:16px"></div>
-        <h3 style="margin-bottom:4px">Scenario ideas</h3>
-        <p class="muted">Pick a scenario to auto-fill the subject and prompt.</p>
-        <div class="scenario-grid">
-          <button type="button" data-subject="Request for flexible hours" data-body="Hello [Manager Name],\n\nI hope you are well. I am writing to ask whether I could adjust my working hours for the next two months while I attend therapy appointments. I can keep the same total hours each week by starting earlier on Tuesdays and Thursdays. Please let me know if this would be possible or if you need any further information.\n\nThank you for considering my request.\nBest regards,\n[Your Name]">Workplace adjustment</button>
-          <button type="button" data-subject="Question about housing benefit payment" data-body="Dear Housing Team,\n\nI am checking that my housing benefit payment for April has been received. The online account still shows it as pending, so I wanted to confirm whether you need any more evidence from me.\n\nPlease let me know what the next steps are.\nKind regards,\n[Your Name]">Benefits query</button>
-          <button type="button" data-subject="Clarification needed on recent gas bill" data-body="Hello Customer Support,\n\nI have a question about my latest gas bill dated 2 May. The usage seems higher than usual even though I have not changed my routine. Could you review the meter readings on your side and let me know if there might be an error?\n\nI appreciate your help.\nSincerely,\n[Your Name]">Utility bill question</button>
+        <h3 style="margin-bottom:4px">Therapist guidance</h3>
+        <p class="muted">Therapists can list key elements to include. Separate each item with a comma or new line.</p>
+        <textarea id="guidanceInput" class="guidance-input" placeholder="e.g. Mention last appointment date&#10;Ask for clarification on the new schedule"></textarea>
+        <div class="guidance-actions">
+          <button type="button" class="ghost-button" id="applyGuidance">Update list</button>
         </div>
+        <ul class="guidance-list" id="guidanceList" aria-live="polite"></ul>
+        <div class="divider" style="margin-top:16px"></div>
         <div class="history" id="history"></div>
       </aside>
     </div>
   </main>
 
   <script>
+    const fromInput = document.getElementById('fromInput');
     const bodyInput = document.getElementById('bodyInput');
     const subjectInput = document.getElementById('subjectInput');
     const toInput = document.getElementById('toInput');
     const checkButton = document.getElementById('checkButton');
     const clearButton = document.getElementById('clearButton');
+    const saveDraftButton = document.getElementById('saveDraftButton');
     const feedbackList = document.getElementById('feedbackList');
     const statusRow = document.getElementById('statusRow');
     const statusSummary = document.getElementById('statusSummary');
+    const draftStatus = document.getElementById('draftStatus');
     const checklist = {
       greeting: document.getElementById('greetingCheck'),
       purpose: document.getElementById('purposeCheck'),
@@ -364,17 +443,134 @@
       closing: document.getElementById('closingCheck')
     };
     const history = document.getElementById('history');
-    const scenarioButtons = document.querySelectorAll('.scenario-grid button');
+    const attachmentInput = document.getElementById('attachmentInput');
+    const attachmentName = document.getElementById('attachmentName');
+    const guidanceInput = document.getElementById('guidanceInput');
+    const applyGuidanceButton = document.getElementById('applyGuidance');
+    const guidanceList = document.getElementById('guidanceList');
 
-    scenarioButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        subjectInput.value = btn.dataset.subject;
-        bodyInput.value = btn.dataset.body;
-        bodyInput.focus();
+    const DRAFT_KEY = 'emailComposerCoachDraft';
+    let guidanceItems = [];
+
+    function updateDraftStatus(message, tone = 'info') {
+      draftStatus.textContent = message;
+      draftStatus.dataset.tone = tone;
+    }
+
+    function addHistoryEntry(message) {
+      const entry = document.createElement('div');
+      entry.className = 'history-entry';
+      entry.textContent = message;
+      history.prepend(entry);
+      while (history.children.length > 3) {
+        history.removeChild(history.lastChild);
+      }
+    }
+
+    function parseGuidance(text) {
+      return text
+        .split(/[\n,]/)
+        .map(part => part.trim())
+        .filter(Boolean);
+    }
+
+    function renderGuidance(items) {
+      guidanceItems = items;
+      guidanceList.innerHTML = '';
+      if (!items.length) {
+        const li = document.createElement('li');
+        li.className = 'muted';
+        li.textContent = 'No specific elements listed.';
+        guidanceList.appendChild(li);
+        return;
+      }
+
+      items.forEach(item => {
+        const li = document.createElement('li');
+        const label = document.createElement('label');
+        label.className = 'guidance-item';
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.dataset.item = item.toLowerCase();
+        checkbox.disabled = true;
+        const span = document.createElement('span');
+        span.textContent = item;
+        label.appendChild(checkbox);
+        label.appendChild(span);
+        li.appendChild(label);
+        guidanceList.appendChild(li);
       });
+    }
+
+    attachmentInput.addEventListener('change', () => {
+      const file = attachmentInput.files && attachmentInput.files[0];
+      attachmentName.textContent = file ? file.name : 'No file chosen';
     });
 
+    applyGuidanceButton.addEventListener('click', () => {
+      const items = parseGuidance(guidanceInput.value);
+      renderGuidance(items);
+      if (items.length) {
+        updateDraftStatus('Guidance updated', 'info');
+      } else {
+        updateDraftStatus('Guidance cleared', 'info');
+      }
+    });
+
+    function saveDraft() {
+      const items = parseGuidance(guidanceInput.value);
+      renderGuidance(items);
+      const draftData = {
+        from: fromInput.value,
+        to: toInput.value,
+        subject: subjectInput.value,
+        body: bodyInput.value,
+        guidance: guidanceInput.value,
+        attachmentName: attachmentName.textContent !== 'No file chosen' ? attachmentName.textContent : ''
+      };
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(draftData));
+        const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        updateDraftStatus('Draft saved', 'success');
+        addHistoryEntry(`Draft saved at ${timestamp}`);
+      } catch (error) {
+        console.error('Unable to save draft', error);
+        updateDraftStatus('Unable to save draft', 'warning');
+      }
+    }
+
+    function loadDraft() {
+      try {
+        const raw = localStorage.getItem(DRAFT_KEY);
+        if (!raw) {
+          renderGuidance([]);
+          return;
+        }
+        const data = JSON.parse(raw);
+        if (data.from !== undefined) fromInput.value = data.from;
+        if (data.to !== undefined) toInput.value = data.to;
+        if (data.subject !== undefined) subjectInput.value = data.subject;
+        if (data.body !== undefined) bodyInput.value = data.body;
+        if (data.guidance !== undefined) {
+          guidanceInput.value = data.guidance;
+          renderGuidance(parseGuidance(data.guidance));
+        } else {
+          renderGuidance([]);
+        }
+        if (data.attachmentName) {
+          attachmentName.textContent = data.attachmentName;
+        }
+        updateDraftStatus('Loaded saved draft', 'info');
+      } catch (error) {
+        console.error('Unable to load draft', error);
+        renderGuidance([]);
+      }
+    }
+
+    saveDraftButton.addEventListener('click', saveDraft);
+
     clearButton.addEventListener('click', () => {
+      fromInput.value = 'you@example.com';
       toInput.value = '';
       subjectInput.value = '';
       bodyInput.value = '';
@@ -384,6 +580,14 @@
       statusSummary.textContent = 'Ready to coach';
       statusSummary.style.background = '#eef2ff';
       statusSummary.style.color = '#4338ca';
+      attachmentInput.value = '';
+      attachmentName.textContent = 'No file chosen';
+      updateDraftStatus('Draft cleared', 'info');
+      try {
+        localStorage.removeItem(DRAFT_KEY);
+      } catch (error) {
+        console.error('Unable to clear draft', error);
+      }
     });
 
     function createFeedbackItem(message, tone = 'warning') {
@@ -426,6 +630,12 @@
       const body = bodyInput.value.trim();
       const toValue = toInput.value.trim();
       const wordCount = countWords(body);
+      const loweredSubject = subject.toLowerCase();
+      const loweredBody = body.toLowerCase();
+      const guidanceCheckboxes = Array.from(guidanceList.querySelectorAll('input[data-item]'));
+      guidanceCheckboxes.forEach(box => {
+        box.checked = false;
+      });
 
       if (!toValue) {
         feedback.push(createFeedbackItem('Add who you are writing to in the “To” field.', 'critical'));
@@ -506,6 +716,20 @@
         }
       }
 
+      if (guidanceItems.length) {
+        guidanceItems.forEach(item => {
+          const normalised = item.toLowerCase();
+          const checkbox = guidanceCheckboxes.find(box => box.dataset.item === normalised);
+          const found = loweredSubject.includes(normalised) || loweredBody.includes(normalised);
+          if (checkbox) {
+            checkbox.checked = found;
+          }
+          if (!found) {
+            feedback.push(createFeedbackItem(`Remember to include: ${item}.`, 'warning'));
+          }
+        });
+      }
+
       if (!feedback.length) {
         feedback.push(createFeedbackItem('Strong structure! Send when you are ready.', 'positive'));
       }
@@ -527,13 +751,7 @@
       statusSummary.style.color = hasIssue ? '#b91c1c' : '#047857';
 
       const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const entry = document.createElement('div');
-      entry.className = 'history-entry';
-      entry.textContent = `Checked at ${timestamp} — ${statuses.map(s => s.label).join(', ')}`;
-      history.prepend(entry);
-      while (history.children.length > 3) {
-        history.removeChild(history.lastChild);
-      }
+      addHistoryEntry(`Checked at ${timestamp} — ${statuses.map(s => s.label).join(', ')}`);
     }
 
     checkButton.addEventListener('click', analyseEmail);
@@ -544,6 +762,8 @@
         analyseEmail();
       }
     });
+
+    loadDraft();
   </script>
 </body>
 </html>
