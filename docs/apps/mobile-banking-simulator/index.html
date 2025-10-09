@@ -143,38 +143,48 @@
 
     .view-toggle {
       display: inline-flex;
+      align-items: center;
+      gap: 4px;
       background: var(--surface-soft);
       border-radius: 999px;
-      border: 1px solid color-mix(in oklab, var(--accent) 25%, white 60%);
+      border: 1px solid color-mix(in oklab, var(--accent) 28%, white 55%);
       padding: 4px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
     }
 
     .view-toggle button {
       border: none;
       background: transparent;
       color: var(--muted);
-      padding: 6px 14px;
+      padding: 6px 16px;
       border-radius: 999px;
       font-weight: 600;
       cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .view-toggle button:focus-visible {
+      outline: 2px solid color-mix(in oklab, var(--accent) 55%, white 35%);
+      outline-offset: 2px;
     }
 
     .view-toggle button.active {
-      background: var(--surface);
+      background: white;
       color: var(--accent-strong);
-      box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 40%, transparent);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.22);
     }
 
     .layout {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
       gap: clamp(12px, 2vw, 24px);
+      align-items: flex-start;
     }
 
     @media (min-width: 960px) {
       .layout {
-        grid-template-columns: minmax(0, 1fr) minmax(260px, 0.95fr);
-        align-items: flex-start;
+        grid-template-columns: minmax(0, 1.2fr) minmax(260px, 1fr);
       }
     }
 
@@ -190,6 +200,7 @@
       flex-direction: column;
       align-items: stretch;
       height: clamp(540px, 88vh, 820px);
+      max-width: 100%;
     }
 
     .device-shell::after {
@@ -202,13 +213,19 @@
     }
 
     .device-shell.phone {
-      width: clamp(280px, 70vw, 380px);
+      width: min(100%, clamp(300px, 72vw, 380px));
       height: clamp(560px, 88vh, 760px);
     }
 
     .device-shell.tablet {
-      width: clamp(520px, 88vw, 880px);
+      width: min(100%, clamp(540px, 88vw, 820px));
       height: clamp(520px, 88vh, 680px);
+    }
+
+    @media (max-width: 1200px) {
+      .device-shell.tablet {
+        width: min(100%, clamp(540px, 80vw, 760px));
+      }
     }
 
     .device-notch {
@@ -297,14 +314,15 @@
       gap: 6px;
       background: rgba(37, 99, 235, 0.08);
       padding: 6px;
-      border-radius: 16px;
+      border-radius: 18px;
+      box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.18);
     }
 
     .tab-nav button {
       border: none;
       background: transparent;
       padding: 10px;
-      border-radius: 12px;
+      border-radius: 14px;
       font-weight: 600;
       color: #1e3a8a;
       display: flex;
@@ -313,13 +331,19 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: background 0.2s ease, color 0.2s ease;
+      transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    }
+
+    .tab-nav button:focus-visible {
+      outline: 2px solid rgba(37, 99, 235, 0.6);
+      outline-offset: 2px;
     }
 
     .tab-nav button.active {
       background: white;
       color: #0f172a;
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.14);
+      transform: translateY(-1px);
     }
 
     .tab-nav button span {
@@ -586,6 +610,60 @@
       font-size: 0.85rem;
       color: inherit;
       margin-top: 4px;
+    }
+
+    #sessionNotes {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    #sessionTimeline {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 8px;
+    }
+
+    #sessionTimeline li {
+      background: #f8fafc;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      border-radius: 10px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    #sessionTimeline li time {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #1e3a8a;
+      letter-spacing: 0.02em;
+    }
+
+    #sessionTimeline li span {
+      font-size: 0.92rem;
+      color: #0f172a;
+    }
+
+    #sessionTimeline li.empty {
+      border-style: dashed;
+      color: var(--muted);
+      background: transparent;
+      align-items: center;
+    }
+
+    #sessionNotes h2 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .tracker-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     .export-actions {
@@ -873,10 +951,13 @@
         <div class="prompt-area" id="promptArea" role="status" aria-live="assertive">
           Ready when you are. Choose a task to begin.
         </div>
-        <section id="sessionNotes" class="card" style="display:flex;flex-direction:column;gap:10px;">
-          <h2 style="margin:0;font-size:1.1rem;">Session tracker</h2>
-          <ul id="sessionTimeline" style="margin:0;padding-left:18px;display:grid;gap:6px;font-size:0.95rem;"></ul>
-          <button class="button" type="button" id="clearTimelineBtn">Clear tracker</button>
+        <section id="sessionNotes" class="card">
+          <h2>Session tracker</h2>
+          <ul id="sessionTimeline" aria-live="polite"></ul>
+          <div class="tracker-actions">
+            <button class="button" type="button" id="exportSessionCsvBtn">⬇️ Download session CSV</button>
+            <button class="button secondary" type="button" id="clearTimelineBtn">Clear tracker</button>
+          </div>
         </section>
       </aside>
     </div>
@@ -1012,15 +1093,36 @@
       return new Intl.NumberFormat('en-GB', { style: 'currency', currency }).format(value);
     }
 
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      })[char]);
+    }
+
     function recordTimeline(event) {
-      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      state.timeline.unshift(`${time} · ${event}`);
+      const now = new Date();
+      state.timeline.unshift({
+        timestamp: now.toISOString(),
+        event,
+      });
       if (state.timeline.length > 12) state.timeline.length = 12;
       renderTimeline();
     }
 
     function renderTimeline() {
-      sessionTimeline.innerHTML = state.timeline.map(item => `<li>${item}</li>`).join('') || '<li>No actions yet.</li>';
+      if (!sessionTimeline) return;
+      if (!state.timeline.length) {
+        sessionTimeline.innerHTML = '<li class="empty">No actions yet.</li>';
+        return;
+      }
+      sessionTimeline.innerHTML = state.timeline.map(entry => {
+        const label = new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return `<li><time datetime="${entry.timestamp}">${label}</time><span>${escapeHtml(entry.event)}</span></li>`;
+      }).join('');
     }
 
     function updateTaskProgress() {
@@ -1531,6 +1633,47 @@
       event.target.reset();
     }
 
+    function exportSessionCsv() {
+      const now = new Date();
+      const rows = [
+        ['Export generated', now.toLocaleString()],
+        [],
+        ['Timeline'],
+        ['Time', 'Event'],
+      ];
+
+      if (state.timeline.length) {
+        [...state.timeline].reverse().forEach(entry => {
+          const label = new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          rows.push([label, entry.event]);
+        });
+      } else {
+        rows.push(['-', 'No actions recorded']);
+      }
+
+      rows.push([]);
+      rows.push(['Practice tasks']);
+      rows.push(['Task', 'Status']);
+      state.practiceTasks.forEach(task => {
+        rows.push([task.title, task.completed ? 'Completed' : 'In progress']);
+      });
+
+      const csv = rows
+        .map(row => row.map(value => `"${String(value ?? '').replace(/"/g, '""')}"`).join(','))
+        .join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `brightwave-session-${now.toISOString().slice(0, 10)}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      showPrompt('Session CSV downloaded.', 'success', 'Share the log or keep it for your records.');
+      recordTimeline('Exported session progress CSV');
+    }
+
     function exportCsv() {
       const account = state.accounts.find(acc => acc.id === state.selectedAccount);
       if (!account) {
@@ -1660,6 +1803,8 @@
       renderTimeline();
       showPrompt('Session tracker cleared.', 'info', 'Continue practising and new actions will appear here.');
     });
+
+    document.getElementById('exportSessionCsvBtn').addEventListener('click', exportSessionCsv);
 
     accountFilter.addEventListener('change', (event) => {
       state.selectedAccount = event.target.value;
