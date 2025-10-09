@@ -6,17 +6,18 @@
 <title>Cognitive Rehabilitation Micro-Apps</title>
 <style>
   :root{
-    --bg:#f9fafb; --surface:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
-    --accent:#ff7a6e; --pill:#f2f4f7; --radius:16px;
-    --shadow:0 2px 6px rgba(0,0,0,.08); --shadow-hover:0 10px 24px rgba(0,0,0,.12);
+    --bg:#f9fafb; --surface:#fff; --surface-alt:#f8f9fc; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+    --accent:#ff7a6e; --accent-dark:#f05245; --pill:#f2f4f7; --radius:16px;
+    --shadow:0 2px 6px rgba(0,0,0,.08); --shadow-hover:0 22px 44px rgba(15,23,42,.18);
     --header-h:84px; --maxw:1200px;
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
   body{
-    font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
+    font-family:"Inter", system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
     color:var(--text); background:var(--bg); position:relative;
     display:flex; flex-direction:column; min-height:100vh;
+    letter-spacing:-0.01em;
   }
 
   /* Particle canvas behind everything */
@@ -25,21 +26,52 @@
   /* Header */
   header{
     position:sticky; top:0; z-index:10;
-    background:rgba(255,255,255,0.85); backdrop-filter:blur(6px);
-    box-shadow:0 1px 3px rgba(0,0,0,.05)
+    background:linear-gradient(135deg, rgba(255,255,255,0.92) 10%, rgba(255,245,243,0.9) 90%);
+    box-shadow:0 2px 14px rgba(15,23,42,.06);
+    border-bottom:1px solid rgba(255,255,255,0.6);
   }
-  .header-inner{max-width:var(--maxw);margin:0 auto;padding:1.25rem 1rem;text-align:center}
-  h1{margin:0;font-size:2.4rem;font-weight:800}
-  .subtitle{margin:0;color:var(--muted);font-size:1.05rem;line-height:1.5}
+  .header-inner{max-width:var(--maxw);margin:0 auto;padding:1.4rem 1.25rem 2.8rem;display:flex;flex-direction:column;gap:1.75rem}
+  .topbar{display:flex;align-items:center;gap:1rem;font-size:0.95rem;color:var(--muted)}
+  .brand{display:flex;align-items:center;gap:.75rem;font-weight:700;color:var(--text);letter-spacing:-0.02em;font-size:1rem}
+  .brand .badge{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;background:linear-gradient(150deg,var(--accent)0%,var(--accent-dark)90%);color:#fff;font-size:1.35rem;box-shadow:0 12px 24px rgba(240,82,69,.35)}
+  .top-links{display:flex;align-items:center;gap:.75rem;margin-left:auto}
+  .top-links a{color:inherit;text-decoration:none;padding:.35rem .6rem;border-radius:999px;border:1px solid transparent;transition:.2s}
+  .top-links a:hover{border-color:rgba(15,23,42,.08);color:var(--text);background:rgba(255,255,255,0.7)}
+  .cta-pill{background:var(--text);color:#fff !important;font-weight:600}
+
+  .hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2.4rem;align-items:center}
+  .hero-copy{display:flex;flex-direction:column;gap:1.2rem}
+  .hero-eyebrow{font-size:.9rem;font-weight:600;text-transform:uppercase;letter-spacing:.18em;color:var(--accent-dark)}
+  .hero h1{margin:0;font-size:clamp(2.4rem, 3vw + 1.8rem, 3.3rem);font-weight:800;line-height:1.05;color:#101828}
+  .hero p{margin:0;font-size:1.05rem;line-height:1.6;color:color-mix(in oklab,var(--text),white 25%)}
+  .hero-actions{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:.5rem}
+  .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.3rem;border-radius:999px;font-weight:600;text-decoration:none;border:1px solid transparent;transition:.2s;font-size:.95rem;cursor:pointer}
+  .btn.primary{background:linear-gradient(140deg,var(--accent)0%,var(--accent-dark)92%);color:#fff;box-shadow:0 20px 30px rgba(240,82,69,.25)}
+  .btn.primary:hover{transform:translateY(-1px);box-shadow:0 24px 40px rgba(240,82,69,.28)}
+  .btn.secondary{background:rgba(255,255,255,0.75);border-color:rgba(15,23,42,.08);color:var(--text)}
+  .btn.secondary:hover{background:#fff;border-color:rgba(15,23,42,.15)}
+  .hero-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.85rem;margin-top:.25rem}
+  .hero-stats .stat{padding:.85rem 1rem;border-radius:var(--radius);background:rgba(255,255,255,0.78);border:1px solid rgba(15,23,42,.05);box-shadow:0 8px 20px rgba(15,23,42,.08)}
+  .hero-stats dt{margin:0;font-weight:700;font-size:1.6rem;color:#0f172a}
+  .hero-stats dd{margin:.15rem 0 0;font-size:.85rem;color:var(--muted)}
+  .hero-visual{position:relative}
+  .hero-visual::before{content:"";position:absolute;inset:8% -12% -12%;background:radial-gradient(circle at top,var(--accent)0%,transparent 55%);opacity:.35;filter:blur(40px);z-index:0}
+  .hero-card{position:relative;background:rgba(255,255,255,0.85);border-radius:calc(var(--radius) + 8px);border:1px solid rgba(255,255,255,0.65);box-shadow:0 24px 48px rgba(15,23,42,.12);overflow:hidden;display:flex;flex-direction:column;gap:1rem;padding:1.4rem;z-index:1;backdrop-filter:blur(16px)}
+  .hero-card img{width:100%;border-radius:12px;object-fit:cover;box-shadow:0 20px 35px rgba(15,23,42,.15)}
+  .hero-card p{margin:0;font-size:.95rem;color:var(--muted)}
+  @media(max-width:720px){
+    .topbar{flex-direction:column;align-items:flex-start;gap:.5rem}
+    .top-links{width:100%;justify-content:flex-start;flex-wrap:wrap}
+    .hero{gap:2rem}
+  }
 
   /* Layout */
   main{ flex:1; max-width:var(--maxw); margin:1.5rem auto 3rem; padding:0 1rem; }
 
   /* Disclaimer card */
-/* Disclaimer card — refreshed */
-.disclaimer{
-  --disc-accent: var(--accent);
-  background: var(--surface);
+  .disclaimer{
+    --disc-accent: var(--accent);
+    background: var(--surface);
   border: 1px solid var(--line);
   border-radius: calc(var(--radius) - 2px);
   padding: 0.85rem 1rem 1rem;
@@ -100,10 +132,14 @@
     border:1px solid var(--line);
     border-radius:var(--radius);
     box-shadow:var(--shadow);
-    padding:1rem;
-    margin:0 0 1rem 0;
+    padding:1.25rem 1.4rem;
+    margin:0 0 1.2rem 0;
+    position:relative;
+    overflow:hidden;
   }
-  .picks h2{ margin:0 0 .5rem 0; font-size:1.15rem; }
+  .picks::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(135deg,rgba(255,122,110,.12),transparent 55%)}
+  .picks h2{ margin:0 0 .7rem 0; font-size:1.2rem; display:flex; align-items:center; gap:.5rem; }
+  .picks h2::before{content:"⭐";font-size:1.1rem}
   .picks .picks-row{
     display:grid; gap:1rem;
   }
@@ -112,16 +148,35 @@
 
   /* Filter bar */
   .filterbar{
-    display:flex; flex-wrap:wrap; gap:.5rem;
+    display:flex; flex-wrap:wrap; gap:.55rem;
     align-items:center;
     background:var(--surface);
     border:1px solid var(--line);
     border-radius:var(--radius);
     box-shadow:var(--shadow);
-    padding:.6rem .75rem;
-    margin:0 0 1rem 0;
+    padding:.75rem .9rem;
+    margin:0 0 1.2rem 0;
   }
   .filterbar .label{ font-weight:600; color:#0f172a; margin-right:.25rem; }
+  .search-input{
+    flex:1 1 220px;
+    position:relative;
+  }
+  .search-input input{
+    width:100%;
+    padding:.55rem 2.3rem .55rem 2.1rem;
+    border-radius:999px;
+    border:1px solid rgba(15,23,42,.08);
+    background:var(--pill);
+    font-size:.95rem;
+  }
+  .search-input svg{
+    position:absolute;
+    left:0.85rem;
+    top:50%;
+    transform:translateY(-50%);
+    width:1rem; height:1rem; color:var(--muted);
+  }
   .chip{
     display:inline-flex; align-items:center; gap:.35rem;
     padding:.35rem .65rem; border-radius:9999px; border:1px solid var(--line);
@@ -143,19 +198,22 @@
   .card{
     display:flex; flex-direction:column; justify-content:space-between;
     text-decoration:none; color:inherit;
-    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
-    padding:1rem; box-shadow:var(--shadow); transition:.2s;
+    background:var(--surface); border-radius:calc(var(--radius) + 4px);
+    padding:1.15rem; box-shadow:var(--shadow); transition:.25s ease;
+    border:1px solid rgba(15,23,42,.06);
+    position:relative; overflow:hidden;
     aspect-ratio: 3 / 2;
-    min-height: 180px;
+    min-height: 190px;
   }
-  .card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-hover) }
+  .card:hover{ transform:translateY(-6px); box-shadow:var(--shadow-hover); border-color:color-mix(in oklab, var(--accent), white 60%); }
 
-  .title{ font-weight:700; font-size:1.25rem; margin-bottom:.4rem;
+  .title{ font-weight:700; font-size:1.25rem; margin-bottom:.5rem;
           display:flex; align-items:center; gap:.5rem; }
   .emoji{ font-size:1.6rem; line-height:1 }
-  .desc{ color:var(--muted); font-size:1rem; line-height:1.4; margin-bottom:.7rem;
+  .desc{ color:var(--muted); font-size:1rem; line-height:1.5; margin-bottom:.8rem;
          overflow:hidden; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; }
   .tag{ background:var(--pill); padding:.3rem .7rem; border-radius:9999px; font-size:.85rem; white-space:nowrap; }
+  .tags{display:flex;flex-wrap:wrap;gap:.4rem}
 
   /* Footer */
   .site-footer{
@@ -176,8 +234,50 @@
 
 <header>
   <div class="header-inner">
-    <h1>Cognitive Rehabilitation Micro-Apps</h1>
-    <p class="subtitle">Interactive, lightweight tools to support assessment, practice, and research in cognitive rehabilitation.</p>
+    <div class="topbar">
+      <span class="brand"><span class="badge">µ</span> Cognitive Rehab Lab</span>
+      <nav class="top-links" aria-label="Primary">
+        <a href="#picks">Featured</a>
+        <a href="#grid">Browse library</a>
+        <a href="https://github.com/marcomion/micro-apps" target="_blank" rel="noopener">GitHub</a>
+        <a class="cta-pill" href="mailto:m.mion@nhs.net">Partner with us</a>
+      </nav>
+    </div>
+
+    <div class="hero">
+      <div class="hero-copy">
+        <span class="hero-eyebrow">Cognitive rehabilitation micro-experiences</span>
+        <h1>Beautifully crafted clinical tools you can try in minutes.</h1>
+        <p>
+          Explore an evolving lab of lightweight, evidence-aligned applications that support assessment,
+          therapy practice, and research collaboration for clinicians and scientists.
+        </p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#grid">Browse the collection</a>
+          <a class="btn secondary" href="mailto:m.mion@nhs.net">Discuss a project</a>
+        </div>
+        <dl class="hero-stats" aria-live="polite">
+          <div class="stat">
+            <dt id="statApps">0</dt>
+            <dd>Micro-apps available</dd>
+          </div>
+          <div class="stat">
+            <dt id="statTags">0</dt>
+            <dd>Clinical focus areas</dd>
+          </div>
+          <div class="stat">
+            <dt id="statFeatured">0</dt>
+            <dd>Curated editor’s picks</dd>
+          </div>
+        </dl>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-card">
+          <img src="assets/Micro_Apps_Banner.png" alt="Preview of micro-app interface" loading="lazy" />
+          <p>Designed for high-trust clinical environments with delightful UX fundamentals.</p>
+        </div>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -218,6 +318,10 @@
   <!-- Filters -->
   <div class="filterbar" role="region" aria-label="Filter apps by tags">
     <span class="label">Filter:</span>
+    <div class="search-input">
+      <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.71.71l.27.28v.79l5 4.99L20.49 19zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z"/></svg>
+      <input type="search" id="searchInput" placeholder="Search by name or description" aria-label="Search apps" />
+    </div>
     <button class="chip" id="allChip" data-active="true" type="button">All</button>
     <!-- dynamic tag chips will be inserted here -->
     <button class="chip clear" id="clearChip" type="button" title="Clear selection">Clear</button>
@@ -264,6 +368,13 @@
   const countLabel = document.getElementById('countLabel');
   const allChip = document.getElementById('allChip');
   const clearChip = document.getElementById('clearChip');
+  const searchInput = document.getElementById('searchInput');
+  const statApps = document.getElementById('statApps');
+  const statTags = document.getElementById('statTags');
+  const statFeatured = document.getElementById('statFeatured');
+
+  const getSearchTerm = () => searchInput ? (searchInput.value || '') : '';
+  const setStat = (el, value) => { if (el) el.textContent = value; };
 
   function getBasePath(){
     const parts = (location.pathname || "/").split("/").filter(Boolean);
@@ -370,11 +481,15 @@
   function getSelectedTags(){
     return Array.from(document.querySelectorAll('.chip[data-tag][data-active="true"]')).map(el => el.dataset.tag);
   }
-  function filterApps(apps, selected){
-    if (!selected.length) return apps;
+  function filterApps(apps, selected, term){
+    const normalized = term.trim().toLowerCase();
     return apps.filter(app => {
       const tags = app.tags || [];
-      return selected.some(t => tags.includes(t));
+      const matchesTags = !selected.length || selected.some(t => tags.includes(t));
+      if (!matchesTags) return false;
+      if (!normalized) return true;
+      const haystack = `${app.title || ''} ${app.description || ''} ${app.slug || ''}`.toLowerCase();
+      return haystack.includes(normalized);
     });
   }
 
@@ -385,24 +500,30 @@
 
     // Picks
     const picks = catalog.filter(a => a.featured === true);
-    const pickSlugs = new Set(picks.map(a => a.slug));
     if (picks.length === 0 && EDITORS_PICKS_FALLBACK.length){
       catalog.forEach(a => { if (EDITORS_PICKS_FALLBACK.includes(a.slug)) picks.push(a); });
     }
     if (picks.length){
       renderCards(picksRow, picks.slice(0, 6)); // show up to 6
       picksSection.hidden = false;
+      setStat(statFeatured, picks.length);
+    } else {
+      setStat(statFeatured, '0');
     }
 
     // Build filter chips & initial grid
     buildTagChips(catalog);
     renderCards(grid, catalog);
     updateCount(catalog.length);
+    setStat(statApps, catalog.length);
+    const uniqueTags = new Set();
+    catalog.forEach(app => (app.tags || []).forEach(tag => uniqueTags.add(tag)));
+    setStat(statTags, uniqueTags.size);
 
     // Filter interactions
     function refresh(){
       const selected = getSelectedTags();
-      const filtered = filterApps(catalog, selected);
+      const filtered = filterApps(catalog, selected, getSearchTerm());
       renderCards(grid, filtered);
       updateCount(filtered.length);
       allChip.dataset.active = selected.length ? 'false' : 'true';
@@ -430,6 +551,12 @@
         refresh();
       }
     });
+
+    if (searchInput){
+      searchInput.addEventListener('input', () => {
+        refresh();
+      });
+    }
   })().catch(err => {
     console.error(err);
     grid.innerHTML = `<p class="desc">Could not load <code>catalog.json</code>.</p>`;
