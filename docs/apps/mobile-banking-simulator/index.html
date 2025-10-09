@@ -52,6 +52,95 @@
       box-shadow: var(--shadow);
     }
 
+    .task-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .task-card h2 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .task-card .task-progress {
+      font-weight: 600;
+      color: var(--accent-strong);
+    }
+
+    .task-card .button {
+      align-self: flex-start;
+    }
+
+    .task-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .task-list li {
+      margin: 0;
+    }
+
+    .task-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: white;
+      box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.08);
+      transition: border 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+    }
+
+    .task-item input[type="checkbox"] {
+      margin-top: 4px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent-strong);
+      cursor: pointer;
+    }
+
+    .task-item input[type="checkbox"]:focus-visible {
+      outline: 2px solid var(--accent-strong);
+      outline-offset: 2px;
+    }
+
+    .task-item span {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .task-item span strong {
+      font-size: 0.95rem;
+    }
+
+    .task-item span small {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .task-list li.complete .task-item {
+      border-color: color-mix(in oklab, var(--good) 50%, white 40%);
+      background: color-mix(in oklab, var(--good) 12%, white 90%);
+      box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--good) 22%, white 80%);
+    }
+
+    .task-list li.complete .task-item span strong {
+      color: var(--good);
+    }
+
     .view-toggle {
       display: inline-flex;
       background: var(--surface-soft);
@@ -527,6 +616,14 @@
       letter-spacing: 4px;
     }
 
+    .limit-summary {
+      background: #f1f5f9;
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 0.85rem;
+      color: #0f172a;
+    }
+
     #clinician-notes {
       background: var(--surface);
       border: 1px solid var(--line);
@@ -725,6 +822,17 @@
                   <button type="button" class="button" id="unlockCardBtn" disabled>🔓 Unlock card</button>
                 </div>
 
+                <form class="form-card" id="limitForm">
+                  <h3>Set spending limits</h3>
+                  <p class="helper" style="margin:0;">Adjust how much can be spent on the card before a manual review is needed.</p>
+                  <div class="limit-summary" id="limitSummary" aria-live="polite"></div>
+                  <label for="limitDaily">Daily card limit</label>
+                  <input id="limitDaily" type="number" min="100" max="5000" step="50" required />
+                  <label for="limitContactless">Contactless tap limit</label>
+                  <input id="limitContactless" type="number" min="10" max="500" step="5" required />
+                  <button type="submit" class="button primary">Update limits</button>
+                </form>
+
                 <form class="form-card" id="pinForm">
                   <h3>Change your PIN</h3>
                   <label for="pinNew">New PIN</label>
@@ -755,6 +863,13 @@
       </section>
 
       <aside aria-label="Prompts and notes" style="display:flex;flex-direction:column;gap:12px;">
+        <section class="task-card" aria-label="Practice task checklist">
+          <h2>Today's practice</h2>
+          <p class="helper" style="margin:0;">Work through each activity inside the simulator. Items tick themselves when you complete the matching action.</p>
+          <div class="task-progress" id="taskProgress" aria-live="polite">0 of 6 tasks completed</div>
+          <ul class="task-list" id="practiceTasksList"></ul>
+          <button type="button" class="button secondary" id="resetTasksBtn">Reset checklist</button>
+        </section>
         <div class="prompt-area" id="promptArea" role="status" aria-live="assertive">
           Ready when you are. Choose a task to begin.
         </div>
@@ -836,6 +951,48 @@
       ],
       cardLocked: false,
       pinLastChanged: '2024-05-11',
+      spendingLimits: {
+        daily: 1500,
+        contactless: 100
+      },
+      practiceTasks: [
+        {
+          id: 'check-balances',
+          title: 'Check balances',
+          helper: 'Refresh the Accounts tab to confirm your current, savings, and linked totals.',
+          completed: false
+        },
+        {
+          id: 'recurring-payment',
+          title: 'Set up a recurring payment',
+          helper: 'Use bill payments or mandates to schedule an automatic outgoing payment.',
+          completed: false
+        },
+        {
+          id: 'send-external',
+          title: 'Send money to other people or accounts',
+          helper: 'Complete the send money form with a recipient and delivery method.',
+          completed: false
+        },
+        {
+          id: 'transfer-own',
+          title: 'Transfer money between your own accounts',
+          helper: 'Move funds internally using the transfer form.',
+          completed: false
+        },
+        {
+          id: 'change-pin',
+          title: 'Change your PIN',
+          helper: 'Submit matching four-digit PIN entries in the security tab.',
+          completed: false
+        },
+        {
+          id: 'set-limits',
+          title: 'Set spending limits',
+          helper: 'Adjust the daily and contactless card limits in the security tools.',
+          completed: false
+        }
+      ],
       timeline: []
     };
 
@@ -847,6 +1004,9 @@
     const directDebitItems = document.getElementById('directDebitItems');
     const standingOrderItems = document.getElementById('standingOrderItems');
     const sessionTimeline = document.getElementById('sessionTimeline');
+    const practiceTasksList = document.getElementById('practiceTasksList');
+    const taskProgress = document.getElementById('taskProgress');
+    const limitSummary = document.getElementById('limitSummary');
 
     function formatCurrency(value, currency = 'GBP') {
       return new Intl.NumberFormat('en-GB', { style: 'currency', currency }).format(value);
@@ -861,6 +1021,117 @@
 
     function renderTimeline() {
       sessionTimeline.innerHTML = state.timeline.map(item => `<li>${item}</li>`).join('') || '<li>No actions yet.</li>';
+    }
+
+    function updateTaskProgress() {
+      if (!taskProgress) return;
+      const total = state.practiceTasks.length;
+      const completed = state.practiceTasks.filter(task => task.completed).length;
+      taskProgress.textContent = `${completed} of ${total} tasks completed`;
+    }
+
+    function renderTasks() {
+      if (!practiceTasksList) return;
+      practiceTasksList.innerHTML = state.practiceTasks.map(task => `
+        <li class="${task.completed ? 'complete' : ''}">
+          <label class="task-item">
+            <input type="checkbox" data-task="${task.id}" ${task.completed ? 'checked' : ''} />
+            <span>
+              <strong>${task.title}</strong>
+              <small>${task.helper}</small>
+            </span>
+          </label>
+        </li>
+      `).join('');
+      updateTaskProgress();
+    }
+
+    function completeTask(id) {
+      const task = state.practiceTasks.find(item => item.id === id);
+      if (!task || task.completed) return;
+      task.completed = true;
+      const checkbox = practiceTasksList?.querySelector(`input[data-task="${id}"]`);
+      if (checkbox) {
+        checkbox.checked = true;
+        checkbox.closest('li')?.classList.add('complete');
+      }
+      updateTaskProgress();
+      recordTimeline(`Checklist: completed task — ${task.title}`);
+    }
+
+    function resetPracticeTasks(manual = false) {
+      state.practiceTasks.forEach(task => {
+        task.completed = false;
+      });
+      if (practiceTasksList) {
+        practiceTasksList.querySelectorAll('input[type="checkbox"]').forEach(input => {
+          input.checked = false;
+          input.closest('li')?.classList.remove('complete');
+        });
+      }
+      updateTaskProgress();
+      if (manual) {
+        showPrompt('Task checklist reset.', 'info', 'Work back through each activity inside the simulator.');
+        recordTimeline('Checklist reset for another run-through');
+      }
+    }
+
+    function renderLimitSummary() {
+      if (!limitSummary) return;
+      const { daily, contactless } = state.spendingLimits;
+      limitSummary.textContent = `Daily limit ${formatCurrency(daily)} · Contactless ${formatCurrency(contactless)}`;
+    }
+
+    function initLimitForm() {
+      const dailyInput = document.getElementById('limitDaily');
+      const contactlessInput = document.getElementById('limitContactless');
+      if (dailyInput) dailyInput.value = state.spendingLimits.daily;
+      if (contactlessInput) contactlessInput.value = state.spendingLimits.contactless;
+      renderLimitSummary();
+    }
+
+    function handleLimitUpdate(event) {
+      event.preventDefault();
+      const dailyInput = document.getElementById('limitDaily');
+      const contactlessInput = document.getElementById('limitContactless');
+      const daily = parseFloat(dailyInput.value);
+      const contactless = parseFloat(contactlessInput.value);
+
+      if (!Number.isFinite(daily) || daily < 100 || daily > 5000) {
+        showPrompt('Set a daily limit between £100 and £5,000.', 'error', 'Adjust the daily amount, then press “Update limits”.');
+        dailyInput.focus();
+        return;
+      }
+      if (!Number.isFinite(contactless) || contactless < 10 || contactless > 500) {
+        showPrompt('Contactless limit must be between £10 and £500.', 'error', 'Amend the contactless amount before saving.');
+        contactlessInput.focus();
+        return;
+      }
+      if (contactless > daily) {
+        showPrompt('Contactless limit cannot be higher than the daily limit.', 'error', 'Lower the contactless limit or raise the daily cap first.');
+        contactlessInput.focus();
+        return;
+      }
+
+      state.spendingLimits.daily = Math.round(daily);
+      state.spendingLimits.contactless = Math.round(contactless);
+      renderLimitSummary();
+      dailyInput.value = state.spendingLimits.daily;
+      contactlessInput.value = state.spendingLimits.contactless;
+      showPrompt('Spending limits updated.', 'success', 'Changes apply straight away to in-store and contactless transactions.');
+      recordTimeline(`Updated spending limits to ${formatCurrency(state.spendingLimits.daily)} daily / ${formatCurrency(state.spendingLimits.contactless)} contactless`);
+      completeTask('set-limits');
+    }
+
+    function handleTaskToggle(event) {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement) || target.type !== 'checkbox') return;
+      const task = state.practiceTasks.find(item => item.id === target.dataset.task);
+      if (!task) return;
+      task.completed = target.checked;
+      target.closest('li')?.classList.toggle('complete', task.completed);
+      updateTaskProgress();
+      recordTimeline(`Checklist: ${task.completed ? 'completed' : 'reopened'} task — ${task.title}`);
     }
 
     function showPrompt(message, type = 'info', nextStep = '') {
@@ -1022,6 +1293,7 @@
       document.getElementById('syncTime').textContent = 'just now';
       showPrompt('Balances refreshed. Everything is up to date.', 'success', 'Continue with your next task.');
       recordTimeline('Manual refresh of balances');
+      completeTask('check-balances');
     }
 
     function updateBalances(accountId, delta) {
@@ -1081,6 +1353,7 @@
 
       showPrompt('Transfer complete.', 'success', 'Review the transaction history to confirm both entries.');
       recordTimeline(`Transferred ${formatCurrency(amount)} from ${source.name} to ${state.accounts.find(a => a.id === to)?.name}`);
+      completeTask('transfer-own');
       event.target.reset();
       document.getElementById('transferFrom').value = from;
       buildAccountSelect(document.getElementById('transferTo'), from);
@@ -1117,6 +1390,7 @@
         };
         targetList.push(newItem);
         renderMandates();
+        completeTask('recurring-payment');
       }
 
       showPrompt('Bill payment submitted.', 'success', frequency === 'once' ? 'Check the transactions list to see it marked as paid.' : 'Review the mandates panel to confirm the new recurring payment.');
@@ -1165,6 +1439,7 @@
           : 'Share the confirmation with the recipient if needed.';
       showPrompt('Payment sent.', 'success', nextStepMessage);
       recordTimeline(`Sent ${formatCurrency(amount)} to ${recipient} via ${labels[method]}`);
+      completeTask('send-external');
       event.target.reset();
     }
 
@@ -1185,6 +1460,7 @@
       renderMandates();
       showPrompt(`${type === 'directDebit' ? 'Direct debit' : 'Standing order'} created.`, 'success', 'You can manage it from the list to pause or cancel later.');
       recordTimeline(`Added ${type === 'directDebit' ? 'direct debit' : 'standing order'}: ${name}`);
+      completeTask('recurring-payment');
       event.target.reset();
     }
 
@@ -1239,6 +1515,7 @@
       state.pinLastChanged = new Date().toISOString().slice(0, 10);
       showPrompt('PIN updated securely.', 'success', 'Remember to memorise it and destroy any written notes.');
       recordTimeline('Changed debit card PIN');
+      completeTask('change-pin');
       event.target.reset();
     }
 
@@ -1398,10 +1675,15 @@
     document.getElementById('newDebitForm').addEventListener('submit', handleNewDebit);
     document.getElementById('lockCardBtn').addEventListener('click', () => handleCardLock(true));
     document.getElementById('unlockCardBtn').addEventListener('click', () => handleCardLock(false));
+    document.getElementById('limitForm').addEventListener('submit', handleLimitUpdate);
     document.getElementById('pinForm').addEventListener('submit', handlePinChange);
     document.getElementById('cardRequestForm').addEventListener('submit', handleCardRequest);
     document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
     document.getElementById('exportPdfBtn').addEventListener('click', exportPdf);
+    document.getElementById('resetTasksBtn').addEventListener('click', () => resetPracticeTasks(true));
+    if (practiceTasksList) {
+      practiceTasksList.addEventListener('change', handleTaskToggle);
+    }
 
     function initForms() {
       const fromSelect = document.getElementById('transferFrom');
@@ -1423,6 +1705,8 @@
       renderMandates();
       renderTimeline();
       initForms();
+      initLimitForm();
+      renderTasks();
       initTime();
     }
 
