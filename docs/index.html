@@ -454,17 +454,21 @@
     `;
   }
 
-  // Click-through routing
-  function wireCardClicks(container){
-    container.addEventListener('click', async (e) => {
-      const a = e.target.closest('a.card'); if (!a) return;
-      e.preventDefault();
-      const slug = a.getAttribute('data-slug');
-      const url = await resolveAppUrl(slug);
-      location.href = url;
-    });
-  }
-  wireCardClicks(grid); wireCardClicks(picksRow);
+// Click-through routing
+function wireCardClicks(container){
+  if (!container) return; // <-- guard against null
+  container.addEventListener('click', async (e) => {
+    const a = e.target.closest('a.card'); 
+    if (!a) return;
+    e.preventDefault();
+    const slug = a.getAttribute('data-slug');
+    const url = await resolveAppUrl(slug);
+    location.href = url;
+  });
+}
+
+wireCardClicks(grid);
+wireCardClicks(picksRow);
 
   // Build tag chips (unique, sorted)
   function buildTagChips(allApps){
