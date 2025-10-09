@@ -149,6 +149,13 @@
     "tags": ["executive"]
   },
   {
+    "slug": "fluency-coach",
+    "title": "Fluency Coach",
+    "description": "Strategy-led verbal fluency with voice capture and grouping support.",
+    "emoji": "🗣️",
+    "tags": ["language", "executive"]
+  },
+  {
     "slug": "visual-neglect-trainer",
     "title": "Left-Anchor Reader",
     "description": "Practice reading while using visual anchors.",
