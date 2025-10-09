@@ -35,6 +35,13 @@
     "tags": ["social", "language"]
   },
   {
+    "slug": "email-composer-coach",
+    "title": "Email Composer Coach",
+    "description": "Draft everyday emails and receive structured coaching on clarity and tone.",
+    "emoji": "✉️",
+    "tags": ["language", "functional"]
+  },
+  {
     "slug": "errands-visual-memory",
     "title": "Errands — Visual Memory",
     "description": "Remember locations/objects while completing errands.",
@@ -54,6 +61,13 @@
     "description": "Spatial planning and working memory in grid-based mazes.",
     "emoji": "🧭",
     "tags": ["visuospatial", "executive", "memory"]
+  },
+  {
+    "slug": "mobile-banking-simulator",
+    "title": "Brightwave Mobile Banking Simulator",
+    "description": "Practise real-time mobile banking: balances, transfers, bills, card controls, and statement exports.",
+    "emoji": "🏦",
+    "tags": ["executive", "attention", "functional"]
   },
   {
     "slug": "memory-in-action",
@@ -133,6 +147,13 @@
     "description": "Plan simple trips; juggle constraints and choices.",
     "emoji": "✈️",
     "tags": ["executive"]
+  },
+  {
+    "slug": "fluency-coach",
+    "title": "Fluency Coach",
+    "description": "Strategy-led verbal fluency with voice capture and grouping support.",
+    "emoji": "🗣️",
+    "tags": ["language", "executive"]
   },
   {
     "slug": "visual-neglect-trainer",

@@ -1,73 +1,410 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Fluency Coach - Strategy-Led Verbal Fluency</title>
 
-  <!-- Shared assets from repo root -->
-  <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3">
-  <script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
-  <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
-
-  <!-- Frame header meta -->
-  <meta name="app-slug" content="fluency-coach">
-  <meta name="app-title" content="Fluency Coach">
-  <meta name="app-desc" content="Strategy-led verbal fluency with voice input, repetition detection, and end-of-session grouping.">
-  <meta name="theme" content="bold dense">
+  <link rel="stylesheet" href="../../shared/theme.css" />
+  <meta name="theme" content="bold dense" />
+  <meta name="app-slug" content="fluency-coach" />
+  <meta name="app-title" content="Fluency Coach" />
+  <meta name="app-desc" content="Strategy-led verbal fluency with voice input, repetition detection, and end-of-session grouping." />
+  <script defer src="../../shared/frame.js"></script>
+  <script defer src="../../shared/clinician_feedback.js"></script>
 
   <style>
-    :root{
-      --bg:#f7f8fb; --card:#ffffff; --ink:#1f2937; --muted:#6b7280; --brand:#0a66c2;
-      --good:#0f766e; --warn:#b45309; --bad:#b91c1c; --pill:#eef2ff;
-      --line:#e5e7eb; --shadow:0 10px 24px rgba(0,0,0,.08); --ring:0 0 0 3px rgba(10,102,194,.18);
+    :root {
+      --accent: #0a66c2;
+      --accent-600: #0a58a0;
+      --accent-700: #094781;
     }
-    *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
-    body{margin:0;background:var(--bg);color:var(--ink);line-height:1.45}
-    .wrap{max-width:1100px;margin:0 auto;padding:16px}
-    .row{display:grid;gap:16px}
-    .cols-3{grid-template-columns:repeat(3,1fr)}
-    .cols-1{grid-template-columns:1fr}
-    .card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:16px}
-    .small{font-size:.9rem;color:var(--muted)}
-    .flex{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    select,button,input[type="text"]{
-      font:inherit;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;outline:none
+
+    main#app-root {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(16px, 2vw, 24px);
     }
-    select:focus,input:focus{box-shadow:var(--ring);border-color:#93c5fd}
-    button{cursor:pointer;background:var(--brand);color:#fff;border:none}
-    button.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
-    button.secondary{background:#f3f4f6;color:#111827}
-    button:disabled{opacity:.55;cursor:not-allowed}
-    .grid{display:grid;grid-template-columns:110px 1fr 110px 110px 110px;gap:8px;align-items:center}
-    .hdr{font-size:.9rem;color:#374151}
-    .item{padding:8px;border-bottom:1px dashed var(--line)}
-    .word{font-weight:700}
-    .tag{font-size:.8rem;padding:6px 8px;border-radius:9999px}
-    .ok{background:#ecfdf5;color:var(--good)}
-    .rep{background:#fff7ed;color:var(--warn)}
-    .off{background:#fef2f2;color:var(--bad)}
-    .live{font-variant-numeric:tabular-nums;font-weight:700}
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:9999px;background:var(--pill);margin:4px 6px 0 0;font-size:.9rem}
-    .groups{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-    .grp{background:#f9fafb;border:1px dashed var(--line);border-radius:12px;padding:12px}
-    .grp h4{margin:0 0 6px}
-    .notice{background:#fff7ed;border:1px solid #fed7aa;color:#92400e;padding:8px 12px;border-radius:10px}
-    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace}
-    #micStatus.ok { color:#0f766e; }
-    #micStatus.warn { color:#b45309; }
-    #micStatus.bad { color:#b91c1c; }
+
+    .app-layout {
+      display: grid;
+      gap: clamp(16px, 2vw, 24px);
+      grid-template-columns: minmax(260px, 320px) 1fr;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 960px) {
+      .app-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: clamp(16px, 1.6vw, 22px);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(12px, 1.4vw, 18px);
+    }
+
+    .panel h2 {
+      margin: 0;
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel h3 {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+
+    .panel-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .field-group {
+      display: grid;
+      gap: clamp(10px, 1.2vw, 16px);
+    }
+
+    .field-group--row {
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+
+    label.field {
+      display: grid;
+      gap: 6px;
+      font-size: 0.95rem;
+    }
+
+    .field-label {
+      font-weight: 600;
+    }
+
+    select,
+    input[type="text"],
+    textarea {
+      width: 100%;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .session-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .session-controls .button {
+      flex: 1 1 140px;
+      min-width: 130px;
+    }
+
+    .button.secondary {
+      background: color-mix(in oklab, var(--surface), var(--line) 20%);
+      border-color: color-mix(in oklab, var(--line), black 8%);
+    }
+
+    .button.ghost {
+      background: var(--surface);
+      border-color: var(--line);
+      box-shadow: none;
+    }
+
+    .button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .notice {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #92400e;
+      padding: 10px 12px;
+      border-radius: 12px;
+    }
+
+    .small {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .stats {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+
+    .stat {
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: color-mix(in oklab, var(--surface), var(--line) 12%);
+      display: grid;
+      gap: 6px;
+      font-weight: 600;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .stat-value {
+      font-size: 1.6rem;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+    }
+
+    .stat--ok {
+      background: #ecfdf5;
+      color: #047857;
+    }
+
+    .stat--rep {
+      background: #fff7ed;
+      color: #b45309;
+    }
+
+    .stat--off {
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+
+    .timer-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #e0f2fe;
+      color: #0c4a6e;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-weight: 600;
+      width: fit-content;
+    }
+
+    .speech-controls {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .mic-status.ok {
+      color: #047857;
+    }
+
+    .mic-status.warn {
+      color: #b45309;
+    }
+
+    .mic-status.bad {
+      color: #b91c1c;
+    }
+
+    .mic-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px dashed color-mix(in oklab, var(--accent), var(--line) 40%);
+      background: color-mix(in oklab, var(--surface), var(--line) 12%);
+      color: var(--text);
+      font-weight: 600;
+      box-shadow: none;
+    }
+
+    .mic-btn.is-active {
+      background: var(--accent);
+      color: #fff;
+      border-style: solid;
+      border-color: var(--accent-600);
+    }
+
+    .mic-icon {
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    .manual-entry {
+      display: none;
+      gap: 10px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .manual-entry input {
+      flex: 1 1 220px;
+    }
+
+    .manual-entry .button {
+      flex: 0 0 auto;
+    }
+
+    .response-header,
+    .response-row {
+      display: grid;
+      grid-template-columns: 120px 1fr 180px 160px;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .response-header {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 6px;
+    }
+
+    .response-row {
+      padding: 12px 0;
+      border-bottom: 1px dashed var(--line);
+    }
+
+    .response-word {
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+
+    .response-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .response-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .response-actions label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .smallBtn {
+      font-size: 0.8rem;
+      padding: 6px 10px;
+      border-radius: 10px;
+    }
+
+    .tag {
+      font-size: 0.78rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .tag--ok {
+      background: #ecfdf5;
+      color: #047857;
+    }
+
+    .tag--rep {
+      background: #fff7ed;
+      color: #b45309;
+    }
+
+    .tag--off {
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+
+    .strategy-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .grp {
+      background: color-mix(in oklab, var(--surface), var(--line) 12%);
+      border: 1px dashed var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .grp h4 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--surface), var(--line) 12%);
+      color: var(--text);
+      font-size: 0.85rem;
+      margin: 4px 6px 0 0;
+    }
+
+    .hint {
+      margin: 0;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    @media (max-width: 720px) {
+      .response-header,
+      .response-row {
+        grid-template-columns: 100px 1fr;
+      }
+
+      .response-row {
+        gap: 10px;
+      }
+
+      .response-row .response-tags,
+      .response-row .response-actions {
+        grid-column: span 2;
+      }
+
+      .response-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+    }
   </style>
 </head>
 <body>
-  <!-- frame.js injects the hero from the meta above -->
   <main id="app-root">
-    <div class="wrap">
-      <div class="row cols-3">
-        <div class="card">
-          <h3>1) Setup</h3>
-          <div class="flex">
-            <label>Category
+    <div class="app-layout">
+      <div class="column column--controls">
+        <section class="panel panel--setup">
+          <h2>Session Setup</h2>
+          <div class="field-group field-group--row">
+            <label class="field">
+              <span class="field-label">Category</span>
               <select id="category">
                 <option value="animals">Animals</option>
                 <option value="produce">Fruits and Vegetables</option>
@@ -77,12 +414,18 @@
                 <option value="emotions">Emotions</option>
               </select>
             </label>
-            <label>Duration
+            <label class="field">
+              <span class="field-label">Duration (seconds)</span>
               <select id="duration">
-                <option>60</option><option>90</option><option>45</option><option>30</option><option>15</option>
+                <option>60</option>
+                <option>90</option>
+                <option>45</option>
+                <option>30</option>
+                <option>15</option>
               </select>
             </label>
-            <label>Input
+            <label class="field">
+              <span class="field-label">Input</span>
               <select id="inputMode">
                 <option value="speech">Speech</option>
                 <option value="manual">Manual</option>
@@ -90,127 +433,191 @@
             </label>
           </div>
 
-          <div class="notice small" id="speechWarn" style="display:none;margin-top:10px">
+          <div class="session-controls">
+            <button type="button" class="button primary" id="btnStart">Start</button>
+            <button type="button" class="button secondary" id="btnPause" disabled>Pause</button>
+            <button type="button" class="button ghost" id="btnStop" disabled>Stop</button>
+            <button type="button" class="button ghost" id="btnExport" disabled>Download CSV</button>
+          </div>
+
+          <div class="speech-controls" id="speechControls">
+            <button type="button" class="button mic-btn" id="btnMic" disabled>
+              <span class="mic-icon">🎤</span>
+              <span class="mic-label">Start listening</span>
+            </button>
+            <div class="small mic-status" id="micStatus" style="display: none;">Mic: idle</div>
+            <div class="small" id="interim" style="display: none; color: var(--muted);">...</div>
+          </div>
+
+          <div class="manual-entry" id="manualBox">
+            <label class="field" style="flex: 1 1 auto;">
+              <span class="field-label">Manual entry</span>
+              <input id="manualInput" placeholder="Type a word and press Enter" type="text" />
+            </label>
+            <button type="button" class="button secondary" id="btnAdd">Add</button>
+          </div>
+
+          <div class="notice small" id="speechWarn" style="display: none;">
             Speech recognition needs Chrome or Edge on HTTPS (or localhost). If unavailable, use Manual input.
           </div>
+        </section>
+      </div>
 
-          <div class="flex" style="margin-top:8px;justify-content:space-between">
-            <div class="flex" style="gap:6px;flex-wrap:wrap">
-              <span class="tag ok">On-target: <span class="live" id="okCount">0</span></span>
-              <span class="tag rep">Repetitions: <span class="live" id="repCount">0</span></span>
-              <span class="tag off">Off-target: <span class="live" id="offCount">0</span></span>
+      <div class="column column--content">
+        <section class="panel panel--summary">
+          <h2>Session Status</h2>
+          <div class="stats">
+            <div class="stat stat--ok">
+              <span class="stat-label">On target</span>
+              <span class="stat-value" id="okCount">0</span>
             </div>
-            <div class="live">Timer: <span id="timer">60</span>s</div>
+            <div class="stat stat--rep">
+              <span class="stat-label">Repetitions</span>
+              <span class="stat-value" id="repCount">0</span>
+            </div>
+            <div class="stat stat--off">
+              <span class="stat-label">Off target</span>
+              <span class="stat-value" id="offCount">0</span>
+            </div>
           </div>
+          <div class="timer-pill">Time remaining: <span id="timer">60</span>s</div>
+          <p class="hint small">Tip: say single words clearly. Multi-word items are allowed; you can approve flagged items later.</p>
+        </section>
 
-          <div class="flex" style="margin-top:8px">
-            <button id="btnStart">Start</button>
-            <button class="secondary" id="btnPause" disabled>Pause</button>
-            <button class="ghost" id="btnStop" disabled>Stop</button>
-            <button class="ghost" id="btnExport" disabled>Download CSV</button>
+        <section class="panel panel--live">
+          <div class="panel-heading">
+            <h2>Live Responses</h2>
           </div>
-
-          <!-- Mic status and interim transcript -->
-          <div class="small" id="micStatus" style="margin-top:6px;display:none;">Mic: idle</div>
-          <div class="small" id="interim" style="margin-top:4px;color:#6b7280;display:none;">...</div>
-
-          <div class="flex" id="manualBox" style="display:none;margin-top:8px">
-            <input id="manualInput" placeholder="Type a word and press Enter" type="text"/>
-            <button class="secondary" id="btnAdd">Add</button>
+          <div class="response-header">
+            <span>+Time</span>
+            <span>Word</span>
+            <span>Status</span>
+            <span>Actions</span>
           </div>
+          <div id="list" class="response-list"></div>
+        </section>
 
-          <div class="small" style="margin-top:8px">
-            Tip: say single words clearly. Multi-word items are allowed; you can approve flagged items later.
+        <section class="panel panel--groups">
+          <div class="panel-heading">
+            <h2>Strategy Grouping</h2>
           </div>
-        </div>
-
-        <div class="card">
-          <h3>2) Live Responses</h3>
-          <div class="grid hdr">
-            <div>+Time</div><div>Word</div><div>Status</div><div>Override</div><div>Delete</div>
-          </div>
-          <div id="list"></div>
-        </div>
-
-        <div class="card">
-          <h3>3) Strategy Grouping (end of session)</h3>
-          <div class="small">When you press Stop, valid items are grouped into suggested sub-categories.</div>
-          <div class="groups" id="groups" style="margin-top:10px"></div>
-        </div>
+          <p class="small">When you press Stop, valid items are grouped into suggested sub-categories.</p>
+          <div class="strategy-grid" id="groups"></div>
+        </section>
       </div>
     </div>
 
-    <script>
+    <section id="clinician-notes" class="note-card">
+      <h2 style="margin-top:0;">Clinician comments</h2>
+      <p class="helper" style="margin:.25rem 0 0;">Use this space to note observations, cueing strategies, or follow-up goals after the session.</p>
+      <textarea id="clinician-comment" placeholder="Enter any notes relevant to this session..."></textarea>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      'use strict';
+
       var interimBuf = '';
       var interimTimer = null;
-      /* Basic lexicon skeleton. You can expand these sets later. */
-      var BASE = {
-        animals: new Set(["dog","cat","horse","cow","sheep","goat","lion","tiger","bear","eagle","shark","whale","fish","bird"]),
-        produce: new Set(["apple","banana","orange","pear","grape","carrot","potato","tomato","onion","lettuce","pepper"]),
-        tools: new Set(["hammer","screwdriver","wrench","saw","knife","scissors","drill","tape","pliers","brush"]),
-        jobs: new Set(["doctor","nurse","teacher","engineer","driver","pilot","chef","police","firefighter","psychologist"]),
-        transport: new Set(["car","bus","train","tram","bicycle","bike","plane","boat","ship","helicopter","subway"]),
-        emotions: new Set(["happy","sad","angry","afraid","calm","anxious","proud","jealous","surprised","bored"])
-      };
-      var EXT = {
-        animals: new Set(["wolf","fox","deer","monkey","dolphin","owl","duck","goose","swan","snake","lizard","frog"]),
-        produce: new Set(["strawberry","blueberry","broccoli","cauliflower","spinach","cucumber","pumpkin","squash"]),
-        tools: new Set(["chisel","plane","sandpaper","level","clamp","ladder","router","sander","grinder"]),
-        jobs: new Set(["paramedic","therapist","scientist","programmer","designer","lawyer","accountant"]),
-        transport: new Set(["van","lorry","taxi","scooter","motorcycle","kayak","yacht","glider","rocket"]),
-        emotions: new Set(["content","relieved","furious","worried","relaxed","serene","ashamed","guilty"])
-      };
-      /* Heuristic broadening */
-      function heuristicOnTarget(cat, key, raw){
-        if(cat==='animals'   && /(fish|bird|whale|shark|eagle|hawk|owl|deer|wolf|bear|lion|tiger|dog|cat|horse)\b/.test(key)) return true;
-        if(cat==='produce'   && /(berry|melon|apple|pear|peach|plum|nut|bean|pea|lettuce|cabbage|onion|garlic|pepper|squash|pumpkin)\b/.test(key)) return true;
-        if(cat==='tools'     && /(wrench|screw|driver|knife|cutter|saw|pliers|drill|brush|tape|bolt|nut|clamp|level|meter|hammer)\b/.test(key)) return true;
-        if(cat==='jobs'      && /(ist|ian|er|or|assistant|manager|technician|officer|worker)\b/.test(key)) return true;
-        if(cat==='transport' && /(car|bike|cycle|train|tram|ship|boat|plane|bus|cab|taxi|van|truck|lorry|scooter|canoe|kayak)\b/.test(key)) return true;
-        if(cat==='emotions'  && /(ness|ful|less|ive|ed)$/.test(key)) return true;
-        if(/\s/.test(raw)) return true;
-        return false;
+      var session = [];
+      var t0 = 0;
+      var timerInt = null;
+      var remaining = 60;
+      var paused = false;
+      var sessionActive = false;
+      var micRequested = false;
+
+      var recog = null;
+      var recogActive = false;
+
+      var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      var hasSpeech = typeof SpeechRecognition !== 'undefined';
+      var secureOrigin = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+      var canSpeech = hasSpeech && secureOrigin;
+
+      function qs(sel) {
+        return document.querySelector(sel);
       }
 
-      /* State */
-      var recog = null, recogActive = false, session = [];
-      var t0 = 0, timerInt = null, remaining = 60, paused = false;
-
-      function qs(s,root){ if(!root) root=document; return root.querySelector(s); }
       var els = {
-        category: qs('#category'), duration: qs('#duration'), inputMode: qs('#inputMode'),
+        category: qs('#category'),
+        duration: qs('#duration'),
+        inputMode: qs('#inputMode'),
+        start: qs('#btnStart'),
+        pauseBtn: qs('#btnPause'),
+        stopBtn: qs('#btnStop'),
+        exportBtn: qs('#btnExport'),
+        micToggle: qs('#btnMic'),
+        speechControls: qs('#speechControls'),
         speechWarn: qs('#speechWarn'),
-        ok: qs('#okCount'), rep: qs('#repCount'), off: qs('#offCount'), timer: qs('#timer'),
-        start: qs('#btnStart'), pauseBtn: qs('#btnPause'), stopBtn: qs('#btnStop'), exportBtn: qs('#btnExport'),
-        list: qs('#list'), manualBox: qs('#manualBox'), manualInput: qs('#manualInput'), btnAdd: qs('#btnAdd'),
-        groups: qs('#groups'), micStatus: qs('#micStatus'), interim: qs('#interim')
+        manualBox: qs('#manualBox'),
+        manualInput: qs('#manualInput'),
+        btnAdd: qs('#btnAdd'),
+        micStatus: qs('#micStatus'),
+        interim: qs('#interim'),
+        ok: qs('#okCount'),
+        rep: qs('#repCount'),
+        off: qs('#offCount'),
+        timer: qs('#timer'),
+        list: qs('#list'),
+        groups: qs('#groups')
       };
 
-      /* Speech availability: Chrome/Edge on secure origin */
-      var hasWebkitSR = (typeof window.webkitSpeechRecognition !== 'undefined');
-      var secureOrigin = (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1');
-      var canSpeech = hasWebkitSR && secureOrigin;
+      var BASE = {
+        animals: new Set(['dog', 'cat', 'horse', 'cow', 'sheep', 'goat', 'lion', 'tiger', 'bear', 'eagle', 'shark', 'whale', 'fish', 'bird']),
+        produce: new Set(['apple', 'banana', 'orange', 'pear', 'grape', 'carrot', 'potato', 'tomato', 'onion', 'lettuce', 'pepper']),
+        tools: new Set(['hammer', 'screwdriver', 'wrench', 'saw', 'knife', 'scissors', 'drill', 'tape', 'pliers', 'brush']),
+        jobs: new Set(['doctor', 'nurse', 'teacher', 'engineer', 'driver', 'pilot', 'chef', 'police', 'firefighter', 'psychologist']),
+        transport: new Set(['car', 'bus', 'train', 'tram', 'bicycle', 'bike', 'plane', 'boat', 'ship', 'helicopter', 'subway']),
+        emotions: new Set(['happy', 'sad', 'angry', 'afraid', 'calm', 'anxious', 'proud', 'jealous', 'surprised', 'bored'])
+      };
 
-      if(!canSpeech){
+      var EXT = {
+        animals: new Set(['wolf', 'fox', 'deer', 'monkey', 'dolphin', 'owl', 'duck', 'goose', 'swan', 'snake', 'lizard', 'frog']),
+        produce: new Set(['strawberry', 'blueberry', 'broccoli', 'cauliflower', 'spinach', 'cucumber', 'pumpkin', 'squash']),
+        tools: new Set(['chisel', 'plane', 'sandpaper', 'level', 'clamp', 'ladder', 'router', 'sander', 'grinder']),
+        jobs: new Set(['paramedic', 'therapist', 'scientist', 'programmer', 'designer', 'lawyer', 'accountant']),
+        transport: new Set(['van', 'lorry', 'taxi', 'scooter', 'motorcycle', 'kayak', 'yacht', 'glider', 'rocket']),
+        emotions: new Set(['content', 'relieved', 'furious', 'worried', 'relaxed', 'serene', 'ashamed', 'guilty'])
+      };
+
+      if (!canSpeech) {
         els.speechWarn.style.display = 'block';
         els.inputMode.value = 'manual';
-        els.manualBox.style.display = 'flex';
       }
 
-      els.inputMode.addEventListener('change', function(){
-        els.manualBox.style.display = (els.inputMode.value === 'manual') ? 'flex' : 'none';
+      updateInputModeUI();
+      resetSession();
+      updateMicButton();
+
+      els.inputMode.addEventListener('change', function () {
+        updateInputModeUI();
       });
 
       els.start.addEventListener('click', startSession);
       els.pauseBtn.addEventListener('click', togglePause);
       els.stopBtn.addEventListener('click', stopSession);
       els.exportBtn.addEventListener('click', exportCSV);
-      els.btnAdd.addEventListener('click', function(){ addManual(els.manualInput.value); });
-      els.manualInput.addEventListener('keydown', function(e){ if(e.key==='Enter'){ addManual(els.manualInput.value); } });
+      els.btnAdd.addEventListener('click', function () {
+        addManual(els.manualInput.value);
+      });
+      els.manualInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          addManual(els.manualInput.value);
+        }
+      });
 
-      function startSession(){
+      if (els.micToggle) {
+        els.micToggle.addEventListener('click', function () {
+          toggleMic();
+        });
+      }
+
+      function startSession() {
         resetSession();
-        remaining = parseInt(els.duration.value, 10);
+        sessionActive = true;
+        remaining = parseInt(els.duration.value, 10) || 60;
         els.timer.textContent = remaining;
         t0 = performance.now();
         timerInt = setInterval(tick, 1000);
@@ -218,245 +625,397 @@
         els.pauseBtn.disabled = false;
         els.stopBtn.disabled = false;
         els.exportBtn.disabled = true;
+        els.pauseBtn.textContent = 'Pause';
         els.groups.innerHTML = '';
-        if(els.inputMode.value === 'speech' && canSpeech){
-          startRecog();
-        }else{
+        updateMicButton();
+
+        if (els.inputMode.value === 'speech' && canSpeech) {
+          setMic('warn', 'Mic: tap “Start listening” to capture words');
+        } else {
           els.manualInput.focus();
         }
       }
 
-      function togglePause(){
-        if(paused){
-          t0 = performance.now() - ((parseInt(els.duration.value,10) - remaining) * 1000);
+      function togglePause() {
+        if (!sessionActive) return;
+        if (paused) {
+          paused = false;
+          els.pauseBtn.textContent = 'Pause';
+          t0 = performance.now() - (parseInt(els.duration.value, 10) - remaining) * 1000;
           timerInt = setInterval(tick, 1000);
-          if(recog && !recogActive){
-            try{ recog.start(); recogActive = true; }catch(e){}
+          if (micRequested && canSpeech) {
+            startMic();
           }
-          paused = false; els.pauseBtn.textContent = 'Pause';
-        }else{
+        } else {
+          paused = true;
+          els.pauseBtn.textContent = 'Resume';
           clearInterval(timerInt);
-          if(recog && recogActive){
-            try{ recog.stop(); }catch(e){}
-            recogActive = false;
-          }
-          paused = true; els.pauseBtn.textContent = 'Resume';
+          stopMic(false);
+          setMic('warn', 'Mic: paused');
         }
+        updateMicButton();
       }
 
-      function stopSession(){
+      function stopSession() {
         clearInterval(timerInt);
-        if(recog && recogActive){ try{ recog.stop(); }catch(e){} recogActive = false; }
+        timerInt = null;
+        sessionActive = false;
+        paused = false;
         els.start.disabled = false;
         els.pauseBtn.disabled = true;
         els.stopBtn.disabled = true;
         els.exportBtn.disabled = false;
-        setMic('idle', 'Mic: stopped');
+        els.pauseBtn.textContent = 'Pause';
+        stopMic(true);
+        hideMicStatus();
         els.interim.style.display = 'none';
         renderGroups();
+        updateMicButton();
       }
 
-      function tick(){
-        if(paused) return;
-        remaining--;
+      function tick() {
+        if (paused) return;
+        remaining -= 1;
+        if (remaining <= 0) {
+          remaining = 0;
+          els.timer.textContent = '0';
+          stopSession();
+          return;
+        }
         els.timer.textContent = remaining;
-        if(remaining <= 0){ stopSession(); }
       }
 
-    function startRecog(){
-  if(!hasWebkitSR) return;
-  if(recogActive) return;
-
-  var SR = window.webkitSpeechRecognition;
-  recog = new SR();
-  recog.lang = 'en-GB';
-  recog.interimResults = true;
-  recog.continuous = true;
-  recog.maxAlternatives = 1;
-
-  recog.onstart = function(){ setMic('ok', 'Mic: listening'); els.interim.style.display = 'block'; };
-  recog.onaudiostart = function(){ setMic('ok', 'Mic: audio detected'); };
-  recog.onsoundstart = function(){ setMic('ok', 'Mic: sound detected'); };
-
-  recog.onresult = function(e){
-    var interimText = '';
-    for(var i=e.resultIndex;i<e.results.length;i++){
-      var res = e.results[i];
-      var txt = (res[0] && res[0].transcript) ? res[0].transcript : '';
-      if(res.isFinal){
-        commitInterim();                 // flush any pending interim first
-        if(txt && /\w/.test(txt)){ handleInput(txt); }
-      }else{
-        interimText += txt + ' ';
+      function toggleMic() {
+        if (!sessionActive || paused || els.inputMode.value !== 'speech' || !canSpeech) {
+          return;
+        }
+        if (micRequested) {
+          micRequested = false;
+          stopMic(false);
+          setMic('warn', 'Mic: paused');
+          els.interim.style.display = 'none';
+        } else {
+          micRequested = true;
+          ensureRecog();
+          startMic();
+        }
+        updateMicButton();
       }
-    }
-    // show interim and schedule a debounce commit (helps when finals never arrive)
-    interimBuf = interimText.trim();
-    els.interim.textContent = interimBuf;
-    if(interimTimer){ clearTimeout(interimTimer); }
-    if(interimBuf){
-      interimTimer = setTimeout(function(){ commitInterim(); }, 800);
-    }
-  };
 
-  // If Chrome fires speech end without a final result, commit whatever we have
-  recog.onspeechend = function(){ commitInterim(); setMic('warn', 'Mic: speech ended'); };
-  recog.onsoundend  = function(){ /* keep alive; auto-restart in onend */ };
-  recog.onaudioend  = function(){ /* keep alive */ };
+      function ensureRecog() {
+        if (!canSpeech || recog) return;
+        recog = new SpeechRecognition();
+        recog.lang = 'en-GB';
+        recog.interimResults = true;
+        recog.continuous = true;
+        recog.maxAlternatives = 1;
 
-  recog.onerror = function(ev){
-    console.warn('Speech error:', ev && ev.error);
-    if(ev && (ev.error === 'no-speech' || ev.error === 'audio-capture')){
-      setMic('warn', 'Mic: no speech or no audio capture');
-    }else if(ev && (ev.error === 'not-allowed' || ev.error === 'service-not-allowed')){
-      setMic('bad', 'Mic: permission blocked');
-      alert('Microphone permission blocked. Allow mic access and press Start again.');
-    }else if(ev && ev.error === 'aborted'){
-      setMic('warn', 'Mic: aborted');
-    }else{
-      setMic('warn', 'Mic: error');
-    }
-  };
+        recog.onstart = function () {
+          recogActive = true;
+          setMic('ok', 'Mic: listening');
+          els.interim.style.display = 'block';
+          updateMicButton();
+        };
 
-  // While the timer is running, keep restarting the stream
-  recog.onend = function(){
-    if(!paused && remaining > 0){
-      try{ recog.start(); recogActive = true; }catch(e){}
-    }else{
-      recogActive = false;
-    }
-  };
+        recog.onresult = function (e) {
+          var interimText = '';
+          for (var i = e.resultIndex; i < e.results.length; i++) {
+            var res = e.results[i];
+            var txt = res[0] && res[0].transcript ? res[0].transcript : '';
+            if (res.isFinal) {
+              commitInterim();
+              if (txt && /\w/.test(txt)) {
+                handleInput(txt);
+              }
+            } else {
+              interimText += txt + ' ';
+            }
+          }
+          interimBuf = interimText.trim();
+          if (interimBuf) {
+            els.interim.textContent = interimBuf;
+            els.interim.style.display = 'block';
+            if (interimTimer) clearTimeout(interimTimer);
+            interimTimer = setTimeout(function () {
+              commitInterim();
+            }, 800);
+          } else {
+            els.interim.textContent = '';
+          }
+        };
 
-  try{ recog.start(); recogActive = true; }catch(e){ console.warn('Start error:', e); }
-}
-function commitInterim(){
-  if(interimTimer){ clearTimeout(interimTimer); interimTimer = null; }
-  var text = interimBuf;
-  interimBuf = '';
-  if(text && /\w/.test(text)){
-    handleInput(text);
-  }
-  els.interim.textContent = '';
-}
-      function setMic(kind, text){
+        recog.onerror = function (ev) {
+          console.warn('Speech error:', ev && ev.error);
+          if (!micRequested) return;
+          if (ev && (ev.error === 'no-speech' || ev.error === 'audio-capture')) {
+            setMic('warn', 'Mic: no speech detected');
+          } else if (ev && (ev.error === 'not-allowed' || ev.error === 'service-not-allowed')) {
+            setMic('bad', 'Mic: permission blocked');
+            alert('Microphone permission blocked. Allow mic access and start again.');
+            micRequested = false;
+          } else if (ev && ev.error === 'aborted') {
+            setMic('warn', 'Mic: aborted');
+          } else {
+            setMic('warn', 'Mic: error');
+          }
+          updateMicButton();
+        };
+
+        recog.onend = function () {
+          recogActive = false;
+          if (micRequested && sessionActive && !paused && remaining > 0) {
+            setTimeout(function () {
+              startMic();
+            }, 150);
+          } else {
+            if (!micRequested) {
+              setMic('warn', 'Mic: idle');
+            }
+            els.interim.style.display = 'none';
+          }
+          updateMicButton();
+        };
+      }
+
+      function startMic() {
+        if (!canSpeech || !micRequested) return;
+        ensureRecog();
+        if (!recog || recogActive) return;
+        try {
+          recog.start();
+        } catch (e) {
+          console.warn('Start error:', e);
+        }
+      }
+
+      function stopMic(force) {
+        if (force) {
+          micRequested = false;
+        }
+        if (recog && (recogActive || force)) {
+          try {
+            recog.stop();
+          } catch (e) {
+            /* ignore */
+          }
+        }
+        recogActive = false;
+      }
+
+      function commitInterim() {
+        if (interimTimer) {
+          clearTimeout(interimTimer);
+          interimTimer = null;
+        }
+        var text = interimBuf;
+        interimBuf = '';
+        if (text && /\w/.test(text)) {
+          handleInput(text);
+        }
+        els.interim.textContent = '';
+      }
+
+      function setMic(kind, text) {
+        if (!els.micStatus || els.inputMode.value !== 'speech' || !canSpeech) {
+          return;
+        }
+        if (!sessionActive && !micRequested) {
+          hideMicStatus();
+          return;
+        }
         els.micStatus.style.display = 'block';
-        els.micStatus.classList.remove('ok','warn','bad');
-        if(kind === 'ok') els.micStatus.classList.add('ok');
-        else if(kind === 'warn') els.micStatus.classList.add('warn');
-        else if(kind === 'bad') els.micStatus.classList.add('bad');
-        els.micStatus.textContent = text || 'Mic: status';
+        els.micStatus.classList.remove('ok', 'warn', 'bad');
+        if (kind === 'ok') els.micStatus.classList.add('ok');
+        if (kind === 'warn') els.micStatus.classList.add('warn');
+        if (kind === 'bad') els.micStatus.classList.add('bad');
+        els.micStatus.textContent = text || 'Mic status';
       }
 
-      /* Input and scoring */
-   function norm(w){
-  return String(w || '')
-    .toLowerCase()
-    // keep letters (ASCII + Latin-1/Extended), spaces, apostrophe, hyphen
-    .replace(/[^a-zA-Z\u00C0-\u024F\s'-]/g, '')
-    .trim()
-    .replace(/\s+/g, ' ')
-    .replace(/'s\b/, '')
-    .replace(/s\b/, ''); // simple singularize
-      }
-      function splitWords(text){
-        var parts = text.split(/[\\n,;]+/).map(function(s){return s.trim();}).filter(Boolean);
-        if(parts.length > 1) return parts;
-        return text.split(/\\s+/).map(function(s){return s.trim();}).filter(Boolean);
+      function hideMicStatus() {
+        if (!els.micStatus) return;
+        els.micStatus.style.display = 'none';
+        els.micStatus.classList.remove('ok', 'warn', 'bad');
       }
 
-      function handleInput(text){
+      function updateMicButton() {
+        if (!els.micToggle) return;
+        var speechMode = els.inputMode.value === 'speech' && canSpeech;
+        var disabled = !speechMode || !sessionActive || paused;
+        var label;
+        if (!speechMode) {
+          label = canSpeech ? 'Speech mode disabled' : 'Speech unavailable';
+        } else if (!sessionActive) {
+          label = 'Start the session to talk';
+        } else if (paused) {
+          label = 'Resume the session to talk';
+        } else if (micRequested) {
+          label = recogActive ? 'Listening… click to stop' : 'Reconnecting microphone…';
+        } else {
+          label = 'Start listening';
+        }
+        els.micToggle.disabled = disabled;
+        els.micToggle.classList.toggle('is-active', speechMode && micRequested && !paused && sessionActive);
+        els.micToggle.innerHTML = '<span class="mic-icon">🎤</span><span class="mic-label">' + label + '</span>';
+      }
+
+      function updateInputModeUI() {
+        var mode = els.inputMode.value;
+        if (mode === 'speech' && canSpeech) {
+          els.speechControls.style.display = 'flex';
+          els.manualBox.style.display = 'none';
+          els.speechWarn.style.display = 'none';
+        } else {
+          els.speechControls.style.display = 'none';
+          hideMicStatus();
+          els.interim.style.display = 'none';
+          els.manualBox.style.display = 'flex';
+          if (mode === 'speech' && !canSpeech) {
+            els.speechWarn.style.display = 'block';
+            els.inputMode.value = 'manual';
+          } else {
+            els.speechWarn.style.display = 'none';
+          }
+        }
+        updateMicButton();
+      }
+
+      function addManual(text) {
+        if (!text) return;
+        handleInput(text);
+        els.manualInput.value = '';
+        els.manualInput.focus();
+      }
+
+      function handleInput(text) {
         var cat = els.category.value;
         var tokens = splitWords(text);
-        for(var i=0;i<tokens.length;i++){
+        for (var i = 0; i < tokens.length; i++) {
           var raw = tokens[i];
           var key = norm(raw);
-          if(!key) continue;
+          if (!key) continue;
           recordWord(cat, key, raw);
         }
       }
 
-      function recordWord(cat, key, raw){
+      function recordWord(cat, key, raw) {
         var t = Math.max(0, (performance.now() - t0) / 1000);
-        var isRepeat = session.some(function(it){ return it.key === key && !it.deleted; });
+        var isRepeat = session.some(function (it) {
+          return it.key === key && !it.deleted;
+        });
         var onTarget = checkOnTarget(cat, key, raw);
-        var item = { cat:cat, ts:t, raw:raw, key:key, repeat:isRepeat, onTarget:onTarget, overrideApproved:false, deleted:false };
+        var item = {
+          cat: cat,
+          ts: t,
+          raw: raw,
+          key: key,
+          repeat: isRepeat,
+          onTarget: onTarget,
+          overrideApproved: false,
+          deleted: false
+        };
         session.push(item);
         renderItem(item, session.length - 1);
         refreshCounts();
       }
 
-      function checkOnTarget(cat, key, raw){
-        var base = BASE[cat]; var ext = EXT[cat];
-        if(base && base.has && (base.has(key) || base.has(raw.toLowerCase()))) return true;
-        if(ext && ext.has && (ext.has(key) || ext.has(raw.toLowerCase()))) return true;
+      function checkOnTarget(cat, key, raw) {
+        var base = BASE[cat];
+        var ext = EXT[cat];
+        if (base && base.has && (base.has(key) || base.has(raw.toLowerCase()))) return true;
+        if (ext && ext.has && (ext.has(key) || ext.has(raw.toLowerCase()))) return true;
         return heuristicOnTarget(cat, key, raw);
       }
 
-      function renderItem(item, idx){
+      function heuristicOnTarget(cat, key, raw) {
+        if (cat === 'animals' && /(fish|bird|whale|shark|eagle|hawk|owl|deer|wolf|bear|lion|tiger|dog|cat|horse)\b/.test(key)) return true;
+        if (cat === 'produce' && /(berry|melon|apple|pear|peach|plum|nut|bean|pea|lettuce|cabbage|onion|garlic|pepper|squash|pumpkin)\b/.test(key)) return true;
+        if (cat === 'tools' && /(wrench|screw|driver|knife|cutter|saw|pliers|drill|brush|tape|bolt|nut|clamp|level|meter|hammer)\b/.test(key)) return true;
+        if (cat === 'jobs' && /(ist|ian|er|or|assistant|manager|technician|officer|worker)\b/.test(key)) return true;
+        if (cat === 'transport' && /(car|bike|cycle|train|tram|ship|boat|plane|bus|cab|taxi|van|truck|lorry|scooter|canoe|kayak)\b/.test(key)) return true;
+        if (cat === 'emotions' && /(ness|ful|less|ive|ed)$/.test(key)) return true;
+        if (/\s/.test(raw)) return true;
+        return false;
+      }
+
+      function renderItem(item, idx) {
         var row = document.createElement('div');
-        row.className = 'grid item';
+        row.className = 'response-row';
         row.dataset.idx = String(idx);
         row.innerHTML =
           '<div class="mono">+' + item.ts.toFixed(1) + 's</div>' +
-          '<div class="word">' + escapeHtml(item.raw) + '</div>' +
-          '<div>' + statusLabel(item) + '</div>' +
-          '<div><label class="small"><input type="checkbox"' + (item.overrideApproved?' checked':'') + '/> Approve</label></div>' +
-          '<div><button class="ghost smallBtn">Remove</button></div>';
+          '<div class="response-word">' + escapeHtml(item.raw) + '</div>' +
+          '<div class="response-tags">' + statusLabel(item) + '</div>' +
+          '<div class="response-actions">' +
+            '<label><input type="checkbox"' + (item.overrideApproved ? ' checked' : '') + '> Approve</label>' +
+            '<button type="button" class="button ghost smallBtn">Remove</button>' +
+          '</div>';
 
-        row.querySelector('input').addEventListener('change', function(e){
+        var checkbox = row.querySelector('input[type="checkbox"]');
+        checkbox.addEventListener('change', function (e) {
           item.overrideApproved = e.target.checked;
-          row.children[2].innerHTML = statusLabel(item);
+          row.querySelector('.response-tags').innerHTML = statusLabel(item);
           refreshCounts();
         });
-        row.querySelector('button').addEventListener('click', function(){
-          item.deleted = true; row.remove(); refreshCounts();
+
+        var removeBtn = row.querySelector('button');
+        removeBtn.addEventListener('click', function () {
+          item.deleted = true;
+          row.remove();
+          refreshCounts();
         });
+
         els.list.prepend(row);
       }
 
-      function statusLabel(item){
-        if(item.deleted) return '<span class="small">-</span>';
+      function statusLabel(item) {
+        if (item.deleted) {
+          return '<span class="small">-</span>';
+        }
         var parts = [];
-        if(item.repeat) parts.push('<span class="tag rep">repeat</span>');
-        var off = (!item.onTarget && !item.overrideApproved);
-        if(off) parts.push('<span class="tag off">off-target</span>');
-        if(!off && !item.repeat) parts.push('<span class="tag ok">ok</span>');
+        if (item.repeat) parts.push('<span class="tag tag--rep">repeat</span>');
+        var off = !item.onTarget && !item.overrideApproved;
+        if (off) parts.push('<span class="tag tag--off">off-target</span>');
+        if (!off && !item.repeat) parts.push('<span class="tag tag--ok">ok</span>');
         return parts.join(' ');
       }
 
-      function refreshCounts(){
-        var ok=0, rep=0, off=0;
-        for(var i=0;i<session.length;i++){
+      function refreshCounts() {
+        var ok = 0;
+        var rep = 0;
+        var off = 0;
+        for (var i = 0; i < session.length; i++) {
           var it = session[i];
-          if(it.deleted) continue;
-          var offNow = (!it.onTarget && !it.overrideApproved);
-          if(it.repeat) rep++;
-          if(offNow) off++;
-          if(!it.repeat && !offNow) ok++;
+          if (it.deleted) continue;
+          var offNow = !it.onTarget && !it.overrideApproved;
+          if (it.repeat) rep++;
+          if (offNow) off++;
+          if (!it.repeat && !offNow) ok++;
         }
         els.ok.textContent = String(ok);
         els.rep.textContent = String(rep);
         els.off.textContent = String(off);
       }
 
-      function renderGroups(){
+      function renderGroups() {
         var cat = els.category.value;
-        var items = session.filter(function(it){ return !it.deleted && (it.onTarget || it.overrideApproved); });
+        var items = session.filter(function (it) {
+          return !it.deleted && (it.onTarget || it.overrideApproved);
+        });
         var unique = new Map();
-        for(var i=0;i<items.length;i++){
+        for (var i = 0; i < items.length; i++) {
           var it = items[i];
-          if(!unique.has(it.key)) unique.set(it.key, it.raw);
+          if (!unique.has(it.key)) unique.set(it.key, it.raw);
         }
         var buckets = categorizeByStrategy(cat, Array.from(unique.keys()));
         var container = els.groups;
         container.innerHTML = '';
-        for(var title in buckets){
-          if(!buckets.hasOwnProperty(title)) continue;
+        for (var title in buckets) {
+          if (!buckets.hasOwnProperty(title)) continue;
           var keys = buckets[title];
           var words = [];
-          for(var j=0;j<keys.length;j++){
+          for (var j = 0; j < keys.length; j++) {
             var raw = unique.get(keys[j]);
-            if(raw) words.push('<span class="pill">' + escapeHtml(raw) + '</span>');
+            if (raw) words.push('<span class="pill">' + escapeHtml(raw) + '</span>');
           }
           var div = document.createElement('div');
           div.className = 'grp';
@@ -465,136 +1024,275 @@ function commitInterim(){
         }
       }
 
-      function categorizeByStrategy(cat, keys){
+      function categorizeByStrategy(cat, keys) {
         var out = {};
-        function put(bucket, key){ if(!out[bucket]) out[bucket]=[]; out[bucket].push(key); }
-        function ensure(arr){ for(var i=0;i<arr.length;i++){ if(!out[arr[i]]) out[arr[i]]=[]; } }
+        function put(bucket, key) {
+          if (!out[bucket]) out[bucket] = [];
+          out[bucket].push(key);
+        }
+        function ensure(arr) {
+          for (var i = 0; i < arr.length; i++) {
+            if (!out[arr[i]]) out[arr[i]] = [];
+          }
+        }
 
-        if(cat==='animals'){
-          ensure(["Mammals","Birds","Fish","Reptiles","Amphibians","Invertebrates","Other"]);
-          for(var i=0;i<keys.length;i++){
-            var k = keys[i];
-            if(/(dog|cat|horse|cow|sheep|goat|lion|tiger|bear|wolf|fox|deer|monkey|whale|dolphin|seal|otter)\b/.test(k)) { put("Mammals",k); continue; }
-            if(/(eagle|hawk|owl|duck|goose|swan|pigeon|sparrow|bird)\b/.test(k)) { put("Birds",k); continue; }
-            if(/(shark|salmon|tuna|cod|trout|fish)\b/.test(k)) { put("Fish",k); continue; }
-            if(/(snake|lizard|gecko|crocodile|alligator|turtle|tortoise)\b/.test(k)) { put("Reptiles",k); continue; }
-            if(/(frog|toad|salamander|newt)\b/.test(k)) { put("Amphibians",k); continue; }
-            if(/(ant|bee|wasp|butterfly|moth|spider|crab|lobster|shrimp|jellyfish)\b/.test(k)) { put("Invertebrates",k); continue; }
-            put("Other",k);
+        if (cat === 'animals') {
+          ensure(['Mammals', 'Birds', 'Fish', 'Reptiles', 'Amphibians', 'Invertebrates', 'Other']);
+          for (var iA = 0; iA < keys.length; iA++) {
+            var kA = keys[iA];
+            if (/(dog|cat|horse|cow|sheep|goat|lion|tiger|bear|wolf|fox|deer|monkey|whale|dolphin|seal|otter)\b/.test(kA)) {
+              put('Mammals', kA);
+              continue;
+            }
+            if (/(eagle|hawk|owl|duck|goose|swan|pigeon|sparrow|bird)\b/.test(kA)) {
+              put('Birds', kA);
+              continue;
+            }
+            if (/(shark|salmon|tuna|cod|trout|fish)\b/.test(kA)) {
+              put('Fish', kA);
+              continue;
+            }
+            if (/(snake|lizard|gecko|crocodile|alligator|turtle|tortoise)\b/.test(kA)) {
+              put('Reptiles', kA);
+              continue;
+            }
+            if (/(frog|toad|salamander|newt)\b/.test(kA)) {
+              put('Amphibians', kA);
+              continue;
+            }
+            if (/(ant|bee|wasp|butterfly|moth|spider|crab|lobster|shrimp|jellyfish)\b/.test(kA)) {
+              put('Invertebrates', kA);
+              continue;
+            }
+            put('Other', kA);
           }
           return out;
         }
 
-        if(cat==='produce'){
-          ensure(["Fruits","Vegetables","Leafy greens","Roots and tubers","Beans and seeds","Other"]);
-          for(var i2=0;i2<keys.length;i2++){
-            var k2 = keys[i2];
-            if(/(apple|pear|banana|orange|grape|berry|melon|peach|plum|cherry|kiwi)\b/.test(k2)) { put("Fruits",k2); continue; }
-            if(/(tomato|onion|pepper|cucumber|squash|pumpkin|broccoli|cauliflower|mushroom)\b/.test(k2)) { put("Vegetables",k2); continue; }
-            if(/(lettuce|cabbage|kale|spinach|endive|rocket|watercress)\b/.test(k2)) { put("Leafy greens",k2); continue; }
-            if(/(carrot|parsnip|turnip|beet|radish|potato|yam|sweet potato)\b/.test(k2)) { put("Roots and tubers",k2); continue; }
-            if(/(pea|bean|lentil|seed|nut)\b/.test(k2)) { put("Beans and seeds",k2); continue; }
-            put("Other",k2);
+        if (cat === 'produce') {
+          ensure(['Fruits', 'Vegetables', 'Leafy greens', 'Roots and tubers', 'Beans and seeds', 'Other']);
+          for (var iP = 0; iP < keys.length; iP++) {
+            var kP = keys[iP];
+            if (/(apple|pear|banana|orange|grape|berry|melon|peach|plum|cherry|kiwi)\b/.test(kP)) {
+              put('Fruits', kP);
+              continue;
+            }
+            if (/(tomato|onion|pepper|cucumber|squash|pumpkin|broccoli|cauliflower|mushroom)\b/.test(kP)) {
+              put('Vegetables', kP);
+              continue;
+            }
+            if (/(lettuce|cabbage|kale|spinach|endive|rocket|watercress)\b/.test(kP)) {
+              put('Leafy greens', kP);
+              continue;
+            }
+            if (/(carrot|parsnip|turnip|beet|radish|potato|yam|sweet potato)\b/.test(kP)) {
+              put('Roots and tubers', kP);
+              continue;
+            }
+            if (/(pea|bean|lentil|seed|nut)\b/.test(kP)) {
+              put('Beans and seeds', kP);
+              continue;
+            }
+            put('Other', kP);
           }
           return out;
         }
 
-        if(cat==='tools'){
-          ensure(["Cutting","Fastening","Measuring","Power tools","Household","Other"]);
-          for(var i3=0;i3<keys.length;i3++){
-            var k3 = keys[i3];
-            if(/(knife|scissors|cutter|saw|chisel|plane|file)\b/.test(k3)) { put("Cutting",k3); continue; }
-            if(/(screw|screwdriver|wrench|spanner|socket|pliers|clamp|hammer|nail|bolt|nut)\b/.test(k3)) { put("Fastening",k3); continue; }
-            if(/(tape measure|ruler|square|level|meter|gauge)\b/.test(k3)) { put("Measuring",k3); continue; }
-            if(/(drill|driver|grinder|sander|router|lathe)\b/.test(k3)) { put("Power tools",k3); continue; }
-            if(/(broom|brush|mop|bucket|vacuum|pan|pot|spatula|whisk)\b/.test(k3)) { put("Household",k3); continue; }
-            put("Other",k3);
+        if (cat === 'tools') {
+          ensure(['Cutting', 'Fastening', 'Measuring', 'Power tools', 'Household', 'Other']);
+          for (var iT = 0; iT < keys.length; iT++) {
+            var kT = keys[iT];
+            if (/(knife|scissors|cutter|saw|chisel|plane|file)\b/.test(kT)) {
+              put('Cutting', kT);
+              continue;
+            }
+            if (/(screw|screwdriver|wrench|spanner|socket|pliers|clamp|hammer|nail|bolt|nut)\b/.test(kT)) {
+              put('Fastening', kT);
+              continue;
+            }
+            if (/(tape measure|ruler|square|level|meter|gauge)\b/.test(kT)) {
+              put('Measuring', kT);
+              continue;
+            }
+            if (/(drill|driver|grinder|sander|router|lathe)\b/.test(kT)) {
+              put('Power tools', kT);
+              continue;
+            }
+            if (/(broom|brush|mop|bucket|vacuum|pan|pot|spatula|whisk)\b/.test(kT)) {
+              put('Household', kT);
+              continue;
+            }
+            put('Other', kT);
           }
           return out;
         }
 
-        if(cat==='jobs'){
-          ensure(["Health","Education and Research","Trades","Tech and Business","Law and Emergency","Other"]);
-          for(var i4=0;i4<keys.length;i4++){
-            var k4 = keys[i4];
-            if(/(doctor|nurse|paramedic|therapist|psychologist|pharmacist|dentist)\b/.test(k4)) { put("Health",k4); continue; }
-            if(/(teacher|lecturer|professor|researcher|scientist)\b/.test(k4)) { put("Education and Research",k4); continue; }
-            if(/(electrician|plumber|carpenter|bricklayer|mechanic|welder|builder)\b/.test(k4)) { put("Trades",k4); continue; }
-            if(/(engineer|developer|programmer|designer|manager|accountant|analyst)\b/.test(k4)) { put("Tech and Business",k4); continue; }
-            if(/(police|officer|firefighter|lawyer|barrister|solicitor)\b/.test(k4)) { put("Law and Emergency",k4); continue; }
-            put("Other",k4);
+        if (cat === 'jobs') {
+          ensure(['Health', 'Education and Research', 'Trades', 'Tech and Business', 'Law and Emergency', 'Other']);
+          for (var iJ = 0; iJ < keys.length; iJ++) {
+            var kJ = keys[iJ];
+            if (/(doctor|nurse|paramedic|therapist|psychologist|pharmacist|dentist)\b/.test(kJ)) {
+              put('Health', kJ);
+              continue;
+            }
+            if (/(teacher|lecturer|professor|researcher|scientist)\b/.test(kJ)) {
+              put('Education and Research', kJ);
+              continue;
+            }
+            if (/(electrician|plumber|carpenter|bricklayer|mechanic|welder|builder)\b/.test(kJ)) {
+              put('Trades', kJ);
+              continue;
+            }
+            if (/(engineer|developer|programmer|designer|manager|accountant|analyst)\b/.test(kJ)) {
+              put('Tech and Business', kJ);
+              continue;
+            }
+            if (/(police|officer|firefighter|lawyer|barrister|solicitor)\b/.test(kJ)) {
+              put('Law and Emergency', kJ);
+              continue;
+            }
+            put('Other', kJ);
           }
           return out;
         }
 
-        if(cat==='transport'){
-          ensure(["Road","Rail","Water","Air or Space","Human or Animal","Other"]);
-          for(var i5=0;i5<keys.length;i5++){
-            var k5 = keys[i5];
-            if(/(car|van|lorry|truck|bus|coach|taxi|cab|motorcycle|scooter)\b/.test(k5)) { put("Road",k5); continue; }
-            if(/(train|tram|subway|metro|underground|monorail)\b/.test(k5)) { put("Rail",k5); continue; }
-            if(/(boat|ship|ferry|canoe|kayak|yacht|sailboat|submarine)\b/.test(k5)) { put("Water",k5); continue; }
-            if(/(plane|airplane|jet|helicopter|glider|balloon|rocket)\b/.test(k5)) { put("Air or Space",k5); continue; }
-            if(/(bicycle|bike|tricycle|wheelbarrow|horse|camel|dogsledge|dogsled)\b/.test(k5)) { put("Human or Animal",k5); continue; }
-            put("Other",k5);
+        if (cat === 'transport') {
+          ensure(['Road', 'Rail', 'Water', 'Air or Space', 'Human or Animal', 'Other']);
+          for (var iR = 0; iR < keys.length; iR++) {
+            var kR = keys[iR];
+            if (/(car|van|lorry|truck|bus|coach|taxi|cab|motorcycle|scooter)\b/.test(kR)) {
+              put('Road', kR);
+              continue;
+            }
+            if (/(train|tram|subway|metro|underground|monorail)\b/.test(kR)) {
+              put('Rail', kR);
+              continue;
+            }
+            if (/(boat|ship|ferry|canoe|kayak|yacht|sailboat|submarine)\b/.test(kR)) {
+              put('Water', kR);
+              continue;
+            }
+            if (/(plane|airplane|jet|helicopter|glider|balloon|rocket)\b/.test(kR)) {
+              put('Air or Space', kR);
+              continue;
+            }
+            if (/(bicycle|bike|tricycle|wheelbarrow|horse|camel|dogsledge|dogsled)\b/.test(kR)) {
+              put('Human or Animal', kR);
+              continue;
+            }
+            put('Other', kR);
           }
           return out;
         }
 
-        if(cat==='emotions'){
-          ensure(["Positive","Negative","High arousal","Low arousal","Social or Relational","Other"]);
-          for(var i6=0;i6<keys.length;i6++){
-            var k6 = keys[i6];
-            if(/(happy|content|relieved|calm|serene|proud)\b/.test(k6)) { put("Positive",k6); }
-            if(/(sad|angry|afraid|anxious|worried|ashamed|guilty|jealous|bored)\b/.test(k6)) { put("Negative",k6); }
-            if(/(angry|afraid|anxious|worried|excited|furious)\b/.test(k6)) { put("High arousal",k6); }
-            if(/(calm|relaxed|serene|content|bored)\b/.test(k6)) { put("Low arousal",k6); }
-            if(/(proud|ashamed|guilty|jealous)\b/.test(k6)) { put("Social or Relational",k6); }
-            if(!out["Positive"].includes(k6) && !out["Negative"].includes(k6) && !out["High arousal"].includes(k6) && !out["Low arousal"].includes(k6) && !out["Social or Relational"].includes(k6)){ put("Other",k6); }
+        if (cat === 'emotions') {
+          ensure(['Positive', 'Negative', 'High arousal', 'Low arousal', 'Social or Relational', 'Other']);
+          for (var iE = 0; iE < keys.length; iE++) {
+            var kE = keys[iE];
+            if (/(happy|content|relieved|calm|serene|proud)\b/.test(kE)) {
+              put('Positive', kE);
+            }
+            if (/(sad|angry|afraid|anxious|worried|ashamed|guilty|jealous|bored)\b/.test(kE)) {
+              put('Negative', kE);
+            }
+            if (/(angry|afraid|anxious|worried|excited|furious)\b/.test(kE)) {
+              put('High arousal', kE);
+            }
+            if (/(calm|relaxed|serene|content|bored)\b/.test(kE)) {
+              put('Low arousal', kE);
+            }
+            if (/(proud|ashamed|guilty|jealous)\b/.test(kE)) {
+              put('Social or Relational', kE);
+            }
+            if (!out['Positive'].includes(kE) && !out['Negative'].includes(kE) && !out['High arousal'].includes(kE) && !out['Low arousal'].includes(kE) && !out['Social or Relational'].includes(kE)) {
+              put('Other', kE);
+            }
           }
           return out;
         }
 
-        out["Other"] = keys;
+        out['Other'] = keys;
         return out;
       }
 
-      function exportCSV(){
+      function splitWords(text) {
+        var parts = text.split(/[\n,;]+/).map(function (s) {
+          return s.trim();
+        }).filter(Boolean);
+        if (parts.length > 1) return parts;
+        return text.split(/\s+/).map(function (s) {
+          return s.trim();
+        }).filter(Boolean);
+      }
+
+      function norm(w) {
+        return String(w || '')
+          .toLowerCase()
+          .replace(/[^a-zA-Z\u00C0-\u024F\s'-]/g, '')
+          .trim()
+          .replace(/\s+/g, ' ')
+          .replace(/'s\b/, '')
+          .replace(/s\b/, '');
+      }
+
+      function exportCSV() {
         var cat = els.category.value;
-        var dur = parseInt(els.duration.value,10);
+        var dur = parseInt(els.duration.value, 10);
         var lines = ['category,duration_s,timestamp_rel_s,raw,normalized,repeat,off_target,override,deleted'];
-        for(var i=0;i<session.length;i++){
+        for (var i = 0; i < session.length; i++) {
           var it = session[i];
-          var offNow = (!it.onTarget && !it.overrideApproved);
+          var offNow = !it.onTarget && !it.overrideApproved;
           lines.push(
             cat + ',' + dur + ',' + it.ts.toFixed(2) + ',' +
             csvEsc(it.raw) + ',' + csvEsc(it.key) + ',' +
-            (it.repeat?1:0) + ',' + (offNow?1:0) + ',' + (it.overrideApproved?1:0) + ',' + (it.deleted?1:0)
+            (it.repeat ? 1 : 0) + ',' + (offNow ? 1 : 0) + ',' + (it.overrideApproved ? 1 : 0) + ',' + (it.deleted ? 1 : 0)
           );
         }
-        var blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'});
+        var blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
         var url = URL.createObjectURL(blob);
-        var a = document.createElement('a'); a.href = url; a.download = 'fluency_' + cat + '_' + Date.now() + '.csv';
-        document.body.appendChild(a); a.click(); a.remove();
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'fluency_' + cat + '_' + Date.now() + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
         URL.revokeObjectURL(url);
       }
 
-      function csvEsc(s){ if(s==null) return ''; var t = String(s).replace(/"/g,'""'); return '"' + t + '"'; }
-      function escapeHtml(s){ return String(s).replace(/[&<>"']/g,function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]); }); }
-      function resetSession(){
-        session = []; els.list.innerHTML = '';
-        els.ok.textContent = '0'; els.rep.textContent = '0'; els.off.textContent = '0';
-        els.groups.innerHTML = '';
-        clearInterval(timerInt); paused = false; els.pauseBtn.textContent = 'Pause';
-        els.micStatus.style.display = 'none'; els.interim.style.display = 'none';
+      function csvEsc(s) {
+        if (s == null) return '';
+        var t = String(s).replace(/"/g, '""');
+        return '"' + t + '"';
       }
 
-      (function init(){
-        if(!canSpeech){ els.inputMode.value = 'manual'; els.manualBox.style.display = 'flex'; }
-      })();
-    </script>
+      function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, function (m) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+        });
+      }
 
-    <!-- Clinician feedback is handled by clinician_feedback.js. No duplicate notes UI here. -->
-  </main>
+      function resetSession() {
+        session = [];
+        els.list.innerHTML = '';
+        els.groups.innerHTML = '';
+        refreshCounts();
+        clearInterval(timerInt);
+        timerInt = null;
+        paused = false;
+        sessionActive = false;
+        micRequested = false;
+        recogActive = false;
+        els.pauseBtn.disabled = true;
+        els.stopBtn.disabled = true;
+        els.start.disabled = false;
+        els.exportBtn.disabled = true;
+        els.pauseBtn.textContent = 'Pause';
+        els.timer.textContent = els.duration.value;
+        els.interim.textContent = '';
+        els.interim.style.display = 'none';
+        hideMicStatus();
+      }
+    })();
+  </script>
 </body>
 </html>
