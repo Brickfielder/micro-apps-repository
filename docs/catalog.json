@@ -56,6 +56,13 @@
     "tags": ["visuospatial", "executive", "memory"]
   },
   {
+    "slug": "mobile-banking-simulator",
+    "title": "Brightwave Mobile Banking Simulator",
+    "description": "Practise real-time mobile banking: balances, transfers, bills, card controls, and statement exports.",
+    "emoji": "🏦",
+    "tags": ["executive", "attention", "functional"]
+  },
+  {
     "slug": "memory-in-action",
     "title": "Memory in Action",
     "description": "Short-term recall inside simple task sequences.",
