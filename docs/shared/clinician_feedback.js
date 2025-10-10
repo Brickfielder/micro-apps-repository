@@ -5,10 +5,19 @@
    ========================================================================== */
 
 (function () {
-  // ---- UI: ensure a comment box exists at the end of #app-root ----
+  let commentEl = null;
+  const listeners = new Set();
+
   function ensureCommentBox() {
+    if (commentEl && document.body.contains(commentEl)) return commentEl;
     const root = document.getElementById("app-root") || document.body;
-    if (!root || document.getElementById("clinician-comment")) return;
+    if (!root) return null;
+
+    commentEl = document.getElementById("clinician-comment");
+    if (commentEl) {
+      bindCommentListener();
+      return commentEl;
+    }
 
     const section = document.createElement("section");
     section.id = "clinician-notes";
@@ -22,12 +31,40 @@
       </p>
     `;
     root.appendChild(section);
+    commentEl = section.querySelector("#clinician-comment");
+    bindCommentListener();
+    return commentEl;
   }
 
-  // ---- CSV augmenter ----
+  function bindCommentListener() {
+    if (!commentEl || commentEl.__clinicianBound) return;
+    commentEl.__clinicianBound = true;
+    commentEl.addEventListener("input", () => {
+      notifyListeners();
+    });
+  }
+
   function getComment() {
-    const el = document.getElementById("clinician-comment");
+    const el = ensureCommentBox();
     return (el && el.value) ? el.value.replace(/\r?\n/g, " ").trim() : "";
+  }
+
+  function setComment(value) {
+    const el = ensureCommentBox();
+    if (!el) return;
+    el.value = value || "";
+    notifyListeners();
+  }
+
+  function notifyListeners() {
+    const note = getComment();
+    listeners.forEach((fn) => {
+      try {
+        fn(note);
+      } catch (err) {
+        console.warn("clinician note listener failed", err);
+      }
+    });
   }
 
   function isProbablyCSV(text) {
@@ -41,6 +78,14 @@
 
     const comment = getComment();
     const sep = lines[0].includes(";") && !lines[0].includes(",") ? ";" : ",";
+
+    const escape = (value) => {
+      if (window.sharedCSV && typeof window.sharedCSV.escapeCell === "function") {
+        return window.sharedCSV.escapeCell(value, sep);
+      }
+      const str = String(value || "");
+      return '"' + str.replace(/"/g, '""') + '"';
+    };
 
     let header = lines[0].trim();
     let dataStartIndex = 1;
@@ -57,7 +102,7 @@
 
     for (let i = dataStartIndex; i < lines.length; i++) {
       if (lines[i].trim().length === 0) continue;
-      lines[i] = lines[i] + sep + `"${comment.replace(/"/g, '""')}"`;
+      lines[i] = lines[i] + sep + escape(comment);
     }
     return lines.join("\r\n");
   }
@@ -116,7 +161,18 @@
 
   // Fallback API
   window.__augmentCSV = augmentCSVText;
+  window.__clinicianNotes = {
+    getNote: getComment,
+    setNote: setComment,
+    subscribe(fn) {
+      if (typeof fn !== "function") return () => {};
+      listeners.add(fn);
+      return () => listeners.delete(fn);
+    },
+  };
 
   // Init
   ensureCommentBox();
+  bindCommentListener();
+  notifyListeners();
 })();

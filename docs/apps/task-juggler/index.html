@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3">
 <script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
 <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
+<script defer src="/micro-apps-repository/shared/csv.js?v=1"></script>
 
 <meta name="theme" content="bold dense">
 <meta name="app-slug" content="task-juggler">
@@ -523,24 +524,31 @@ function downloadCSV(){
   try{
     ensureLogged(); // snapshot even if mid-session
 
-    const keys = Object.keys(metrics.log[0]);
-    const esc = v => '"' + String(v).replace(/"/g,'""') + '"';
-    const lines = [keys.join(',')].concat(metrics.log.map(r=>keys.map(k=>esc(r[k] ?? '')).join(',')));
-    const csv  = '\uFEFF' + lines.join('\n'); // BOM for Excel
+    const columns = Object.keys(metrics.log[0] || {});
+    const filename = 'task_juggler_session.csv';
+
+    if (window.sharedCSV && typeof window.sharedCSV.triggerDownload === 'function') {
+      window.sharedCSV.triggerDownload({ records: metrics.log, columns, filename });
+      return;
+    }
+
+    const esc = (v) => {
+      const text = v == null ? '' : String(v);
+      return '"' + text.replace(/"/g,'""') + '"';
+    };
+    const lines = [columns.join(',')].concat(metrics.log.map(r=>columns.map(k=>esc(r[k])).join(',')));
+    const csv  = '\uFEFF' + lines.join('\r\n');
     const blob = new Blob([csv], { type:'text/csv;charset=utf-8' });
 
-    // Legacy Edge/IE
     if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-      window.navigator.msSaveOrOpenBlob(blob, 'task_juggler_session.csv');
+      window.navigator.msSaveOrOpenBlob(blob, filename);
       return;
     }
 
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'task_juggler_session.csv';
-
-    // ✅ robust root (frame.js can null body)
+    a.download = filename;
     const root = document.body || document.documentElement;
     if (root && root.appendChild) {
       root.appendChild(a);
@@ -548,7 +556,6 @@ function downloadCSV(){
       a.remove();
       setTimeout(()=>URL.revokeObjectURL(url), 0);
     } else {
-      // last-ditch fallback (no DOM root available)
       window.open(url, '_blank');
       setTimeout(()=>URL.revokeObjectURL(url), 1000);
     }
