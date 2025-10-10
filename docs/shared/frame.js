@@ -5,6 +5,7 @@
    - Title/desc from catalog.json via <meta name="app-slug">,
      with optional overrides <meta name="app-title"> / <meta name="app-desc">
    - Injects a hero header and wraps #app-root in .app-wrap
+   - Exposes `sharedNative` shim for host/native wrappers
    - Supports global overrides: window.__CATALOG_URL__, window.__THEME_URL__, window.__FRAME_DEBUG__
    ========================================================================== */
 (() => {
@@ -119,5 +120,143 @@
 
   // --- Init
   ensureTheme();
-  loadMeta().then(placeHeroAndWrap);
+  function initNativeShim(metaInfo) {
+    if (window.sharedNative && window.sharedNative.__isSharedNative) {
+      return window.sharedNative;
+    }
+
+    const meta = metaInfo || {};
+    const slugFromMeta = meta.slug || "";
+    const slugFromPath = (() => {
+      const part = (location.pathname || "").split("/").filter(Boolean).pop() || "";
+      return part.replace(/\.html?$/i, "");
+    })();
+    const getMetaTag = (name) => {
+      const el = document.querySelector(`meta[name="${name}"]`);
+      return el ? el.content || "" : "";
+    };
+
+    const nativeMeta = {
+      slug: slugFromMeta || getMetaTag("app-slug") || slugFromPath,
+      title:
+        meta.title ||
+        getMetaTag("app-title") ||
+        document.title ||
+        slugFromMeta ||
+        slugFromPath ||
+        "micro-app",
+      desc: meta.desc || getMetaTag("app-desc") || getMetaTag("description") || "",
+      theme: getMetaTag("theme") || "",
+    };
+
+    const queue = [];
+    const listeners = new Set();
+    const getBridge = () => window.ReactNativeWebView || window.__MICRO_APP_NATIVE__ || null;
+
+    const tryPost = (raw) => {
+      const bridge = getBridge();
+      if (!bridge || typeof bridge.postMessage !== "function") return false;
+      try {
+        bridge.postMessage(raw);
+        return true;
+      } catch (err) {
+        warn("native post failed", err);
+        return false;
+      }
+    };
+
+    const enqueue = (message) => {
+      const raw = typeof message === "string" ? message : JSON.stringify(message);
+      if (!tryPost(raw)) {
+        queue.push(raw);
+      }
+      return raw;
+    };
+
+    const flushQueue = () => {
+      if (!queue.length) return;
+      const pending = queue.splice(0);
+      while (pending.length) {
+        const raw = pending.shift();
+        if (!tryPost(raw)) {
+          queue.unshift(raw, ...pending);
+          break;
+        }
+      }
+    };
+
+    const sharedNative = {
+      __isSharedNative: true,
+      getMeta() {
+        return { ...nativeMeta };
+      },
+      isNative() {
+        return !!getBridge();
+      },
+      emit(type, payload) {
+        if (!type) return false;
+        const message = {
+          type,
+          payload: payload === undefined ? null : payload,
+          meta: { slug: nativeMeta.slug, title: nativeMeta.title },
+          timestamp: Date.now(),
+        };
+        enqueue(message);
+        flushQueue();
+        return message;
+      },
+      post(message) {
+        const raw = enqueue(message);
+        flushQueue();
+        return raw;
+      },
+      shareCSV(csvText, extras) {
+        if (!csvText) return false;
+        const info = Object.assign({ csv: csvText }, extras || {});
+        sharedNative.emit("share_csv", info);
+        return true;
+      },
+      ready(extras) {
+        sharedNative.emit("app_ready", Object.assign({}, extras || {}));
+      },
+      flush: flushQueue,
+      onMessage(fn) {
+        if (typeof fn !== "function") return () => {};
+        listeners.add(fn);
+        return () => listeners.delete(fn);
+      },
+    };
+
+    window.addEventListener("message", (event) => {
+      if (!listeners.size) return;
+      listeners.forEach((fn) => {
+        try {
+          fn(event.data, event);
+        } catch (err) {
+          warn("native listener error", err);
+        }
+      });
+    });
+
+    window.addEventListener("focus", flushQueue);
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) flushQueue();
+    });
+
+    const flushTimer = setInterval(flushQueue, 2000);
+    window.addEventListener("beforeunload", () => clearInterval(flushTimer));
+
+    window.sharedNative = sharedNative;
+    setTimeout(() => {
+      sharedNative.ready();
+      flushQueue();
+    }, 0);
+
+    return sharedNative;
+  }
+
+  loadMeta().then((meta) => {
+    placeHeroAndWrap(meta);
+    initNativeShim(meta);
+  });
 })();

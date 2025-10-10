@@ -1,12 +1,36 @@
 /* ==========================================================================
    clinician_feedback.js — v2 resilient
    - Injects a clinician note card (styled by theme.css)
-   - Appends `clinician_comment` column into exported CSVs
+   - Appends shared metadata columns (app_slug, app_title, exported_at, clinician_comment)
    ========================================================================== */
 
 (function () {
   let commentEl = null;
   const listeners = new Set();
+
+  function getAppMeta() {
+    try {
+      if (window.sharedNative && typeof window.sharedNative.getMeta === "function") {
+        const meta = window.sharedNative.getMeta() || {};
+        if (meta && (meta.slug || meta.title)) return meta;
+      }
+    } catch (err) {
+      console.warn("sharedNative meta failed", err);
+    }
+    const getMetaTag = (name) => {
+      const el = document.querySelector(`meta[name="${name}"]`);
+      return el ? el.content || "" : "";
+    };
+    const slugFromPath = (() => {
+      const part = (location.pathname || "").split("/").filter(Boolean).pop() || "";
+      return part.replace(/\.html?$/i, "");
+    })();
+    return {
+      slug: getMetaTag("app-slug") || slugFromPath,
+      title: getMetaTag("app-title") || document.title || slugFromPath || "micro-app",
+      desc: getMetaTag("app-desc") || getMetaTag("description") || "",
+    };
+  }
 
   function ensureCommentBox() {
     if (commentEl && document.body.contains(commentEl)) return commentEl;
@@ -78,6 +102,8 @@
 
     const comment = getComment();
     const sep = lines[0].includes(";") && !lines[0].includes(",") ? ";" : ",";
+    const meta = getAppMeta();
+    const exportedAt = new Date().toISOString();
 
     const escape = (value) => {
       if (window.sharedCSV && typeof window.sharedCSV.escapeCell === "function") {
@@ -96,13 +122,35 @@
       dataStartIndex = 1;
     }
 
-    if (!header.split(sep).map(s => s.trim()).includes("clinician_comment")) {
-      lines[0] = header + sep + "clinician_comment";
-    }
+    const additions = [
+      { name: "app_slug", value: meta.slug || "" },
+      { name: "app_title", value: meta.title || "" },
+      { name: "exported_at", value: exportedAt },
+      { name: "clinician_comment", value: comment },
+    ];
 
-    for (let i = dataStartIndex; i < lines.length; i++) {
-      if (lines[i].trim().length === 0) continue;
-      lines[i] = lines[i] + sep + escape(comment);
+    const headerCells = lines[0].split(sep);
+    const headerNames = headerCells.map((s) => s.trim());
+    const toAppend = [];
+
+    additions.forEach((entry) => {
+      if (!headerNames.includes(entry.name)) {
+        headerCells.push(entry.name);
+        headerNames.push(entry.name);
+        toAppend.push(entry);
+      }
+    });
+
+    if (toAppend.length) {
+      lines[0] = headerCells.join(sep);
+      for (let i = dataStartIndex; i < lines.length; i++) {
+        if (lines[i].trim().length === 0) continue;
+        let row = lines[i];
+        toAppend.forEach((entry) => {
+          row = row + sep + escape(entry.value);
+        });
+        lines[i] = row;
+      }
     }
     return lines.join("\r\n");
   }
