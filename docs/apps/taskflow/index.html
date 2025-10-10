@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="/micro-apps-repository/shared/theme.css?v=3">
   <script defer src="/micro-apps-repository/shared/frame.js?v=3"></script>
   <script defer src="/micro-apps-repository/shared/clinician_feedback.js?v=3"></script>
+  <script defer src="/micro-apps-repository/shared/csv.js?v=1"></script>
 
   <!-- Let frame.js find the catalog entry (or override below) -->
   <meta name="app-slug" content="taskflow">
@@ -577,16 +578,22 @@ function downloadCSV(){
       r.timestamp, r.trial_id, r.scenario, r.difficulty, r.steps_n, r.added_order, r.final_order, r.suggested_order, r.aligned_anchors, r.seconds
     ])
   ];
-  const csv = rows.map(r=>r.map(cell=>{
-    const s = String(cell);
-    return (s.includes(',')||s.includes('|')) ? '"'+s.replaceAll('"','""')+'"' : s;
-  }).join(',')).join('\n');
-
-  const blob = new Blob([csv], {type:'text/csv'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `taskflow_log_${new Date().toISOString().replace(/[:.]/g,'-')}.csv`;
-  document.body.appendChild(a); a.click(); a.remove();
+  const filename = `taskflow_log_${new Date().toISOString().replace(/[:.]/g,'-')}.csv`;
+  if (window.sharedCSV && typeof window.sharedCSV.triggerDownload === 'function') {
+    window.sharedCSV.triggerDownload({ rows, filename });
+  } else {
+    const csv = rows.map(r=>r.map(cell=>{
+      const s = cell == null ? '' : String(cell);
+      return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+    }).join(',')).join('\r\n');
+    const blob = new Blob(['\uFEFF'+csv], {type:'text/csv'});
+    const a = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  }
 }
 
 /* =========================

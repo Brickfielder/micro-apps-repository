@@ -12,6 +12,9 @@
   <meta name="app-desc" content="Strategy-led verbal fluency with voice input, repetition detection, and end-of-session grouping." />
   <script defer src="../../shared/frame.js"></script>
   <script defer src="../../shared/clinician_feedback.js"></script>
+  <script defer src="../../shared/words.js"></script>
+  <script defer src="../../shared/csv.js"></script>
+  <script defer src="../../shared/speech.js"></script>
 
   <style>
     :root {
@@ -519,7 +522,6 @@
       'use strict';
 
       var interimBuf = '';
-      var interimTimer = null;
       var session = [];
       var t0 = 0;
       var timerInt = null;
@@ -528,13 +530,23 @@
       var sessionActive = false;
       var micRequested = false;
 
-      var recog = null;
-      var recogActive = false;
-
-      var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      var hasSpeech = typeof SpeechRecognition !== 'undefined';
+      var speechSession = null;
+      var speechListening = false;
+      var speechModule = window.sharedSpeech;
+      var hasSpeech = !!(speechModule && typeof speechModule.isSupported === 'function' && speechModule.isSupported());
       var secureOrigin = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
       var canSpeech = hasSpeech && secureOrigin;
+      var normalizeWordFn = (window.sharedWords && typeof window.sharedWords.normalizeWord === 'function'
+        ? window.sharedWords.normalizeWord
+        : (typeof window.normalizeWord === 'function' ? window.normalizeWord : function (w) {
+            return String(w || '')
+              .toLowerCase()
+              .replace(/[^a-zA-Z\u00C0-\u024F\s'-]/g, '')
+              .trim()
+              .replace(/\s+/g, ' ')
+              .replace(/'s\b/, '')
+              .replace(/s\b/, '');
+          }));
 
       function qs(sel) {
         return document.querySelector(sel);
@@ -685,134 +697,139 @@
         els.timer.textContent = remaining;
       }
 
+      function speechShouldCapture() {
+        return sessionActive && !paused && micRequested && els.inputMode.value === 'speech' && canSpeech && remaining > 0;
+      }
+
+      function ensureSpeechSession() {
+        if (!canSpeech || speechSession || !speechModule || typeof speechModule.create !== 'function') return;
+        speechSession = speechModule.create({
+          lang: 'en-GB',
+          interimResults: true,
+          continuous: true,
+          onStatus: handleSpeechStatus,
+          onInterim: handleSpeechInterim,
+          onInterimCommit: handleSpeechCommit,
+          onResult: handleSpeechResult,
+          onError: handleSpeechError,
+          onTimeout: function () {
+            if (micRequested) setMic('warn', 'Mic: no speech detected');
+          }
+        });
+      }
+
+      function handleSpeechStatus(status) {
+        speechListening = status === 'listening';
+        if (!micRequested) {
+          if (status === 'idle') hideMicStatus();
+          updateMicButton();
+          return;
+        }
+        if (status === 'listening') {
+          setMic('ok', 'Mic: listening');
+          els.interim.style.display = 'block';
+        } else if (status === 'reconnecting') {
+          setMic('warn', 'Mic: reconnecting…');
+        } else if (status === 'timeout') {
+          setMic('warn', 'Mic: no speech detected');
+        } else if (status === 'error') {
+          setMic('warn', 'Mic: error');
+        } else if (status === 'idle') {
+          setMic('warn', 'Mic: idle');
+          els.interim.style.display = 'none';
+        }
+        updateMicButton();
+      }
+
+      function handleSpeechInterim(text) {
+        if (!speechShouldCapture()) return;
+        interimBuf = text || '';
+        if (interimBuf) {
+          els.interim.textContent = interimBuf;
+          els.interim.style.display = 'block';
+        } else {
+          els.interim.textContent = '';
+          els.interim.style.display = 'none';
+        }
+      }
+
+      function handleSpeechCommit(text) {
+        if (!speechShouldCapture()) return;
+        const cleaned = text ? text.trim() : '';
+        if (cleaned && /\w/.test(cleaned)) {
+          handleInput(cleaned);
+        }
+        interimBuf = '';
+        els.interim.textContent = '';
+        els.interim.style.display = 'none';
+      }
+
+      function handleSpeechResult(text) {
+        if (!speechShouldCapture()) return;
+        const cleaned = text ? text.trim() : '';
+        if (cleaned && /\w/.test(cleaned)) {
+          handleInput(cleaned);
+        }
+        interimBuf = '';
+        els.interim.textContent = '';
+      }
+
+      function handleSpeechError(err) {
+        if (!micRequested) return;
+        console.warn('Speech error:', err);
+        if (err === 'no-speech' || err === 'audio-capture') {
+          setMic('warn', 'Mic: no speech detected');
+        } else if (err === 'not-allowed' || err === 'service-not-allowed') {
+          setMic('bad', 'Mic: permission blocked');
+          alert('Microphone permission blocked. Allow mic access and start again.');
+          micRequested = false;
+          stopMic(true);
+        } else if (err === 'aborted') {
+          setMic('warn', 'Mic: aborted');
+        } else {
+          setMic('warn', 'Mic: error');
+        }
+        updateMicButton();
+      }
+
       function toggleMic() {
         if (!sessionActive || paused || els.inputMode.value !== 'speech' || !canSpeech) {
           return;
         }
         if (micRequested) {
           micRequested = false;
+          if (speechSession && typeof speechSession.commitInterim === 'function') {
+            speechSession.commitInterim();
+          }
           stopMic(false);
           setMic('warn', 'Mic: paused');
           els.interim.style.display = 'none';
         } else {
           micRequested = true;
-          ensureRecog();
+          ensureSpeechSession();
           startMic();
         }
         updateMicButton();
       }
 
-      function ensureRecog() {
-        if (!canSpeech || recog) return;
-        recog = new SpeechRecognition();
-        recog.lang = 'en-GB';
-        recog.interimResults = true;
-        recog.continuous = true;
-        recog.maxAlternatives = 1;
-
-        recog.onstart = function () {
-          recogActive = true;
-          setMic('ok', 'Mic: listening');
-          els.interim.style.display = 'block';
-          updateMicButton();
-        };
-
-        recog.onresult = function (e) {
-          var interimText = '';
-          for (var i = e.resultIndex; i < e.results.length; i++) {
-            var res = e.results[i];
-            var txt = res[0] && res[0].transcript ? res[0].transcript : '';
-            if (res.isFinal) {
-              commitInterim();
-              if (txt && /\w/.test(txt)) {
-                handleInput(txt);
-              }
-            } else {
-              interimText += txt + ' ';
-            }
-          }
-          interimBuf = interimText.trim();
-          if (interimBuf) {
-            els.interim.textContent = interimBuf;
-            els.interim.style.display = 'block';
-            if (interimTimer) clearTimeout(interimTimer);
-            interimTimer = setTimeout(function () {
-              commitInterim();
-            }, 800);
-          } else {
-            els.interim.textContent = '';
-          }
-        };
-
-        recog.onerror = function (ev) {
-          console.warn('Speech error:', ev && ev.error);
-          if (!micRequested) return;
-          if (ev && (ev.error === 'no-speech' || ev.error === 'audio-capture')) {
-            setMic('warn', 'Mic: no speech detected');
-          } else if (ev && (ev.error === 'not-allowed' || ev.error === 'service-not-allowed')) {
-            setMic('bad', 'Mic: permission blocked');
-            alert('Microphone permission blocked. Allow mic access and start again.');
-            micRequested = false;
-          } else if (ev && ev.error === 'aborted') {
-            setMic('warn', 'Mic: aborted');
-          } else {
-            setMic('warn', 'Mic: error');
-          }
-          updateMicButton();
-        };
-
-        recog.onend = function () {
-          recogActive = false;
-          if (micRequested && sessionActive && !paused && remaining > 0) {
-            setTimeout(function () {
-              startMic();
-            }, 150);
-          } else {
-            if (!micRequested) {
-              setMic('warn', 'Mic: idle');
-            }
-            els.interim.style.display = 'none';
-          }
-          updateMicButton();
-        };
-      }
-
       function startMic() {
         if (!canSpeech || !micRequested) return;
-        ensureRecog();
-        if (!recog || recogActive) return;
-        try {
-          recog.start();
-        } catch (e) {
-          console.warn('Start error:', e);
-        }
+        ensureSpeechSession();
+        if (!speechSession) return;
+        speechSession.start();
       }
 
       function stopMic(force) {
         if (force) {
           micRequested = false;
         }
-        if (recog && (recogActive || force)) {
-          try {
-            recog.stop();
-          } catch (e) {
-            /* ignore */
+        if (speechSession) {
+          if (typeof speechSession.commitInterim === 'function') {
+            speechSession.commitInterim();
           }
+          speechSession.stop();
         }
-        recogActive = false;
-      }
-
-      function commitInterim() {
-        if (interimTimer) {
-          clearTimeout(interimTimer);
-          interimTimer = null;
-        }
-        var text = interimBuf;
-        interimBuf = '';
-        if (text && /\w/.test(text)) {
-          handleInput(text);
-        }
-        els.interim.textContent = '';
+        speechListening = false;
       }
 
       function setMic(kind, text) {
@@ -849,7 +866,7 @@
         } else if (paused) {
           label = 'Resume the session to talk';
         } else if (micRequested) {
-          label = recogActive ? 'Listening… click to stop' : 'Reconnecting microphone…';
+          label = speechListening ? 'Listening… click to stop' : 'Connecting microphone…';
         } else {
           label = 'Start listening';
         }
@@ -891,7 +908,7 @@
         var tokens = splitWords(text);
         for (var i = 0; i < tokens.length; i++) {
           var raw = tokens[i];
-          var key = norm(raw);
+          var key = normalizeWordFn(raw);
           if (!key) continue;
           recordWord(cat, key, raw);
         }
@@ -1225,44 +1242,48 @@
         }).filter(Boolean);
       }
 
-      function norm(w) {
-        return String(w || '')
-          .toLowerCase()
-          .replace(/[^a-zA-Z\u00C0-\u024F\s'-]/g, '')
-          .trim()
-          .replace(/\s+/g, ' ')
-          .replace(/'s\b/, '')
-          .replace(/s\b/, '');
-      }
-
       function exportCSV() {
         var cat = els.category.value;
         var dur = parseInt(els.duration.value, 10);
-        var lines = ['category,duration_s,timestamp_rel_s,raw,normalized,repeat,off_target,override,deleted'];
+        var rows = [['category', 'duration_s', 'timestamp_rel_s', 'raw', 'normalized', 'repeat', 'off_target', 'override', 'deleted']];
         for (var i = 0; i < session.length; i++) {
           var it = session[i];
           var offNow = !it.onTarget && !it.overrideApproved;
-          lines.push(
-            cat + ',' + dur + ',' + it.ts.toFixed(2) + ',' +
-            csvEsc(it.raw) + ',' + csvEsc(it.key) + ',' +
-            (it.repeat ? 1 : 0) + ',' + (offNow ? 1 : 0) + ',' + (it.overrideApproved ? 1 : 0) + ',' + (it.deleted ? 1 : 0)
-          );
+          rows.push([
+            cat,
+            dur,
+            it.ts.toFixed(2),
+            it.raw,
+            it.key,
+            it.repeat ? 1 : 0,
+            offNow ? 1 : 0,
+            it.overrideApproved ? 1 : 0,
+            it.deleted ? 1 : 0
+          ]);
         }
-        var blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = 'fluency_' + cat + '_' + Date.now() + '.csv';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-      }
-
-      function csvEsc(s) {
-        if (s == null) return '';
-        var t = String(s).replace(/"/g, '""');
-        return '"' + t + '"';
+        var filename = 'fluency_' + cat + '_' + Date.now() + '.csv';
+        if (window.sharedCSV && typeof window.sharedCSV.triggerDownload === 'function') {
+          window.sharedCSV.triggerDownload({ rows: rows, filename: filename });
+        } else {
+          var fallback = rows.map(function (row) {
+            return row.map(function (cell) {
+              var text = cell == null ? '' : String(cell);
+              if (/[",\n]/.test(text)) {
+                return '"' + text.replace(/"/g, '""') + '"';
+              }
+              return text;
+            }).join(',');
+          }).join('\r\n');
+          var blob = new Blob(['\uFEFF' + fallback], { type: 'text/csv;charset=utf-8;' });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+        }
       }
 
       function escapeHtml(s) {
@@ -1281,7 +1302,7 @@
         paused = false;
         sessionActive = false;
         micRequested = false;
-        recogActive = false;
+          speechListening = false;
         els.pauseBtn.disabled = true;
         els.stopBtn.disabled = true;
         els.start.disabled = false;

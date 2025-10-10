@@ -9,6 +9,7 @@
   <meta name="app-slug" content="emergency-call-simulator" />
   <script defer src="../shared/frame.js"></script>
   <script defer src="../shared/clinician_feedback.js"></script>
+  <script defer src="../shared/speech.js"></script>
   <style>
     :root {
       color-scheme: light;
@@ -517,7 +518,9 @@
     let repeatTimer = null;
     let onScreenPromptTimer = null;
     let shutdownTimer = null;
-    let recognitionInstance = null;
+    const speechModule = window.sharedSpeech;
+    const speechSupported = !!(speechModule && typeof speechModule.isSupported === 'function' && speechModule.isSupported());
+    let speechSession = null;
     let recognitionLoopActive = false;
     let audioContext = null;
     let digits = '';
@@ -640,19 +643,57 @@
     const stopRecognitionLoop = () => {
       recognitionLoopActive = false;
       recognitionReady = false;
-      if (recognitionInstance) {
-        try {
-          recognitionInstance.onend = null;
-          recognitionInstance.stop();
-        } catch (err) {
-          // ignore
-        }
+      if (speechSession && typeof speechSession.stop === 'function') {
+        speechSession.stop();
       }
     };
 
+    const handleSpeechResult = (text, detail) => {
+      if (!recognitionEnabled) return;
+      const transcript = (text || '').trim().toLowerCase();
+      if (!transcript) return;
+      const now = Date.now();
+
+      if (lastPromptEndedAt && now - lastPromptEndedAt < 2000) {
+        addEvent('speech_ignored_prompt_overlap', {
+          transcript,
+          deltaMs: now - lastPromptEndedAt,
+        });
+        return;
+      }
+
+      const normalized = typeof transcript.normalize === 'function' ? transcript.normalize('NFKD') : transcript;
+      const sanitized = normalized
+        .replace(/[^a-z\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      const words = sanitized.split(' ').filter(Boolean);
+      const containsAmbulance = words.includes('ambulance');
+      const confidence = detail && typeof detail.confidence === 'number' ? detail.confidence : null;
+
+      if (!containsAmbulance) {
+        addEvent('speech_rejected_no_match', { transcript, sanitized, confidence });
+        return;
+      }
+
+      if (confidence !== null && confidence < 0.6) {
+        addEvent('speech_rejected_low_confidence', { transcript, confidence });
+        return;
+      }
+
+      addEvent('speech_detected', { transcript, sanitized, confidence });
+      recognitionSuccess = true;
+      addEvent('task_complete', { method: 'speech' });
+      finalizeSuccess();
+    };
+
+    const handleSpeechError = (error) => {
+      const errCode = typeof error === 'string' ? error : (error && error.error) || 'unknown';
+      addEvent('speech_error', { error: errCode });
+    };
+
     const startRecognitionLoop = () => {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) {
+      if (!speechSupported) {
         fallbackNote.hidden = false;
         recognitionReady = false;
         addEvent('speech_support_missing', {});
@@ -665,70 +706,34 @@
       }
       if (recognitionLoopActive) return;
       recognitionLoopActive = true;
-      recognitionInstance = new SpeechRecognition();
-      recognitionInstance.lang = 'en-GB';
-      recognitionInstance.interimResults = false;
-      recognitionInstance.maxAlternatives = 1;
+      recognitionSuccess = false;
+
+      if (!speechSession && speechModule && typeof speechModule.create === 'function') {
+        speechSession = speechModule.create({
+          lang: 'en-GB',
+          interimResults: false,
+          continuous: true,
+          reconnectDelay: 300,
+          maxSilenceMs: 8000,
+          onStatus: (status) => {
+            if (status === 'listening' || status === 'reconnecting') {
+              recognitionReady = true;
+            } else if (status === 'idle') {
+              recognitionReady = false;
+            }
+          },
+          onResult: handleSpeechResult,
+          onError: handleSpeechError,
+          onTimeout: () => {
+            addEvent('speech_timeout', {});
+          }
+        });
+      }
+
       recognitionReady = true;
       recognitionEnabled = false;
-
-      recognitionInstance.onresult = (event) => {
-        if (!recognitionEnabled) return;
-        const result = event.results[0][0];
-        const transcript = (result.transcript || '').trim().toLowerCase();
-        const now = Date.now();
-
-        if (lastPromptEndedAt && now - lastPromptEndedAt < 2000) {
-          addEvent('speech_ignored_prompt_overlap', {
-            transcript,
-            deltaMs: now - lastPromptEndedAt,
-          });
-          return;
-        }
-
-        const normalized = typeof transcript.normalize === 'function' ? transcript.normalize('NFKD') : transcript;
-        const sanitized = normalized
-          .replace(/[^a-z\s]/g, ' ')
-          .replace(/\s+/g, ' ')
-          .trim();
-        const words = sanitized.split(' ').filter(Boolean);
-        const containsAmbulance = words.includes('ambulance');
-        const confidence = typeof result.confidence === 'number' ? result.confidence : null;
-
-        if (!containsAmbulance) {
-          addEvent('speech_rejected_no_match', { transcript, sanitized, confidence });
-          return;
-        }
-
-        if (confidence !== null && confidence < 0.6) {
-          addEvent('speech_rejected_low_confidence', { transcript, confidence });
-          return;
-        }
-
-        addEvent('speech_detected', { transcript, sanitized, confidence });
-        recognitionSuccess = true;
-        addEvent('task_complete', { method: 'speech' });
-        finalizeSuccess();
-      };
-
-      recognitionInstance.onerror = (event) => {
-        addEvent('speech_error', { error: event.error });
-      };
-
-      recognitionInstance.onend = () => {
-        if (recognitionLoopActive && !recognitionSuccess) {
-          try {
-            recognitionInstance.start();
-          } catch (err) {
-            // ignore repeated start issues
-          }
-        }
-      };
-
-      try {
-        recognitionInstance.start();
-      } catch (err) {
-        addEvent('speech_error', { error: err.message });
+      if (speechSession && typeof speechSession.start === 'function') {
+        speechSession.start();
       }
     };
 
