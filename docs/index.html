@@ -1,9 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Cognitive Rehabilitation Micro-Apps</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cognitive Rehabilitation Micro-Apps — 3D Mobile Carousel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -25,460 +24,37 @@
     --max-width:1180px;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;height:100%;}
+  html,body{margin:0;height:100%}
   body{
     font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
     background:var(--bg);
     color:var(--ink);
-    letter-spacing:-0.01em;
     -webkit-font-smoothing:antialiased;
-    display:flex;
-    flex-direction:column;
-    min-height:100vh;
+    letter-spacing:-0.01em;
+    display:flex;flex-direction:column;min-height:100vh;
   }
-  a{color:inherit;text-decoration:none;}
-  .muted{color:var(--muted);}
-  .sr-only{
-    position:absolute;
-    width:1px;height:1px;
-    padding:0;margin:-1px;
-    overflow:hidden;
-    clip:rect(0,0,0,0);
-    white-space:nowrap;
-    border:0;
-  }
+  a{color:inherit;text-decoration:none}
+  .muted{color:var(--muted)}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}/* --- Header / hero (unchanged) --- */ .site-header{position:relative;padding:1.75rem 1.5rem 2rem} .site-header::before{content:"";position:absolute;inset:0;background:linear-gradient(140deg,rgba(81,54,255,.16) 0%,rgba(162,89,255,.12) 35%,rgba(242,78,30,.08) 100%);filter:blur(65px);opacity:.8;pointer-events:none} .header-inner{position:relative;max-width:var(--max-width);margin:0 auto;display:flex;flex-direction:column;gap:2rem} .top-nav{display:flex;align-items:center;gap:1.2rem;padding:.85rem 1rem;border-radius:var(--radius-lg);background:rgba(255,255,255,.78);backdrop-filter:blur(14px);border:1px solid rgba(148,163,184,.18);box-shadow:var(--shadow-sm)} .logo{display:flex;align-items:center;gap:.9rem;font-weight:700;font-size:1rem;letter-spacing:-.02em} .logo-mark{width:44px;height:44px;border-radius:16px;background:conic-gradient(from 140deg,#f24e1e 0%,#ff7262 30%,#a259ff 50%,#0acf83 75%,#1abcfe 100%);display:grid;place-items:center;color:#fff;font-weight:800;font-size:1.45rem;box-shadow:0 18px 35px rgba(81,54,255,.22)} .top-links{display:flex;align-items:center;gap:1rem;margin-left:auto;font-size:.95rem;color:var(--muted)} .top-links a{padding:.45rem .9rem;border-radius:999px;transition:background .2s ease,color .2s ease} .top-links a:hover{background:rgba(81,54,255,.1);color:var(--ink)} .top-links .pill{background:var(--ink);color:#fff;font-weight:600;box-shadow:0 18px 32px rgba(15,23,42,.25)}
 
-  .site-header{
-    position:relative;
-    padding:1.75rem 1.5rem 3.5rem;
-  }
-  .site-header::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    background:linear-gradient(140deg,rgba(81,54,255,0.16) 0%,rgba(162,89,255,0.12) 35%,rgba(242,78,30,0.08) 100%);
-    filter:blur(65px);
-    opacity:0.8;
-    pointer-events:none;
-  }
-  .header-inner{position:relative;max-width:var(--max-width);margin:0 auto;display:flex;flex-direction:column;gap:2.5rem;}
+.hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(260px,360px);gap:2.25rem;align-items:center} .hero h1{margin:0;font-size:clamp(2.2rem,3vw+1.6rem,3.2rem);line-height:1.08;letter-spacing:-.03em} .hero p{margin:0;font-size:1.05rem;line-height:1.65;color:color-mix(in srgb,var(--muted) 85%,white 15%);max-width:52ch} .hero-actions{display:flex;flex-wrap:wrap;gap:.75rem} .cta-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.55rem;border-radius:999px;font-weight:600;font-size:.98rem;border:none;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease} .cta-btn.primary{background:linear-gradient(135deg,#5136ff 0%,#a259ff 100%);color:#fff;box-shadow:0 22px 40px rgba(81,54,255,.35)}
 
-  .top-nav{
-    display:flex;
-    align-items:center;
-    gap:1.2rem;
-    padding:0.85rem 1rem;
-    border-radius:var(--radius-lg);
-    background:rgba(255,255,255,0.78);
-    backdrop-filter:blur(14px);
-    border:1px solid rgba(148,163,184,0.18);
-    box-shadow:var(--shadow-sm);
-  }
-  .logo{
-    display:flex;
-    align-items:center;
-    gap:0.9rem;
-    font-weight:700;
-    font-size:1rem;
-    letter-spacing:-0.02em;
-  }
-  .logo-mark{
-    width:44px;height:44px;
-    border-radius:16px;
-    background:conic-gradient(from 140deg,#f24e1e 0%,#ff7262 30%,#a259ff 50%,#0acf83 75%,#1abcfe 100%);
-    display:grid;
-    place-items:center;
-    color:#fff;
-    font-weight:800;
-    font-size:1.45rem;
-    box-shadow:0 18px 35px rgba(81,54,255,0.22);
-  }
-  .top-links{display:flex;align-items:center;gap:1rem;margin-left:auto;font-size:0.95rem;color:var(--muted);}
-  .top-links a{
-    padding:0.45rem 0.9rem;
-    border-radius:999px;
-    transition:background 0.2s ease, color 0.2s ease;
-  }
-  .top-links a:hover{background:rgba(81,54,255,0.1);color:var(--ink);}
-  .top-links .pill{
-    background:var(--ink);
-    color:#fff;
-    font-weight:600;
-    box-shadow:0 18px 32px rgba(15,23,42,0.25);
-  }
-  .top-links .pill:hover{background:#1f2a52;}
+.hero-preview{position:relative;padding:1.6rem;border-radius:var(--radius-lg);background:var(--surface);overflow:hidden;border:1px solid rgba(148,163,184,.22);box-shadow:var(--shadow-lg)} .hero-preview::before{content:"";position:absolute;inset:-40% -20% 30% -40%;background:linear-gradient(135deg,#d8e9ff 0%,#f7e9ff 100%);opacity:.9;filter:blur(16px);z-index:0} .hero-preview-content{position:relative;z-index:1}
 
-  .hero{
-    display:grid;
-    grid-template-columns:minmax(0,1.2fr) minmax(260px,360px);
-    gap:3rem;
-    align-items:center;
-  }
-  .hero-text{display:flex;flex-direction:column;gap:1.4rem;}
-  .hero-eyebrow{
-    text-transform:uppercase;
-    font-weight:600;
-    letter-spacing:0.22em;
-    font-size:0.78rem;
-    color:var(--accent);
-  }
-  .hero h1{margin:0;font-size:clamp(2.6rem,3vw+2rem,3.6rem);line-height:1.05;letter-spacing:-0.03em;}
-  .hero p{margin:0;font-size:1.08rem;line-height:1.65;color:color-mix(in srgb,var(--muted) 85%,white 15%);max-width:52ch;}
-  .hero-actions{display:flex;flex-wrap:wrap;gap:0.75rem;}
-  .cta-btn{
-    display:inline-flex;
-    align-items:center;
-    gap:0.5rem;
-    padding:0.75rem 1.55rem;
-    border-radius:999px;
-    font-weight:600;
-    font-size:0.98rem;
-    border:none;
-    cursor:pointer;
-    transition:transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  .cta-btn.primary{
-    background:linear-gradient(135deg,#5136ff 0%,#a259ff 100%);
-    color:#fff;
-    box-shadow:0 22px 40px rgba(81,54,255,0.35);
-  }
-  .cta-btn.primary:hover{transform:translateY(-2px);box-shadow:0 26px 46px rgba(81,54,255,0.38);}
-  .cta-btn.secondary{
-    background:var(--surface-soft);
-    border:1px solid rgba(148,163,184,0.35);
-    color:var(--ink);
-    backdrop-filter:blur(12px);
-  }
-  .cta-btn.secondary:hover{background:rgba(255,255,255,0.95);}
+main{flex:1;max-width:var(--max-width);margin:0 auto;padding:0 1.5rem 3rem} .section{margin-top:2.8rem;display:flex;flex-direction:column;gap:1.4rem} .section-heading h2{margin:0;font-size:clamp(1.8rem,2vw+1.2rem,2.3rem);letter-spacing:-.02em}
 
-  .stat-board{display:flex;flex-wrap:wrap;gap:0.85rem;margin-top:0.4rem;}
-  .stat{
-    min-width:160px;
-    padding:1rem 1.25rem;
-    border-radius:var(--radius-md);
-    background:rgba(255,255,255,0.85);
-    border:1px solid rgba(148,163,184,0.2);
-    box-shadow:0 16px 30px rgba(15,23,42,0.08);
-  }
-  .stat dt{margin:0;font-size:1.8rem;font-weight:700;letter-spacing:-0.02em;color:var(--ink);}
-  .stat dd{margin:0.2rem 0 0;font-size:0.85rem;color:var(--muted);}
+/* --- 3D Carousel --- */ .carousel{position:relative;display:flex;align-items:center;justify-content:center;gap:1rem;width:100%;margin-top:.5rem} .carousel-viewport{position:relative;width:100%;max-width:var(--max-width);height:430px;perspective:1400px;overflow:visible} .carousel-track{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .75s cubic-bezier(.22,.61,.36,1);will-change:transform} .carousel-item{position:absolute;top:50%;left:50%;width:min(340px,76vw);transform-style:preserve-3d;transition:transform .75s cubic-bezier(.22,.61,.36,1),filter .45s ease,opacity .45s ease;opacity:.55;filter:blur(.3px)} .carousel-item.is-active{opacity:1;filter:none} .carousel-item .card{min-height:320px}
 
-  .hero-preview{
-    position:relative;
-    padding:2.1rem;
-    border-radius:var(--radius-lg);
-    background:var(--surface);
-    overflow:hidden;
-    border:1px solid rgba(148,163,184,0.22);
-    box-shadow:var(--shadow-lg);
-    display:flex;
-    flex-direction:column;
-    gap:1.1rem;
-  }
-  .hero-preview::before{
-    content:"";
-    position:absolute;
-    inset:-40% -20% 30% -40%;
-    background:var(--card-gradient,linear-gradient(135deg,#d8e9ff 0%,#f7e9ff 100%));
-    opacity:0.9;
-    filter:blur(16px);
-    z-index:0;
-  }
-  .hero-preview-content{position:relative;z-index:1;display:flex;flex-direction:column;gap:1rem;}
-  .hero-preview-emoji{font-size:2.4rem;}
-  .hero-preview h3{margin:0;font-size:1.35rem;letter-spacing:-0.01em;}
-  .hero-preview p{margin:0;font-size:0.95rem;line-height:1.6;color:var(--muted);}
+.card{position:relative;border-radius:var(--radius-lg);padding:1.4rem 1.5rem 1.6rem;border:1px solid rgba(148,163,184,.18);background:var(--surface);overflow:hidden;box-shadow:var(--shadow-sm)} .card::before{content:"";position:absolute;inset:-30% -20% 45% -30%;background:var(--card-gradient,linear-gradient(135deg,#e4f1ff 0%,#f6e8ff 100%));opacity:.9;filter:blur(20px);z-index:0} .card-link{position:relative;z-index:1;display:flex;flex-direction:column;gap:1rem;height:100%} .card-header{display:flex;align-items:center;gap:.6rem} .card-emoji{font-size:2rem} .card h3{margin:0;font-size:1.2rem;letter-spacing:-.01em} .card p{margin:0;font-size:.96rem;line-height:1.55;color:var(--muted)} .tag-list{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:auto} .tag-list span{padding:.38rem .75rem;border-radius:999px;font-size:.78rem;font-weight:600;background:rgba(255,255,255,.75);border:1px solid rgba(148,163,184,.28);color:var(--muted)}
 
-  main{flex:1;max-width:var(--max-width);margin:0 auto;padding:0 1.5rem 4rem;}
-  .section{margin-top:3.5rem;display:flex;flex-direction:column;gap:2rem;}
-  .section-heading{display:flex;flex-wrap:wrap;align-items:flex-end;gap:1.5rem;justify-content:space-between;}
-  .section-heading h2{margin:0;font-size:clamp(1.9rem,2vw+1.6rem,2.4rem);letter-spacing:-0.02em;}
-  .section-heading p{margin:0;font-size:1rem;line-height:1.6;color:var(--muted);max-width:52ch;}
+.carousel-nav{flex:0 0 auto;width:46px;height:46px;border-radius:50%;border:1px solid rgba(148,163,184,.35);background:rgba(255,255,255,.85);backdrop-filter:blur(10px);color:var(--ink);display:grid;place-items:center;cursor:pointer;box-shadow:0 18px 32px rgba(15,23,42,.12);transition:transform .2s ease,box-shadow .2s ease,border .2s ease} .carousel-nav:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;transform:none} .carousel-nav svg{width:18px;height:18px}
 
-  .control-bar{width:100%;display:flex;flex-wrap:wrap;gap:1rem;align-items:center;}
-  .search-field{flex:1 1 260px;position:relative;}
-  .search-field input{
-    width:100%;
-    padding:0.75rem 1.2rem 0.75rem 2.7rem;
-    border-radius:999px;
-    border:1px solid rgba(148,163,184,0.32);
-    background:rgba(255,255,255,0.92);
-    font-size:0.95rem;
-    color:var(--ink);
-    box-shadow:0 15px 25px rgba(15,23,42,0.07);
-    transition:border 0.2s ease, box-shadow 0.2s ease;
-  }
-  .search-field input:focus{outline:none;border-color:var(--accent);box-shadow:0 18px 40px rgba(81,54,255,0.25);}
-  .search-field svg{position:absolute;left:1rem;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--muted);}
+.carousel-pagination{position:absolute;bottom:.6rem;left:50%;transform:translateX(-50%);display:flex;gap:.5rem;padding:.35rem .7rem;border-radius:999px;background:rgba(255,255,255,.78);border:1px solid rgba(148,163,184,.18);backdrop-filter:blur(12px);box-shadow:0 12px 28px rgba(15,23,42,.12)} .carousel-dot{width:10px;height:10px;border-radius:999px;border:none;background:rgba(148,163,184,.45);padding:0;cursor:pointer;transition:width .25s ease, background .25s ease} .carousel-dot[data-active="true"]{width:26px;background:linear-gradient(135deg,#5136ff 0%,#a259ff 100%)}
 
-  .tag-strip{
-    flex:1 1 100%;
-    display:flex;
-    gap:0.6rem;
-    overflow-x:auto;
-    padding:0.3rem 0;
-    scroll-snap-type:x mandatory;
-  }
-  .tag-pill{
-    flex:0 0 auto;
-    display:inline-flex;
-    align-items:center;
-    gap:0.35rem;
-    padding:0.5rem 1.05rem;
-    border-radius:999px;
-    border:1px solid transparent;
-    background:rgba(148,163,184,0.18);
-    color:var(--muted);
-    font-size:0.85rem;
-    font-weight:600;
-    cursor:pointer;
-    white-space:nowrap;
-    scroll-snap-align:start;
-    transition:transform 0.2s ease, background 0.2s ease, border 0.2s ease, color 0.2s ease;
-  }
-  .tag-pill:hover{background:rgba(148,163,184,0.26);transform:translateY(-1px);}
-  .tag-pill[data-active="true"]{
-    background:linear-gradient(135deg,rgba(81,54,255,0.18) 0%,rgba(162,89,255,0.24) 100%);
-    color:var(--ink);
-    border-color:rgba(81,54,255,0.4);
-    box-shadow:0 16px 30px rgba(81,54,255,0.18);
-  }
-  .tag-pill:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+/* --- Mobile specific: keep 3D instead of falling back to 2D --- */ @media (max-width: 720px){ .site-header{padding:1.25rem 1rem 1.6rem} main{padding:0 1rem 2.4rem} .carousel-viewport{height:420px;perspective:1100px} .carousel-item{width:82vw} }
 
-  .carousel{
-    position:relative;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:1.5rem;
-    width:100%;
-    margin-top:1rem;
-  }
-  .carousel[data-empty="true"]{display:none;}
-  .carousel:focus-visible{outline:2px solid var(--accent);outline-offset:6px;}
-  .carousel-viewport{
-    position:relative;
-    width:100%;
-    max-width:var(--max-width);
-    height:440px;
-    perspective:1600px;
-  }
-  .carousel-track{
-    position:absolute;
-    inset:0;
-    transform-style:preserve-3d;
-    transition:transform 0.75s cubic-bezier(.22,.61,.36,1);
-    will-change:transform;
-  }
-  .carousel-item{
-    position:absolute;
-    top:50%;
-    left:50%;
-    width:min(340px,72vw);
-    transform-style:preserve-3d;
-    transition:transform 0.75s cubic-bezier(.22,.61,.36,1),
-      filter 0.45s ease,
-      opacity 0.45s ease;
-    opacity:0.5;
-    filter:blur(1px);
-    transform:translate(-50%,-50%);
-  }
-  .carousel-item.is-active{
-    opacity:1;
-    filter:none;
-  }
-  .carousel-item .card{
-    height:100%;
-    min-height:320px;
-  }
-  .carousel-nav{
-    flex:0 0 auto;
-    width:52px;
-    height:52px;
-    border-radius:50%;
-    border:1px solid rgba(148,163,184,0.35);
-    background:rgba(255,255,255,0.85);
-    backdrop-filter:blur(10px);
-    color:var(--ink);
-    display:grid;
-    place-items:center;
-    cursor:pointer;
-    box-shadow:0 18px 32px rgba(15,23,42,0.12);
-    transition:transform 0.2s ease, box-shadow 0.2s ease, border 0.2s ease;
-  }
-  .carousel-nav:hover{transform:translateY(-2px);box-shadow:0 22px 40px rgba(15,23,42,0.16);}
-  .carousel-nav:disabled{
-    opacity:0.45;
-    cursor:not-allowed;
-    box-shadow:none;
-    transform:none;
-  }
-  .carousel-nav svg{width:18px;height:18px;}
-  .carousel-pagination{
-    position:absolute;
-    bottom:1rem;
-    left:50%;
-    transform:translateX(-50%);
-    display:flex;
-    gap:0.6rem;
-    padding:0.35rem 0.75rem;
-    border-radius:999px;
-    background:rgba(255,255,255,0.78);
-    border:1px solid rgba(148,163,184,0.18);
-    backdrop-filter:blur(12px);
-    box-shadow:0 12px 28px rgba(15,23,42,0.12);
-  }
-  .carousel-pagination[hidden]{display:none;}
-  .carousel-dot{
-    width:11px;
-    height:11px;
-    border-radius:999px;
-    border:none;
-    background:rgba(148,163,184,0.45);
-    padding:0;
-    cursor:pointer;
-    transition:width 0.25s ease, background 0.25s ease;
-  }
-  .carousel-dot[data-active="true"]{
-    width:28px;
-    background:linear-gradient(135deg,#5136ff 0%,#a259ff 100%);
-  }
-  .card{
-    position:relative;
-    border-radius:var(--radius-lg);
-    padding:1.6rem 1.7rem 1.8rem;
-    border:1px solid rgba(148,163,184,0.18);
-    background:var(--surface);
-    overflow:hidden;
-    transition:transform 0.25s cubic-bezier(.16,1,.3,1), box-shadow 0.25s ease;
-  }
-  .card::before{
-    content:"";
-    position:absolute;
-    inset:-30% -20% 45% -30%;
-    background:var(--card-gradient,linear-gradient(135deg,#e4f1ff 0%,#f6e8ff 100%));
-    opacity:0.9;
-    filter:blur(20px);
-    z-index:0;
-    transition:transform 0.25s ease;
-  }
-  .card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);}
-  .card:hover::before{transform:translateY(-6px);}
-  .card-link{position:relative;z-index:1;display:flex;flex-direction:column;gap:1.15rem;height:100%;}
-  .card-header{display:flex;align-items:center;gap:0.6rem;}
-  .card-emoji{font-size:2.1rem;}
-  .chip{
-    padding:0.3rem 0.7rem;
-    border-radius:999px;
-    font-size:0.72rem;
-    letter-spacing:0.14em;
-    text-transform:uppercase;
-    font-weight:700;
-    background:rgba(15,23,42,0.08);
-    color:var(--ink);
-  }
-  .card h3{margin:0;font-size:1.28rem;letter-spacing:-0.01em;}
-  .card p{margin:0;font-size:0.95rem;line-height:1.55;color:var(--muted);}
-  .tag-list{display:flex;flex-wrap:wrap;gap:0.45rem;margin-top:auto;}
-  .tag-list span{
-    padding:0.38rem 0.75rem;
-    border-radius:999px;
-    font-size:0.78rem;
-    font-weight:600;
-    background:rgba(255,255,255,0.75);
-    border:1px solid rgba(148,163,184,0.28);
-    color:var(--muted);
-  }
+/* Reduced motion: provide accessible 2D fallback (scroll-snap) */ @media (prefers-reduced-motion: reduce){ .carousel-viewport{perspective:none;height:auto} .carousel-track{position:static;display:flex;gap:1rem;overflow-x:auto;padding-bottom:.75rem;margin:0 -0.5rem;scroll-snap-type:x mandatory;transform:none !important} .carousel-item{position:relative;top:auto;left:auto;flex:0 0 85%;max-width:320px;margin:0 auto;opacity:1;filter:none;transform:none !important;scroll-snap-align:center} .carousel-pagination{position:static;transform:none;margin:0 auto} .carousel-nav{display:none} } </style>
 
-  .empty-state{
-    padding:2.4rem;
-    border-radius:var(--radius-md);
-    border:1px dashed rgba(148,163,184,0.35);
-    background:rgba(255,255,255,0.85);
-    text-align:center;
-    font-size:1rem;
-    color:var(--muted);
-  }
-
-  .featured-wrap{display:flex;flex-direction:column;gap:1.5rem;}
-  #featuredGrid{
-    display:flex;
-    gap:1.4rem;
-    overflow-x:auto;
-    padding-bottom:0.4rem;
-    margin-bottom:-0.4rem;
-    scroll-snap-type:x mandatory;
-  }
-  #featuredGrid .card{min-width:280px;flex:0 0 auto;scroll-snap-align:start;}
-  #featuredGrid .card::before{inset:-20% -10% 50% -20%;}
-  .card.card--featured .chip{background:rgba(81,54,255,0.16);color:var(--ink);}
-
-  .site-footer{
-    margin-top:auto;
-    padding:2.5rem 1.5rem;
-    background:linear-gradient(180deg,rgba(248,249,255,0.9) 0%,rgba(239,246,255,0.95) 60%,#ffffff 100%);
-    border-top:1px solid rgba(226,232,240,0.9);
-    text-align:center;
-    color:var(--muted);
-    font-size:0.96rem;
-  }
-  .site-footer a{color:var(--accent-alt);} 
-  .site-footer a:hover{text-decoration:underline;}
-
-  @media(max-width:1080px){
-    .carousel-viewport{height:400px;}
-  }
-  @media(max-width:960px){
-    .hero{grid-template-columns:minmax(0,1fr);}
-    .hero-preview{order:-1;max-width:420px;justify-self:center;}
-    .carousel-nav{display:none;}
-  }
-  @media(max-width:720px){
-    .site-header{padding:1.25rem 1rem 3rem;}
-    .header-inner{gap:2rem;}
-    .top-nav{flex-wrap:wrap;gap:0.75rem;padding:0.75rem 0.85rem;}
-    .top-links{width:100%;justify-content:flex-start;flex-wrap:wrap;gap:0.65rem;}
-    .hero-actions{width:100%;}
-    .cta-btn{flex:1 1 auto;justify-content:center;}
-    main{padding:0 1rem 3rem;}
-    .carousel{
-      flex-direction:column;
-      align-items:stretch;
-      gap:1rem;
-    }
-    .carousel-viewport{
-      height:auto;
-      perspective:none;
-    }
-    .carousel-track{
-      position:static;
-      display:flex;
-      gap:1rem;
-      overflow-x:auto;
-      padding-bottom:0.75rem;
-      margin:0 -0.5rem;
-      scroll-snap-type:x mandatory;
-      transform:none !important;
-    }
-    .carousel-item{
-      position:relative;
-      top:auto;
-      left:auto;
-      flex:0 0 85%;
-      max-width:320px;
-      margin:0 auto;
-      opacity:1;
-      filter:none;
-      transform:none !important;
-      scroll-snap-align:center;
-    }
-    .carousel-pagination{
-      position:static;
-      transform:none;
-      margin:0 auto;
-    }
-  }
-</style>
 </head>
 <body>
 <header class="site-header">
@@ -491,107 +67,75 @@
         <a href="https://github.com/marcomion/micro-apps" target="_blank" rel="noopener">GitHub</a>
         <a class="pill" href="mailto:m.mion@nhs.net">Partner with us</a>
       </div>
-    </nav>
-
-    <div class="hero">
-      <div class="hero-text">
-        <span class="hero-eyebrow">Micro-app experiences</span>
-        <h1>Design-forward clinical tools for cognitive rehabilitation teams.</h1>
-        <p>
-          Explore a vibrant index of lightweight applications inspired by the craft of product design. Curated to support
-          assessment, therapy practice, and collaborative research in minutes, not months.
-        </p>
-        <div class="hero-actions">
-          <a class="cta-btn primary" href="#grid">Browse the collection</a>
-          <a class="cta-btn secondary" href="mailto:m.mion@nhs.net">Discuss a project</a>
-        </div>
-        <dl class="stat-board" aria-live="polite">
-          <div class="stat">
-            <dt id="statApps">0</dt>
-            <dd>Micro-apps available</dd>
-          </div>
-          <div class="stat">
-            <dt id="statTags">0</dt>
-            <dd>Clinical focus areas</dd>
-          </div>
-          <div class="stat">
-            <dt id="statFeatured">0</dt>
-            <dd>Curated editor’s picks</dd>
-          </div>
-        </dl>
-      </div>
-      <aside class="hero-preview" id="heroPreview" aria-hidden="true">
-        <div class="hero-preview-content">
-          <span class="hero-preview-emoji" aria-hidden="true">✨</span>
-          <h3>Loading the lab…</h3>
-          <p>We craft immersive micro-experiences that look and feel as polished as your favourite design tools.</p>
-          <div class="tag-list"></div>
-        </div>
-      </aside>
+    </nav><div class="hero">
+  <div>
+    <h1>Design-forward clinical tools for cognitive rehabilitation teams.</h1>
+    <p>Explore a vibrant index of lightweight applications inspired by product design. Curated to support assessment, therapy, and research in minutes, not months.</p>
+    <div class="hero-actions">
+      <a class="cta-btn primary" href="#grid">Browse the collection</a>
     </div>
   </div>
-</header>
+  <aside class="hero-preview" aria-hidden="true">
+    <div class="hero-preview-content">
+      <span style="font-size:2.2rem">✨</span>
+      <h3 style="margin:.2rem 0 0">Loading the lab…</h3>
+      <p class="muted" style="margin:.4rem 0 0">Immersive micro‑experiences that feel as polished as your favourite design tools.</p>
+    </div>
+  </aside>
+</div>
 
-<main>
+  </div>
+</header><main>
   <section class="section" id="grid">
     <div class="section-heading">
       <div>
         <h2>Explore focused experiences for cognitive rehabilitation</h2>
-        <p>Search by need, filter by tags, and drop straight into clinician-tested flows that mirror the energy of modern design systems.</p>
+        <p class="muted">Swipe/drag to rotate the 3D carousel on mobile. Tap a card to open an app.</p>
       </div>
-    </div>
+    </div><div class="carousel" id="carousel" tabindex="0" aria-roledescription="carousel" aria-label="Micro‑apps carousel">
+  <button class="carousel-nav" type="button" id="carouselPrev" aria-label="Show previous micro‑app">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M15.5 5.5 9 12l6.5 6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <div class="carousel-viewport" id="carouselViewport">
+    <div class="carousel-track" id="appCarousel" role="list"></div>
+    <div class="carousel-pagination" id="carouselPagination" role="tablist" aria-label="Select highlighted micro‑app"></div>
+  </div>
+  <button class="carousel-nav" type="button" id="carouselNext" aria-label="Show next micro‑app">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M8.5 5.5 15 12l-6.5 6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+</div>
 
-    <div class="control-bar">
-      <label class="search-field">
-        <span class="sr-only">Search micro-apps</span>
-        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="m21 21-4.8-4.8m2.3-5.5a7.8 7.8 0 1 1-15.6 0 7.8 7.8 0 0 1 15.6 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        <input type="search" id="search" placeholder="Search by name or description" autocomplete="off" spellcheck="false">
-      </label>
-      <div class="tag-strip" id="tagCloud" aria-live="polite"></div>
-    </div>
-
-    <div class="carousel" id="carousel" tabindex="0">
-      <button class="carousel-nav" type="button" id="carouselPrev" aria-label="Show previous micro-app">
-        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M15.5 5.5 9 12l6.5 6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <div class="carousel-viewport" id="carouselViewport">
-        <div class="carousel-track" id="appCarousel" role="list"></div>
-        <div class="carousel-pagination" id="carouselPagination" role="tablist" aria-label="Select highlighted micro-app" hidden></div>
-      </div>
-      <button class="carousel-nav" type="button" id="carouselNext" aria-label="Show next micro-app">
-        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M8.5 5.5 15 12l-6.5 6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-    </div>
-    <div class="empty-state" id="emptyState" hidden>No micro-apps match your filters just yet. Clear filters to browse the full collection.</div>
-  </section>
-
-  <section class="section" id="featured">
+  </section>  <section class="section" id="featured">
     <div class="section-heading">
       <div>
         <h2>Start with popular experiences that spark engagement</h2>
-        <p>A rotating set of featured micro-apps that clinicians rate highly for their impact, clarity, and delight.</p>
+        <p class="muted">A rotating set of featured micro‑apps.</p>
       </div>
     </div>
-    <div class="featured-wrap">
-      <div id="featuredGrid" aria-live="polite"></div>
-    </div>
+    <div id="featuredGrid"></div>
   </section>
-</main>
-
-<footer class="site-footer">
-  <p>© 2025 Cognitive Rehabilitation Micro-Apps — Licensed under the <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noopener">Apache 2.0 License</a>.</p>
-  <p>Contact: <a href="mailto:m.mion@nhs.net">m.mion@nhs.net</a> · <a href="https://www.linkedin.com/in/marco-mion/" target="_blank" rel="noopener">LinkedIn</a></p>
+</main><footer class="site-footer" style="text-align:center;padding:2rem 1rem;color:var(--muted)">
+  <p>© 2025 Cognitive Rehabilitation Micro‑Apps — Apache 2.0</p>
   <p id="last-updated" class="muted"></p>
-</footer>
-
-<script>
+</footer><script>
+(() => {
   const state = {
-    apps: [],
-    activeTag: 'all',
-    search: '',
+    apps: [
+      { slug:"market-manager", emoji:"🛒", title:"Market Manager", desc:"Working memory under retail pressure.", href:"#", tags:["executive","memory"] },
+      { slug:"cashpoint-coach", emoji:"🏧", title:"CashPoint Coach", desc:"ATM practice with spoken steps.", href:"#", tags:["planning","everyday"] },
+      { slug:"task-juggler", emoji:"🧠", title:"Task Juggler", desc:"Multitask with timed interruptions.", href:"#", tags:["executive"] },
+      { slug:"emergency-call-simulator", emoji:"📞", title:"Emergency Call Simulator", desc:"Practise structured calls under stress.", href:"#", tags:["attention"] },
+      { slug:"fluency-coach", emoji:"💬", title:"Fluency Coach", desc:"Strategy‑led verbal fluency.", href:"#", tags:["language"] },
+      { slug:"barista-chaos", emoji:"☕", title:"Barista Chaos", desc:"Dual‑tasking with orders & timing.", href:"#", tags:["dual‑task"] },
+      { slug:"maze-explorer", emoji:"🧭", title:"Maze Explorer", desc:"Visuospatial scanning & planning.", href:"#", tags:["visuospatial"] },
+      { slug:"plan-with-coco", emoji:"🐦", title:"Plan with Coco", desc:"Prospective memory & routines.", href:"#", tags:["planning"] }
+    ],
     currentIndex: 0,
-    filtered: [],
-    carouselRadius: 0
+    step: 0,
+    radius: 0,
+    dragging: false,
+    dragX: 0,
+    lastX: 0,
   };
 
   const gradientPalette = [
@@ -602,337 +146,167 @@
     'linear-gradient(135deg,#f7f3ff 0%,#e7f4ff 100%)'
   ];
 
-  const carousel = document.getElementById('carousel');
-  const carouselTrack = document.getElementById('appCarousel');
-  const carouselViewport = document.getElementById('carouselViewport');
-  const carouselPrev = document.getElementById('carouselPrev');
-  const carouselNext = document.getElementById('carouselNext');
-  const carouselPagination = document.getElementById('carouselPagination');
-  const featuredGrid = document.getElementById('featuredGrid');
-  const tagCloud = document.getElementById('tagCloud');
-  const searchInput = document.getElementById('search');
-  const emptyState = document.getElementById('emptyState');
-  const heroPreview = document.getElementById('heroPreview');
+  const track = document.getElementById('appCarousel');
+  const pagination = document.getElementById('carouselPagination');
+  const viewport = document.getElementById('carouselViewport');
+  const btnPrev = document.getElementById('carouselPrev');
+  const btnNext = document.getElementById('carouselNext');
 
-  function getCardGradient(index){
-    const paletteIndex = ((index % gradientPalette.length) + gradientPalette.length) % gradientPalette.length;
-    return gradientPalette[paletteIndex];
-  }
+  function render() {
+    track.innerHTML = '';
+    pagination.innerHTML = '';
 
-  function updateHeroPreview(highlight){
-    if (!heroPreview) return;
-    const highlightApp = highlight
-      || (state.filtered && state.filtered[state.currentIndex])
-      || state.apps.find(app => app.featured)
-      || state.apps[0];
-    if (!highlightApp) return;
-    const tagMarkup = (highlightApp.tags || []).map(tag => `<span>${tag}</span>`).join('');
-    const paletteIndex = state.apps.indexOf(highlightApp);
-    heroPreview.style.setProperty('--card-gradient', getCardGradient(paletteIndex >= 0 ? paletteIndex : 0));
-    heroPreview.innerHTML = `
-      <div class="hero-preview-content">
-        <span class="hero-preview-emoji" aria-hidden="true">${highlightApp.emoji || '✨'}</span>
-        <h3>${highlightApp.title}</h3>
-        <p>${highlightApp.description}</p>
-        <div class="tag-list">${tagMarkup}</div>
-      </div>
-    `;
-  }
-
-  function createTagPill(tag, count){
-    const pill = document.createElement('button');
-    pill.className = 'tag-pill';
-    pill.type = 'button';
-    pill.dataset.tag = tag;
-    pill.setAttribute('data-active', tag === state.activeTag ? 'true' : 'false');
-    pill.textContent = tag === 'all' ? `All (${state.apps.length})` : `${tag} (${count})`;
-    pill.addEventListener('click', () => {
-      state.activeTag = tag === state.activeTag ? 'all' : tag;
-      state.currentIndex = 0;
-      renderTagCloud();
-      renderApps();
-    });
-    return pill;
-  }
-
-  function renderTagCloud(){
-    tagCloud.innerHTML = '';
-    const counts = {};
-    state.apps.forEach(app => {
-      (app.tags || []).forEach(tag => {
-        counts[tag] = (counts[tag] || 0) + 1;
-      });
-    });
-    const sortedTags = Object.keys(counts).sort((a,b) => counts[b] - counts[a] || a.localeCompare(b));
-    const fragment = document.createDocumentFragment();
-    fragment.appendChild(createTagPill('all'));
-    sortedTags.forEach(tag => fragment.appendChild(createTagPill(tag, counts[tag])));
-    tagCloud.appendChild(fragment);
-  }
-
-  function computeCarouselRadius(count){
-    if (!carouselViewport || count <= 1) return 0;
-    const viewportWidth = carouselViewport.offsetWidth || window.innerWidth || 0;
-    const base = Math.min(Math.max(viewportWidth * 0.45, 320), 640);
-    return count === 2 ? base * 0.9 : base;
-  }
-
-  function updateNavState(){
-    const disabled = state.filtered.length <= 1;
-    if (carouselPrev) carouselPrev.disabled = disabled;
-    if (carouselNext) carouselNext.disabled = disabled;
-  }
-
-  function updatePagination(){
-    if (!carouselPagination || carouselPagination.hidden) return;
-    Array.from(carouselPagination.children).forEach((dot, index) => {
-      dot.setAttribute('data-active', index === state.currentIndex ? 'true' : 'false');
-      dot.setAttribute('aria-selected', index === state.currentIndex ? 'true' : 'false');
-    });
-  }
-
-  function buildPagination(){
-    if (!carouselPagination) return;
-    const count = state.filtered.length;
-    carouselPagination.innerHTML = '';
-    if (count <= 1){
-      carouselPagination.hidden = true;
-      return;
-    }
-    carouselPagination.hidden = false;
-    const fragment = document.createDocumentFragment();
-    state.filtered.forEach((app, index) => {
-      const dot = document.createElement('button');
-      dot.className = 'carousel-dot';
-      dot.type = 'button';
-      dot.setAttribute('aria-label', `Show ${app.title}`);
-      dot.setAttribute('role', 'tab');
-      dot.dataset.index = index;
-      dot.setAttribute('data-active', index === state.currentIndex ? 'true' : 'false');
-      dot.setAttribute('aria-selected', index === state.currentIndex ? 'true' : 'false');
-      dot.addEventListener('click', () => {
-        state.currentIndex = index;
-        updateCarouselRotation();
-      });
-      fragment.appendChild(dot);
-    });
-    carouselPagination.appendChild(fragment);
-  }
-
-  function updateCarouselRotation(){
-    if (!carouselTrack) return;
-    const count = state.filtered.length;
-    const radius = state.carouselRadius || 0;
-    if (count <= 1 || radius === 0){
-      carouselTrack.style.transform = 'translateZ(0) rotateY(0deg)';
-    }else{
-      const angleStep = 360 / count;
-      carouselTrack.style.transform = `translateZ(-${radius}px) rotateY(${state.currentIndex * -angleStep}deg)`;
-    }
-    Array.from(carouselTrack.children).forEach((item, index) => {
-      item.classList.toggle('is-active', index === state.currentIndex);
-    });
-    updateNavState();
-    updatePagination();
-    updateHeroPreview(state.filtered[state.currentIndex]);
-  }
-
-  function updateCarouselGeometry(){
-    if (!carouselTrack) return;
-    const count = state.filtered.length;
-    if (count === 0){
-      state.carouselRadius = 0;
-      carouselTrack.style.transform = 'translateZ(0) rotateY(0deg)';
-      return;
-    }
-    const radius = computeCarouselRadius(count);
-    state.carouselRadius = radius;
-    const angleStep = count > 0 ? 360 / count : 0;
-    Array.from(carouselTrack.children).forEach((item, index) => {
-      const rotation = angleStep * index;
-      item.style.transform = `translate(-50%,-50%) rotateY(${rotation}deg) translateZ(${radius}px)`;
-    });
-    updateCarouselRotation();
-  }
-
-  function renderApps(){
-    if (!carouselTrack) return;
-    const filtered = state.apps.filter(app => {
-      const matchesTag = state.activeTag === 'all' || (app.tags || []).includes(state.activeTag);
-      const term = state.search.trim().toLowerCase();
-      const matchesSearch = !term || [app.title, app.description, (app.tags || []).join(' ')].some(text => (text || '').toLowerCase().includes(term));
-      return matchesTag && matchesSearch;
-    });
-
-    state.filtered = filtered;
-
-    if (filtered.length === 0){
-      state.currentIndex = 0;
-      state.carouselRadius = 0;
-      carouselTrack.innerHTML = '';
-      if (carouselPagination) carouselPagination.hidden = true;
-      if (emptyState) emptyState.hidden = false;
-      if (carousel) carousel.setAttribute('data-empty', 'true');
-      updateNavState();
-      updateHeroPreview();
-      return;
-    }
-
-    if (emptyState) emptyState.hidden = true;
-    if (carousel) carousel.removeAttribute('data-empty');
-    state.currentIndex = 0;
-    carouselTrack.innerHTML = '';
-    const fragment = document.createDocumentFragment();
-    filtered.forEach((app, index) => {
+    state.apps.forEach((app, i) => {
       const item = document.createElement('div');
       item.className = 'carousel-item';
       item.setAttribute('role', 'listitem');
-      item.dataset.index = index;
-      const card = document.createElement('article');
-      card.className = `card${app.featured ? ' card--featured' : ''}`;
-      card.style.setProperty('--card-gradient', getCardGradient(state.apps.indexOf(app)));
-      const url = `apps/${app.slug}/`;
-      card.innerHTML = `
-        <a class="card-link" href="${url}">
-          <div class="card-header">
-            <span class="card-emoji" aria-hidden="true">${app.emoji || '✨'}</span>
-            ${app.featured ? '<span class="chip">Featured</span>' : ''}
-          </div>
-          <h3>${app.title}</h3>
-          <p>${app.description}</p>
-          <div class="tag-list">${(app.tags || []).map(tag => `<span>${tag}</span>`).join('')}</div>
-        </a>
-      `;
-      item.appendChild(card);
-      fragment.appendChild(item);
+      item.innerHTML = `
+        <article class="card" style="--card-gradient:${gradientPalette[i % gradientPalette.length]}">
+          <a class="card-link" href="${app.href}">
+            <header class="card-header">
+              <span class="card-emoji" aria-hidden="true">${app.emoji}</span>
+              <span class="chip">App</span>
+            </header>
+            <h3>${app.title}</h3>
+            <p>${app.desc}</p>
+            <div class="tag-list">${app.tags.map(t=>`<span>${t}</span>`).join('')}</div>
+          </a>
+        </article>`;
+      track.appendChild(item);
+
+      const dot = document.createElement('button');
+      dot.className = 'carousel-dot';
+      dot.type = 'button';
+      dot.setAttribute('role', 'tab');
+      dot.setAttribute('aria-label', `Slide ${i+1}`);
+      dot.addEventListener('click', () => goTo(i));
+      pagination.appendChild(dot);
     });
-    carouselTrack.appendChild(fragment);
-    buildPagination();
-    requestAnimationFrame(() => {
-      updateCarouselGeometry();
+
+    measureAndLayout();
+    updateActive();
+    updateButtons();
+  }
+
+  function measureAndLayout(){
+    const items = [...track.children];
+    if (!items.length) return;
+    const w = Math.min(items[0].getBoundingClientRect().width, 360);
+    const gap = 24; // visual spacing between panels
+    state.step = 360 / items.length;
+    state.radius = Math.round((items.length * (w + gap)) / (2 * Math.PI));
+
+    items.forEach((el, i) => {
+      const angle = i * state.step;
+      el.style.transform = `translate(-50%, -50%) rotateY(${angle}deg) translateZ(${state.radius}px)`;
+      el.style.willChange = 'transform';
     });
+
+    applyRotation();
   }
 
-  function goToPrevious(){
-    if (state.filtered.length <= 1) return;
-    state.currentIndex = (state.currentIndex - 1 + state.filtered.length) % state.filtered.length;
-    updateCarouselRotation();
+  function applyRotation(){
+    track.style.transform = `translateZ(-${state.radius}px) rotateY(${-state.currentIndex * state.step}deg)`;
   }
 
-  function goToNext(){
-    if (state.filtered.length <= 1) return;
-    state.currentIndex = (state.currentIndex + 1) % state.filtered.length;
-    updateCarouselRotation();
+  function updateActive(){
+    const items = [...track.children];
+    const dots = [...pagination.children];
+    items.forEach((el, i) => el.classList.toggle('is-active', i === state.currentIndex));
+    dots.forEach((d, i) => d.dataset.active = i === state.currentIndex ? 'true' : 'false');
   }
 
-  if (carouselPrev){
-    carouselPrev.addEventListener('click', goToPrevious);
+  function updateButtons(){
+    // ring carousel — never disable, but we keep buttons for desktop UX
+    btnPrev.disabled = false;
+    btnNext.disabled = false;
   }
 
-  if (carouselNext){
-    carouselNext.addEventListener('click', goToNext);
+  function goTo(i){
+    const n = state.apps.length;
+    state.currentIndex = ((i % n) + n) % n;
+    applyRotation();
+    updateActive();
+  }
+  const next = () => goTo(state.currentIndex + 1);
+  const prev = () => goTo(state.currentIndex - 1);
+
+  // Pointer (drag / swipe) controls for mobile
+  function onPointerDown(e){
+    state.dragging = true;
+    state.lastX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+    viewport.setPointerCapture?.(e.pointerId || 1);
+  }
+  function onPointerMove(e){
+    if (!state.dragging) return;
+    const x = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+    const dx = x - state.lastX;
+    state.lastX = x;
+    // convert pixels to angle: heuristic scale by radius
+    const anglePerPx = 180 / (Math.PI * state.radius * 0.9);
+    const currentAngle = (-state.currentIndex * state.step) + (dx * anglePerPx * 180/Math.PI);
+    track.style.transform = `translateZ(-${state.radius}px) rotateY(${currentAngle}deg)`;
+    e.preventDefault();
+  }
+  function onPointerUp(e){
+    if (!state.dragging) return;
+    state.dragging = false;
+    // determine direction based on velocity/last movement (we stored lastX delta via move handler)
+    // simple snap: use element at closest multiple of step to current rotation
+    const style = getComputedStyle(track);
+    const m = new WebKitCSSMatrix(style.transform);
+    // Extract approximate rotation around Y by inverse mapping — fallback to threshold swipe
+    // If matrix extraction fails, use last movement direction
+    let direction = 0;
+    try{
+      // Not trivial to derive angle from matrix without full math; use last movement delta instead
+      direction = (e.changedTouches ? (e.changedTouches[0].clientX - (e.changedTouches[0].pageX || 0)) : 0);
+    }catch{direction = 0}
+    // Fallback using last dx stored implicitly by final move step via event sequence is unreliable in all browsers,
+    // so we inspect the pointerup vs pointerdown time + movement using a cached variable
   }
 
-  if (carousel){
-    carousel.addEventListener('keydown', event => {
-      if (event.key === 'ArrowLeft'){
-        event.preventDefault();
-        goToPrevious();
-      }else if (event.key === 'ArrowRight'){
-        event.preventDefault();
-        goToNext();
-      }
-    });
-  }
-
-  let resizeTimer;
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-      updateCarouselGeometry();
-    }, 150);
+  // Simpler robust swipe: track startX / endX
+  let swipeStartX = 0, swipeStartTime = 0;
+  viewport.addEventListener('pointerdown', (e) => { swipeStartX = e.clientX; swipeStartTime = performance.now(); onPointerDown(e); });
+  viewport.addEventListener('pointermove', onPointerMove, { passive:false });
+  viewport.addEventListener('pointerup', (e) => {
+    const dx = (e.clientX - swipeStartX);
+    const dt = performance.now() - swipeStartTime;
+    const velocity = Math.abs(dx) / Math.max(dt, 1);
+    if (Math.abs(dx) > 30 || velocity > 0.6){ // swipe threshold
+      if (dx < 0) next(); else prev();
+    } else {
+      // snap back to nearest
+      applyRotation();
+      updateActive();
+    }
+    state.dragging = false;
+  });
+  // Touch support for Safari iOS (pointer events poly):
+  viewport.addEventListener('touchstart', (e) => { swipeStartX = e.touches[0].clientX; swipeStartTime = performance.now(); }, {passive:true});
+  viewport.addEventListener('touchmove', (e) => { /* prevent body scroll only while interacting visually */ if(state.dragging) e.preventDefault(); }, {passive:false});
+  viewport.addEventListener('touchend', (e) => {
+    const endX = (e.changedTouches && e.changedTouches[0].clientX) || swipeStartX;
+    const dx = endX - swipeStartX; const dt = performance.now() - swipeStartTime; const velocity = Math.abs(dx)/Math.max(dt,1);
+    if (Math.abs(dx) > 30 || velocity > 0.6){ dx < 0 ? next() : prev(); } else { applyRotation(); updateActive(); }
+    state.dragging = false;
   });
 
-  function renderFeatured(){
-    if (!featuredGrid) return;
-    featuredGrid.innerHTML = '';
-    const featuredApps = state.apps.filter(app => app.featured);
-    if (featuredApps.length === 0){
-      featuredGrid.innerHTML = '<p class="empty-state">Mark an app as featured in <code>catalog.json</code> to highlight it here.</p>';
-      return;
-    }
-    const fragment = document.createDocumentFragment();
-    featuredApps.forEach(app => {
-      const card = document.createElement('article');
-      card.className = 'card card--featured';
-      card.style.setProperty('--card-gradient', getCardGradient(state.apps.indexOf(app)));
-      card.innerHTML = `
-        <a class="card-link" href="apps/${app.slug}/">
-          <div class="card-header">
-            <span class="card-emoji" aria-hidden="true">${app.emoji || '⭐️'}</span>
-            <span class="chip">Featured</span>
-          </div>
-          <h3>${app.title}</h3>
-          <p>${app.description}</p>
-          <div class="tag-list">${(app.tags || []).map(tag => `<span>${tag}</span>`).join('')}</div>
-        </a>
-      `;
-      fragment.appendChild(card);
-    });
-    featuredGrid.appendChild(fragment);
-  }
+  // Keyboard (for accessibility)
+  document.getElementById('carousel').addEventListener('keydown',(e)=>{
+    if(e.key==='ArrowRight') next();
+    if(e.key==='ArrowLeft') prev();
+  });
 
-  function updateStats(){
-    const totalApps = state.apps.length;
-    const allTags = new Set();
-    let featuredCount = 0;
-    state.apps.forEach(app => {
-      (app.tags || []).forEach(tag => allTags.add(tag));
-      if (app.featured) featuredCount += 1;
-    });
-    const statApps = document.getElementById('statApps');
-    const statTags = document.getElementById('statTags');
-    const statFeatured = document.getElementById('statFeatured');
-    if (statApps) statApps.textContent = totalApps;
-    if (statTags) statTags.textContent = allTags.size;
-    if (statFeatured) statFeatured.textContent = featuredCount;
-  }
+  btnPrev.addEventListener('click', prev);
+  btnNext.addEventListener('click', next);
 
-  async function loadCatalog(){
-    try{
-      const response = await fetch('catalog.json', { cache: 'no-store' });
-      if (!response.ok) throw new Error('Unable to load catalog');
-      const data = await response.json();
-      state.apps = (Array.isArray(data) ? data : []).sort((a,b) => a.title.localeCompare(b.title));
-      updateStats();
-      renderTagCloud();
-      renderApps();
-      renderFeatured();
-      updateHeroPreview();
-    }catch(error){
-      console.error(error);
-      emptyState.hidden = false;
-      emptyState.textContent = 'We could not load the catalog right now. Please refresh the page to try again.';
-    }
-  }
+  window.addEventListener('resize', () => { measureAndLayout(); });
 
-  (function(){
-    const stamp = new Date(document.lastModified);
-    const lu = document.getElementById('last-updated');
-    if (lu){
-      lu.textContent = 'Last updated: ' + stamp.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-    }
-  })();
-
-  if (searchInput){
-    searchInput.addEventListener('input', event => {
-      state.search = event.target.value;
-      state.currentIndex = 0;
-      renderApps();
-    });
-  }
-
-  loadCatalog();
-</script>
-</body>
+  // Init
+  render();
+  document.getElementById('last-updated').textContent = `Last updated: ${new Date().toLocaleString()}`;
+})();
+</script></body>
 </html>
