@@ -245,10 +245,103 @@
   }
   .tag-pill:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
 
-  .apps-grid{
+  .carousel{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:1.5rem;
+    width:100%;
+    margin-top:1rem;
+  }
+  .carousel[data-empty="true"]{display:none;}
+  .carousel:focus-visible{outline:2px solid var(--accent);outline-offset:6px;}
+  .carousel-viewport{
+    position:relative;
+    width:100%;
+    max-width:var(--max-width);
+    height:440px;
+    perspective:1600px;
+  }
+  .carousel-track{
+    position:absolute;
+    inset:0;
+    transform-style:preserve-3d;
+    transition:transform 0.75s cubic-bezier(.22,.61,.36,1);
+    will-change:transform;
+  }
+  .carousel-item{
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:min(340px,72vw);
+    transform-style:preserve-3d;
+    transition:transform 0.75s cubic-bezier(.22,.61,.36,1),
+      filter 0.45s ease,
+      opacity 0.45s ease;
+    opacity:0.5;
+    filter:blur(1px);
+    transform:translate(-50%,-50%);
+  }
+  .carousel-item.is-active{
+    opacity:1;
+    filter:none;
+  }
+  .carousel-item .card{
+    height:100%;
+    min-height:320px;
+  }
+  .carousel-nav{
+    flex:0 0 auto;
+    width:52px;
+    height:52px;
+    border-radius:50%;
+    border:1px solid rgba(148,163,184,0.35);
+    background:rgba(255,255,255,0.85);
+    backdrop-filter:blur(10px);
+    color:var(--ink);
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-    gap:1.6rem;
+    place-items:center;
+    cursor:pointer;
+    box-shadow:0 18px 32px rgba(15,23,42,0.12);
+    transition:transform 0.2s ease, box-shadow 0.2s ease, border 0.2s ease;
+  }
+  .carousel-nav:hover{transform:translateY(-2px);box-shadow:0 22px 40px rgba(15,23,42,0.16);}
+  .carousel-nav:disabled{
+    opacity:0.45;
+    cursor:not-allowed;
+    box-shadow:none;
+    transform:none;
+  }
+  .carousel-nav svg{width:18px;height:18px;}
+  .carousel-pagination{
+    position:absolute;
+    bottom:1rem;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    gap:0.6rem;
+    padding:0.35rem 0.75rem;
+    border-radius:999px;
+    background:rgba(255,255,255,0.78);
+    border:1px solid rgba(148,163,184,0.18);
+    backdrop-filter:blur(12px);
+    box-shadow:0 12px 28px rgba(15,23,42,0.12);
+  }
+  .carousel-pagination[hidden]{display:none;}
+  .carousel-dot{
+    width:11px;
+    height:11px;
+    border-radius:999px;
+    border:none;
+    background:rgba(148,163,184,0.45);
+    padding:0;
+    cursor:pointer;
+    transition:width 0.25s ease, background 0.25s ease;
+  }
+  .carousel-dot[data-active="true"]{
+    width:28px;
+    background:linear-gradient(135deg,#5136ff 0%,#a259ff 100%);
   }
   .card{
     position:relative;
@@ -332,9 +425,13 @@
   .site-footer a{color:var(--accent-alt);} 
   .site-footer a:hover{text-decoration:underline;}
 
+  @media(max-width:1080px){
+    .carousel-viewport{height:400px;}
+  }
   @media(max-width:960px){
     .hero{grid-template-columns:minmax(0,1fr);}
     .hero-preview{order:-1;max-width:420px;justify-self:center;}
+    .carousel-nav{display:none;}
   }
   @media(max-width:720px){
     .site-header{padding:1.25rem 1rem 3rem;}
@@ -344,7 +441,42 @@
     .hero-actions{width:100%;}
     .cta-btn{flex:1 1 auto;justify-content:center;}
     main{padding:0 1rem 3rem;}
-    .apps-grid{gap:1.2rem;}
+    .carousel{
+      flex-direction:column;
+      align-items:stretch;
+      gap:1rem;
+    }
+    .carousel-viewport{
+      height:auto;
+      perspective:none;
+    }
+    .carousel-track{
+      position:static;
+      display:flex;
+      gap:1rem;
+      overflow-x:auto;
+      padding-bottom:0.75rem;
+      margin:0 -0.5rem;
+      scroll-snap-type:x mandatory;
+      transform:none !important;
+    }
+    .carousel-item{
+      position:relative;
+      top:auto;
+      left:auto;
+      flex:0 0 85%;
+      max-width:320px;
+      margin:0 auto;
+      opacity:1;
+      filter:none;
+      transform:none !important;
+      scroll-snap-align:center;
+    }
+    .carousel-pagination{
+      position:static;
+      transform:none;
+      margin:0 auto;
+    }
   }
 </style>
 </head>
@@ -418,7 +550,18 @@
       <div class="tag-strip" id="tagCloud" aria-live="polite"></div>
     </div>
 
-    <div class="apps-grid" id="appGrid" aria-live="polite"></div>
+    <div class="carousel" id="carousel" tabindex="0">
+      <button class="carousel-nav" type="button" id="carouselPrev" aria-label="Show previous micro-app">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M15.5 5.5 9 12l6.5 6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="carousel-viewport" id="carouselViewport">
+        <div class="carousel-track" id="appCarousel" role="list"></div>
+        <div class="carousel-pagination" id="carouselPagination" role="tablist" aria-label="Select highlighted micro-app" hidden></div>
+      </div>
+      <button class="carousel-nav" type="button" id="carouselNext" aria-label="Show next micro-app">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M8.5 5.5 15 12l-6.5 6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
     <div class="empty-state" id="emptyState" hidden>No micro-apps match your filters just yet. Clear filters to browse the full collection.</div>
   </section>
 
@@ -445,7 +588,10 @@
   const state = {
     apps: [],
     activeTag: 'all',
-    search: ''
+    search: '',
+    currentIndex: 0,
+    filtered: [],
+    carouselRadius: 0
   };
 
   const gradientPalette = [
@@ -456,7 +602,12 @@
     'linear-gradient(135deg,#f7f3ff 0%,#e7f4ff 100%)'
   ];
 
-  const appGrid = document.getElementById('appGrid');
+  const carousel = document.getElementById('carousel');
+  const carouselTrack = document.getElementById('appCarousel');
+  const carouselViewport = document.getElementById('carouselViewport');
+  const carouselPrev = document.getElementById('carouselPrev');
+  const carouselNext = document.getElementById('carouselNext');
+  const carouselPagination = document.getElementById('carouselPagination');
   const featuredGrid = document.getElementById('featuredGrid');
   const tagCloud = document.getElementById('tagCloud');
   const searchInput = document.getElementById('search');
@@ -464,20 +615,25 @@
   const heroPreview = document.getElementById('heroPreview');
 
   function getCardGradient(index){
-    return gradientPalette[index % gradientPalette.length];
+    const paletteIndex = ((index % gradientPalette.length) + gradientPalette.length) % gradientPalette.length;
+    return gradientPalette[paletteIndex];
   }
 
-  function updateHeroPreview(){
+  function updateHeroPreview(highlight){
     if (!heroPreview) return;
-    const highlight = state.apps.find(app => app.featured) || state.apps[0];
-    if (!highlight) return;
-    const tagMarkup = (highlight.tags || []).map(tag => `<span>${tag}</span>`).join('');
-    heroPreview.style.setProperty('--card-gradient', getCardGradient(state.apps.indexOf(highlight)));
+    const highlightApp = highlight
+      || (state.filtered && state.filtered[state.currentIndex])
+      || state.apps.find(app => app.featured)
+      || state.apps[0];
+    if (!highlightApp) return;
+    const tagMarkup = (highlightApp.tags || []).map(tag => `<span>${tag}</span>`).join('');
+    const paletteIndex = state.apps.indexOf(highlightApp);
+    heroPreview.style.setProperty('--card-gradient', getCardGradient(paletteIndex >= 0 ? paletteIndex : 0));
     heroPreview.innerHTML = `
       <div class="hero-preview-content">
-        <span class="hero-preview-emoji" aria-hidden="true">${highlight.emoji || '✨'}</span>
-        <h3>${highlight.title}</h3>
-        <p>${highlight.description}</p>
+        <span class="hero-preview-emoji" aria-hidden="true">${highlightApp.emoji || '✨'}</span>
+        <h3>${highlightApp.title}</h3>
+        <p>${highlightApp.description}</p>
         <div class="tag-list">${tagMarkup}</div>
       </div>
     `;
@@ -492,6 +648,7 @@
     pill.textContent = tag === 'all' ? `All (${state.apps.length})` : `${tag} (${count})`;
     pill.addEventListener('click', () => {
       state.activeTag = tag === state.activeTag ? 'all' : tag;
+      state.currentIndex = 0;
       renderTagCloud();
       renderApps();
     });
@@ -513,9 +670,93 @@
     tagCloud.appendChild(fragment);
   }
 
+  function computeCarouselRadius(count){
+    if (!carouselViewport || count <= 1) return 0;
+    const viewportWidth = carouselViewport.offsetWidth || window.innerWidth || 0;
+    const base = Math.min(Math.max(viewportWidth * 0.45, 320), 640);
+    return count === 2 ? base * 0.9 : base;
+  }
+
+  function updateNavState(){
+    const disabled = state.filtered.length <= 1;
+    if (carouselPrev) carouselPrev.disabled = disabled;
+    if (carouselNext) carouselNext.disabled = disabled;
+  }
+
+  function updatePagination(){
+    if (!carouselPagination || carouselPagination.hidden) return;
+    Array.from(carouselPagination.children).forEach((dot, index) => {
+      dot.setAttribute('data-active', index === state.currentIndex ? 'true' : 'false');
+      dot.setAttribute('aria-selected', index === state.currentIndex ? 'true' : 'false');
+    });
+  }
+
+  function buildPagination(){
+    if (!carouselPagination) return;
+    const count = state.filtered.length;
+    carouselPagination.innerHTML = '';
+    if (count <= 1){
+      carouselPagination.hidden = true;
+      return;
+    }
+    carouselPagination.hidden = false;
+    const fragment = document.createDocumentFragment();
+    state.filtered.forEach((app, index) => {
+      const dot = document.createElement('button');
+      dot.className = 'carousel-dot';
+      dot.type = 'button';
+      dot.setAttribute('aria-label', `Show ${app.title}`);
+      dot.setAttribute('role', 'tab');
+      dot.dataset.index = index;
+      dot.setAttribute('data-active', index === state.currentIndex ? 'true' : 'false');
+      dot.setAttribute('aria-selected', index === state.currentIndex ? 'true' : 'false');
+      dot.addEventListener('click', () => {
+        state.currentIndex = index;
+        updateCarouselRotation();
+      });
+      fragment.appendChild(dot);
+    });
+    carouselPagination.appendChild(fragment);
+  }
+
+  function updateCarouselRotation(){
+    if (!carouselTrack) return;
+    const count = state.filtered.length;
+    const radius = state.carouselRadius || 0;
+    if (count <= 1 || radius === 0){
+      carouselTrack.style.transform = 'translateZ(0) rotateY(0deg)';
+    }else{
+      const angleStep = 360 / count;
+      carouselTrack.style.transform = `translateZ(-${radius}px) rotateY(${state.currentIndex * -angleStep}deg)`;
+    }
+    Array.from(carouselTrack.children).forEach((item, index) => {
+      item.classList.toggle('is-active', index === state.currentIndex);
+    });
+    updateNavState();
+    updatePagination();
+    updateHeroPreview(state.filtered[state.currentIndex]);
+  }
+
+  function updateCarouselGeometry(){
+    if (!carouselTrack) return;
+    const count = state.filtered.length;
+    if (count === 0){
+      state.carouselRadius = 0;
+      carouselTrack.style.transform = 'translateZ(0) rotateY(0deg)';
+      return;
+    }
+    const radius = computeCarouselRadius(count);
+    state.carouselRadius = radius;
+    const angleStep = count > 0 ? 360 / count : 0;
+    Array.from(carouselTrack.children).forEach((item, index) => {
+      const rotation = angleStep * index;
+      item.style.transform = `translate(-50%,-50%) rotateY(${rotation}deg) translateZ(${radius}px)`;
+    });
+    updateCarouselRotation();
+  }
+
   function renderApps(){
-    if (!appGrid) return;
-    appGrid.innerHTML = '';
+    if (!carouselTrack) return;
     const filtered = state.apps.filter(app => {
       const matchesTag = state.activeTag === 'all' || (app.tags || []).includes(state.activeTag);
       const term = state.search.trim().toLowerCase();
@@ -523,14 +764,30 @@
       return matchesTag && matchesSearch;
     });
 
+    state.filtered = filtered;
+
     if (filtered.length === 0){
-      emptyState.hidden = false;
+      state.currentIndex = 0;
+      state.carouselRadius = 0;
+      carouselTrack.innerHTML = '';
+      if (carouselPagination) carouselPagination.hidden = true;
+      if (emptyState) emptyState.hidden = false;
+      if (carousel) carousel.setAttribute('data-empty', 'true');
+      updateNavState();
+      updateHeroPreview();
       return;
     }
 
-    emptyState.hidden = true;
+    if (emptyState) emptyState.hidden = true;
+    if (carousel) carousel.removeAttribute('data-empty');
+    state.currentIndex = 0;
+    carouselTrack.innerHTML = '';
     const fragment = document.createDocumentFragment();
-    filtered.forEach(app => {
+    filtered.forEach((app, index) => {
+      const item = document.createElement('div');
+      item.className = 'carousel-item';
+      item.setAttribute('role', 'listitem');
+      item.dataset.index = index;
       const card = document.createElement('article');
       card.className = `card${app.featured ? ' card--featured' : ''}`;
       card.style.setProperty('--card-gradient', getCardGradient(state.apps.indexOf(app)));
@@ -546,10 +803,55 @@
           <div class="tag-list">${(app.tags || []).map(tag => `<span>${tag}</span>`).join('')}</div>
         </a>
       `;
-      fragment.appendChild(card);
+      item.appendChild(card);
+      fragment.appendChild(item);
     });
-    appGrid.appendChild(fragment);
+    carouselTrack.appendChild(fragment);
+    buildPagination();
+    requestAnimationFrame(() => {
+      updateCarouselGeometry();
+    });
   }
+
+  function goToPrevious(){
+    if (state.filtered.length <= 1) return;
+    state.currentIndex = (state.currentIndex - 1 + state.filtered.length) % state.filtered.length;
+    updateCarouselRotation();
+  }
+
+  function goToNext(){
+    if (state.filtered.length <= 1) return;
+    state.currentIndex = (state.currentIndex + 1) % state.filtered.length;
+    updateCarouselRotation();
+  }
+
+  if (carouselPrev){
+    carouselPrev.addEventListener('click', goToPrevious);
+  }
+
+  if (carouselNext){
+    carouselNext.addEventListener('click', goToNext);
+  }
+
+  if (carousel){
+    carousel.addEventListener('keydown', event => {
+      if (event.key === 'ArrowLeft'){
+        event.preventDefault();
+        goToPrevious();
+      }else if (event.key === 'ArrowRight'){
+        event.preventDefault();
+        goToNext();
+      }
+    });
+  }
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      updateCarouselGeometry();
+    }, 150);
+  });
 
   function renderFeatured(){
     if (!featuredGrid) return;
@@ -625,6 +927,7 @@
   if (searchInput){
     searchInput.addEventListener('input', event => {
       state.search = event.target.value;
+      state.currentIndex = 0;
       renderApps();
     });
   }
