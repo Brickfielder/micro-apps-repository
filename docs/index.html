@@ -185,6 +185,7 @@
     pointerDown: false,
     isDragging: false,
     dragStartX: 0,
+    dragStartY: 0,
     baseRotation: 0,
     swipeStartTime: 0,
     moved: 0,
@@ -307,6 +308,7 @@
     state.isDragging = false;
     state.moved = 0;
     state.dragStartX = pointerX(e);
+    state.dragStartY = pointerY(e);
     state.baseRotation = -state.currentIndex * state.step;
     state.swipeStartTime = performance.now();
     state.ignoreClick = false;
