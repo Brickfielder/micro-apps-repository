@@ -2,7 +2,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Cognitive Rehabilitation Micro-Apps — 3D Mobile Carousel</title>
+<title>Cognitive Rehabilitation Micro-Apps — Interactive Card Deck</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -52,17 +52,15 @@
   .section{margin-top:2.8rem;display:flex;flex-direction:column;gap:1.4rem}
   .section-heading h2{margin:0;font-size:clamp(1.8rem,2vw+1.2rem,2.3rem);letter-spacing:-.02em}
 
-  /* 3D Carousel */
-  .carousel{position:relative;display:flex;align-items:center;justify-content:center;gap:1rem;width:100%;margin-top:.5rem}
-  .carousel-viewport{position:relative;width:100%;max-width:var(--max-width);height:430px;perspective:1400px;overflow:visible;touch-action:pan-y}
-  .carousel-track{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .75s cubic-bezier(.22,.61,.36,1);will-change:transform}
-  .carousel-item{
-    position:absolute;top:50%;left:50%;width:min(340px,76vw);
-    transform-style:preserve-3d;transition:transform .75s cubic-bezier(.22,.61,.36,1),filter .45s ease,opacity .45s ease;
-    opacity:.55;filter:blur(.3px); pointer-events:none; /* only active clickable */
-  }
-  .carousel-item.is-active{opacity:1;filter:none;pointer-events:auto;z-index:3}
+  /* Deck carousel */
+  .carousel{position:relative;display:flex;align-items:center;justify-content:center;gap:1rem;width:100%;margin-top:.5rem;padding:1.2rem 0 3.2rem}
+  .carousel-viewport{position:relative;flex:1 1 auto;max-width:920px;height:420px;display:flex;align-items:center;justify-content:center;touch-action:pan-y}
+  .carousel-viewport.is-dragging{cursor:grabbing}
+  .carousel-track{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+  .carousel-item{position:absolute;top:50%;left:50%;width:min(340px,74vw);transform:translate(-50%,-50%);transition:transform .45s cubic-bezier(.22,.61,.36,1),opacity .3s ease,filter .3s ease;pointer-events:none;opacity:0;filter:blur(.4px)}
+  .carousel-item.is-active{pointer-events:auto;opacity:1;filter:none}
   .carousel-item .card{min-height:320px}
+  .carousel-item[data-hidden="true"]{opacity:0;pointer-events:none}
 
   .card{position:relative;border-radius:var(--radius-lg);padding:1.4rem 1.5rem 1.6rem;border:1px solid rgba(148,163,184,.18);background:var(--surface);overflow:hidden;box-shadow:var(--shadow-sm)}
   .card::before{content:"";position:absolute;inset:-30% -20% 45% -30%;background:var(--card-gradient,linear-gradient(135deg,#e4f1ff 0%,#f6e8ff 100%));opacity:.9;filter:blur(20px);z-index:0}
@@ -85,23 +83,38 @@
   .carousel-nav:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;transform:none}
   .carousel-nav svg{width:18px;height:18px}
 
-  .carousel-pagination{position:absolute;bottom:.6rem;left:50%;transform:translateX(-50%);display:flex;gap:.5rem;padding:.35rem .7rem;border-radius:999px;background:rgba(255,255,255,.78);border:1px solid rgba(148,163,184,.18);backdrop-filter:blur(12px);box-shadow:0 12px 28px rgba(15,23,42,.12)}
+  .carousel-pagination{position:absolute;bottom:.4rem;left:50%;transform:translateX(-50%);display:flex;gap:.5rem;padding:.35rem .7rem;border-radius:999px;background:rgba(255,255,255,.78);border:1px solid rgba(148,163,184,.18);backdrop-filter:blur(12px);box-shadow:0 12px 28px rgba(15,23,42,.12)}
   .carousel-dot{width:10px;height:10px;border-radius:999px;border:none;background:rgba(148,163,184,.45);padding:0;cursor:pointer;transition:width .25s ease, background .25s ease}
   .carousel-dot[data-active="true"]{width:26px;background:linear-gradient(135deg,#5136ff 0%,#a259ff 100%)}
 
   @media (max-width: 720px){
     .site-header{padding:1.25rem 1rem 1.6rem}
     main{padding:0 1rem 2.4rem}
-    .carousel-viewport{height:420px;perspective:1100px}
-    .carousel-item{width:82vw}
+    .carousel{padding:1rem 0 2.4rem}
+    .carousel-viewport{height:auto;max-width:none;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 .5rem 1rem}
+    .carousel-track{position:static;display:flex;gap:1rem;justify-content:flex-start;align-items:stretch;pointer-events:auto}
+    .carousel-item{position:relative;top:auto;left:auto;width:82vw;max-width:320px;transform:none !important;opacity:1 !important;filter:none !important;pointer-events:auto;scroll-snap-align:center}
+    .carousel-item .card{min-height:auto}
+    .carousel-nav{display:none}
+    .carousel-pagination{position:static;transform:none;margin-top:1rem}
   }
 
   @media (prefers-reduced-motion: reduce){
-    .carousel-viewport{perspective:none;height:auto}
     .carousel-track{position:static;display:flex;gap:1rem;overflow-x:auto;padding-bottom:.75rem;margin:0 -0.5rem;scroll-snap-type:x mandatory;transform:none !important}
     .carousel-item{position:relative;top:auto;left:auto;flex:0 0 85%;max-width:320px;margin:0 auto;opacity:1;filter:none;transform:none !important;scroll-snap-align:center;pointer-events:auto}
     .carousel-pagination{position:static;transform:none;margin:0 auto}
     .carousel-nav{display:none}
+  }
+
+  @media (max-width: 960px){
+    .hero{grid-template-columns:1fr;gap:1.8rem}
+    .hero-preview{order:-1;max-width:420px;margin:0 auto;width:100%}
+  }
+
+  @media (max-width: 640px){
+    .top-nav{flex-wrap:wrap;row-gap:.75rem}
+    .top-links{flex-wrap:wrap;justify-content:flex-start;width:100%}
+    .hero-preview{display:none}
   }
 </style>
 </head>
@@ -141,7 +154,7 @@
     <div class="section-heading">
       <div>
         <h2>Explore focused experiences for cognitive rehabilitation</h2>
-        <p class="muted">Swipe/drag to rotate the 3D carousel on mobile. Tap a card to open an app.</p>
+        <p class="muted">Swipe or drag the card deck to spotlight a micro-app. Tap the focused card to launch it.</p>
       </div>
     </div>
 
@@ -180,15 +193,9 @@
   const state = {
     apps: [],
     currentIndex: 0,
-    step: 0,
-    radius: 0,
-    pointerDown: false,
-    isDragging: false,
+    pointerActive: false,
     dragStartX: 0,
-    dragStartY: 0,
-    baseRotation: 0,
-    swipeStartTime: 0,
-    moved: 0,
+    dragOffset: 0,
     ignoreClick: false
   };
 
@@ -205,22 +212,45 @@
   const viewport = document.getElementById('carouselViewport');
   const btnPrev = document.getElementById('carouselPrev');
   const btnNext = document.getElementById('carouselNext');
+  const liveRegion = document.createElement('div');
+  liveRegion.className = 'sr-only';
+  liveRegion.setAttribute('aria-live', 'polite');
+  document.body.appendChild(liveRegion);
 
-  function render() {
-    if (!state.apps.length) return;
+  const stackedMedia = window.matchMedia('(max-width: 720px)');
+  const motionMedia = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function useDeckLayout(){
+    return !stackedMedia.matches && !motionMedia.matches;
+  }
+
+  function pointerX(evt){
+    if (typeof evt.clientX === 'number') return evt.clientX;
+    if (evt.touches && evt.touches.length) return evt.touches[0].clientX;
+    if (evt.changedTouches && evt.changedTouches.length) return evt.changedTouches[0].clientX;
+    return 0;
+  }
+
+  function render(){
     track.innerHTML = '';
     pagination.innerHTML = '';
+
+    if (!state.apps.length){
+      updateButtons();
+      return;
+    }
 
     state.apps.forEach((app, i) => {
       const item = document.createElement('div');
       item.className = 'carousel-item';
+      item.dataset.index = i;
       item.setAttribute('role', 'listitem');
       item.innerHTML = `
         <article class="card" style="--card-gradient:${gradientPalette[i % gradientPalette.length]}">
           <a class="card-link" href="${app.href}">
             <header class="card-header">
               <span class="card-emoji" aria-hidden="true">${app.emoji}</span>
-              <span class="chip">App</span>
+              <span class="chip">${app.featured ? 'Featured' : 'App'}</span>
             </header>
             <h3>${app.title}</h3>
             <p>${app.desc}</p>
@@ -233,138 +263,158 @@
       dot.className = 'carousel-dot';
       dot.type = 'button';
       dot.setAttribute('role', 'tab');
-      dot.setAttribute('aria-label', `Slide ${i+1}`);
+      dot.setAttribute('aria-label', `Focus ${app.title}`);
       dot.addEventListener('click', () => goTo(i));
       pagination.appendChild(dot);
     });
 
-    measureAndLayout();
-    updateActive();
+    state.currentIndex = Math.min(state.currentIndex, state.apps.length - 1);
+    updateDots();
+    positionCards();
     updateButtons();
+    announceActive();
   }
 
-  function measureAndLayout(){
+  function positionCards(dragOffset = 0){
     const items = [...track.children];
     if (!items.length) return;
-    const cardWidth = items[0].querySelector('.card')?.offsetWidth || items[0].getBoundingClientRect().width;
-    const w = Math.min(cardWidth, 360);
-    const gap = 24;
-    state.step = 360 / items.length;
-    state.radius = Math.round((items.length * (w + gap)) / (2 * Math.PI));
+
+    if (!useDeckLayout()){
+      items.forEach((el, i) => {
+        el.style.transform = '';
+        el.style.opacity = '';
+        el.style.pointerEvents = 'auto';
+        el.style.filter = '';
+        el.style.zIndex = '';
+        el.removeAttribute('data-hidden');
+        el.removeAttribute('aria-hidden');
+        el.classList.toggle('is-active', i === state.currentIndex);
+        const link = el.querySelector('a');
+        if (link) link.tabIndex = 0;
+      });
+      return;
+    }
+
+    const width = viewport.offsetWidth || 1;
+    const spread = Math.min(width / 3, 140);
+    const drop = Math.min(18, width / 28);
+    const fadeDistance = 2.2;
 
     items.forEach((el, i) => {
-      const angle = i * state.step;
-      el.style.transform = `translate(-50%, -50%) rotateY(${angle}deg) translateZ(${state.radius}px)`;
-      el.style.willChange = 'transform';
-    });
+      const offset = i - state.currentIndex + dragOffset;
+      const absOffset = Math.abs(offset);
+      const clamped = Math.min(absOffset, fadeDistance);
+      const translateX = offset * spread;
+      const translateY = clamped * drop;
+      const scale = Math.max(0.82, 1 - clamped * 0.12);
+      const rotate = offset * -4;
+      const visible = absOffset <= fadeDistance;
+      const active = absOffset < 0.5;
 
-    applyRotation();
-  }
-
-  function applyRotation(){
-    track.style.transform = `translateZ(-${state.radius}px) rotateY(${-state.currentIndex * state.step}deg)`;
-  }
-
-  function updateActive(){
-    const items = [...track.children];
-    const dots = [...pagination.children];
-    items.forEach((el, i) => {
-      const active = i === state.currentIndex;
+      el.style.transform = `translate(-50%, -50%) translateX(${translateX}px) translateY(${translateY}px) rotate(${rotate}deg) scale(${scale})`;
+      el.style.opacity = visible ? 1 - clamped * 0.18 : 0;
+      el.style.pointerEvents = active ? 'auto' : 'none';
+      el.style.filter = active ? 'none' : 'saturate(.92)';
+      el.style.zIndex = String(100 - Math.round(clamped * 10));
+      el.dataset.hidden = visible ? 'false' : 'true';
+      el.setAttribute('aria-hidden', active ? 'false' : 'true');
       el.classList.toggle('is-active', active);
-      el.style.zIndex = active ? 3 : 1;
+
+      const link = el.querySelector('a');
+      if (link) link.tabIndex = active ? 0 : -1;
     });
-    dots.forEach((d, i) => {
+  }
+
+  function updateDots(){
+    const dots = [...pagination.children];
+    dots.forEach((dot, i) => {
       const active = i === state.currentIndex;
-      d.dataset.active = active ? 'true' : 'false';
-      d.setAttribute('aria-selected', active ? 'true' : 'false');
+      dot.dataset.active = active ? 'true' : 'false';
+      dot.setAttribute('aria-selected', active ? 'true' : 'false');
+      dot.tabIndex = active ? 0 : -1;
     });
   }
 
   function updateButtons(){
-    btnPrev.disabled = false;
-    btnNext.disabled = false;
+    const disable = !useDeckLayout() || state.apps.length <= 1;
+    btnPrev.disabled = disable;
+    btnNext.disabled = disable;
+    btnPrev.tabIndex = disable ? -1 : 0;
+    btnNext.tabIndex = disable ? -1 : 0;
+    if (disable){
+      btnPrev.setAttribute('aria-hidden','true');
+      btnNext.setAttribute('aria-hidden','true');
+    } else {
+      btnPrev.removeAttribute('aria-hidden');
+      btnNext.removeAttribute('aria-hidden');
+    }
   }
 
-  function goTo(i){
-    const n = state.apps.length;
-    state.currentIndex = ((i % n) + n) % n;
-    applyRotation();
-    updateActive();
+  function announceActive(){
+    const active = state.apps[state.currentIndex];
+    if (!active) return;
+    const tags = Array.isArray(active.tags) && active.tags.length ? ` • ${active.tags.join(', ')}` : '';
+    liveRegion.textContent = `${active.title}${tags}`;
   }
+
+  function goTo(index){
+    if (!state.apps.length) return;
+    const n = state.apps.length;
+    state.currentIndex = ((index % n) + n) % n;
+    state.dragOffset = 0;
+    positionCards();
+    updateDots();
+    updateButtons();
+    announceActive();
+  }
+
   const next = () => goTo(state.currentIndex + 1);
   const prev = () => goTo(state.currentIndex - 1);
 
-  // Helpers
-  function rotationPerPixel(){ return state.radius ? 180 / (Math.PI * state.radius) : 0; }
-  function pointerX(evt){
-    if (typeof evt.clientX === 'number') return evt.clientX;
-    if (evt.touches && evt.touches.length) return evt.touches[0].clientX;
-    if (evt.changedTouches && evt.changedTouches.length) return evt.changedTouches[0].clientX;
-    return 0;
-  }
-  // Gesture handlers — NO pointer capture
   function onPointerDown(e){
-    state.pointerDown = true;
-    state.isDragging = false;
-    state.moved = 0;
+    if (!useDeckLayout() || state.apps.length <= 1) return;
+    state.pointerActive = true;
     state.dragStartX = pointerX(e);
-    state.dragStartY = pointerY(e);
-    state.baseRotation = -state.currentIndex * state.step;
-    state.swipeStartTime = performance.now();
+    state.dragOffset = 0;
     state.ignoreClick = false;
-    // no preventDefault, no setPointerCapture — keep native click intact
+    viewport.classList.add('is-dragging');
+    if (viewport.setPointerCapture && typeof e.pointerId === 'number'){
+      viewport.setPointerCapture(e.pointerId);
+    }
   }
 
   function onPointerMove(e){
-    if (!state.pointerDown) return;
-    const x = pointerX(e);
-    const dx = x - state.dragStartX;
-    state.moved = Math.max(state.moved, Math.abs(dx));
-
-    if (!state.isDragging){
-      const DRAG_THRESHOLD = 10;
-      if (Math.abs(dx) > DRAG_THRESHOLD){
-        state.isDragging = true;
-        state.ignoreClick = true;
-      } else {
-        return;
-      }
-    }
-
-    const angle = state.baseRotation + (dx * rotationPerPixel());
-    track.style.transform = `translateZ(-${state.radius}px) rotateY(${angle}deg)`;
-    if (e.cancelable) e.preventDefault(); // stops page scroll while dragging
+    if (!state.pointerActive) return;
+    const dx = pointerX(e) - state.dragStartX;
+    const width = viewport.offsetWidth || 1;
+    const spread = Math.max(Math.min(width / 3, 140), 60);
+    const dragOffset = dx / spread;
+    if (Math.abs(dx) > 6) state.ignoreClick = true;
+    state.dragOffset = dragOffset;
+    positionCards(dragOffset);
+    if (e.cancelable) e.preventDefault();
   }
 
   function onPointerUp(e){
-    if (!state.pointerDown) return;
-    state.pointerDown = false;
-
-    const x = pointerX(e);
-    const dx = x - state.dragStartX;
-    const elapsed = performance.now() - state.swipeStartTime;
-    const velocity = Math.abs(dx) / Math.max(elapsed, 1);
-
-    const TAP_PX = 6;
-    if (!state.isDragging && Math.abs(dx) < TAP_PX && state.moved < TAP_PX){
-      state.ignoreClick = false;
-      return;
+    if (!state.pointerActive) return;
+    state.pointerActive = false;
+    viewport.classList.remove('is-dragging');
+    if (viewport.releasePointerCapture && typeof e.pointerId === 'number'){
+      viewport.releasePointerCapture(e.pointerId);
     }
 
-    // SWIPE
-    state.isDragging = false;
-    state.ignoreClick = true;
-    const angle = state.baseRotation + (dx * rotationPerPixel());
-    const approxIndex = Math.round(-angle / state.step);
-    if (Math.abs(dx) > 30 || velocity > 0.6){
-      goTo(state.currentIndex + (dx < 0 ? 1 : -1));
+    const dragOffset = state.dragOffset;
+    state.dragOffset = 0;
+    const threshold = 0.35;
+    if (Math.abs(dragOffset) > threshold){
+      goTo(state.currentIndex + (dragOffset < 0 ? 1 : -1));
     } else {
-      goTo(approxIndex);
+      goTo(state.currentIndex);
     }
 
+    setTimeout(() => { state.ignoreClick = false; }, 80);
   }
 
-  // Event wiring
   if ('PointerEvent' in window){
     viewport.addEventListener('pointerdown', onPointerDown);
     viewport.addEventListener('pointermove', onPointerMove, { passive:false });
@@ -372,31 +422,54 @@
     viewport.addEventListener('pointercancel', onPointerUp);
     viewport.addEventListener('pointerleave', onPointerUp);
   } else {
-    viewport.addEventListener('mousedown', onPointerDown);
-    viewport.addEventListener('mousemove', onPointerMove);
-    viewport.addEventListener('mouseup', onPointerUp);
-    viewport.addEventListener('mouseleave', onPointerUp);
     viewport.addEventListener('touchstart', onPointerDown, { passive:true });
     viewport.addEventListener('touchmove', onPointerMove, { passive:false });
     viewport.addEventListener('touchend', onPointerUp);
+    viewport.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('mousemove', onPointerMove);
+    window.addEventListener('mouseup', onPointerUp);
   }
 
+  viewport.addEventListener('wheel', (event) => {
+    if (!useDeckLayout() || state.apps.length <= 1) return;
+    if (Math.abs(event.deltaX) < Math.abs(event.deltaY)) return;
+    event.preventDefault();
+    if (event.deltaX > 0) next();
+    else if (event.deltaX < 0) prev();
+  }, { passive:false });
+
   track.addEventListener('click', (e) => {
+    if (!useDeckLayout()) return;
     if (!state.ignoreClick) return;
     e.preventDefault();
     e.stopPropagation();
     state.ignoreClick = false;
   }, true);
 
-  // Keyboard & buttons
-  document.getElementById('carousel').addEventListener('keydown',(e)=>{
-    if(e.key==='ArrowRight') next();
-    if(e.key==='ArrowLeft') prev();
+  document.getElementById('carousel').addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+    if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+    if (e.key === 'End') { e.preventDefault(); goTo(state.apps.length - 1); }
   });
+
   btnPrev.addEventListener('click', prev);
   btnNext.addEventListener('click', next);
 
-  window.addEventListener('resize', () => { measureAndLayout(); });
+  const handleLayoutChange = () => {
+    state.pointerActive = false;
+    state.dragOffset = 0;
+    viewport.classList.remove('is-dragging');
+    positionCards();
+    updateDots();
+    updateButtons();
+  };
+
+  stackedMedia.addEventListener('change', handleLayoutChange);
+  motionMedia.addEventListener('change', handleLayoutChange);
+  window.addEventListener('resize', () => {
+    if (useDeckLayout()) positionCards(state.pointerActive ? state.dragOffset : 0);
+  });
 
   function renderFeatured(){
     const container = document.getElementById('featuredGrid');
@@ -440,21 +513,20 @@
     } catch (err){
       console.error(err);
       state.apps = [
-        { slug:'market-manager', emoji:'🛒', title:'Market Manager', desc:'Working memory under retail pressure.', href:'apps/market-manager/index.html', tags:['executive','memory'] },
-        { slug:'cashpoint-coach', emoji:'🏧', title:'CashPoint Coach', desc:'ATM practice with spoken steps.', href:'apps/atm-practice/index.html', tags:['planning','functional'] },
-        { slug:'task-juggler', emoji:'🧠', title:'Task Juggler', desc:'Multitask with timed interruptions.', href:'apps/task-juggler/index.html', tags:['executive'] },
-        { slug:'emergency-call-simulator', emoji:'📞', title:'Emergency Call Simulator', desc:'Practise structured calls under stress.', href:'apps/emergency-call-simulator/index.html', tags:['attention'] },
-        { slug:'fluency-coach', emoji:'💬', title:'Fluency Coach', desc:'Strategy-led verbal fluency.', href:'apps/fluency-coach/index.html', tags:['language'] },
-        { slug:'barista-chaos', emoji:'☕', title:'Barista Chaos', desc:'Dual-tasking with orders & timing.', href:'apps/barista-chaos/index.html', tags:['dual-task'] },
-        { slug:'maze-explorer', emoji:'🧭', title:'Maze Explorer', desc:'Visuospatial scanning & planning.', href:'apps/maze-explorer/index.html', tags:['visuospatial'] },
-        { slug:'plan-with-coco', emoji:'🐦', title:'Plan with Coco', desc:'Prospective memory & routines.', href:'apps/plan-with-coco/index.html', tags:['planning'] }
+        { slug:'market-manager', emoji:'🛒', title:'Market Manager', desc:'Working memory under retail pressure.', href:'apps/market-manager/index.html', tags:['executive','memory'], featured:false },
+        { slug:'cashpoint-coach', emoji:'🏧', title:'CashPoint Coach', desc:'ATM practice with spoken steps.', href:'apps/atm-practice/index.html', tags:['planning','functional'], featured:true },
+        { slug:'task-juggler', emoji:'🧠', title:'Task Juggler', desc:'Multitask with timed interruptions.', href:'apps/task-juggler/index.html', tags:['executive'], featured:false },
+        { slug:'emergency-call-simulator', emoji:'📞', title:'Emergency Call Simulator', desc:'Practise structured calls under stress.', href:'apps/emergency-call-simulator/index.html', tags:['attention'], featured:true },
+        { slug:'fluency-coach', emoji:'💬', title:'Fluency Coach', desc:'Strategy-led verbal fluency.', href:'apps/fluency-coach/index.html', tags:['language'], featured:false },
+        { slug:'barista-chaos', emoji:'☕', title:'Barista Chaos', desc:'Dual-tasking with orders & timing.', href:'apps/barista-chaos/index.html', tags:['dual-task'], featured:false },
+        { slug:'maze-explorer', emoji:'🧭', title:'Maze Explorer', desc:'Visuospatial scanning & planning.', href:'apps/maze-explorer/index.html', tags:['visuospatial'], featured:false },
+        { slug:'plan-with-coco', emoji:'🐦', title:'Plan with Coco', desc:'Prospective memory & routines.', href:'apps/plan-with-coco/index.html', tags:['planning'], featured:true }
       ];
     }
     render();
     renderFeatured();
   }
 
-  // Init
   loadApps();
   document.getElementById('last-updated').textContent = `Last updated: ${new Date().toLocaleString()}`;
 })();
