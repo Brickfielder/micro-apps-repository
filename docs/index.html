@@ -189,7 +189,7 @@
     baseRotation: 0,
     swipeStartTime: 0,
     moved: 0,
-    downLink: null
+    ignoreClick: false
   };
 
   const gradientPalette = [
@@ -302,13 +302,6 @@
     if (evt.changedTouches && evt.changedTouches.length) return evt.changedTouches[0].clientX;
     return 0;
   }
-  function pointerY(evt){
-    if (typeof evt.clientY === 'number') return evt.clientY;
-    if (evt.touches && evt.touches.length) return evt.touches[0].clientY;
-    if (evt.changedTouches && evt.changedTouches.length) return evt.changedTouches[0].clientY;
-    return 0;
-  }
-
   // Gesture handlers — NO pointer capture
   function onPointerDown(e){
     state.pointerDown = true;
@@ -318,7 +311,7 @@
     state.dragStartY = pointerY(e);
     state.baseRotation = -state.currentIndex * state.step;
     state.swipeStartTime = performance.now();
-    state.downLink = e.target && e.target.closest ? e.target.closest('.card-link') : null;
+    state.ignoreClick = false;
     // no preventDefault, no setPointerCapture — keep native click intact
   }
 
@@ -332,7 +325,7 @@
       const DRAG_THRESHOLD = 10;
       if (Math.abs(dx) > DRAG_THRESHOLD){
         state.isDragging = true;
-        state.downLink = null;
+        state.ignoreClick = true;
       } else {
         return;
       }
@@ -348,26 +341,19 @@
     state.pointerDown = false;
 
     const x = pointerX(e);
-    const y = pointerY(e);
     const dx = x - state.dragStartX;
     const elapsed = performance.now() - state.swipeStartTime;
     const velocity = Math.abs(dx) / Math.max(elapsed, 1);
 
-    // TAP: use elementFromPoint because pointer events were not targeted to the link
     const TAP_PX = 6;
     if (!state.isDragging && Math.abs(dx) < TAP_PX && state.moved < TAP_PX){
-      const el = document.elementFromPoint(x, y);
-      const link = (el && el.closest ? el.closest('.card-link') : null) || state.downLink;
-      if (link) {
-        // Prefer native navigation; fall back to manual
-        try { link.click(); } catch { window.location.href = link.href; }
-        state.downLink = null;
-        return;
-      }
+      state.ignoreClick = false;
+      return;
     }
 
     // SWIPE
     state.isDragging = false;
+    state.ignoreClick = true;
     const angle = state.baseRotation + (dx * rotationPerPixel());
     const approxIndex = Math.round(-angle / state.step);
     if (Math.abs(dx) > 30 || velocity > 0.6){
@@ -376,7 +362,6 @@
       goTo(approxIndex);
     }
 
-    state.downLink = null;
   }
 
   // Event wiring
@@ -396,16 +381,12 @@
     viewport.addEventListener('touchend', onPointerUp);
   }
 
-  // Defensive: delegate real clicks to links when not dragging
-  viewport.addEventListener('click', (e) => {
-    if (state.isDragging || state.moved > 6) return; // ignore click after a drag
-    if (state.downLink && e.target === viewport){
-      const link = state.downLink;
-      state.downLink = null;
-      e.preventDefault();
-      try { link.click(); } catch { window.location.href = link.href; }
-    }
-  });
+  track.addEventListener('click', (e) => {
+    if (!state.ignoreClick) return;
+    e.preventDefault();
+    e.stopPropagation();
+    state.ignoreClick = false;
+  }, true);
 
   // Keyboard & buttons
   document.getElementById('carousel').addEventListener('keydown',(e)=>{
