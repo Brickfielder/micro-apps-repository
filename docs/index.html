@@ -387,7 +387,7 @@
     state.dragOffset = 0;
     state.ignoreClick = false;
     viewport.classList.add('is-dragging');
-    if (viewport.setPointerCapture && typeof e.pointerId === 'number'){
+    if (viewport.setPointerCapture && typeof e.pointerId === 'number' && e.pointerType !== 'mouse'){
       viewport.setPointerCapture(e.pointerId);
     }
   }
