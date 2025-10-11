@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cognitive Rehabilitation Micro-Apps — Mobile Library</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:linear-gradient(180deg,#f7f4ff 0%,#f1f9ff 42%,#ffffff 100%);
+      --ink:#0f172a; --muted:#475569; --surface:#ffffff;
+      --accent:#5136ff; --accent-alt:#ff7262;
+      --radius-lg:22px; --radius-sm:12px;
+      --shadow:0 18px 38px rgba(15,23,42,0.12);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;height:100%}
+    body{
+      font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--ink);
+      display:flex;
+      flex-direction:column;
+      min-height:100vh;
+    }
+    a{color:inherit;text-decoration:none}
+    header{
+      padding:1.5rem 1.25rem 1rem;
+      display:flex;
+      flex-direction:column;
+      gap:1.25rem;
+    }
+    .logo{
+      display:flex;
+      align-items:center;
+      gap:.75rem;
+      font-weight:700;
+      font-size:1.05rem;
+      letter-spacing:-0.02em;
+    }
+    .logo-mark{
+      width:42px;
+      height:42px;
+      border-radius:15px;
+      display:grid;
+      place-items:center;
+      background:conic-gradient(from 140deg,#f24e1e 0%,#ff7262 30%,#a259ff 50%,#0acf83 75%,#1abcfe 100%);
+      color:#fff;
+      font-weight:800;
+      font-size:1.4rem;
+      box-shadow:0 16px 32px rgba(81,54,255,.22);
+    }
+    .hero h1{
+      margin:0;
+      font-size:1.75rem;
+      line-height:1.18;
+      letter-spacing:-0.03em;
+    }
+    .hero p{
+      margin:.45rem 0 0;
+      font-size:1rem;
+      line-height:1.6;
+      color:var(--muted);
+    }
+    .hero-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:.75rem;
+      margin-top:.75rem;
+    }
+    .hero-actions a{
+      display:inline-flex;
+      align-items:center;
+      gap:.4rem;
+      padding:.65rem 1.1rem;
+      border-radius:999px;
+      background:var(--accent);
+      color:#fff;
+      font-weight:600;
+      font-size:.95rem;
+      box-shadow:0 16px 32px rgba(81,54,255,.25);
+    }
+    .hero-actions a.secondary{
+      background:rgba(255,255,255,.85);
+      color:var(--accent);
+      box-shadow:none;
+      border:1px solid rgba(81,54,255,.18);
+    }
+    main{
+      flex:1;
+      padding:0 1.25rem 2.5rem;
+      display:flex;
+      flex-direction:column;
+      gap:1.5rem;
+    }
+    .cards{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+      gap:1rem;
+    }
+    .card{
+      background:var(--surface);
+      border-radius:var(--radius-lg);
+      padding:1.1rem 1.2rem 1.25rem;
+      border:1px solid rgba(148,163,184,.22);
+      box-shadow:var(--shadow);
+      display:flex;
+      flex-direction:column;
+      gap:.75rem;
+      min-height:180px;
+    }
+    .card-header{
+      display:flex;
+      align-items:center;
+      gap:.6rem;
+    }
+    .card-emoji{font-size:1.9rem}
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:.3rem;
+      padding:.32rem .65rem;
+      border-radius:999px;
+      font-size:.72rem;
+      font-weight:600;
+      letter-spacing:.02em;
+      background:rgba(15,23,42,.08);
+      color:var(--muted);
+      border:1px solid rgba(148,163,184,.22);
+    }
+    .card h2{
+      margin:0;
+      font-size:1.1rem;
+      letter-spacing:-0.01em;
+    }
+    .card p{
+      margin:0;
+      font-size:.95rem;
+      line-height:1.55;
+      color:var(--muted);
+    }
+    .tags{
+      display:flex;
+      flex-wrap:wrap;
+      gap:.45rem;
+      margin-top:auto;
+    }
+    .tags span{
+      padding:.38rem .75rem;
+      border-radius:999px;
+      font-size:.78rem;
+      font-weight:600;
+      background:rgba(255,255,255,.78);
+      border:1px solid rgba(148,163,184,.24);
+      color:var(--muted);
+    }
+    footer{
+      padding:1.5rem 1.25rem 2.25rem;
+      text-align:center;
+      color:var(--muted);
+      font-size:.9rem;
+    }
+    footer a{
+      color:var(--accent);
+      font-weight:600;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo"><span class="logo-mark" aria-hidden="true">µ</span> Cognitive Rehab Lab</div>
+    <div class="hero">
+      <h1>Micro-apps, optimised for mobile focus.</h1>
+      <p>Browse the cognitive rehabilitation library with a fast, touch-friendly card view. Tap any card to launch the experience.</p>
+      <div class="hero-actions">
+        <a href="#apps">Browse cards</a>
+        <a class="secondary" href="./index.html?view=desktop">View desktop site</a>
+      </div>
+    </div>
+  </header>
+  <main>
+    <section id="apps">
+      <div class="cards" id="mobileCards" aria-live="polite"></div>
+    </section>
+  </main>
+  <footer>
+    <p>© 2025 Cognitive Rehabilitation Micro-Apps — Apache 2.0</p>
+    <p id="last-updated"></p>
+  </footer>
+  <script>
+    (async () => {
+      const container = document.getElementById('mobileCards');
+      function renderCards(apps){
+        container.innerHTML = '';
+        if (!apps.length){
+          const empty = document.createElement('p');
+          empty.textContent = 'No micro-apps available right now.';
+          container.appendChild(empty);
+          return;
+        }
+        const frag = document.createDocumentFragment();
+        apps.forEach(app => {
+          const link = document.createElement('a');
+          link.className = 'card';
+          link.href = `apps/${app.slug}/index.html`;
+          link.innerHTML = `
+            <header class="card-header">
+              <span class="card-emoji" aria-hidden="true">${app.emoji || '🧩'}</span>
+              ${app.featured ? '<span class="chip">Featured</span>' : ''}
+            </header>
+            <h2>${app.title}</h2>
+            <p>${app.description}</p>
+            <div class="tags">${(app.tags || []).map(tag => `<span>${tag}</span>`).join('')}</div>
+          `;
+          frag.appendChild(link);
+        });
+        container.appendChild(frag);
+      }
+      try {
+        const res = await fetch('./catalog.json');
+        if (!res.ok) throw new Error('Network error');
+        const catalog = await res.json();
+        renderCards(catalog);
+      } catch (err){
+        console.error(err);
+        renderCards([
+          { slug:'market-manager', emoji:'🛒', title:'Market Manager', description:'Working memory under retail pressure.', tags:['executive','memory'] },
+          { slug:'atm-practice', emoji:'🏧', title:'CashPoint Coach', description:'ATM practice with spoken steps.', tags:['planning','functional'], featured:true },
+          { slug:'task-juggler', emoji:'🧠', title:'Task Juggler', description:'Multitask with timed interruptions.', tags:['executive'] }
+        ]);
+      }
+      document.getElementById('last-updated').textContent = `Last updated: ${new Date().toLocaleString()}`;
+    })();
+  </script>
+</body>
+</html>
