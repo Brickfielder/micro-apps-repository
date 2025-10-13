@@ -133,6 +133,34 @@
     .top-links{flex-wrap:wrap;justify-content:flex-start;width:100%}
     .hero-preview{display:none}
   }
+/* --- FIX: prevent right-side overflow from deck + glow layers --- */
+
+/* Never allow the page to grow horizontally */
+html, body { overflow-x: hidden; }
+
+/* Desktop-only clipping for the carousel area */
+@media (min-width: 721px){
+  .carousel,
+  .carousel-viewport {
+    overflow: hidden;            /* fallback */
+    contain: layout paint;       /* isolate paint/layout effects */
+    isolation: isolate;          /* keep filters/glows local */
+  }
+  @supports (overflow: clip) {
+    .carousel,
+    .carousel-viewport { overflow: clip; } /* modern */
+  }
+}
+
+/* The big blurred glows can push layout width; clip them */
+.site-header,
+.hero-preview { overflow: hidden; }
+
+/* Optional: slightly reduce side spread on wide screens */
+:root { --deck-spread-max: 140px; }          /* default cap (matches your current code) */
+@media (min-width: 961px){
+  :root { --deck-spread-max: 120px; }        /* tighten a touch on larger viewports */
+}
 </style>
 </head>
 <body>
@@ -328,9 +356,16 @@
     }
 
     const width = viewport.offsetWidth || 1;
-    const spread = Math.min(width / 3, 140);
-    const drop = Math.min(18, width / 28);
-    const fadeDistance = 2.2;
+
+// read the CSS cap if present; fallback to 140
+const cssCap = parseInt(
+  getComputedStyle(document.documentElement)
+    .getPropertyValue('--deck-spread-max')
+) || 140;
+
+const spread = Math.min(width / 3, cssCap);
+const drop = Math.min(18, width / 28);
+const fadeDistance = 2.0;  // slightly tighter = less off-screen travel
 
     items.forEach((el, i) => {
       const offset = i - state.currentIndex + dragOffset;
