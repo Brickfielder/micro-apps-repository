@@ -9,6 +9,8 @@
   <meta name="app-slug" content="build-your-package" />
   <script>
     window.__THEME_URL__ = new URL('../../shared/theme.css', location.href).toString();
+    window.__FRAME_URL__ = new URL('../../shared/frame.js', location.href).toString();
+    window.__CLINICIAN_FEEDBACK_URL__ = new URL('../../shared/clinician_feedback.js', location.href).toString();
     window.__CATALOG_URL__ = new URL('../../catalog.json', location.href).toString();
   </script>
   <script defer src="../../shared/frame.js"></script>
@@ -349,13 +351,118 @@
         statusEl.textContent = '';
       }
 
-      async function addFileToZip(zip, url, destination) {
+      const SHARED_ASSETS = [
+        { url: window.__THEME_URL__, destination: 'shared/theme.css', label: 'theme.css' },
+        { url: window.__FRAME_URL__, destination: 'shared/frame.js', label: 'frame.js' },
+        { url: window.__CLINICIAN_FEEDBACK_URL__, destination: 'shared/clinician_feedback.js', label: 'clinician_feedback.js' },
+      ];
+
+      const SHARED_REWRITE_TARGETS = {
+        'theme.css': '../shared/theme.css',
+        'frame.js': '../shared/frame.js',
+        'clinician_feedback.js': '../shared/clinician_feedback.js',
+      };
+
+      function serialiseDocument(doc) {
+        const docType = doc.doctype;
+        let result = '';
+        if (docType) {
+          result += `<!DOCTYPE ${docType.name}`;
+          if (docType.publicId) {
+            result += ` PUBLIC "${docType.publicId}"`;
+          }
+          if (docType.systemId) {
+            const suffix = docType.publicId ? '' : ' SYSTEM';
+            result += `${suffix} "${docType.systemId}"`;
+          }
+          result += '>';
+        }
+        const html = doc.documentElement ? doc.documentElement.outerHTML : '';
+        return docType ? `${result}\n${html}` : html;
+      }
+
+      function rewriteSharedUrls(html) {
+        try {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+
+          if (!doc || !doc.documentElement) {
+            return html;
+          }
+
+          const sharedEntries = Object.entries(SHARED_REWRITE_TARGETS);
+
+          doc.querySelectorAll('link[href], script[src]').forEach(node => {
+            const attr = node.tagName === 'LINK' ? 'href' : 'src';
+            const current = node.getAttribute(attr);
+            if (!current) {
+              return;
+            }
+            for (const [fileName, relative] of sharedEntries) {
+              if (current.includes(fileName)) {
+                node.setAttribute(attr, relative);
+                break;
+              }
+            }
+          });
+
+          const escapeRegex = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const toLiteral = value => JSON.stringify(value);
+          const assignmentTargets = [
+            { varName: 'window.__THEME_URL__', file: 'theme.css' },
+            { varName: 'window.__FRAME_URL__', file: 'frame.js' },
+            { varName: 'window.__CLINICIAN_FEEDBACK_URL__', file: 'clinician_feedback.js' },
+          ];
+
+          doc.querySelectorAll('script:not([src])').forEach(node => {
+            const text = node.textContent;
+            if (!text) {
+              return;
+            }
+            let updated = text;
+            sharedEntries.forEach(([fileName, relative]) => {
+              const newUrlPattern = new RegExp(
+                `new URL\\((['\"\`]).*?${escapeRegex(fileName)}.*?\\1,\\s*location\\.href\\)\\.toString\\(\\)`,
+                'g'
+              );
+              updated = updated.replace(newUrlPattern, toLiteral(relative));
+            });
+
+            assignmentTargets.forEach(({ varName, file }) => {
+              const relative = SHARED_REWRITE_TARGETS[file];
+              const assignPattern = new RegExp(
+                `${escapeRegex(varName)}\\s*=\\s*new URL\\((['\"\`]).*?${escapeRegex(file)}.*?\\1,\\s*location\\.href\\)\\.toString\\(\\)`,
+                'g'
+              );
+              updated = updated.replace(assignPattern, `${varName} = ${toLiteral(relative)}`);
+            });
+
+            if (updated !== text) {
+              node.textContent = updated;
+            }
+          });
+
+          return serialiseDocument(doc);
+        } catch (error) {
+          console.warn('[packager] Failed to rewrite shared asset URLs', error);
+          return html;
+        }
+      }
+
+      async function addFileToZip(zip, url, destination, options = {}) {
         const response = await fetch(url, { cache: 'no-store' });
         if (!response.ok) {
           throw new Error(`${response.status} ${response.statusText}`);
         }
-        const blob = await response.blob();
-        zip.file(destination, blob);
+
+        if (options.rewriteSharedUrls && destination.endsWith('.html')) {
+          const original = await response.text();
+          const rewritten = rewriteSharedUrls(original);
+          zip.file(destination, rewritten);
+        } else {
+          const blob = await response.blob();
+          zip.file(destination, blob);
+        }
       }
 
       async function createZip() {
@@ -366,7 +473,7 @@
         }
 
         setBusy(true);
-        statusEl.textContent = 'Fetching app files…';
+        statusEl.textContent = 'Fetching shared resources…';
         progressEl.style.width = '0%';
         progressEl.parentElement.setAttribute('aria-valuenow', '0');
 
@@ -374,13 +481,26 @@
         let completed = 0;
         let failures = 0;
 
+        for (const asset of SHARED_ASSETS) {
+          try {
+            await addFileToZip(zip, asset.url, asset.destination);
+          } catch (error) {
+            failures += 1;
+            zip.file(`${asset.destination}.ERROR.txt`, String(error));
+          }
+        }
+
+        statusEl.textContent = failures
+          ? 'Fetching app files… (shared resources had issues – see ZIP for details).'
+          : 'Fetching app files…';
+
         try {
           for (const checkbox of selected) {
             const slug = checkbox.dataset.slug;
             const url = checkbox.dataset.url;
             const target = `${slug}/index.html`;
             try {
-              await addFileToZip(zip, url, target);
+              await addFileToZip(zip, url, target, { rewriteSharedUrls: true });
             } catch (error) {
               failures += 1;
               zip.file(`${target}.ERROR.txt`, String(error));
