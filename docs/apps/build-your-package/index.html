@@ -1,190 +1,562 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Build your package</title>
-<style>
-    :root{--bg:#f7f7f9;--card:#fff;--text:#1f2937;--muted:#667085;--border:#e5e7eb;--brand:#0a66c2;--brand2:#084f96;--radius:16px;--shadow:0 10px 22px rgba(0,0,0,.08)}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
-    header{padding:26px 16px;text-align:center;border-bottom:1px solid var(--border);background:linear-gradient(#ffffff, #fafbff)}
-    header h1{margin:0;font-size:26px}
-    header p{margin:8px auto 0;max-width:760px;color:var(--muted)}
-    main{max-width:980px;margin:24px auto 40px;padding:0 16px;display:grid;gap:16px}
-    .panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
-    .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
-    .btn{background:var(--brand);color:#fff;border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}
-    .btn:disabled{opacity:.6;cursor:not-allowed}
-    .btn.secondary{background:#eef2f8;color:#0b3a6b}
-    .apps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
-    .app{border:1px solid var(--border);border-radius:12px;padding:12px;display:grid;gap:8px}
-    .app h3{margin:0;font-size:16px}
-    .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
-    .muted{color:var(--muted);font-size:13px}
-    .pill{display:inline-block;background:#f5f7fa;border:1px solid var(--border);border-radius:999px;padding:2px 8px;font-size:12px;margin-right:6px}
-    .progress{height:12px;background:#eef2f6;border-radius:999px;overflow:hidden;border:1px solid var(--border)}
-    .progress>div{height:100%;width:0%;background:var(--brand);transition:width .2s}
-    .center{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
-    @media (max-width:600px){header h1{font-size:22px}}
-  </style>
-<meta content="Build_your_package" name="app-slug"/><link href="/shared/theme.css" rel="stylesheet"/><script defer="" src="/shared/frame.js"></script><link href="../../../shared/theme.css" rel="stylesheet"/><script defer="" src="../../../shared/frame.js"></script><script defer="" src="../../../shared/clinician_feedback.js"></script>  <meta name="app-slug" content="build-your-package">
-</head>
-<body><main id="app-root">
-<header>
-<h1>Build your package</h1>
-<p>Select apps and download a single ZIP. This simple packager includes each app’s <code>index.html</code> only — reliable on GitHub Pages. (For full offline bundles we can add per‑app manifests later.)</p>
-</header>
-<main>
-<section class="panel">
-<div class="controls">
-<div class="center">
-<button class="btn secondary" id="btnAll">Select all</button>
-<button class="btn secondary" id="btnNone">Clear</button>
-<button class="btn" id="btnZip">Download ZIP</button>
-</div>
-<div aria-live="polite" class="muted" id="count"></div>
-</div>
-<div class="progress" style="margin-top:8px"><div id="bar"></div></div>
-<div aria-live="polite" class="muted" id="status" style="margin-top:6px"></div>
-</section>
-<section class="panel">
-<div class="apps" id="apps" role="list"></div>
-</section>
-</main>
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-<script>
-    const ABS_CATALOG = location.origin + location.pathname.replace(/Build_your_package.*$/, '') + 'catalog.json';
-    const PACKAGER = 'Build your package';
-    const APPS = document.getElementById('apps');
-    const COUNT = document.getElementById('count');
-    const BAR = document.getElementById('bar');
-    const STATUS = document.getElementById('status');
-    const BTN_ALL = document.getElementById('btnAll');
-    const BTN_NONE = document.getElementById('btnNone');
-    const BTN_ZIP = document.getElementById('btnZip');
-
-    function normPath(p){
-      if(!p) return null;
-      p = p.replace(/\\/index\\.html$/i,'/');
-      p = p.replace(/^\\/?docs\\//i,'/micro-apps-repository/');
-      if(!p.endsWith('/')) p += '/';
-      return p;
-    }
-    function slug(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');}
-
-    function render(list){
-      APPS.innerHTML='';
-      list.filter(x => x.name !== PACKAGER).forEach(x => {
-        const id = 'chk-' + slug(x.name);
-        const card = document.createElement('div');
-        card.className = 'app';
-        card.setAttribute('role','listitem');
-        card.innerHTML = `
-          <div class="row">
-            <h3>${x.name}</h3>
-            <label><input id="${id}" type="checkbox" data-name="${x.name}" data-path="${x.path}" checked> Include</label>
-          </div>
-          ${x.about ? `<div class="muted">${x.about}</div>`: ''}
-          <div>${(x.tags||[]).map(t=>`<span class="pill">${t}</span>`).join('')}</div>
-          <div class="muted">Path: ${x.path}</div>
-        `;
-        APPS.appendChild(card);
-      });
-      updateCount();
-    }
-    function updateCount(){
-      const total = APPS.querySelectorAll('input[type=checkbox]').length;
-      const sel = APPS.querySelectorAll('input[type=checkbox]:checked').length;
-      COUNT.textContent = `${sel}/${total} selected`;
-    }
-    APPS.addEventListener('change', e=>{ if(e.target.matches('input[type=checkbox]')) updateCount(); });
-    BTN_ALL.onclick = ()=>{ APPS.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=true); updateCount(); };
-    BTN_NONE.onclick = ()=>{ APPS.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=false); updateCount(); };
-
-    async function load(){
-      let list = [];
-      try{
-        const res = await fetch(ABS_CATALOG, {cache:'no-store'});
-        if(res.ok) list = await res.json();
-      }catch{}
-      // Fallback if catalog fails
-      if(!Array.isArray(list) || !list.length){
-        list = [
-          {name:"Audio Errands", path:"/micro-apps-repository/Audio_Errands/", tags:["Executive Functioning","Strategy Training"]},
-          {name:"Barista Chaos", path:"/micro-apps-repository/Barista_Chaos/", tags:["Executive Functioning"]},
-          {name:"Build your package", path:"/micro-apps-repository/Build_your_package/", tags:["Utility"]},
-          {name:"Emergency despatch", path:"/micro-apps-repository/Emergency_despatch/", tags:["Executive Functioning","Visuospatial"]},
-          {name:"Errands — visual memory", path:"/micro-apps-repository/Errands-visual-memory/", tags:["Visuospatial","Executive Functioning"]},
-          {name:"Fluency Coach", path:"/micro-apps-repository/Fluency_Coach/", tags:["Language","Executive Functioning","Strategy Training"]},
-          {name:"Office Day", path:"/micro-apps-repository/Office_Day/", tags:["Executive Functioning","Strategy Training"]},
-          {name:"Plan with Coco", path:"/micro-apps-repository/Plan_with_Coco/", tags:["Executive Functioning","Language"]},
-          {name:"Star Hunt", path:"/micro-apps-repository/Star_Hunt/", tags:["Visuospatial"]},
-          {name:"Taskflow", path:"/micro-apps-repository/Taskflow/", tags:["Executive Functioning"]},
-          {name:"Tower control", path:"/micro-apps-repository/Tower_control/", tags:["Executive Functioning","Visuospatial"]},
-          {name:"Visuospatial Blocks", path:"/micro-apps-repository/Visuospatial_Blocks/", tags:["Visuospatial"]},
-          {name:"Word Scavenger", path:"/micro-apps-repository/word-scavenger/", tags:["Language"]},
-          {name:"Maze Explorer", path:"/micro-apps-repository/maze-explorer/", tags:["Visuospatial","Executive Functioning"]},
-        ];
-      }
-      list = list.map(it => ({...it, path: normPath(it.path || it.url)})).filter(x=>x.path);
-      list.sort((a,b)=>a.name.localeCompare(b.name));
-      render(list);
-    }
-
-    async function addFileToZip(zip, url, dest){
-      const res = await fetch(url, {cache:'no-store'});
-      if(!res.ok) throw new Error(res.status + ' ' + url);
-      const blob = await res.blob();
-      zip.file(dest, blob);
-    }
-
-    async function makeZip(){
-      const checks = [...APPS.querySelectorAll('input[type=checkbox]:checked')];
-      if(!checks.length){ alert('Select at least one app'); return; }
-      BTN_ZIP.disabled = true;
-      BAR.style.width = '0%'; STATUS.textContent = 'Fetching files…';
-
-      const zip = new JSZip();
-      const total = checks.length;
-      let i = 0, failures = 0;
-
-      for(const c of checks){
-        i++;
-        const base = normPath(c.dataset.path);
-        const name = c.dataset.name;
-        const dst = slug(name) + '/index.html';
-        try{
-          await addFileToZip(zip, base + 'index.html', dst);
-        }catch(e){
-          failures++;
-          zip.file(dst + '.ERROR.txt', String(e));
-        }
-        BAR.style.width = Math.round(100 * i / total) + '%';
-        STATUS.textContent = `Added ${i}/${total} app pages…`;
-      }
-
-      STATUS.textContent = failures ? `Packaging (${failures} failed fetches)…` : 'Packaging…';
-      const blob = await zip.generateAsync({type:'blob'});
-      const stamp = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
-      saveAs(blob, 'micro-apps-basic-package_' + stamp + '.zip');
-      STATUS.textContent = failures ? `Done with ${failures} error(s).` : 'Done.';
-      BTN_ZIP.disabled = false;
-    }
-
-    BTN_ZIP.onclick = makeZip;
-    load();
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Build your package</title>
+  <link rel="stylesheet" href="../../shared/theme.css" />
+  <meta name="theme" content="bold dense" />
+  <meta name="app-slug" content="build-your-package" />
+  <script>
+    window.__THEME_URL__ = new URL('../../shared/theme.css', location.href).toString();
+    window.__FRAME_URL__ = new URL('../../shared/frame.js', location.href).toString();
+    window.__CLINICIAN_FEEDBACK_URL__ = new URL('../../shared/clinician_feedback.js', location.href).toString();
+    window.__CATALOG_URL__ = new URL('../../catalog.json', location.href).toString();
   </script>
-<section id="clinician-notes">
-<div style="background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 16px; margin-top: 24px;">
-<label for="clinician-comment" style="display:block;font-weight:600;margin-bottom:8px;">
-      Clinician comments (optional)
-    </label>
-<textarea id="clinician-comment" placeholder="Enter any notes relevant to this session..." rows="4" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); font: inherit; resize: vertical;"></textarea>
-<p style="margin:8px 0 0; color: var(--muted); font-size: 0.9rem;">
-      This note will be added as <code>clinician_comment</code> in the exported CSV.
-    </p>
-</div>
-</section></main></body>
-</html>
+  <script defer src="../../shared/frame.js"></script>
+  <script defer src="../../shared/clinician_feedback.js"></script>
+  <style>
+    :root {
+      --page-gap: clamp(18px, 4vw, 32px);
+      --panel-bg: var(--surface, #fff);
+      --panel-border: var(--line, #e2e8f0);
+      --panel-radius: var(--radius, 16px);
+      --panel-shadow: var(--shadow, 0 10px 25px rgba(15, 23, 42, 0.08));
+      --accent: var(--brand, #0a66c2);
+    }
 
+    body {
+      margin: 0;
+      background: var(--background, #f7f8fb);
+      color: var(--text, #1f2937);
+      font-family: var(--font-body, "Inter", system-ui, -apple-system, "Segoe UI", sans-serif);
+    }
+
+    #app-root {
+      max-width: 980px;
+      margin: 0 auto var(--page-gap);
+      padding: 0 clamp(14px, 3vw, 24px) var(--page-gap);
+      display: grid;
+      gap: var(--page-gap);
+    }
+
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--panel-radius);
+      box-shadow: var(--panel-shadow);
+      padding: clamp(16px, 2.4vw, 24px);
+      display: grid;
+      gap: clamp(12px, 2vw, 18px);
+    }
+
+    .panel h2 {
+      margin: 0;
+      font-size: clamp(1.15rem, 2.6vw, 1.35rem);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .hint {
+      color: var(--muted, #64748b);
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    button.btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    button.btn.primary {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 10px 18px rgba(10, 102, 194, 0.22);
+    }
+
+    button.btn.secondary {
+      background: rgba(10, 102, 194, 0.12);
+      color: var(--accent);
+    }
+
+    button.btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .apps {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    .app-card {
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      min-height: 100%;
+    }
+
+    .app-card header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .app-card h3 {
+      margin: 0;
+      font-size: 1.02rem;
+    }
+
+    .app-card p {
+      margin: 0;
+      color: var(--muted, #64748b);
+      font-size: 0.93rem;
+      line-height: 1.45;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: 999px;
+      border: 1px solid var(--panel-border);
+      padding: 2px 10px;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted, #64748b);
+      background: rgba(148, 163, 184, 0.08);
+    }
+
+    .progress {
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(10, 102, 194, 0.12);
+      overflow: hidden;
+      border: 1px solid rgba(10, 102, 194, 0.28);
+    }
+
+    .progress > div {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: width 0.2s ease;
+    }
+
+    .status-row {
+      color: var(--muted, #64748b);
+      font-size: 0.9rem;
+      min-height: 1.3em;
+    }
+
+    @media (max-width: 620px) {
+      .controls {
+        align-items: stretch;
+      }
+
+      .button-row {
+        width: 100%;
+        justify-content: stretch;
+      }
+
+      button.btn {
+        flex: 1 1 auto;
+        justify-content: center;
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main id="app-root">
+    <section class="panel">
+      <h2>Bundle micro-apps for your learners</h2>
+      <p class="hint">
+        Choose the activities you want to include, then download a single ZIP file that contains each app’s <code>index.html</code> page. The bundle works offline in most browsers and can be hosted on your own site.
+      </p>
+      <div class="controls">
+        <div class="button-row">
+          <button class="btn secondary" id="btn-select-all" type="button">Select all</button>
+          <button class="btn secondary" id="btn-clear" type="button">Clear</button>
+          <button class="btn primary" id="btn-download" type="button">Download ZIP</button>
+        </div>
+        <div class="hint" id="selection-count" aria-live="polite"></div>
+      </div>
+      <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div id="progress-bar"></div>
+      </div>
+      <div class="status-row" id="status" aria-live="polite"></div>
+    </section>
+
+    <section class="panel">
+      <div class="apps" id="apps" role="list"></div>
+    </section>
+
+    <section id="clinician-notes">
+      <div style="background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 16px;">
+        <label for="clinician-comment" style="display:block;font-weight:600;margin-bottom:8px;">
+          Clinician comments (optional)
+        </label>
+        <textarea id="clinician-comment" placeholder="Enter any notes relevant to this session..." rows="4" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); font: inherit; resize: vertical;"></textarea>
+        <p style="margin:8px 0 0; color: var(--muted); font-size: 0.9rem;">
+          This note will be added as <code>clinician_comment</code> in the exported CSV.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+  <script>
+    (function () {
+      const appsContainer = document.getElementById('apps');
+      const countEl = document.getElementById('selection-count');
+      const statusEl = document.getElementById('status');
+      const progressEl = document.getElementById('progress-bar');
+      const btnAll = document.getElementById('btn-select-all');
+      const btnClear = document.getElementById('btn-clear');
+      const btnDownload = document.getElementById('btn-download');
+
+      const FALLBACK_SLUGS = [
+        'audio-errands', 'atm-practice', 'barista-chaos', 'build-your-package', 'emergency-call-simulator',
+        'emergency-despatch', 'emotion-chat', 'email-composer-coach', 'errands-visual-memory', 'fluency-coach',
+        'market-manager', 'maze-explorer', 'memory-in-action', 'mobile-banking-simulator', 'office-day',
+        'plan-with-coco', 'shopping-trip-planner', 'signal-master', 'star-hunt', 'task-juggler', 'taskflow',
+        'tower-control', 'travel-with-coco', 'visual-neglect-trainer', 'visuospatial-blocks', 'word-scavenger'
+      ];
+
+      function slugToTitle(slug) {
+        return slug
+          .replace(/-/g, ' ')
+          .replace(/\b([a-z])/g, (m, c) => c.toUpperCase());
+      }
+
+      function normaliseEntry(entry) {
+        const slug = (entry.slug || '').trim() || slugify(entry.title || entry.name || 'app');
+        const title = entry.title || entry.name || slugToTitle(slug);
+        const description = entry.description || entry.desc || entry.about || '';
+        const tags = Array.isArray(entry.tags) ? entry.tags.filter(Boolean) : [];
+        const emoji = entry.emoji || '';
+        const url = new URL(`../${slug}/index.html`, location.href).toString();
+        return { slug, title, description, tags, emoji, url };
+      }
+
+      function slugify(text) {
+        return (text || '')
+          .toString()
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '') || 'app';
+      }
+
+      function updateCount() {
+        const checkboxes = appsContainer.querySelectorAll('input[type="checkbox"]');
+        const selected = appsContainer.querySelectorAll('input[type="checkbox"]:checked');
+        countEl.textContent = checkboxes.length ? `${selected.length}/${checkboxes.length} selected` : '';
+      }
+
+      function renderApps(apps) {
+        appsContainer.innerHTML = '';
+        apps.forEach(app => {
+          const id = `chk-${app.slug}`;
+          const card = document.createElement('article');
+          card.className = 'app-card';
+          card.setAttribute('role', 'listitem');
+          card.innerHTML = `
+            <header>
+              <div>
+                <h3>${app.emoji ? `${app.emoji} ` : ''}${app.title}</h3>
+                ${app.description ? `<p>${app.description}</p>` : ''}
+              </div>
+              <label style="font-size:0.9rem; display:flex; align-items:center; gap:6px;">
+                <input type="checkbox" id="${id}" data-slug="${app.slug}" data-url="${app.url}" checked />
+                Include
+              </label>
+            </header>
+            ${app.tags.length ? `<div class="tag-row">${app.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}</div>` : ''}
+          `;
+          appsContainer.appendChild(card);
+        });
+        updateCount();
+      }
+
+      function setBusy(isBusy) {
+        btnDownload.disabled = isBusy;
+        btnAll.disabled = isBusy;
+        btnClear.disabled = isBusy;
+      }
+
+      async function loadCatalog() {
+        const url = new URL('../../catalog.json', location.href);
+        try {
+          const response = await fetch(url, { cache: 'no-store' });
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          const json = await response.json();
+          if (!Array.isArray(json)) {
+            throw new Error('Unexpected catalog format');
+          }
+          return json;
+        } catch (error) {
+          console.warn('[packager] Failed to load catalog.json', error);
+          statusEl.textContent = 'Unable to load catalog.json – showing fallback list.';
+          return FALLBACK_SLUGS.map(slug => ({ slug, title: slugToTitle(slug) }));
+        }
+      }
+
+      async function init() {
+        statusEl.textContent = 'Loading catalog…';
+        const catalog = await loadCatalog();
+        const apps = catalog
+          .map(normaliseEntry)
+          .filter(app => app.slug && app.slug !== 'build-your-package')
+          .sort((a, b) => a.title.localeCompare(b.title));
+        renderApps(apps);
+        statusEl.textContent = '';
+      }
+
+      const SHARED_ASSETS = [
+        { url: window.__THEME_URL__, destination: 'shared/theme.css', label: 'theme.css' },
+        { url: window.__FRAME_URL__, destination: 'shared/frame.js', label: 'frame.js' },
+        { url: window.__CLINICIAN_FEEDBACK_URL__, destination: 'shared/clinician_feedback.js', label: 'clinician_feedback.js' },
+      ];
+
+      const SHARED_REWRITE_TARGETS = {
+        'theme.css': '../shared/theme.css',
+        'frame.js': '../shared/frame.js',
+        'clinician_feedback.js': '../shared/clinician_feedback.js',
+      };
+
+      function serialiseDocument(doc) {
+        const docType = doc.doctype;
+        let result = '';
+        if (docType) {
+          result += `<!DOCTYPE ${docType.name}`;
+          if (docType.publicId) {
+            result += ` PUBLIC "${docType.publicId}"`;
+          }
+          if (docType.systemId) {
+            const suffix = docType.publicId ? '' : ' SYSTEM';
+            result += `${suffix} "${docType.systemId}"`;
+          }
+          result += '>';
+        }
+        const html = doc.documentElement ? doc.documentElement.outerHTML : '';
+        return docType ? `${result}\n${html}` : html;
+      }
+
+      function rewriteSharedUrls(html) {
+        try {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+
+          if (!doc || !doc.documentElement) {
+            return html;
+          }
+
+          const sharedEntries = Object.entries(SHARED_REWRITE_TARGETS);
+
+          doc.querySelectorAll('link[href], script[src]').forEach(node => {
+            const attr = node.tagName === 'LINK' ? 'href' : 'src';
+            const current = node.getAttribute(attr);
+            if (!current) {
+              return;
+            }
+            for (const [fileName, relative] of sharedEntries) {
+              if (current.includes(fileName)) {
+                node.setAttribute(attr, relative);
+                break;
+              }
+            }
+          });
+
+          const escapeRegex = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const toLiteral = value => JSON.stringify(value);
+          const assignmentTargets = [
+            { varName: 'window.__THEME_URL__', file: 'theme.css' },
+            { varName: 'window.__FRAME_URL__', file: 'frame.js' },
+            { varName: 'window.__CLINICIAN_FEEDBACK_URL__', file: 'clinician_feedback.js' },
+          ];
+
+          doc.querySelectorAll('script:not([src])').forEach(node => {
+            const text = node.textContent;
+            if (!text) {
+              return;
+            }
+            let updated = text;
+            sharedEntries.forEach(([fileName, relative]) => {
+              const newUrlPattern = new RegExp(
+                `new URL\\((['\"\`]).*?${escapeRegex(fileName)}.*?\\1,\\s*location\\.href\\)\\.toString\\(\\)`,
+                'g'
+              );
+              updated = updated.replace(newUrlPattern, toLiteral(relative));
+            });
+
+            assignmentTargets.forEach(({ varName, file }) => {
+              const relative = SHARED_REWRITE_TARGETS[file];
+              const assignPattern = new RegExp(
+                `${escapeRegex(varName)}\\s*=\\s*new URL\\((['\"\`]).*?${escapeRegex(file)}.*?\\1,\\s*location\\.href\\)\\.toString\\(\\)`,
+                'g'
+              );
+              updated = updated.replace(assignPattern, `${varName} = ${toLiteral(relative)}`);
+            });
+
+            if (updated !== text) {
+              node.textContent = updated;
+            }
+          });
+
+          return serialiseDocument(doc);
+        } catch (error) {
+          console.warn('[packager] Failed to rewrite shared asset URLs', error);
+          return html;
+        }
+      }
+
+      async function addFileToZip(zip, url, destination, options = {}) {
+        const response = await fetch(url, { cache: 'no-store' });
+        if (!response.ok) {
+          throw new Error(`${response.status} ${response.statusText}`);
+        }
+
+        if (options.rewriteSharedUrls && destination.endsWith('.html')) {
+          const original = await response.text();
+          const rewritten = rewriteSharedUrls(original);
+          zip.file(destination, rewritten);
+        } else {
+          const blob = await response.blob();
+          zip.file(destination, blob);
+        }
+      }
+
+      async function createZip() {
+        const selected = Array.from(appsContainer.querySelectorAll('input[type="checkbox"]:checked'));
+        if (!selected.length) {
+          alert('Select at least one app to build a package.');
+          return;
+        }
+
+        setBusy(true);
+        statusEl.textContent = 'Fetching shared resources…';
+        progressEl.style.width = '0%';
+        progressEl.parentElement.setAttribute('aria-valuenow', '0');
+
+        const zip = new JSZip();
+        let completed = 0;
+        let failures = 0;
+
+        for (const asset of SHARED_ASSETS) {
+          try {
+            await addFileToZip(zip, asset.url, asset.destination);
+          } catch (error) {
+            failures += 1;
+            zip.file(`${asset.destination}.ERROR.txt`, String(error));
+          }
+        }
+
+        statusEl.textContent = failures
+          ? 'Fetching app files… (shared resources had issues – see ZIP for details).'
+          : 'Fetching app files…';
+
+        try {
+          for (const checkbox of selected) {
+            const slug = checkbox.dataset.slug;
+            const url = checkbox.dataset.url;
+            const target = `${slug}/index.html`;
+            try {
+              await addFileToZip(zip, url, target, { rewriteSharedUrls: true });
+            } catch (error) {
+              failures += 1;
+              zip.file(`${target}.ERROR.txt`, String(error));
+            }
+            completed += 1;
+            const percentage = Math.round((completed / selected.length) * 100);
+            progressEl.style.width = `${percentage}%`;
+            progressEl.parentElement.setAttribute('aria-valuenow', String(percentage));
+            statusEl.textContent = `Added ${completed}/${selected.length} app pages…`;
+          }
+
+          statusEl.textContent = failures
+            ? `Packaging archive (encountered ${failures} error${failures === 1 ? '' : 's'}).`
+            : 'Packaging archive…';
+
+          const blob = await zip.generateAsync({ type: 'blob' });
+          const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+          saveAs(blob, `micro-apps-package_${stamp}.zip`);
+          statusEl.textContent = failures
+            ? `Packaging complete with ${failures} error${failures === 1 ? '' : 's'} – check the ZIP for details.`
+            : 'Packaging complete.';
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      appsContainer.addEventListener('change', event => {
+        if (event.target.matches('input[type="checkbox"]')) {
+          updateCount();
+        }
+      });
+
+      btnAll.addEventListener('click', () => {
+        appsContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+          cb.checked = true;
+        });
+        updateCount();
+      });
+
+      btnClear.addEventListener('click', () => {
+        appsContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+          cb.checked = false;
+        });
+        updateCount();
+      });
+
+      btnDownload.addEventListener('click', () => {
+        createZip().catch(error => {
+          console.error('[packager] Failed to create ZIP', error);
+          statusEl.textContent = 'Something went wrong while creating the package.';
+          setBusy(false);
+        });
+      });
+
+      init();
+    })();
+  </script>
+</body>
+</html>

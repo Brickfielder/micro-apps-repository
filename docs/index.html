@@ -1,11 +1,25 @@
-<!DOCTYPE html><html lang="en"> 
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Cognitive Rehabilitation Micro-Apps — 3D Mobile Carousel</title>
+<title>Cognitive Rehabilitation Micro-Apps — Interactive Card Deck</title>
+
+<script>
+  // Redirect phones to the mobile view unless explicitly forced
+  if (!window.location.search.includes('view=desktop') &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(max-width: 720px)').matches) {
+    const search = window.location.search;
+    const hash = window.location.hash;
+    window.location.replace(`./index-mobile.html${search}${hash}`);
+  }
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
 <style>
   :root{
     --bg:linear-gradient(180deg,#f7f4ff 0%,#f1f9ff 42%,#ffffff 100%);
@@ -14,6 +28,9 @@
     --radius-lg:28px; --radius-md:18px; --radius-sm:12px;
     --shadow-sm:0 12px 30px rgba(15,23,42,0.06); --shadow-lg:0 32px 60px rgba(15,23,42,0.12);
     --max-width:1180px;
+
+    /* cap for deck spread (read by JS) */
+    --deck-spread-max: 140px;
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
@@ -28,7 +45,16 @@
 
   /* Header / hero */
   .site-header{position:relative;padding:1.75rem 1.5rem 2rem}
-  .site-header::before{content:"";position:absolute;inset:0;background:linear-gradient(140deg,rgba(81,54,255,.16) 0%,rgba(162,89,255,.12) 35%,rgba(242,78,30,.08) 100%);filter:blur(65px);opacity:.8;pointer-events:none}
+  /* Restored/stronger banner glow without clipping it away */
+  .site-header::before{
+    content:"";position:absolute;inset:-10%;
+    background:linear-gradient(140deg,rgba(81,54,255,.22) 0%,rgba(162,89,255,.16) 35%,rgba(242,78,30,.10) 100%);
+    filter:blur(55px);
+    opacity:.95;
+    pointer-events:none;
+    will-change:transform,filter;
+  }
+
   .header-inner{position:relative;max-width:var(--max-width);margin:0 auto;display:flex;flex-direction:column;gap:2rem}
   .top-nav{display:flex;align-items:center;gap:1.2rem;padding:.85rem 1rem;border-radius:var(--radius-lg);background:rgba(255,255,255,.78);backdrop-filter:blur(14px);border:1px solid rgba(148,163,184,.18);box-shadow:var(--shadow-sm)}
   .logo{display:flex;align-items:center;gap:.9rem;font-weight:700;font-size:1rem;letter-spacing:-.02em}
@@ -44,8 +70,15 @@
   .hero-actions{display:flex;flex-wrap:wrap;gap:.75rem}
   .cta-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.55rem;border-radius:999px;font-weight:600;font-size:.98rem;border:none;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease}
   .cta-btn.primary{background:linear-gradient(135deg,#5136ff 0%,#a259ff 100%);color:#fff;box-shadow:0 22px 40px rgba(81,54,255,.35)}
-  .hero-preview{position:relative;padding:1.6rem;border-radius:var(--radius-lg);background:var(--surface);overflow:hidden;border:1px solid rgba(148,163,184,.22);box-shadow:var(--shadow-lg)}
-  .hero-preview::before{content:"";position:absolute;inset:-40% -20% 30% -40%;background:linear-gradient(135deg,#d8e9ff 0%,#f7e9ff 100%);opacity:.9;filter:blur(16px);z-index:0}
+
+  .hero-preview{position:relative;padding:1.6rem;border-radius:var(--radius-lg);background:var(--surface);overflow:visible;border:1px solid rgba(148,163,184,.22);box-shadow:var(--shadow-lg)}
+  /* Strong, safe glow using transforms (don’t affect layout width) */
+  .hero-preview::before{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(135deg,#d8e9ff 0%,#f7e9ff 100%);
+    opacity:.9;filter:blur(22px);transform:scale(1.35);
+    z-index:0;will-change:transform,filter;
+  }
   .hero-preview-content{position:relative;z-index:1}
 
   main{flex:1;max-width:var(--max-width);margin:0 auto;padding:0 1.5rem 3rem}
@@ -63,6 +96,7 @@
   }
   .carousel-item.is-active{opacity:1;filter:none;pointer-events:auto;z-index:3}
   .carousel-item .card{min-height:320px}
+  .carousel-item[data-hidden="true"]{opacity:0;pointer-events:none}
 
   .card{position:relative;border-radius:var(--radius-lg);padding:1.4rem 1.5rem 1.6rem;border:1px solid rgba(148,163,184,.18);background:var(--surface);overflow:hidden;box-shadow:var(--shadow-sm)}
   .card::before{content:"";position:absolute;inset:-30% -20% 45% -30%;background:var(--card-gradient,linear-gradient(135deg,#e4f1ff 0%,#f6e8ff 100%));opacity:.9;filter:blur(20px);z-index:0}
@@ -85,27 +119,61 @@
   .carousel-nav:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;transform:none}
   .carousel-nav svg{width:18px;height:18px}
 
-  .carousel-pagination{position:absolute;bottom:.6rem;left:50%;transform:translateX(-50%);display:flex;gap:.5rem;padding:.35rem .7rem;border-radius:999px;background:rgba(255,255,255,.78);border:1px solid rgba(148,163,184,.18);backdrop-filter:blur(12px);box-shadow:0 12px 28px rgba(15,23,42,.12)}
+  .carousel-pagination{position:absolute;bottom:.4rem;left:50%;transform:translateX(-50%);display:flex;gap:.5rem;padding:.35rem .7rem;border-radius:999px;background:rgba(255,255,255,.78);border:1px solid rgba(148,163,184,.18);backdrop-filter:blur(12px);box-shadow:0 12px 28px rgba(15,23,42,.12)}
   .carousel-dot{width:10px;height:10px;border-radius:999px;border:none;background:rgba(148,163,184,.45);padding:0;cursor:pointer;transition:width .25s ease, background .25s ease}
   .carousel-dot[data-active="true"]{width:26px;background:linear-gradient(135deg,#5136ff 0%,#a259ff 100%)}
+
+  /* --- SAFE OVERFLOW FIXES --- */
+  /* Hide accidental horizontal growth globally, keep vertical scrolling */
+  html, body { overflow-x: hidden; }
+
+  /* Desktop-only: clip the deck area, not the header */
+  @media (min-width: 721px){
+    .carousel,
+    .carousel-viewport{
+      overflow:hidden;             /* fallback */
+      contain: layout paint;       /* isolate paint/layout from the page */
+      isolation:isolate;           /* keep filters local */
+    }
+    @supports (overflow: clip){
+      .carousel,
+      .carousel-viewport{ overflow: clip; }
+    }
+  }
 
   @media (max-width: 720px){
     .carousel{width:100%;}
     .site-header{padding:1.25rem 1rem 1.6rem}
     main{padding:0 1rem 2.4rem}
-    .carousel-viewport{height:420px;perspective:1100px}
-    .carousel-item{width:82vw}
+    .carousel{padding:1rem 0 2.4rem}
+    .carousel-viewport{height:auto;max-width:none;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 .5rem 1rem}
+    .carousel-track{position:static;display:flex;gap:1rem;justify-content:flex-start;align-items:stretch;pointer-events:auto}
+    .carousel-item{position:relative;top:auto;left:auto;width:82vw;max-width:320px;transform:none !important;opacity:1 !important;filter:none !important;pointer-events:auto;scroll-snap-align:center}
+    .carousel-item .card{min-height:auto}
+    .carousel-nav{display:none}
+    .carousel-pagination{position:static;transform:none;margin-top:1rem}
   }
 
   @media (prefers-reduced-motion: reduce){
-    .carousel-viewport{perspective:none;height:auto}
     .carousel-track{position:static;display:flex;gap:1rem;overflow-x:auto;padding-bottom:.75rem;margin:0 -0.5rem;scroll-snap-type:x mandatory;transform:none !important}
     .carousel-item{position:relative;top:auto;left:auto;flex:0 0 85%;max-width:320px;margin:0 auto;opacity:1;filter:none;transform:none !important;scroll-snap-align:center;pointer-events:auto}
     .carousel-pagination{position:static;transform:none;margin:0 auto}
     .carousel-nav{display:none}
   }
+
+  @media (max-width: 960px){
+    .hero{grid-template-columns:1fr;gap:1.8rem}
+    .hero-preview{order:-1;max-width:420px;margin:0 auto;width:100%}
+  }
+
+  @media (max-width: 640px){
+    .top-nav{flex-wrap:wrap;row-gap:.75rem}
+    .top-links{flex-wrap:wrap;justify-content:flex-start;width:100%}
+    .hero-preview{display:none}
+  }
 </style>
 </head>
+
 <body>
 <header class="site-header">
   <div class="header-inner">
@@ -142,7 +210,7 @@
     <div class="section-heading">
       <div>
         <h2>Explore focused experiences for cognitive rehabilitation</h2>
-        <p class="muted">Swipe/drag to rotate the 3D carousel on mobile. Tap a card to open an app.</p>
+        <p class="muted">Swipe or drag the card deck to spotlight a micro-app. Tap the focused card to launch it.</p>
       </div>
     </div>
 
@@ -157,6 +225,22 @@
       <button class="carousel-nav" type="button" id="carouselNext" aria-label="Show next micro-app">
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M8.5 5.5 15 12l-6.5 6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
+    </div>
+
+    <div class="download-section" id="bundle">
+      <div>
+        <h3>Bundle and download micro-apps in one click</h3>
+        <p>The Build-Your-Package downloader lets you hand-pick apps from the catalog and export them as a single ZIP that works offline or on your own intranet.</p>
+      </div>
+      <ul>
+        <li>Select the sessions you need and keep track of your bundle progress in real time.</li>
+        <li>Optional clinician notes are embedded so you can share context with your learners.</li>
+        <li>Download the ZIP, extract it and save it to your desired location. Your apps will be ready to use.</li>
+      </ul>
+      <div class="download-actions">
+        <a class="cta-btn primary" href="./apps/build-your-package/index.html">Launch the Build-Your-Package downloader</a>
+        <a class="cta-btn secondary" href="./apps/build-your-package/index.html#clinician-notes">See where notes are saved</a>
+      </div>
     </div>
   </section>
 
@@ -181,15 +265,9 @@
   const state = {
     apps: [],
     currentIndex: 0,
-    step: 0,
-    radius: 0,
-    pointerDown: false,
-    isDragging: false,
+    pointerActive: false,
     dragStartX: 0,
-    dragStartY: 0,
-    baseRotation: 0,
-    swipeStartTime: 0,
-    moved: 0,
+    dragOffset: 0,
     ignoreClick: false
   };
 
@@ -206,22 +284,45 @@
   const viewport = document.getElementById('carouselViewport');
   const btnPrev = document.getElementById('carouselPrev');
   const btnNext = document.getElementById('carouselNext');
+  const liveRegion = document.createElement('div');
+  liveRegion.className = 'sr-only';
+  liveRegion.setAttribute('aria-live', 'polite');
+  document.body.appendChild(liveRegion);
 
-  function render() {
-    if (!state.apps.length) return;
+  const stackedMedia = window.matchMedia('(max-width: 720px)');
+  const motionMedia = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function useDeckLayout(){
+    return !stackedMedia.matches && !motionMedia.matches;
+  }
+
+  function pointerX(evt){
+    if (typeof evt.clientX === 'number') return evt.clientX;
+    if (evt.touches && evt.touches.length) return evt.touches[0].clientX;
+    if (evt.changedTouches && evt.changedTouches.length) return evt.changedTouches[0].clientX;
+    return 0;
+  }
+
+  function render(){
     track.innerHTML = '';
     pagination.innerHTML = '';
+
+    if (!state.apps.length){
+      updateButtons();
+      return;
+    }
 
     state.apps.forEach((app, i) => {
       const item = document.createElement('div');
       item.className = 'carousel-item';
+      item.dataset.index = i;
       item.setAttribute('role', 'listitem');
       item.innerHTML = `
         <article class="card" style="--card-gradient:${gradientPalette[i % gradientPalette.length]}">
           <a class="card-link" href="${app.href}">
             <header class="card-header">
               <span class="card-emoji" aria-hidden="true">${app.emoji}</span>
-              <span class="chip">App</span>
+              <span class="chip">${app.featured ? 'Featured' : 'App'}</span>
             </header>
             <h3>${app.title}</h3>
             <p>${app.desc}</p>
@@ -234,231 +335,51 @@
       dot.className = 'carousel-dot';
       dot.type = 'button';
       dot.setAttribute('role', 'tab');
-      dot.setAttribute('aria-label', `Slide ${i+1}`);
+      dot.setAttribute('aria-label', `Focus ${app.title}`);
       dot.addEventListener('click', () => goTo(i));
       pagination.appendChild(dot);
     });
 
-    measureAndLayout();
-    updateActive();
+    state.currentIndex = Math.min(state.currentIndex, state.apps.length - 1);
+    updateDots();
+    positionCards();
     updateButtons();
+    announceActive();
   }
 
-  function measureAndLayout(){
+  function positionCards(dragOffset = 0){
     const items = [...track.children];
     if (!items.length) return;
-    const cardWidth = items[0].querySelector('.card')?.offsetWidth || items[0].getBoundingClientRect().width;
-    const w = Math.min(cardWidth, 360);
-    const gap = 24;
-    state.step = 360 / items.length;
-    state.radius = Math.round((items.length * (w + gap)) / (2 * Math.PI));
 
-    items.forEach((el, i) => {
-      const angle = i * state.step;
-      el.style.transform = `translate(-50%, -50%) rotateY(${angle}deg) translateZ(${state.radius}px)`;
-      el.style.willChange = 'transform';
-    });
-
-    applyRotation();
-  }
-
-  function applyRotation(){
-    track.style.transform = `translateZ(-${state.radius}px) rotateY(${-state.currentIndex * state.step}deg)`;
-  }
-
-  function updateActive(){
-    const items = [...track.children];
-    const dots = [...pagination.children];
-    items.forEach((el, i) => {
-      const active = i === state.currentIndex;
-      el.classList.toggle('is-active', active);
-      el.style.zIndex = active ? 3 : 1;
-    });
-    dots.forEach((d, i) => {
-      const active = i === state.currentIndex;
-      d.dataset.active = active ? 'true' : 'false';
-      d.setAttribute('aria-selected', active ? 'true' : 'false');
-    });
-  }
-
-  function updateButtons(){
-    btnPrev.disabled = false;
-    btnNext.disabled = false;
-  }
-
-  function goTo(i){
-    const n = state.apps.length;
-    state.currentIndex = ((i % n) + n) % n;
-    applyRotation();
-    updateActive();
-  }
-  const next = () => goTo(state.currentIndex + 1);
-  const prev = () => goTo(state.currentIndex - 1);
-
-  // Helpers
-  function rotationPerPixel(){ return state.radius ? 180 / (Math.PI * state.radius) : 0; }
-  function pointerX(evt){
-    if (typeof evt.clientX === 'number') return evt.clientX;
-    if (evt.touches && evt.touches.length) return evt.touches[0].clientX;
-    if (evt.changedTouches && evt.changedTouches.length) return evt.changedTouches[0].clientX;
-    return 0;
-  }
-  // Gesture handlers — NO pointer capture
-  function onPointerDown(e){
-    state.pointerDown = true;
-    state.isDragging = false;
-    state.moved = 0;
-    state.dragStartX = pointerX(e);
-    state.dragStartY = pointerY(e);
-    state.baseRotation = -state.currentIndex * state.step;
-    state.swipeStartTime = performance.now();
-    state.ignoreClick = false;
-    // no preventDefault, no setPointerCapture — keep native click intact
-  }
-
-  function onPointerMove(e){
-    if (!state.pointerDown) return;
-    const x = pointerX(e);
-    const dx = x - state.dragStartX;
-    state.moved = Math.max(state.moved, Math.abs(dx));
-
-    if (!state.isDragging){
-      const DRAG_THRESHOLD = 10;
-      if (Math.abs(dx) > DRAG_THRESHOLD){
-        state.isDragging = true;
-        state.ignoreClick = true;
-      } else {
-        return;
-      }
-    }
-
-    const angle = state.baseRotation + (dx * rotationPerPixel());
-    track.style.transform = `translateZ(-${state.radius}px) rotateY(${angle}deg)`;
-    if (e.cancelable) e.preventDefault(); // stops page scroll while dragging
-  }
-
-  function onPointerUp(e){
-    if (!state.pointerDown) return;
-    state.pointerDown = false;
-
-    const x = pointerX(e);
-    const dx = x - state.dragStartX;
-    const elapsed = performance.now() - state.swipeStartTime;
-    const velocity = Math.abs(dx) / Math.max(elapsed, 1);
-
-    const TAP_PX = 6;
-    if (!state.isDragging && Math.abs(dx) < TAP_PX && state.moved < TAP_PX){
-      state.ignoreClick = false;
+    if (!useDeckLayout()){
+      items.forEach((el, i) => {
+        el.style.transform = '';
+        el.style.opacity = '';
+        el.style.pointerEvents = 'auto';
+        el.style.filter = '';
+        el.style.zIndex = '';
+        el.removeAttribute('data-hidden');
+        el.removeAttribute('aria-hidden');
+        el.classList.toggle('is-active', i === state.currentIndex);
+        const link = el.querySelector('a');
+        if (link) link.tabIndex = 0;
+      });
       return;
     }
 
-    // SWIPE
-    state.isDragging = false;
-    state.ignoreClick = true;
-    const angle = state.baseRotation + (dx * rotationPerPixel());
-    const approxIndex = Math.round(-angle / state.step);
-    if (Math.abs(dx) > 30 || velocity > 0.6){
-      goTo(state.currentIndex + (dx < 0 ? 1 : -1));
-    } else {
-      goTo(approxIndex);
-    }
+    const width = viewport.offsetWidth || 1;
+    // read cap from CSS (fallback 140)
+    const cssCap = parseInt(
+      getComputedStyle(document.documentElement).getPropertyValue('--deck-spread-max')
+    ) || 140;
+    const spread = Math.min(width / 3, cssCap);
+    const drop = Math.min(18, width / 28);
+    const fadeDistance = 2.0;
 
-  }
-
-  // Event wiring
-  if ('PointerEvent' in window){
-    viewport.addEventListener('pointerdown', onPointerDown);
-    viewport.addEventListener('pointermove', onPointerMove, { passive:false });
-    viewport.addEventListener('pointerup', onPointerUp);
-    viewport.addEventListener('pointercancel', onPointerUp);
-    viewport.addEventListener('pointerleave', onPointerUp);
-  } else {
-    viewport.addEventListener('mousedown', onPointerDown);
-    viewport.addEventListener('mousemove', onPointerMove);
-    viewport.addEventListener('mouseup', onPointerUp);
-    viewport.addEventListener('mouseleave', onPointerUp);
-    viewport.addEventListener('touchstart', onPointerDown, { passive:true });
-    viewport.addEventListener('touchmove', onPointerMove, { passive:false });
-    viewport.addEventListener('touchend', onPointerUp);
-  }
-
-  track.addEventListener('click', (e) => {
-    if (!state.ignoreClick) return;
-    e.preventDefault();
-    e.stopPropagation();
-    state.ignoreClick = false;
-  }, true);
-
-  // Keyboard & buttons
-  document.getElementById('carousel').addEventListener('keydown',(e)=>{
-    if(e.key==='ArrowRight') next();
-    if(e.key==='ArrowLeft') prev();
-  });
-  btnPrev.addEventListener('click', prev);
-  btnNext.addEventListener('click', next);
-
-  window.addEventListener('resize', () => { measureAndLayout(); });
-
-  function renderFeatured(){
-    const container = document.getElementById('featuredGrid');
-    container.innerHTML = '';
-    const featured = state.apps.filter(app => app.featured);
-    if (!featured.length) return;
-    const grid = document.createElement('div');
-    grid.className = 'featured-grid';
-    featured.forEach(app => {
-      const card = document.createElement('a');
-      card.className = 'featured-card';
-      card.href = app.href;
-      card.innerHTML = `
-        <header class="card-header">
-          <span class="card-emoji" aria-hidden="true">${app.emoji}</span>
-          <span class="chip">Featured</span>
-        </header>
-        <h3>${app.title}</h3>
-        <p>${app.desc}</p>
-        <div class="tag-list">${app.tags.map(t=>`<span>${t}</span>`).join('')}</div>
-      `;
-      grid.appendChild(card);
-    });
-    container.appendChild(grid);
-  }
-
-  async function loadApps(){
-    try {
-      const res = await fetch('./catalog.json');
-      if (!res.ok) throw new Error('Failed to load catalog');
-      const catalog = await res.json();
-      state.apps = catalog.map(app => ({
-        slug: app.slug,
-        emoji: app.emoji || '🧩',
-        title: app.title,
-        desc: app.description,
-        tags: Array.isArray(app.tags) ? app.tags : [],
-        featured: Boolean(app.featured),
-        href: `apps/${app.slug}/index.html`
-      }));
-    } catch (err){
-      console.error(err);
-      state.apps = [
-        { slug:'market-manager', emoji:'🛒', title:'Market Manager', desc:'Working memory under retail pressure.', href:'apps/market-manager/index.html', tags:['executive','memory'] },
-        { slug:'cashpoint-coach', emoji:'🏧', title:'CashPoint Coach', desc:'ATM practice with spoken steps.', href:'apps/atm-practice/index.html', tags:['planning','functional'] },
-        { slug:'task-juggler', emoji:'🧠', title:'Task Juggler', desc:'Multitask with timed interruptions.', href:'apps/task-juggler/index.html', tags:['executive'] },
-        { slug:'emergency-call-simulator', emoji:'📞', title:'Emergency Call Simulator', desc:'Practise structured calls under stress.', href:'apps/emergency-call-simulator/index.html', tags:['attention'] },
-        { slug:'fluency-coach', emoji:'💬', title:'Fluency Coach', desc:'Strategy-led verbal fluency.', href:'apps/fluency-coach/index.html', tags:['language'] },
-        { slug:'barista-chaos', emoji:'☕', title:'Barista Chaos', desc:'Dual-tasking with orders & timing.', href:'apps/barista-chaos/index.html', tags:['dual-task'] },
-        { slug:'maze-explorer', emoji:'🧭', title:'Maze Explorer', desc:'Visuospatial scanning & planning.', href:'apps/maze-explorer/index.html', tags:['visuospatial'] },
-        { slug:'plan-with-coco', emoji:'🐦', title:'Plan with Coco', desc:'Prospective memory & routines.', href:'apps/plan-with-coco/index.html', tags:['planning'] }
-      ];
-    }
-    render();
-    renderFeatured();
-  }
-
-  // Init
-  loadApps();
-  document.getElementById('last-updated').textContent = `Last updated: ${new Date().toLocaleString()}`;
-})();
-</script>
-</body>
-</html>
+    items.forEach((el, i) => {
+      const offset = i - state.currentIndex + dragOffset;
+      const absOffset = Math.abs(offset);
+      const clamped = Math.min(absOffset, fadeDistance);
+      const translateX = offset * spread;
+      const translateY = clamped * drop;
+      const sca
