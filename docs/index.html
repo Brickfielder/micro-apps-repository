@@ -9,7 +9,7 @@
       window.matchMedia('(max-width: 720px)').matches) {
     const search = window.location.search;
     const hash = window.location.hash;
-    window.location.replace(./index-mobile.html${search}${hash});
+    window.location.replace(`./index-mobile.html${search}${hash}`);
   }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -277,7 +277,7 @@
       item.className = 'carousel-item';
       item.dataset.index = i;
       item.setAttribute('role', 'listitem');
-      item.innerHTML = 
+      item.innerHTML = `
         <article class="card" style="--card-gradient:${gradientPalette[i % gradientPalette.length]}">
           <a class="card-link" href="${app.href}">
             <header class="card-header">
@@ -286,16 +286,16 @@
             </header>
             <h3>${app.title}</h3>
             <p>${app.desc}</p>
-            <div class="tag-list">${app.tags.map(t=><span>${t}</span>).join('')}</div>
+            <div class="tag-list">${app.tags.map(t => `<span>${t}</span>`).join('')}</div>
           </a>
-        </article>;
+        </article>`;
       track.appendChild(item);
 
       const dot = document.createElement('button');
       dot.className = 'carousel-dot';
       dot.type = 'button';
       dot.setAttribute('role', 'tab');
-      dot.setAttribute('aria-label', Focus ${app.title});
+      dot.setAttribute('aria-label', `Focus ${app.title}`);
       dot.addEventListener('click', () => goTo(i));
       pagination.appendChild(dot);
     });
@@ -343,7 +343,7 @@
       const visible = absOffset <= fadeDistance;
       const active = absOffset < 0.5;
 
-      el.style.transform = translate(-50%, -50%) translateX(${translateX}px) translateY(${translateY}px) rotate(${rotate}deg) scale(${scale});
+      el.style.transform = `translate(-50%, -50%) translateX(${translateX}px) translateY(${translateY}px) rotate(${rotate}deg) scale(${scale})`;
       el.style.opacity = visible ? 1 - clamped * 0.18 : 0;
       el.style.pointerEvents = active ? 'auto' : 'none';
       el.style.filter = active ? 'none' : 'saturate(.92)';
@@ -385,8 +385,8 @@
   function announceActive(){
     const active = state.apps[state.currentIndex];
     if (!active) return;
-    const tags = Array.isArray(active.tags) && active.tags.length ?  • ${active.tags.join(', ')} : '';
-    liveRegion.textContent = ${active.title}${tags};
+    const tags = Array.isArray(active.tags) && active.tags.length ? ` • ${active.tags.join(', ')}` : '';
+    liveRegion.textContent = `${active.title}${tags}`;
   }
 
   function goTo(index){
@@ -514,15 +514,15 @@
       const card = document.createElement('a');
       card.className = 'featured-card';
       card.href = app.href;
-      card.innerHTML = 
+      card.innerHTML = `
         <header class="card-header">
           <span class="card-emoji" aria-hidden="true">${app.emoji}</span>
           <span class="chip">Featured</span>
         </header>
         <h3>${app.title}</h3>
         <p>${app.desc}</p>
-        <div class="tag-list">${app.tags.map(t=><span>${t}</span>).join('')}</div>
-      ;
+        <div class="tag-list">${app.tags.map(t => `<span>${t}</span>`).join('')}</div>
+      `;
       grid.appendChild(card);
     });
     container.appendChild(grid);
@@ -540,7 +540,7 @@
         desc: app.description,
         tags: Array.isArray(app.tags) ? app.tags : [],
         featured: Boolean(app.featured),
-        href: apps/${app.slug}/index.html
+        href: `apps/${app.slug}/index.html`
       }));
     } catch (err){
       console.error(err);
@@ -560,7 +560,7 @@
   }
 
   loadApps();
-  document.getElementById('last-updated').textContent = Last updated: ${new Date().toLocaleString()};
+  document.getElementById('last-updated').textContent = `Last updated: ${new Date().toLocaleString()}`;
 })();
 </script>
 </body>
