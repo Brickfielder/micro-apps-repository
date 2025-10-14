@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>AR Neglect Scanner — Prototype</title>
+
+<!-- A-Frame + AR.js (marker-based) -->
+<script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.7/aframe/build/aframe-ar.min.js"></script>
+
+<style>
+  :root{
+    --ink:#0f172a; --muted:#475569; --ok:#16a34a; --accent:#2563eb; --danger:#dc2626;
+    --bg:rgba(255,255,255,.9); --shadow:0 10px 30px rgba(0,0,0,.18);
+  }
+  html,body{margin:0;height:100%;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  /* HUD overlay */
+  .hud{
+    position:fixed; inset:auto 0 0 0; pointer-events:none;
+    display:grid; gap:.75rem; padding:1rem; z-index:10;
+    grid-template-columns:1fr auto;
+  }
+  .card{
+    background:var(--bg); border-radius:14px; padding:.75rem 1rem; box-shadow:var(--shadow);
+    pointer-events:auto;
+  }
+  .pill{display:inline-block; padding:.25rem .6rem; border-radius:999px; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.1); font-size:.85rem}
+  .kpi{display:flex; gap:1rem; align-items:center; flex-wrap:wrap}
+  .kpi strong{font-size:1.1rem}
+  .btn{
+    display:inline-flex; align-items:center; gap:.5rem; padding:.6rem .9rem; border-radius:12px; border:0; cursor:pointer;
+    box-shadow:var(--shadow); background:#fff; color:var(--ink); font-weight:600;
+  }
+  .btn.primary{background:var(--accent); color:#fff}
+  .btn.danger{background:var(--danger); color:#fff}
+  .row{display:flex; gap:.5rem; flex-wrap:wrap; align-items:center}
+  .stack{display:grid; gap:.5rem}
+  .topbar{
+    position:fixed; top:0; left:0; right:0; padding:.6rem; display:flex; gap:.5rem; justify-content:space-between; z-index:10;
+  }
+  .notice{
+    position:fixed; top:60px; left:50%; transform:translateX(-50%);
+    background:var(--bg); padding:.5rem .75rem; border-radius:10px; box-shadow:var(--shadow); z-index:10; font-size:.95rem
+  }
+  .help{
+    position:fixed; left:50%; transform:translateX(-50%); bottom:92px; z-index:10; background:var(--bg);
+    padding:.6rem .8rem; border-radius:12px; box-shadow:var(--shadow); font-size:.95rem
+  }
+  .hidden{display:none}
+  /* Fallback message */
+  .fallback{
+    position:fixed; inset:0; display:grid; place-items:center; padding:2rem; text-align:center; background:#0b1220; color:#e2e8f0;
+  }
+  .fallback .box{max-width:680px}
+  .fallback a{color:#93c5fd}
+</style>
+</head>
+<body>
+
+<!-- Fallback (hidden once AR scene boots) -->
+<div id="fallback" class="fallback">
+  <div class="box">
+    <h2>AR Neglect Scanner (Prototype)</h2>
+    <p>This demo uses your camera with <strong>marker-based AR</strong>. You’ll need:</p>
+    <ol style="text-align:left;max-width:520px;margin:1rem auto">
+      <li>HTTPS (e.g., <em>GitHub Pages</em>) and a mobile browser (iOS Safari or Android Chrome).</li>
+      <li>Camera permission allowed.</li>
+      <li>A printed or on-screen <strong>Hiro marker</strong> (search “hiro marker ar.js”).</li>
+    </ol>
+    <p>Open this page on your phone and point it at the Hiro marker. Targets will appear on the marker plane.</p>
+  </div>
+</div>
+
+<!-- Top controls -->
+<div class="topbar">
+  <div class="row card">
+    <button id="btnStart" class="btn primary">Start session</button>
+    <button id="btnReset" class="btn">Reset</button>
+    <button id="btnCSV" class="btn">Download CSV</button>
+  </div>
+  <div class="row card">
+    <span class="pill">AR Mode: <strong>Marker</strong></span>
+    <span class="pill">Live</span>
+    <button id="btnExit" class="btn danger">Exit</button>
+  </div>
+</div>
+
+<!-- Status toast -->
+<div id="status" class="notice hidden">Point your camera at the marker…</div>
+<div id="tip" class="help hidden">Tap the coloured targets to collect them</div>
+
+<!-- HUD -->
+<div class="hud">
+  <div class="card kpi">
+    <span>⏱ <strong id="timer">00:00</strong></span>
+    <span>⬅️ Left: <strong id="scoreL">0/0</strong></span>
+    <span>➡️ Right: <strong id="scoreR">0/0</strong></span>
+    <span>🎯 Remaining: <strong id="remain">0</strong></span>
+    <span id="firstLeft" class="pill">Time to first left: —</span>
+  </div>
+  <div class="card">
+    <div class="stack">
+      <div>Difficulty</div>
+      <div class="row">
+        <button class="btn" data-diff="easy">Easy</button>
+        <button class="btn" data-diff="std">Standard</button>
+        <button class="btn" data-diff="hard">Hard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- A-Frame / AR.js scene -->
+<a-scene
+  id="scene"
+  embedded
+  vr-mode-ui="enabled: false"
+  renderer="precision: mediump; antialias: true; alpha: true; physicallyCorrectLights: false"
+  arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+  class="hidden"
+>
+  <!-- Camera/raycaster for tapping targets -->
+  <a-entity id="cursor"
+            cursor="rayOrigin: mouse"
+            raycaster="objects: .clickable; far: 20">
+  </a-entity>
+
+  <!-- Marker (Hiro) is our tabletop plane -->
+  <a-marker type="preset" preset="hiro" id="marker">
+    <!-- Soft light so colours pop -->
+    <a-entity light="type: ambient; intensity: 0.9"></a-entity>
+    <a-entity light="type: directional; intensity: 0.6" position="0 1 1"></a-entity>
+
+    <!-- A flat reference plane (invisible), 1m x 0.6m -->
+    <a-plane id="plane" position="0 0 0" rotation="-90 0 0" width="1" height="0.6" visible="false" color="#ccc"></a-plane>
+
+    <!-- Container where targets will be added -->
+    <a-entity id="targets"></a-entity>
+  </a-marker>
+
+  <a-entity camera></a-entity>
+</a-scene>
+
+<script>
+  // --- Simple state
+  const ui = {
+    scene: document.getElementById('scene'),
+    fallback: document.getElementById('fallback'),
+    status: document.getElementById('status'),
+    tip: document.getElementById('tip'),
+    timer: document.getElementById('timer'),
+    scoreL: document.getElementById('scoreL'),
+    scoreR: document.getElementById('scoreR'),
+    remain: document.getElementById('remain'),
+    firstLeft: document.getElementById('firstLeft'),
+    btnStart: document.getElementById('btnStart'),
+    btnReset: document.getElementById('btnReset'),
+    btnCSV: document.getElementById('btnCSV'),
+    btnExit: document.getElementById('btnExit'),
+  };
+
+  const marker = () => document.getElementById('marker');
+  const targetsEl = () => document.getElementById('targets');
+
+  let config = { totalLeft: 8, totalRight: 8, spreadX: 0.48, spreadY: 0.22, height: 0.04 };
+  let started = false, startTime = 0, interval = null, firstLeftTime = null;
+  let counts = { left: 0, right: 0, remain: 0, leftTotal: 0, rightTotal: 0 };
+  let log = []; // {ts, side, id, rt}
+
+  // Difficulty buttons
+  document.querySelectorAll('[data-diff]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const mode = btn.dataset.diff;
+      if (mode === 'easy') config = { totalLeft: 5, totalRight: 5, spreadX: 0.40, spreadY: 0.18, height: 0.05 };
+      if (mode === 'std')  config = { totalLeft: 8, totalRight: 8, spreadX: 0.48, spreadY: 0.22, height: 0.04 };
+      if (mode === 'hard') config = { totalLeft:10, totalRight:10, spreadX: 0.48, spreadY: 0.24, height: 0.035 };
+      if (!started) ui.status.textContent = `Difficulty set: ${mode.toUpperCase()}`;
+    });
+  });
+
+  // Initialize scene after a short tick so AR.js can attach
+  window.addEventListener('load', () => {
+    // If camera is available, show scene; otherwise keep fallback visible
+    setTimeout(()=> {
+      ui.scene.classList.remove('hidden');
+      ui.fallback.classList.add('hidden');
+      ui.status.classList.remove('hidden');
+      ui.status.textContent = 'Point your camera at the Hiro marker to begin.';
+      ui.tip.classList.add('hidden');
+
+      // Marker events
+      marker().addEventListener('markerFound', () => {
+        if (!started) {
+          ui.tip.classList.remove('hidden');
+          ui.status.classList.add('hidden');
+        }
+      });
+      marker().addEventListener('markerLost', () => {
+        if (started) {
+          ui.status.textContent = 'Marker lost — hold steady or move closer.';
+          ui.status.classList.remove('hidden');
+        }
+      });
+    }, 400);
+  });
+
+  function mmss(ms){
+    const s = Math.max(0, Math.floor(ms/1000));
+    const m = Math.floor(s/60).toString().padStart(2,'0');
+    const ss = (s%60).toString().padStart(2,'0');
+    return `${m}:${ss}`;
+  }
+
+  function startTimer(){
+    startTime = performance.now();
+    interval = setInterval(()=>{
+      const t = performance.now() - startTime;
+      ui.timer.textContent = mmss(t);
+    }, 200);
+  }
+
+  function stopTimer(){
+    clearInterval(interval);
+    interval = null;
+  }
+
+  function rand(min,max){ return Math.random()*(max-min)+min; }
+
+  function spawnTargets(){
+    // Clear old
+    targetsEl().innerHTML = '';
+    counts.left = 0; counts.right = 0;
+    counts.leftTotal = config.totalLeft; counts.rightTotal = config.totalRight;
+    counts.remain = config.totalLeft + config.totalRight;
+    ui.scoreL.textContent = `${counts.left}/${counts.leftTotal}`;
+    ui.scoreR.textContent = `${counts.right}/${counts.rightTotal}`;
+    ui.remain.textContent = counts.remain;
+    ui.firstLeft.textContent = 'Time to first left: —';
+    firstLeftTime = null;
+
+    const mk = (side, i) => {
+      // Geometry: colourful spheres (alternatively planes with textures)
+      const color = side==='left' ? '#ef4444' : '#10b981'; // red vs green
+      const e = document.createElement('a-sphere');
+      e.setAttribute('radius', 0.03);
+      e.setAttribute('color', color);
+      e.setAttribute('class', 'clickable');
+      e.dataset.side = side;
+      e.dataset.id = `${side}-${i}`;
+
+      // Position: on the marker plane, z = height (above plane)
+      const x = side==='left' ? rand(-config.spreadX, -0.12) : rand(0.12, config.spreadX);
+      const y = rand(0.0, config.spreadY);
+      e.setAttribute('position', `${x} ${config.height} ${-y}`);
+      e.setAttribute('animation__bob', 'property=position; dir=alternate; dur=1400; easing=easeInOutSine; loop=true; to=' + `${x} ${config.height+0.015} ${-y}`);
+
+      // On click, log and remove
+      e.addEventListener('click', ()=>{
+        const ts = performance.now() - startTime;
+        log.push({ts: Math.round(ts), side, id: e.dataset.id});
+        // Small pop animation then remove
+        e.setAttribute('animation__pop','property=scale; to=1.6 1.6 1.6; dur=120; easing=easeOutQuad');
+        setTimeout(()=> e.parentNode && e.parentNode.removeChild(e), 120);
+
+        if (side==='left'){
+          counts.left++;
+          if (!firstLeftTime) { firstLeftTime = ts; ui.firstLeft.textContent = `Time to first left: ${mmss(firstLeftTime)}`; }
+        } else {
+          counts.right++;
+        }
+        counts.remain--;
+        ui.scoreL.textContent = `${counts.left}/${counts.leftTotal}`;
+        ui.scoreR.textContent = `${counts.right}/${counts.rightTotal}`;
+        ui.remain.textContent = counts.remain;
+
+        if (counts.remain<=0){
+          stopTimer();
+          ui.status.textContent = 'Session complete — download CSV for log.';
+          ui.status.classList.remove('hidden');
+          ui.tip.classList.add('hidden');
+        }
+      });
+
+      targetsEl().appendChild(e);
+    };
+
+    for (let i=0;i<config.totalLeft;i++) mk('left', i+1);
+    for (let i=0;i<config.totalRight;i++) mk('right', i+1);
+  }
+
+  function startSession(){
+    if (started) return;
+    started = true; log = [];
+    spawnTargets();
+    startTimer();
+    ui.tip.classList.remove('hidden');
+    ui.status.classList.add('hidden');
+  }
+
+  function resetSession(){
+    stopTimer(); started=false; log=[];
+    ui.timer.textContent = '00:00';
+    ui.firstLeft.textContent = 'Time to first left: —';
+    targetsEl().innerHTML = '';
+    counts = { left:0, right:0, remain:0, leftTotal:0, rightTotal:0 };
+    ui.scoreL.textContent = '0/0';
+    ui.scoreR.textContent = '0/0';
+    ui.remain.textContent = '0';
+    ui.status.textContent = 'Reset — point at the marker and press Start.';
+    ui.status.classList.remove('hidden');
+    ui.tip.classList.add('hidden');
+  }
+
+  function downloadCSV(){
+    const headers = [
+      'timestamp_ms','side','id','elapsed_total_ms','left_found','right_found','left_total','right_total','time_to_first_left_ms'
+    ];
+    let leftFound=0, rightFound=0;
+    const rows = log.map((e)=>{
+      if (e.side==='left') leftFound++; else rightFound++;
+      return [
+        e.ts, e.side, e.id,
+        Math.round(e.ts),
+        leftFound, rightFound,
+        config.totalLeft, config.totalRight,
+        firstLeftTime ? Math.round(firstLeftTime) : ''
+      ].join(',');
+    });
+    const csv = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `ar-neglect-log-${Date.now()}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // UI events
+  ui.btnStart.addEventListener('click', startSession);
+  ui.btnReset.addEventListener('click', resetSession);
+  ui.btnCSV.addEventListener('click', downloadCSV);
+  ui.btnExit.addEventListener('click', ()=> {
+    // Best-effort “exit”: reload to drop camera stream cleanly
+    location.reload();
+  });
+</script>
+</body>
+</html>
