@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>AR Neglect Scanner Prototype</title>
+  <link rel="stylesheet" href="../shared/theme.css" />
+  <meta name="theme" content="bold dense" />
+  <meta name="app-slug" content="ar-neglect-proto" />
+  <script defer src="../shared/frame.js"></script>
+  <script defer src="../shared/clinician_feedback.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --bg: rgba(18, 18, 20, 0.75);
+      --panel-bg: rgba(255, 255, 255, 0.9);
+      --accent: #2b7bff;
+      --accent-dark: #1b53aa;
+      --danger: #d7263d;
+      --success: #2aa779;
+      --pill: rgba(43, 123, 255, 0.15);
+      --text-strong: #0e1726;
+      --text-muted: #4a5568;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: #050505;
+      color: #fff;
+      overflow: hidden;
+    }
+    .app-wrap {
+      margin: 0 !important;
+      max-width: none !important;
+      padding: 0 !important;
+      background: transparent !important;
+    }
+    .app-wrap .app-hero { display: none !important; }
+    #app-root {
+      position: fixed;
+      inset: 0;
+      min-height: 100vh;
+      width: 100%;
+      padding: 0 !important;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
+    #primer, #hud, #hintToast, #protocolWarning {
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      pointer-events: none;
+    }
+    #primer {
+      top: 0;
+      bottom: 0;
+      align-items: center;
+      padding: 24px;
+      background: rgba(5, 5, 5, 0.92);
+      flex-direction: column;
+      text-align: center;
+      gap: 16px;
+      pointer-events: auto;
+    }
+    #primer h1 {
+      margin: 0;
+      font-size: 1.6rem;
+    }
+    #primer p {
+      margin: 0;
+      line-height: 1.45;
+      color: #e7e7e7;
+      max-width: 460px;
+    }
+    .card {
+      background: var(--panel-bg);
+      color: var(--text-strong);
+      border-radius: 16px;
+      padding: 16px 20px;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.25);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      pointer-events: auto;
+    }
+    .card ul {
+      padding-left: 18px;
+      margin: 0;
+      text-align: left;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: transform 0.1s ease, background 0.2s ease;
+    }
+    button:hover, button:focus-visible { background: var(--accent-dark); }
+    button:active { transform: scale(0.97); }
+    button.secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+    }
+    button.danger { background: var(--danger); }
+    button.danger:hover, button.danger:focus-visible { background: #aa1d30; }
+    button.success { background: var(--success); }
+    #hud {
+      top: 16px;
+      pointer-events: none;
+    }
+    #hudContent {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      width: min(680px, calc(100vw - 24px));
+    }
+    .hud-card {
+      background: var(--panel-bg);
+      color: var(--text-strong);
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      pointer-events: auto;
+    }
+    .hud-card h2 {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 0;
+      color: var(--text-muted);
+    }
+    .hud-card strong {
+      font-size: 1.18rem;
+      color: var(--text-strong);
+    }
+    .hud-card small { color: var(--text-muted); }
+    .hud-card button { width: auto; align-self: flex-start; padding: 8px 14px; font-size: 0.85rem; }
+    #hintToast {
+      bottom: 20px;
+      pointer-events: none;
+    }
+    #hintToast span {
+      background: var(--panel-bg);
+      color: var(--text-strong);
+      padding: 10px 18px;
+      border-radius: 999px;
+      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.3);
+      font-weight: 600;
+    }
+    #protocolWarning {
+      top: 10px;
+      justify-content: center;
+      display: none;
+    }
+    #protocolWarning span {
+      background: var(--danger);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+    }
+    #controlsRow {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    #difficultySelect {
+      pointer-events: auto;
+      font-size: 1rem;
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(43, 123, 255, 0.4);
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--text-strong);
+    }
+    #difficultySelect:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    a-scene {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+    }
+    a-scene > canvas,
+    a-scene > .a-canvas,
+    a-scene canvas,
+    a-scene .a-canvas,
+    a-scene video,
+    a-scene .arjs-video {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover;
+    }
+    @media (max-width: 720px) {
+      #hudContent { grid-template-columns: repeat(auto-fit, minmax(48%, 1fr)); }
+      #primer h1 { font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app-root">
+    <div id="protocolWarning"><span>This prototype must be served over HTTPS (e.g., GitHub Pages). Camera access is blocked for file:// URLs.</span></div>
+
+    <div id="primer" role="dialog" aria-modal="true">
+      <div class="card">
+        <h1>AR Neglect Scanning Prototype</h1>
+        <p>Run from GitHub Pages (HTTPS) on Android Chrome or iOS Safari. Allow camera access when prompted and point at a Hiro marker.</p>
+        <ul>
+          <li>Tap <strong>Enable camera</strong>, then <strong>Allow</strong>.</li>
+          <li>Place the printed <strong>Hiro marker</strong> on a flat surface.</li>
+          <li>Select difficulty and press <strong>Start</strong>.</li>
+        </ul>
+        <div id="primerActions">
+          <button id="enableCamera">Enable camera</button>
+          <button class="secondary" id="primerClose">Dismiss</button>
+        </div>
+        <p id="cameraStatus" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <div id="hud" aria-live="polite">
+      <div id="hudContent">
+        <div class="hud-card">
+          <h2>Session</h2>
+          <strong id="timer">00:00</strong>
+          <small id="timeToFirstLeft">Time to first left: —</small>
+        </div>
+        <div class="hud-card">
+          <h2>Left coverage</h2>
+          <strong id="leftScore">0 / 0</strong>
+          <small id="leftFirst">Left first: —</small>
+        </div>
+        <div class="hud-card">
+          <h2>Right coverage</h2>
+          <strong id="rightScore">0 / 0</strong>
+          <small>Remaining: <span id="remaining">0</span></small>
+        </div>
+        <div class="hud-card" id="controlsCard">
+          <h2>Controls</h2>
+          <div id="controlsRow">
+            <label class="sr-only" for="difficultySelect">Difficulty</label>
+            <select id="difficultySelect">
+              <option value="easy">Easy</option>
+              <option value="standard" selected>Standard</option>
+              <option value="hard">Hard</option>
+            </select>
+            <button id="startBtn">Start</button>
+            <button id="resetBtn" class="secondary">Reset</button>
+            <button id="downloadBtn" class="success" disabled>Download CSV</button>
+            <button id="exitBtn" class="danger">Exit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="hintToast"><span>Point at the Hiro marker…</span></div>
+
+    <a-scene
+      vr-mode-ui="enabled: false"
+      embedded
+      renderer="antialias: false; alpha: true; precision: mediump; powerPreference: high-performance"
+      arjs="sourceType: webcam; facingMode: environment; detectionMode: mono; videoTexture: true; maxDetectionRate: 30; sourceWidth: 640; sourceHeight: 480; debugUIEnabled: false;"
+      id="arScene"
+      style="display: none;"
+    >
+      <a-assets>
+        <a-mixin id="starMixin" geometry="primitive: cone; radiusBottom: 0.18; radiusTop: 0" material="color: #facc15; metalness: 0.1; roughness: 0.4"></a-mixin>
+      </a-assets>
+      <a-entity id="cameraRig">
+        <a-entity camera look-controls></a-entity>
+        <a-entity cursor="rayOrigin: mouse" raycaster="objects: .clickable"></a-entity>
+      </a-entity>
+      <!-- Swap to a custom .patt marker by replacing preset="hiro" with url="../path/to/marker.patt" -->
+      <a-marker type="preset" preset="hiro" id="hiroMarker">
+        <a-entity id="starContainer"></a-entity>
+      </a-marker>
+      <a-entity light="type: ambient; intensity: 0.8"></a-entity>
+      <a-entity light="type: directional; intensity: 0.6" position="0 2 1"></a-entity>
+    </a-scene>
+  </div>
+
+  <script>
+    (function () {
+      const primer = document.getElementById('primer');
+      const enableCameraBtn = document.getElementById('enableCamera');
+      const primerClose = document.getElementById('primerClose');
+      const cameraStatus = document.getElementById('cameraStatus');
+      const protocolWarning = document.getElementById('protocolWarning');
+      const startBtn = document.getElementById('startBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const exitBtn = document.getElementById('exitBtn');
+      const difficultySelect = document.getElementById('difficultySelect');
+      const timerEl = document.getElementById('timer');
+      const leftScoreEl = document.getElementById('leftScore');
+      const rightScoreEl = document.getElementById('rightScore');
+      const remainingEl = document.getElementById('remaining');
+      const timeToFirstLeftEl = document.getElementById('timeToFirstLeft');
+      const leftFirstEl = document.getElementById('leftFirst');
+      const hintToast = document.getElementById('hintToast');
+      const marker = document.getElementById('hiroMarker');
+      const starContainer = document.getElementById('starContainer');
+      const scene = document.getElementById('arScene');
+
+      // Adjust star counts/spread per difficulty here if clinical tweaks are needed.
+      const difficultyPresets = {
+        easy: { count: 5, spread: { x: [ -0.35, 0.35 ], z: [ -0.25, 0.25 ] }, y: 0.05, scale: 0.9 },
+        standard: { count: 8, spread: { x: [ -0.4, 0.4 ], z: [ -0.3, 0.3 ] }, y: 0.06, scale: 0.85 },
+        hard: { count: 10, spread: { x: [ -0.45, 0.45 ], z: [ -0.35, 0.35 ] }, y: 0.07, scale: 0.8 }
+      };
+
+      let sessionActive = false;
+      let sessionArmed = false;
+      let sessionStartTime = null;
+      let timerInterval = null;
+      let leftTotal = 0;
+      let rightTotal = 0;
+      let leftFound = 0;
+      let rightFound = 0;
+      let remaining = 0;
+      let timeToFirstLeft = null;
+      let touchPrimed = false;
+      const eventLog = [];
+
+      const formatTime = (ms) => {
+        const totalSeconds = Math.floor(ms / 1000);
+        const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+        const seconds = String(totalSeconds % 60).padStart(2, '0');
+        return `${minutes}:${seconds}`;
+      };
+
+      const updateHUD = () => {
+        const elapsed = sessionActive && sessionStartTime ? Date.now() - sessionStartTime : 0;
+        timerEl.textContent = formatTime(elapsed);
+        leftScoreEl.textContent = `${leftFound} / ${leftTotal}`;
+        rightScoreEl.textContent = `${rightFound} / ${rightTotal}`;
+        remainingEl.textContent = remaining;
+        timeToFirstLeftEl.textContent = `Time to first left: ${timeToFirstLeft !== null ? formatTime(timeToFirstLeft) : '—'}`;
+        leftFirstEl.textContent = timeToFirstLeft !== null ? `First left at ${formatTime(timeToFirstLeft)}` : 'Left first: —';
+      };
+
+      const resetSession = (soft = false) => {
+        sessionActive = false;
+        sessionArmed = false;
+        sessionStartTime = null;
+        leftFound = 0;
+        rightFound = 0;
+        remaining = 0;
+        timeToFirstLeft = null;
+        eventLog.length = 0;
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+        Array.from(starContainer.children).forEach((child) => child.parentNode.removeChild(child));
+        hintToast.firstElementChild.textContent = soft ? 'Session reset — point at the marker.' : 'Point at the Hiro marker…';
+        downloadBtn.disabled = true;
+        startBtn.disabled = false;
+        startBtn.textContent = 'Start';
+        updateHUD();
+      };
+
+      const spawnStars = () => {
+        const preset = difficultyPresets[difficultySelect.value] || difficultyPresets.standard;
+        const { count, spread, y, scale } = preset;
+        leftTotal = count;
+        rightTotal = count;
+        remaining = count * 2;
+
+        const createStar = (side, index) => {
+          const entity = document.createElement('a-entity');
+          const minX = side === 'left' ? spread.x[0] : 0.05;
+          const maxX = side === 'left' ? -0.05 : spread.x[1];
+          const x = minX + Math.random() * (maxX - minX);
+          const z = spread.z[0] + Math.random() * (spread.z[1] - spread.z[0]);
+          const yOffset = y + (Math.random() * 0.08);
+          const hue = side === 'left' ? 200 : 40;
+          entity.setAttribute('class', 'clickable');
+          entity.setAttribute('geometry', `primitive: cone; radiusBottom: ${0.2 * scale}; radiusTop: 0`);
+          entity.setAttribute('material', `color: hsl(${hue}, 80%, 60%); metalness: 0.1; roughness: 0.4`);
+          entity.setAttribute('position', `${x} ${yOffset} ${z}`);
+          entity.setAttribute('rotation', `0 0 0`);
+          entity.setAttribute('scale', `${scale} ${scale} ${scale}`);
+          const bobToY = (yOffset + 0.05).toFixed(3);
+          entity.setAttribute('animation__bob', `property: position; dir: alternate; dur: ${1500 + Math.random() * 600}; easing: easeInOutSine; loop: true; to: ${x.toFixed(3)} ${bobToY} ${z.toFixed(3)};`);
+          entity.dataset.side = side;
+          entity.dataset.id = `${side}-${index}`;
+          entity.addEventListener('click', () => collectStar(entity));
+          return entity;
+        };
+
+        for (let i = 0; i < count; i += 1) {
+          starContainer.appendChild(createStar('left', i + 1));
+          starContainer.appendChild(createStar('right', i + 1));
+        }
+        updateHUD();
+      };
+
+      const collectStar = (entity) => {
+        if (!sessionActive || !entity || !entity.parentNode) return;
+        const side = entity.dataset.side;
+        const id = entity.dataset.id;
+        const elapsed = Date.now() - sessionStartTime;
+
+        if (side === 'left') {
+          leftFound += 1;
+          if (timeToFirstLeft === null) {
+            timeToFirstLeft = elapsed;
+          }
+        } else {
+          rightFound += 1;
+        }
+        remaining -= 1;
+
+        eventLog.push({
+          timestamp: Date.now(),
+          side,
+          id,
+          elapsedTotal: elapsed,
+          leftFound,
+          rightFound,
+          leftTotal,
+          rightTotal,
+          timeToFirstLeft
+        });
+
+        entity.setAttribute('animation__pop', 'property: scale; to: 0.1 0.1 0.1; dur: 160; easing: easeInBack; loop: false');
+        setTimeout(() => {
+          if (entity.parentNode) entity.parentNode.removeChild(entity);
+        }, 160);
+
+        updateHUD();
+
+        if (remaining <= 0) {
+          completeSession();
+        }
+      };
+
+      const completeSession = () => {
+        sessionActive = false;
+        sessionArmed = false;
+        startBtn.disabled = false;
+        startBtn.textContent = 'Start';
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+        hintToast.firstElementChild.textContent = 'Complete — download CSV';
+        downloadBtn.disabled = eventLog.length === 0;
+      };
+
+      const armSession = () => {
+        if (sessionActive || sessionArmed) return;
+        sessionArmed = true;
+        startBtn.disabled = true;
+        startBtn.textContent = 'Waiting for marker…';
+        hintToast.firstElementChild.textContent = 'Align the marker to begin.';
+        Array.from(starContainer.children).forEach((child) => child.parentNode.removeChild(child));
+      };
+
+      const startSession = () => {
+        spawnStars();
+        sessionActive = true;
+        sessionArmed = false;
+        sessionStartTime = Date.now();
+        hintToast.firstElementChild.textContent = 'Marker found ✓ — collect the stars';
+        timerInterval = setInterval(updateHUD, 250);
+        updateHUD();
+      };
+
+      const ensureTouchPrimed = () => {
+        if (touchPrimed) return;
+        touchPrimed = true;
+        const handler = () => {
+          scene.emit('user-gesture');
+        };
+        window.addEventListener('touchend', handler, { once: true, passive: true });
+        window.addEventListener('mousedown', handler, { once: true });
+      };
+
+      const downloadCSV = () => {
+        if (!eventLog.length) return;
+        const headers = ['timestamp_ms','side','id','elapsed_total_ms','left_found','right_found','left_total','right_total','time_to_first_left_ms'];
+        const rows = [headers.join(',')];
+        eventLog.forEach(evt => {
+          rows.push([
+            evt.timestamp,
+            evt.side,
+            evt.id,
+            evt.elapsedTotal,
+            evt.leftFound,
+            evt.rightFound,
+            evt.leftTotal,
+            evt.rightTotal,
+            evt.timeToFirstLeft ?? ''
+          ].join(','));
+        });
+        const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+        const a = document.createElement('a');
+        const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+        a.href = URL.createObjectURL(blob);
+        a.download = `ar-neglect-session-${stamp}.csv`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      };
+
+      const markerFound = () => {
+        hintToast.firstElementChild.textContent = sessionActive ? 'Marker found ✓ — continue collecting' : 'Marker found ✓';
+        if (sessionArmed && !sessionActive) {
+          startSession();
+        }
+        if (sessionActive && !timerInterval) {
+          timerInterval = setInterval(updateHUD, 250);
+        }
+      };
+
+      const markerLost = () => {
+        hintToast.firstElementChild.textContent = sessionActive ? 'Marker lost… hold steady / move closer' : 'Marker lost…';
+        if (sessionActive && timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+      };
+
+      const initCameraPrimer = async () => {
+        cameraStatus.textContent = 'Requesting camera…';
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: { ideal: 'environment' },
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            },
+            audio: false
+          });
+          stream.getTracks().forEach(track => track.stop());
+          cameraStatus.textContent = 'Camera ready. If you do not see the feed, reload or check site settings.';
+          primer.style.display = 'none';
+          scene.style.display = 'block';
+          ensureTouchPrimed();
+        } catch (err) {
+          console.warn('Camera access failed', err);
+          cameraStatus.textContent = 'Unable to access camera. Use Chrome (Android) or Safari (iOS). Check the lock icon ▸ Site settings ▸ Camera: Allow.';
+        }
+      };
+
+      marker.addEventListener('markerFound', () => {
+        markerFound();
+      });
+
+      marker.addEventListener('markerLost', markerLost);
+
+      enableCameraBtn.addEventListener('click', initCameraPrimer);
+      primerClose.addEventListener('click', () => {
+        primer.style.display = 'none';
+        scene.style.display = 'block';
+      });
+
+      startBtn.addEventListener('click', () => {
+        if (sessionActive) return;
+        ensureTouchPrimed();
+        resetSession(true);
+        armSession();
+      });
+
+      resetBtn.addEventListener('click', () => {
+        resetSession(true);
+      });
+
+      downloadBtn.addEventListener('click', downloadCSV);
+      exitBtn.addEventListener('click', () => location.reload());
+
+      if (location.protocol !== 'https:' && location.protocol !== 'http:') {
+        protocolWarning.style.display = 'flex';
+      }
+
+      resetSession();
+    })();
+  </script>
+</body>
+</html>

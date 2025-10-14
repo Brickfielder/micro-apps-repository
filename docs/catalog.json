@@ -14,6 +14,13 @@
   "tags": ["attention", "executive"]
   },
   {
+    "slug": "ar-neglect-proto",
+    "title": "AR Neglect Scanner Prototype",
+    "description": "Marker-based AR session to assess left/right search coverage with CSV export.",
+    "emoji": "⭐️",
+    "tags": ["attention", "perception"]
+  },
+  {
     "slug": "barista-chaos",
     "title": "Barista Chaos",
     "description": "Prioritise and serve orders amid interruptions and changing rules.",
