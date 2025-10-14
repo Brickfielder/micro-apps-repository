@@ -587,6 +587,13 @@
         📸 Enable Camera & Start
       </button>
       
+      <div id="httpsWarning" style="margin-top: 16px; padding: 12px; background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; display: none;">
+        <p style="margin: 0; color: #92400e; font-weight: 600;">⚠️ HTTPS Required</p>
+        <p style="margin: 8px 0 0 0; color: #78350f; font-size: 0.875rem;">
+          This app must be accessed via HTTPS (e.g., GitHub Pages). Camera access is blocked on HTTP/file:// protocols.
+        </p>
+      </div>
+      
       <p style="margin-top: 16px; font-size: 0.8rem; text-align: center;">
         By continuing, you consent to camera access for AR functionality
       </p>
@@ -1231,7 +1238,22 @@
       
       // Camera Setup
       const setupCamera = async () => {
+        console.log('setupCamera called');
+        startSetupBtn.disabled = true;
+        startSetupBtn.textContent = '📸 Requesting access...';
+        
+        // Check if API is available
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          console.error('getUserMedia not supported');
+          showToast('Camera API not available in this browser', 'warning');
+          startSetupBtn.disabled = false;
+          startSetupBtn.textContent = '📸 Enable Camera & Start';
+          return;
+        }
+        
         try {
+          console.log('Requesting camera permission...');
+          
           const stream = await navigator.mediaDevices.getUserMedia({
             video: {
               facingMode: { ideal: 'environment' },
@@ -1241,32 +1263,60 @@
             audio: false
           });
           
-          stream.getTracks().forEach(track => track.stop());
+          console.log('Camera stream obtained:', stream);
+          console.log('Video tracks:', stream.getVideoTracks());
+          
+          // Stop the test stream
+          stream.getTracks().forEach(track => {
+            console.log('Stopping track:', track.label);
+            track.stop();
+          });
+          
+          console.log('Camera permission granted, initializing scene...');
           
           showToast('Camera access granted!', 'success');
           
+          // Hide onboarding
           onboarding.style.display = 'none';
+          
+          // Show scene
           scene.style.display = 'block';
           
+          console.log('Scene display set to block');
+          
+          // Wait for scene to initialize
           setTimeout(() => {
+            console.log('Hiding loading screen and showing calibration');
             loadingScreen.classList.add('hidden');
             calibrationGuide.classList.add('active');
-          }, 500);
+          }, 1500);
           
         } catch (error) {
           console.error('Camera error:', error);
+          console.error('Error name:', error.name);
+          console.error('Error message:', error.message);
           
-          let errorMsg = 'Camera access denied. ';
+          startSetupBtn.disabled = false;
+          startSetupBtn.textContent = '📸 Enable Camera & Start';
           
-          if (error.name === 'NotAllowedError') {
-            errorMsg += 'Please allow camera access in your browser settings.';
-          } else if (error.name === 'NotFoundError') {
+          let errorMsg = 'Camera access failed. ';
+          
+          if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+            errorMsg += 'Please click the lock icon 🔒 in your address bar, allow camera access, and refresh the page.';
+          } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
             errorMsg += 'No camera found on this device.';
+          } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+            errorMsg += 'Camera is in use by another application. Close other apps and try again.';
+          } else if (error.name === 'OverconstrainedError') {
+            errorMsg += 'Camera does not meet requirements. Try a different device.';
+          } else if (error.name === 'SecurityError') {
+            errorMsg += 'Camera blocked due to security policy. Ensure you are using HTTPS.';
           } else {
-            errorMsg += 'Please check your browser settings and try again.';
+            errorMsg += `Error: ${error.message}`;
           }
           
           showToast(errorMsg, 'warning');
+          alert(errorMsg);
         }
       };
       
@@ -1301,7 +1351,12 @@
       });
       
       // Event Listeners
-      startSetupBtn.addEventListener('click', setupCamera);
+      startSetupBtn.addEventListener('click', (e) => {
+        console.log('Start setup button clicked');
+        e.preventDefault();
+        e.stopPropagation();
+        setupCamera();
+      });
       
       startCalibrationBtn.addEventListener('click', () => {
         calibrationGuide.classList.remove('active');
@@ -1337,6 +1392,15 @@
       
       // Initialize
       console.log('AR Neglect Assessment initialized');
+      console.log('Browser:', navigator.userAgent);
+      console.log('Protocol:', window.location.protocol);
+      console.log('getUserMedia available:', !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia));
+      
+      // Check protocol
+      if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+        console.warn('Not running on HTTPS!');
+        showToast('⚠️ HTTPS required for camera access', 'warning');
+      }
       
       // Remove loading screen after a delay
       setTimeout(() => {
