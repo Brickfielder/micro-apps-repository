@@ -1,19 +1,34 @@
 <!doctype html><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Camera sanity check</title>
-<style>body{margin:0;font-family:system-ui} .wrap{padding:12px} video,canvas{width:100%;max-width:720px;border:1px solid #ddd;border-radius:12px} button{padding:10px 14px;margin:8px 0;border-radius:10px;border:0;background:#2563eb;color:#fff}</style>
-<div class="wrap">
-  <p id="msg">Requesting camera…</p>
-  <video id="v" playsinline autoplay muted></video>
-  <button id="snap">Snapshot</button>
-  <canvas id="c"></canvas>
-</div>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AR.js minimal (Android safe)</title>
+<style>body,html{margin:0;height:100%} .hint{position:fixed;top:8px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.9);padding:8px 12px;border-radius:10px;font-family:system-ui;z-index:10}</style>
+<div class="hint" id="hint">Allow camera ▸ point at the <b>Hiro marker</b></div>
+
+<script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.js"></script>
+
+<a-scene
+  vr-mode-ui="enabled:false"
+  embedded
+  renderer="antialias:true;alpha:true;precision:mediump"
+  arjs="
+    sourceType: webcam;
+    debugUIEnabled: false;
+    trackingMethod: best;
+    facingMode: environment;
+    sourceWidth:1280; sourceHeight:720; displayWidth:1280; displayHeight:720;">
+  <a-entity camera></a-entity>
+  <a-marker type="preset" preset="hiro" id="m">
+    <a-entity light="type:ambient; intensity:0.9"></a-entity>
+    <a-entity light="type:directional; intensity:0.6" position="0 1 1"></a-entity>
+    <a-box position="0 0.1 0" depth="0.2" height="0.2" width="0.2" color="#e11d48"
+           animation="property: rotation; to: 0 360 0; loop:true; dur:3000; easing:linear"></a-box>
+  </a-marker>
+</a-scene>
+
 <script>
-(async () => {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}, audio:false});
-    v.srcObject = stream; msg.textContent = 'Camera OK ✓';
-  } catch(e){ msg.textContent = 'Camera failed: '+e.message; }
-})();
-snap.onclick = () => { c.width=v.videoWidth; c.height=v.videoHeight; c.getContext('2d').drawImage(v,0,0); };
+// show helpful hints if the marker is found/lost
+const h = document.getElementById('hint');
+document.getElementById('m').addEventListener('markerFound', ()=>{ h.textContent='Marker found ✓'; setTimeout(()=>h.remove(), 1200); });
+document.getElementById('m').addEventListener('markerLost', ()=>{ if(!document.body.contains(h)) document.body.appendChild(h); h.textContent='Hold steady / move closer to marker'; });
 </script>
