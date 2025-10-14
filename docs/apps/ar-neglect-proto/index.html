@@ -4,11 +4,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>AR Neglect Scanner Prototype</title>
-  <link rel="stylesheet" href="../shared/theme.css" />
-  <meta name="theme" content="bold dense" />
-  <meta name="app-slug" content="ar-neglect-proto" />
-  <script defer src="../shared/frame.js"></script>
-  <script defer src="../shared/clinician_feedback.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.js"></script>
   <style>
@@ -33,22 +28,13 @@
       color: #fff;
       overflow: hidden;
     }
-    .app-wrap {
-      margin: 0 !important;
-      max-width: none !important;
-      padding: 0 !important;
-      background: transparent !important;
-    }
-    .app-wrap .app-hero { display: none !important; }
     #app-root {
       position: fixed;
       inset: 0;
       min-height: 100vh;
       width: 100%;
-      padding: 0 !important;
-      background: transparent !important;
-      border: 0 !important;
-      box-shadow: none !important;
+      padding: 0;
+      background: transparent;
     }
     #primer, #hud, #hintToast, #protocolWarning {
       position: fixed;
@@ -120,6 +106,10 @@
     button.danger { background: var(--danger); }
     button.danger:hover, button.danger:focus-visible { background: #aa1d30; }
     button.success { background: var(--success); }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
     #hud {
       top: 16px;
       pointer-events: none;
@@ -296,10 +286,9 @@
         <a-mixin id="starMixin" geometry="primitive: cone; radiusBottom: 0.18; radiusTop: 0" material="color: #facc15; metalness: 0.1; roughness: 0.4"></a-mixin>
       </a-assets>
       <a-entity id="cameraRig">
-        <a-entity camera look-controls></a-entity>
-        <a-entity cursor="rayOrigin: mouse" raycaster="objects: .clickable"></a-entity>
+        <a-entity camera look-controls="enabled: false"></a-entity>
+        <a-entity cursor="rayOrigin: mouse; fuse: false" raycaster="objects: .clickable; far: 10"></a-entity>
       </a-entity>
-      <!-- Swap to a custom .patt marker by replacing preset="hiro" with url="../path/to/marker.patt" -->
       <a-marker type="preset" preset="hiro" id="hiroMarker">
         <a-entity id="starContainer"></a-entity>
       </a-marker>
@@ -331,7 +320,6 @@
       const starContainer = document.getElementById('starContainer');
       const scene = document.getElementById('arScene');
 
-      // Adjust star counts/spread per difficulty here if clinical tweaks are needed.
       const difficultyPresets = {
         easy: { count: 5, spread: { x: [ -0.35, 0.35 ], z: [ -0.25, 0.25 ] }, y: 0.05, scale: 0.9 },
         standard: { count: 8, spread: { x: [ -0.4, 0.4 ], z: [ -0.3, 0.3 ] }, y: 0.06, scale: 0.85 },
@@ -349,6 +337,7 @@
       let remaining = 0;
       let timeToFirstLeft = null;
       let touchPrimed = false;
+      let cameraInitialized = false;
       const eventLog = [];
 
       const formatTime = (ms) => {
@@ -426,7 +415,13 @@
       };
 
       const collectStar = (entity) => {
-        if (!sessionActive || !entity || !entity.parentNode) return;
+        if (!sessionActive || !entity || !entity.parentNode) {
+          console.log('collectStar called but conditions not met:', { sessionActive, hasEntity: !!entity, hasParent: entity?.parentNode });
+          return;
+        }
+        
+        console.log('Collecting star:', entity.dataset.id);
+        
         const side = entity.dataset.side;
         const id = entity.dataset.id;
         const elapsed = Date.now() - sessionStartTime;
@@ -500,11 +495,37 @@
       const ensureTouchPrimed = () => {
         if (touchPrimed) return;
         touchPrimed = true;
-        const handler = () => {
+        console.log('Priming touch interactions...');
+        
+        // Create a comprehensive touch handler
+        const primeHandler = () => {
+          console.log('User interaction detected, emitting gesture');
           scene.emit('user-gesture');
+          
+          // Also ensure the raycaster is working
+          const raycaster = document.querySelector('[raycaster]');
+          if (raycaster) {
+            raycaster.components.raycaster.refreshObjects();
+          }
         };
-        window.addEventListener('touchend', handler, { once: true, passive: true });
-        window.addEventListener('mousedown', handler, { once: true });
+        
+        // Listen for various interaction types
+        window.addEventListener('touchstart', primeHandler, { once: true, passive: true });
+        window.addEventListener('touchend', primeHandler, { once: true, passive: true });
+        window.addEventListener('mousedown', primeHandler, { once: true });
+        window.addEventListener('click', primeHandler, { once: true });
+        
+        // Also add a direct touch handler to the scene canvas
+        setTimeout(() => {
+          const canvas = scene.querySelector('canvas');
+          if (canvas) {
+            console.log('Adding touch handler to canvas');
+            canvas.addEventListener('touchstart', (e) => {
+              console.log('Touch on canvas detected');
+              primeHandler();
+            }, { once: true, passive: true });
+          }
+        }, 1000);
       };
 
       const downloadCSV = () => {
@@ -552,8 +573,19 @@
       };
 
       const initCameraPrimer = async () => {
-        cameraStatus.textContent = 'Requesting camera…';
+        if (cameraInitialized) {
+          console.log('Camera already initialized');
+          return;
+        }
+
+        // Disable button and show status
+        enableCameraBtn.disabled = true;
+        cameraStatus.textContent = 'Requesting camera access...';
+        
+        console.log('Attempting to request camera...');
+
         try {
+          // Request camera permission
           const stream = await navigator.mediaDevices.getUserMedia({
             video: {
               facingMode: { ideal: 'environment' },
@@ -562,27 +594,67 @@
             },
             audio: false
           });
-          stream.getTracks().forEach(track => track.stop());
-          cameraStatus.textContent = 'Camera ready. If you do not see the feed, reload or check site settings.';
-          primer.style.display = 'none';
-          scene.style.display = 'block';
-          ensureTouchPrimed();
+          
+          console.log('Camera stream obtained:', stream);
+          
+          // Stop the test stream
+          stream.getTracks().forEach(track => {
+            console.log('Stopping track:', track.label);
+            track.stop();
+          });
+          
+          cameraInitialized = true;
+          cameraStatus.textContent = '✓ Camera ready! Close this dialog to begin.';
+          cameraStatus.style.color = '#2aa779';
+          
+          // Wait a moment, then hide primer and show scene
+          setTimeout(() => {
+            primer.style.display = 'none';
+            scene.style.display = 'block';
+            ensureTouchPrimed();
+            console.log('Scene displayed, camera should be starting...');
+          }, 1000);
+          
         } catch (err) {
-          console.warn('Camera access failed', err);
-          cameraStatus.textContent = 'Unable to access camera. Use Chrome (Android) or Safari (iOS). Check the lock icon ▸ Site settings ▸ Camera: Allow.';
+          console.error('Camera access failed:', err);
+          enableCameraBtn.disabled = false;
+          
+          let errorMsg = 'Unable to access camera. ';
+          
+          if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+            errorMsg += 'Permission denied. Click the lock icon 🔒 in the address bar → Site settings → Camera: Allow, then refresh.';
+          } else if (err.name === 'NotFoundError') {
+            errorMsg += 'No camera found on this device.';
+          } else if (err.name === 'NotReadableError') {
+            errorMsg += 'Camera is in use by another app. Close other apps and try again.';
+          } else if (err.name === 'SecurityError') {
+            errorMsg += 'Camera access blocked. Ensure you are using HTTPS.';
+          } else {
+            errorMsg += `Error: ${err.message}. Use Chrome (Android) or Safari (iOS).`;
+          }
+          
+          cameraStatus.textContent = errorMsg;
+          cameraStatus.style.color = '#d7263d';
         }
       };
 
-      marker.addEventListener('markerFound', () => {
-        markerFound();
-      });
-
+      // Event listeners
+      marker.addEventListener('markerFound', markerFound);
       marker.addEventListener('markerLost', markerLost);
 
-      enableCameraBtn.addEventListener('click', initCameraPrimer);
+      enableCameraBtn.addEventListener('click', (e) => {
+        console.log('Enable camera button clicked');
+        e.preventDefault();
+        e.stopPropagation();
+        initCameraPrimer();
+      });
+
       primerClose.addEventListener('click', () => {
         primer.style.display = 'none';
         scene.style.display = 'block';
+        if (!cameraInitialized) {
+          cameraStatus.textContent = 'Note: Camera not enabled. Click "Enable camera" first for full functionality.';
+        }
       });
 
       startBtn.addEventListener('click', () => {
@@ -599,11 +671,56 @@
       downloadBtn.addEventListener('click', downloadCSV);
       exitBtn.addEventListener('click', () => location.reload());
 
-      if (location.protocol !== 'https:' && location.protocol !== 'http:') {
+      // Check protocol
+      if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
         protocolWarning.style.display = 'flex';
+        console.warn('Not running on HTTPS - camera may not work');
       }
 
+      // Initialize
       resetSession();
+      
+      // Check if camera API is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        cameraStatus.textContent = '⚠ Camera API not available. Use a modern browser (Chrome/Safari) on HTTPS.';
+        cameraStatus.style.color = '#d7263d';
+        enableCameraBtn.disabled = true;
+      }
+
+      console.log('AR Neglect Scanner initialized');
+      
+      // Add mobile touch debugging
+      if ('ontouchstart' in window) {
+        console.log('Touch device detected');
+        
+        // Add global touch listener for debugging
+        document.addEventListener('touchstart', (e) => {
+          console.log('Global touchstart detected at:', e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: true });
+        
+        // Monitor scene readiness
+        scene.addEventListener('loaded', () => {
+          console.log('A-Frame scene loaded');
+          
+          // Wait a bit then check for canvas
+          setTimeout(() => {
+            const canvas = scene.querySelector('canvas');
+            console.log('Canvas found:', !!canvas);
+            
+            if (canvas) {
+              // Add direct touch handler to canvas
+              canvas.addEventListener('touchstart', (e) => {
+                console.log('Direct touch on AR canvas');
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                const x = touch.clientX - rect.left;
+                const y = touch.clientY - rect.top;
+                console.log('Touch coordinates:', x, y);
+              }, { passive: true });
+            }
+          }, 2000);
+        });
+      }
     })();
   </script>
 </body>
