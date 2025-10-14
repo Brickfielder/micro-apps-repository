@@ -806,6 +806,9 @@
       let totalPausedTime = 0;
       let timerInterval = null;
       let markerVisible = false;
+
+      // Camera
+      let cameraStream = null;
       
       // Data
       let leftTotal = 0;
@@ -1236,6 +1239,90 @@
         calibrationGuide.classList.add('active');
       };
       
+      const attachStreamToAR = async () => {
+        const sceneEl = scene.sceneEl || scene;
+        const arSystem = sceneEl?.systems?.arjs;
+
+        if (!arSystem || !arSystem.arSource) {
+          console.warn('AR.js system not ready yet, retrying video attachment');
+          setTimeout(attachStreamToAR, 200);
+          return;
+        }
+
+        const source = arSystem.arSource;
+        const videoEl = source.domElement;
+
+        if (!videoEl) {
+          console.warn('AR.js video element missing');
+          return;
+        }
+
+        if (!cameraStream) {
+          console.warn('No camera stream available to attach');
+          return;
+        }
+
+        if (videoEl.srcObject !== cameraStream) {
+          videoEl.srcObject = cameraStream;
+        }
+
+        videoEl.setAttribute('playsinline', 'true');
+        videoEl.setAttribute('webkit-playsinline', 'true');
+        videoEl.setAttribute('autoplay', 'true');
+        videoEl.muted = true;
+        videoEl.autoplay = true;
+
+        const ensurePlaying = () => {
+          if (videoEl.readyState >= 2) {
+            if ('ready' in source) {
+              source.ready = true;
+            }
+
+            if (typeof source.onResizeElement === 'function') {
+              source.onResizeElement();
+            }
+
+            if (typeof source.copyElementSizeTo === 'function') {
+              source.copyElementSizeTo(sceneEl.canvas);
+
+              const controllerCanvas = arSystem?.arContext?.arController?.canvas;
+              if (controllerCanvas) {
+                source.copyElementSizeTo(controllerCanvas);
+              }
+            }
+
+            if (typeof arSystem.onResize === 'function') {
+              arSystem.onResize();
+            }
+
+            return Promise.resolve();
+          }
+
+          return new Promise((resolve) => {
+            const onLoaded = () => {
+              videoEl.removeEventListener('loadeddata', onLoaded);
+              resolve(ensurePlaying());
+            };
+
+            videoEl.addEventListener('loadeddata', onLoaded, { once: true });
+          });
+        };
+
+        try {
+          await videoEl.play();
+          await ensurePlaying();
+        } catch (err) {
+          console.warn('Unable to play AR.js video element', err);
+        }
+      };
+
+      const stopCameraStream = () => {
+        if (cameraStream) {
+          cameraStream.getTracks().forEach(track => track.stop());
+          cameraStream = null;
+        }
+      };
+
       // Camera Setup
       const setupCamera = async () => {
         console.log('setupCamera called');
@@ -1254,7 +1341,7 @@
         try {
           console.log('Requesting camera permission...');
           
-          const stream = await navigator.mediaDevices.getUserMedia({
+          cameraStream = await navigator.mediaDevices.getUserMedia({
             video: {
               facingMode: { ideal: 'environment' },
               width: { ideal: 1280 },
@@ -1262,26 +1349,22 @@
             },
             audio: false
           });
-          
-          console.log('Camera stream obtained:', stream);
-          console.log('Video tracks:', stream.getVideoTracks());
-          
-          // Stop the test stream
-          stream.getTracks().forEach(track => {
-            console.log('Stopping track:', track.label);
-            track.stop();
-          });
-          
+
+          console.log('Camera stream obtained:', cameraStream);
+          console.log('Video tracks:', cameraStream.getVideoTracks());
+
           console.log('Camera permission granted, initializing scene...');
-          
+
           showToast('Camera access granted!', 'success');
-          
+
           // Hide onboarding
           onboarding.style.display = 'none';
-          
+
           // Show scene
           scene.style.display = 'block';
-          
+
+          await attachStreamToAR();
+
           console.log('Scene display set to block');
           
           // Wait for scene to initialize
@@ -1384,10 +1467,26 @@
       downloadResultsBtn.addEventListener('click', downloadCSV);
       
       newAssessmentBtn.addEventListener('click', resetAssessment);
-      
+
+      window.addEventListener('beforeunload', stopCameraStream);
+      window.addEventListener('pagehide', stopCameraStream);
+
       // Scene loaded
       scene.addEventListener('loaded', () => {
         console.log('A-Frame scene loaded');
+
+        if (cameraStream) {
+          attachStreamToAR();
+        }
+      });
+
+      window.addEventListener('resize', () => {
+        const sceneEl = scene.sceneEl || scene;
+        const arSystem = sceneEl?.systems?.arjs;
+
+        if (arSystem && typeof arSystem.onResize === 'function') {
+          arSystem.onResize();
+        }
       });
       
       // Initialize
