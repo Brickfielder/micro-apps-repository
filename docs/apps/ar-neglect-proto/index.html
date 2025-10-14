@@ -1240,7 +1240,8 @@
       };
       
       const attachStreamToAR = async () => {
-        const arSystem = scene.systems?.arjs;
+        const sceneEl = scene.sceneEl || scene;
+        const arSystem = sceneEl?.systems?.arjs;
 
         if (!arSystem || !arSystem.arSource) {
           console.warn('AR.js system not ready yet, retrying video attachment');
@@ -1265,27 +1266,53 @@
           videoEl.srcObject = cameraStream;
         }
 
+        videoEl.setAttribute('playsinline', 'true');
+        videoEl.setAttribute('webkit-playsinline', 'true');
+        videoEl.setAttribute('autoplay', 'true');
+        videoEl.muted = true;
+        videoEl.autoplay = true;
+
+        const ensurePlaying = () => {
+          if (videoEl.readyState >= 2) {
+            if ('ready' in source) {
+              source.ready = true;
+            }
+
+            if (typeof source.onResizeElement === 'function') {
+              source.onResizeElement();
+            }
+
+            if (typeof source.copyElementSizeTo === 'function') {
+              source.copyElementSizeTo(sceneEl.canvas);
+
+              const controllerCanvas = arSystem?.arContext?.arController?.canvas;
+              if (controllerCanvas) {
+                source.copyElementSizeTo(controllerCanvas);
+              }
+            }
+
+            if (typeof arSystem.onResize === 'function') {
+              arSystem.onResize();
+            }
+
+            return Promise.resolve();
+          }
+
+          return new Promise((resolve) => {
+            const onLoaded = () => {
+              videoEl.removeEventListener('loadeddata', onLoaded);
+              resolve(ensurePlaying());
+            };
+
+            videoEl.addEventListener('loadeddata', onLoaded, { once: true });
+          });
+        };
+
         try {
           await videoEl.play();
+          await ensurePlaying();
         } catch (err) {
           console.warn('Unable to play AR.js video element', err);
-        }
-
-        if ('ready' in source) {
-          source.ready = true;
-        }
-
-        if (typeof source.onResizeElement === 'function') {
-          source.onResizeElement();
-        }
-
-        if (typeof source.copyElementSizeTo === 'function') {
-          source.copyElementSizeTo(scene.canvas);
-
-          const controllerCanvas = arSystem?.arContext?.arController?.canvas;
-          if (controllerCanvas) {
-            source.copyElementSizeTo(controllerCanvas);
-          }
         }
       };
 
@@ -1447,6 +1474,19 @@
       // Scene loaded
       scene.addEventListener('loaded', () => {
         console.log('A-Frame scene loaded');
+
+        if (cameraStream) {
+          attachStreamToAR();
+        }
+      });
+
+      window.addEventListener('resize', () => {
+        const sceneEl = scene.sceneEl || scene;
+        const arSystem = sceneEl?.systems?.arjs;
+
+        if (arSystem && typeof arSystem.onResize === 'function') {
+          arSystem.onResize();
+        }
       });
       
       // Initialize
