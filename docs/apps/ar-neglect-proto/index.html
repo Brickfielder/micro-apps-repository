@@ -725,6 +725,7 @@
           displayHeight: 480;
           debugUIEnabled: false;"
     id="arScene"
+    style="display: none;"
   >
     <a-assets>
       <a-mixin id="targetMixin" 
@@ -767,4 +768,444 @@
       
       // Buttons
       const startSetupBtn = document.getElementById('startSetup');
-      const startCalibrationBtn = documen
+      const startCalibrationBtn = document.getElementById('startCalibration');
+      const pauseBtn = document.getElementById('pauseBtn');
+      const endBtn = document.getElementById('endBtn');
+      const downloadResultsBtn = document.getElementById('downloadResults');
+      const newAssessmentBtn = document.getElementById('newAssessment');
+      const difficultySelect = document.getElementById('difficultySelect');
+      const httpsWarning = document.getElementById('httpsWarning');
+      
+      // Game state
+      let gameState = {
+        isPlaying: false,
+        isPaused: false,
+        startTime: null,
+        targets: [],
+        collected: [],
+        difficulty: 'standard',
+        leftTargets: 0,
+        rightTargets: 0,
+        leftCollected: 0,
+        rightCollected: 0,
+        firstLeftTime: null,
+        timerInterval: null
+      };
+      
+      const DIFFICULTY_CONFIGS = {
+        easy: { count: 6, spread: 0.3 },
+        standard: { count: 10, spread: 0.4 },
+        hard: { count: 16, spread: 0.5 }
+      };
+      
+      const COLORS = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#6c5ce7', '#a29bfe', '#fd79a8', '#00b894'];
+
+      // Check HTTPS
+      function checkHTTPS() {
+        if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+          httpsWarning.style.display = 'block';
+          startSetupBtn.disabled = true;
+          return false;
+        }
+        return true;
+      }
+
+      // Request camera permission
+      async function requestCameraPermission() {
+        try {
+          showToast('Requesting camera access...', 'warning');
+          const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+              facingMode: 'environment',
+              width: { ideal: 640 },
+              height: { ideal: 480 }
+            } 
+          });
+          // Stop the test stream
+          stream.getTracks().forEach(track => track.stop());
+          showToast('Camera access granted!', 'success');
+          return true;
+        } catch (error) {
+          console.error('Camera permission denied:', error);
+          showToast('Camera access denied. Please allow camera access and try again.', 'warning');
+          return false;
+        }
+      }
+
+      // Initialize
+      async function init() {
+        checkHTTPS();
+        
+        // Wait for AR.js to load with timeout
+        try {
+          await Promise.race([
+            new Promise(resolve => {
+              const sceneEl = document.querySelector('a-scene');
+              if (sceneEl.hasLoaded) {
+                resolve();
+              } else {
+                sceneEl.addEventListener('loaded', resolve);
+              }
+            }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
+          ]);
+        } catch (error) {
+          console.warn('A-Frame loading timeout, continuing anyway:', error);
+        }
+        
+        // Hide loading screen
+        setTimeout(() => {
+          loadingScreen.classList.add('hidden');
+        }, 500);
+        
+        setupEventListeners();
+      }
+
+      // Setup event listeners
+      function setupEventListeners() {
+        startSetupBtn.addEventListener('click', async () => {
+          const hasPermission = await requestCameraPermission();
+          if (hasPermission) {
+            onboarding.style.display = 'none';
+            calibrationGuide.classList.add('active');
+            scene.style.display = 'block';
+            
+            // Give AR.js time to initialize camera
+            await new Promise(resolve => setTimeout(resolve, 1500));
+          }
+        });
+        
+        startCalibrationBtn.addEventListener('click', startGame);
+        pauseBtn.addEventListener('click', togglePause);
+        endBtn.addEventListener('click', endGame);
+        downloadResultsBtn.addEventListener('click', downloadResults);
+        newAssessmentBtn.addEventListener('click', resetGame);
+        difficultySelect.addEventListener('change', (e) => {
+          gameState.difficulty = e.target.value;
+        });
+        
+        // Marker found/lost events
+        marker.addEventListener('markerFound', () => {
+          if (gameState.isPlaying && !gameState.isPaused) {
+            showToast('Marker detected!', 'success');
+          }
+        });
+        
+        marker.addEventListener('markerLost', () => {
+          if (gameState.isPlaying && !gameState.isPaused) {
+            showToast('Marker lost - reposition camera', 'warning');
+          }
+        });
+      }
+
+      // Start game
+      function startGame() {
+        calibrationGuide.classList.remove('active');
+        
+        gameState.isPlaying = true;
+        gameState.isPaused = false;
+        gameState.startTime = Date.now();
+        gameState.collected = [];
+        gameState.leftCollected = 0;
+        gameState.rightCollected = 0;
+        gameState.firstLeftTime = null;
+        
+        hud.classList.add('active');
+        controls.classList.add('active');
+        
+        generateTargets();
+        startTimer();
+        
+        showToast('Assessment started! Tap targets to collect them.', 'success');
+      }
+
+      // Generate targets
+      function generateTargets() {
+        // Clear existing targets
+        while (targetContainer.firstChild) {
+          targetContainer.removeChild(targetContainer.firstChild);
+        }
+        gameState.targets = [];
+        
+        const config = DIFFICULTY_CONFIGS[gameState.difficulty];
+        const targetCount = config.count;
+        const spread = config.spread;
+        
+        gameState.leftTargets = 0;
+        gameState.rightTargets = 0;
+        
+        for (let i = 0; i < targetCount; i++) {
+          const angle = (Math.PI * 2 * i) / targetCount;
+          const radius = 0.2 + Math.random() * spread;
+          const height = 0.1 + Math.random() * 0.3;
+          
+          const x = Math.cos(angle) * radius;
+          const z = Math.sin(angle) * radius;
+          const side = x < 0 ? 'left' : 'right';
+          
+          if (side === 'left') gameState.leftTargets++;
+          else gameState.rightTargets++;
+          
+          const target = document.createElement('a-sphere');
+          target.setAttribute('mixin', 'targetMixin');
+          target.setAttribute('position', `${x} ${height} ${z}`);
+          target.setAttribute('color', COLORS[i % COLORS.length]);
+          target.setAttribute('class', 'clickable-target');
+          target.dataset.side = side;
+          target.dataset.id = i;
+          
+          // Float animation offset
+          const floatOffset = Math.random() * 0.1 - 0.05;
+          target.setAttribute('animation__float', `property: position; from: ${x} ${height + floatOffset} ${z}; to: ${x} ${height - floatOffset} ${z}; dir: alternate; dur: ${2000 + Math.random() * 1000}; easing: easeInOutSine; loop: true`);
+          
+          // Click handler
+          target.addEventListener('click', () => collectTarget(target));
+          
+          targetContainer.appendChild(target);
+          gameState.targets.push({
+            id: i,
+            side: side,
+            element: target,
+            collected: false
+          });
+        }
+        
+        updateStats();
+      }
+
+      // Collect target
+      function collectTarget(targetElement) {
+        if (!gameState.isPlaying || gameState.isPaused) return;
+        
+        const targetId = parseInt(targetElement.dataset.id);
+        const targetData = gameState.targets.find(t => t.id === targetId);
+        
+        if (!targetData || targetData.collected) return;
+        
+        targetData.collected = true;
+        const collectTime = Date.now() - gameState.startTime;
+        
+        gameState.collected.push({
+          id: targetId,
+          side: targetData.side,
+          time: collectTime
+        });
+        
+        if (targetData.side === 'left') {
+          gameState.leftCollected++;
+          if (gameState.firstLeftTime === null) {
+            gameState.firstLeftTime = collectTime;
+          }
+        } else {
+          gameState.rightCollected++;
+        }
+        
+        // Animate collection
+        targetElement.setAttribute('animation__collect', {
+          property: 'scale',
+          to: '0 0 0',
+          dur: 300,
+          easing: 'easeInQuad'
+        });
+        
+        targetElement.setAttribute('animation__spin', {
+          property: 'rotation',
+          to: '0 360 0',
+          dur: 300,
+          easing: 'easeInQuad'
+        });
+        
+        setTimeout(() => {
+          targetElement.parentNode.removeChild(targetElement);
+        }, 300);
+        
+        updateStats();
+        
+        // Check if all collected
+        if (gameState.collected.length === gameState.targets.length) {
+          setTimeout(() => endGame(), 500);
+        }
+      }
+
+      // Update stats
+      function updateStats() {
+        document.getElementById('leftScore').textContent = `${gameState.leftCollected} / ${gameState.leftTargets}`;
+        document.getElementById('rightScore').textContent = `${gameState.rightCollected} / ${gameState.rightTargets}`;
+        
+        const leftPercent = gameState.leftTargets > 0 ? (gameState.leftCollected / gameState.leftTargets) * 100 : 0;
+        const rightPercent = gameState.rightTargets > 0 ? (gameState.rightCollected / gameState.rightTargets) * 100 : 0;
+        
+        document.getElementById('leftProgress').style.width = `${leftPercent}%`;
+        document.getElementById('rightProgress').style.width = `${rightPercent}%`;
+        
+        if (gameState.firstLeftTime !== null) {
+          document.getElementById('firstLeftTime').textContent = `First left: ${formatTime(gameState.firstLeftTime)}`;
+        }
+      }
+
+      // Timer
+      function startTimer() {
+        gameState.timerInterval = setInterval(() => {
+          if (!gameState.isPaused) {
+            const elapsed = Date.now() - gameState.startTime;
+            document.getElementById('timer').textContent = formatTime(elapsed);
+          }
+        }, 100);
+      }
+
+      function formatTime(ms) {
+        const seconds = Math.floor(ms / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        const decisecs = Math.floor((ms % 1000) / 100);
+        return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${decisecs}`;
+      }
+
+      // Pause/Resume
+      function togglePause() {
+        gameState.isPaused = !gameState.isPaused;
+        pauseBtn.textContent = gameState.isPaused ? '▶️ Resume' : '⏸ Pause';
+        showToast(gameState.isPaused ? 'Assessment paused' : 'Assessment resumed', 'warning');
+      }
+
+      // End game
+      function endGame() {
+        if (!gameState.isPlaying) return;
+        
+        gameState.isPlaying = false;
+        clearInterval(gameState.timerInterval);
+        
+        hud.classList.remove('active');
+        controls.classList.remove('active');
+        
+        showResults();
+      }
+
+      // Show results
+      function showResults() {
+        const duration = Date.now() - gameState.startTime;
+        const totalTargets = gameState.targets.length;
+        const totalCollected = gameState.collected.length;
+        
+        // Calculate laterality index
+        const leftPercent = gameState.leftTargets > 0 ? (gameState.leftCollected / gameState.leftTargets) * 100 : 0;
+        const rightPercent = gameState.rightTargets > 0 ? (gameState.rightCollected / gameState.rightTargets) * 100 : 0;
+        const lateralityIndex = Math.round(rightPercent - leftPercent);
+        
+        // Average collection time
+        const avgTime = gameState.collected.length > 0 
+          ? gameState.collected.reduce((sum, t) => sum + t.time, 0) / gameState.collected.length
+          : 0;
+        
+        // Update results display
+        document.getElementById('lateralityIndex').textContent = lateralityIndex;
+        document.getElementById('resultDuration').textContent = formatTime(duration);
+        document.getElementById('resultTotal').textContent = `${totalCollected} / ${totalTargets}`;
+        document.getElementById('resultLeft').textContent = `${gameState.leftCollected} / ${gameState.leftTargets}`;
+        document.getElementById('resultRight').textContent = `${gameState.rightCollected} / ${gameState.rightTargets}`;
+        document.getElementById('resultFirstLeft').textContent = gameState.firstLeftTime ? formatTime(gameState.firstLeftTime) : '—';
+        document.getElementById('resultAvgTime').textContent = avgTime > 0 ? formatTime(avgTime) : '—';
+        
+        // Interpretation
+        let interpretation = '';
+        if (lateralityIndex < -20) {
+          interpretation = 'Strong left-side bias detected. Significantly more right-side targets collected, suggesting possible left spatial neglect. Clinical follow-up recommended.';
+        } else if (lateralityIndex < -10) {
+          interpretation = 'Moderate left-side bias. Right-side targets were collected more frequently. Consider additional assessment.';
+        } else if (lateralityIndex > 20) {
+          interpretation = 'Strong right-side bias detected. Significantly more left-side targets collected, suggesting possible right spatial neglect. Clinical follow-up recommended.';
+        } else if (lateralityIndex > 10) {
+          interpretation = 'Moderate right-side bias. Left-side targets were collected more frequently. Consider additional assessment.';
+        } else {
+          interpretation = 'Balanced performance across both sides. No significant laterality bias detected in this assessment.';
+        }
+        
+        document.getElementById('interpretationText').textContent = interpretation;
+        
+        resultsModal.classList.add('active');
+      }
+
+      // Download results as CSV
+      function downloadResults() {
+        const duration = Date.now() - gameState.startTime;
+        const lateralityIndex = Math.round(
+          ((gameState.rightCollected / gameState.rightTargets) * 100) -
+          ((gameState.leftCollected / gameState.leftTargets) * 100)
+        );
+        
+        let csv = 'AR Neglect Assessment Results\n\n';
+        csv += 'Metric,Value\n';
+        csv += `Assessment Date,${new Date().toLocaleString()}\n`;
+        csv += `Difficulty,${gameState.difficulty}\n`;
+        csv += `Duration,${formatTime(duration)}\n`;
+        csv += `Total Targets,${gameState.targets.length}\n`;
+        csv += `Total Collected,${gameState.collected.length}\n`;
+        csv += `Left Targets,${gameState.leftTargets}\n`;
+        csv += `Left Collected,${gameState.leftCollected}\n`;
+        csv += `Right Targets,${gameState.rightTargets}\n`;
+        csv += `Right Collected,${gameState.rightCollected}\n`;
+        csv += `Laterality Index,${lateralityIndex}\n`;
+        csv += `Time to First Left,${gameState.firstLeftTime ? formatTime(gameState.firstLeftTime) : 'N/A'}\n\n`;
+        
+        csv += 'Collection Details\n';
+        csv += 'Target ID,Side,Collection Time (ms)\n';
+        gameState.collected.forEach(item => {
+          csv += `${item.id},${item.side},${item.time}\n`;
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ar-neglect-assessment-${Date.now()}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        showToast('Results downloaded!', 'success');
+      }
+
+      // Reset game
+      function resetGame() {
+        resultsModal.classList.remove('active');
+        calibrationGuide.classList.add('active');
+        
+        // Clear targets
+        while (targetContainer.firstChild) {
+          targetContainer.removeChild(targetContainer.firstChild);
+        }
+        
+        gameState = {
+          isPlaying: false,
+          isPaused: false,
+          startTime: null,
+          targets: [],
+          collected: [],
+          difficulty: difficultySelect.value,
+          leftTargets: 0,
+          rightTargets: 0,
+          leftCollected: 0,
+          rightCollected: 0,
+          firstLeftTime: null,
+          timerInterval: null
+        };
+      }
+
+      // Toast notifications
+      function showToast(message, type = '') {
+        const toastEl = document.createElement('div');
+        toastEl.className = `toast-message ${type}`;
+        toastEl.textContent = message;
+        toast.appendChild(toastEl);
+        
+        setTimeout(() => {
+          toastEl.style.opacity = '0';
+          setTimeout(() => toast.removeChild(toastEl), 300);
+        }, 3000);
+      }
+
+      // Initialize app
+      init();
+    })();
+  </script>
+</body>
+</html>
