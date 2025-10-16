@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
-<title>Neglect Overlay — Animal Targets</title>
+<title>Neglect Overlay — Animal Targets (High Contrast)</title>
 <style>
   html, body { height:100%; margin:0; background:#000; overflow:hidden; }
   #wrap { position: fixed; inset: 0; }
@@ -235,9 +235,9 @@
 
   function difficultySpec(){
     switch (ui.diff.value) {
-      case 'easy':   return { w: 160, h: 160, drift: 0.0,  rot: 0.0  };
-      case 'normal': return { w: 130, h: 130, drift: 0.12, rot: 0.0015 };
-      case 'hard':   return { w: 100, h: 100, drift: 0.25, rot: 0.003  };
+      case 'easy':   return { w: 170, h: 170, drift: 0.0,  rot: 0.0  };
+      case 'normal': return { w: 140, h: 140, drift: 0.12, rot: 0.0015 };
+      case 'hard':   return { w: 110, h: 110, drift: 0.25, rot: 0.003  };
     }
   }
 
@@ -271,7 +271,7 @@
     if (sideAtSpawn === 'L') stats.spawnedLeft++;
     else if (sideAtSpawn === 'R') stats.spawnedRight++;
 
-    const hue = Math.floor(Math.random()*360); // for ring tint
+    const hue = Math.floor(Math.random()*360); // ring tint
     const animal = ANIMALS[Math.floor(Math.random()*ANIMALS.length)];
     tokens.push({
       x, y, w: spec.w, h: spec.h, r: 0,
@@ -293,36 +293,41 @@
 
   function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
 
-  // --- Drawing: ANIMAL tokens ---
+  // --- Drawing: ANIMAL tokens (HIGH CONTRAST "sticker") ---
   function drawToken(t){
     ctx.save();
     ctx.translate(t.x, t.y);
     ctx.rotate(t.r);
 
-    // soft shadow
-    ctx.shadowColor = "rgba(0,0,0,0.30)";
-    ctx.shadowBlur = 18; ctx.shadowOffsetY = 10;
+    // Outer soft shadow (makes whole sticker pop)
+    ctx.shadowColor = "rgba(0,0,0,0.55)";
+    ctx.shadowBlur = 28; ctx.shadowOffsetY = 12;
 
-    // subtle ring behind animal
-    const radius = Math.min(t.w, t.h) * 0.55;
-    ctx.beginPath();
-    ctx.arc(0, 0, radius, 0, Math.PI*2);
-    ctx.fillStyle = "rgba(0,0,0,0.25)";
-    ctx.fill();
+    const radius = Math.min(t.w, t.h) * 0.58;
 
-    // glossy rim
-    ctx.shadowBlur = 0;
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = "rgba(255,255,255,0.7)";
+    // Base disc with slight radial gradient (near-white for max contrast)
+    const rg = ctx.createRadialGradient(0, 0, radius*0.15, 0, 0, radius);
+    rg.addColorStop(0, "rgba(255,255,255,0.98)");
+    rg.addColorStop(1, "rgba(245,245,245,0.98)");
+    ctx.beginPath(); ctx.arc(0,0, radius, 0, Math.PI*2); ctx.fillStyle = rg; ctx.fill();
+
+    // Colored rim (tinted) + dark outer stroke
+    ctx.lineWidth = Math.max(2, radius*0.10);
+    ctx.strokeStyle = `hsl(${t.hue} 80% 45%)`;
+    ctx.stroke();
+    ctx.lineWidth = Math.max(1.5, radius*0.05);
+    ctx.strokeStyle = "rgba(0,0,0,0.7)";
     ctx.stroke();
 
-    // emoji animal
-    const fontPx = Math.round(Math.min(t.w, t.h) * 0.86);
+    // Emoji with subtle inner glow to stand out on bright areas
+    const fontPx = Math.round(radius * 1.6);
+    ctx.shadowColor = "rgba(0,0,0,0.35)";
+    ctx.shadowBlur = 10; ctx.shadowOffsetY = 4;
     ctx.font = `900 ${fontPx}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji", system-ui, sans-serif`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    // slight upward nudge to visually center many emoji glyphs
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
     ctx.fillText(t.animal, 0, -fontPx*0.03);
+    // reset shadow
+    ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
 
     ctx.restore();
   }
@@ -341,12 +346,12 @@
     for (const t of tokens){
       t.x += t.vx; t.y += t.vy; t.r += t.vr;
 
-      // Edge bounce
+      // Edge bounce (FIX: use t.h/2 on bottom check)
       const m = 20;
       if (t.x - t.w/2 < m) { t.x = m + t.w/2; t.vx *= -0.9; }
       if (t.x + t.w/2 > W - m) { t.x = W - m - t.w/2; t.vx *= -0.9; }
       if (t.y - t.h/2 < m) { t.y = m + t.h/2; t.vy *= -0.9; }
-      if (t.y + t.w/2 > H - m) { t.y = H - m - t.w/2; t.vy *= -0.9; }
+      if (t.y + t.h/2 > H - m) { t.y = H - m - t.h/2; t.vy *= -0.9; }
 
       // Avoid UI panels (AABB approx)
       const tr = tokenRectAt(t.x, t.y, t.w, t.h);
@@ -370,12 +375,12 @@
     animId = requestAnimationFrame(tick);
   }
 
-  // --- Interaction (circular hit test suits animals) ---
+  // --- Interaction (circular hit test) ---
   function pickToken(x, y){
     for (let i = tokens.length-1; i >= 0; i--){
       const t = tokens[i];
       const dx = x - t.x, dy = y - t.y;
-      const r = Math.min(t.w, t.h) * 0.55;
+      const r = Math.min(t.w, t.h) * 0.58;
       if (dx*dx + dy*dy <= r*r) return i;
     }
     return -1;
@@ -522,13 +527,4 @@
       try { await screen.orientation.lock('landscape'); } catch(_) {}
     }
   }
-  ui.fsBtn.onclick = async ()=> { await tryFullscreenAndLock(); checkOrientationGate(); };
-
-  // Initial gate check + ResizeObserver
-  checkOrientationGate();
-  const ro = new ResizeObserver(() => { layout(); if (sessionActive) draw(); });
-  ro.observe(cvs);
-})();
-</script>
-</body>
-</html>
+  ui.fsBtn.onclick = async ()=> { await tryF
