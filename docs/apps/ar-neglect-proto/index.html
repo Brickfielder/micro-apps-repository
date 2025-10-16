@@ -64,6 +64,21 @@
   #results table { width:100%; border-collapse: collapse; margin: 8px 0 12px; }
   #results td { padding:6px 4px; border-bottom:1px solid rgba(255,255,255,.06); }
   #results .card .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:8px; }
+
+  /* Orientation gate overlay */
+  #orientGate {
+    position: fixed; inset:0; z-index: 40; display:none;
+    align-items:center; justify-content:center; text-align:center;
+    background: rgba(0,0,0,0.8); color:#fff;
+    font: 700 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial;
+    padding: 24px;
+  }
+  #orientGate .box {
+    max-width: 520px; padding: 20px; border:1px solid rgba(255,255,255,.2); border-radius:16px;
+    background: rgba(15,15,20,.9);
+  }
+  #orientGate h3 { margin:0 0 10px; font-size:18px; }
+  #orientGate p { margin: 8px 0 0; opacity:.9; }
 </style>
 </head>
 <body>
@@ -97,7 +112,8 @@
       <label>Items
         <input id="concurrency" type="number" min="1" max="12" step="1" value="6" />
       </label>
-      <div style="display:flex; gap:8px; margin-top:8px;">
+      <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+        <button class="btn" id="fsBtn" type="button">Fullscreen & lock</button>
         <button class="btn" id="startBtn">Start 1-min</button>
         <button class="btn" id="stopBtn" disabled>Stop</button>
       </div>
@@ -113,6 +129,15 @@
         <button class="btn" id="csvBtn">Download CSV</button>
         <button class="btn" id="dismissBtn">Close</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Orientation gate -->
+  <div id="orientGate" aria-live="polite">
+    <div class="box">
+      <h3>Please rotate your device</h3>
+      <p>This task must run in <b>landscape</b> for consistent measurement. Rotate the phone to continue.</p>
+      <p style="margin-top:12px; opacity:.85;">Tip: tap <b>Fullscreen & lock</b> to try locking landscape on supported devices.</p>
     </div>
   </div>
 
@@ -145,8 +170,9 @@
     ctx.setTransform(dpr,0,0,dpr,0,0);
   }
   layout();
-  addEventListener('resize', ()=> setTimeout(layout, 80));
-  addEventListener('orientationchange', ()=> setTimeout(layout, 300));
+
+  addEventListener('resize', ()=> { setTimeout(layout, 80); checkOrientationGate(); });
+  addEventListener('orientationchange', ()=> { setTimeout(layout, 300); checkOrientationGate(); });
 
   // --- UI rect helpers (to avoid spawning/overlap) ---
   function rectFrom(el){
@@ -155,15 +181,9 @@
     const r = el.getBoundingClientRect();
     return { x1: r.left - cr.left, y1: r.top - cr.top, x2: r.right - cr.left, y2: r.bottom - cr.top };
   }
-  function inflate(rect, pad){
-    return { x1: rect.x1 - pad, y1: rect.y1 - pad, x2: rect.x2 + pad, y2: rect.y2 + pad };
-  }
-  function intersects(a,b){
-    return !(a.x2 < b.x1 || a.x1 > b.x2 || a.y2 < b.y1 || a.y1 > b.y2);
-  }
-  function tokenRectAt(x, y, w, h){
-    return { x1: x - w/2, y1: y - h/2, x2: x + w/2, y2: y + h/2 };
-  }
+  function inflate(rect, pad){ return { x1: rect.x1 - pad, y1: rect.y1 - pad, x2: rect.x2 + pad, y2: rect.y2 + pad }; }
+  function intersects(a,b){ return !(a.x2 < b.x1 || a.x1 > b.x2 || a.y2 < b.y1 || a.y1 > b.y2); }
+  function tokenRectAt(x, y, w, h){ return { x1: x - w/2, y1: y - h/2, x2: x + w/2, y2: y + h/2 }; }
   function getUIRects(pad=12){
     const hud = rectFrom(document.getElementById('hud'));
     const ctl = rectFrom(document.getElementById('ctlPanel'));
@@ -179,6 +199,7 @@
     conc: document.getElementById('concurrency'),
     start: document.getElementById('startBtn'),
     stop: document.getElementById('stopBtn'),
+    fsBtn: document.getElementById('fsBtn'),
     time: document.getElementById('time'),
     left: document.getElementById('leftStat'),
     right: document.getElementById('rightStat'),
@@ -188,6 +209,7 @@
     resultsBody: document.getElementById('resultsBody'),
     csvBtn: document.getElementById('csvBtn'),
     dismissBtn: document.getElementById('dismissBtn'),
+    orientGate: document.getElementById('orientGate'),
   };
 
   let tokens = [];
@@ -218,7 +240,7 @@
     }
   }
 
-  // Random spawn that avoids UI rects
+  // Random spawn that avoids UI rects (increments L/R only on success)
   function spawnToken(sideHint = null){
     const r = cvs.getBoundingClientRect();
     const W = r.width, H = r.height;
@@ -226,25 +248,27 @@
     const margin = 24;
     const uiRects = getUIRects(12);
 
-    let tries = 60;
-    let x, y;
+    let tries = 80;
+    let x, y, sideAtSpawn = null;
     while (tries-- > 0){
-      // Side-biased x range if hinted
       if (sideHint === 'L') {
         x = margin + spec.w/2 + Math.random() * Math.max(10, (W/2 - margin - spec.w));
-        stats.spawnedLeft++;
+        sideAtSpawn = 'L';
       } else if (sideHint === 'R') {
         x = (W/2 + margin + spec.w/2) + Math.random() * Math.max(10, (W/2 - margin - spec.w));
-        stats.spawnedRight++;
+        sideAtSpawn = 'R';
       } else {
         x = margin + spec.w/2 + Math.random() * Math.max(10, (W - (margin + spec.w)));
-        if (x < W/2) stats.spawnedLeft++; else stats.spawnedRight++;
+        sideAtSpawn = (x < W/2) ? 'L' : 'R';
       }
       y = margin + spec.h/2 + Math.random() * Math.max(10, (H - (margin + spec.h)));
 
       const tRect = tokenRectAt(x, y, spec.w, spec.h);
       if (!uiRects.some(u => intersects(tRect, u))) break;
     }
+
+    if (sideAtSpawn === 'L') stats.spawnedLeft++;
+    else if (sideAtSpawn === 'R') stats.spawnedRight++;
 
     const hue = Math.floor(Math.random()*360);
     tokens.push({
@@ -330,11 +354,10 @@
       if (t.y - t.h/2 < m) { t.y = m + t.h/2; t.vy *= -0.9; }
       if (t.y + t.h/2 > H - m) { t.y = H - m - t.h/2; t.vy *= -0.9; }
 
-      // Avoid UI panels (AABB approx; good enough for small rotations)
+      // Avoid UI panels (AABB approx)
       const tr = tokenRectAt(t.x, t.y, t.w, t.h);
       for (const u of uiRects){
         if (intersects(tr, u)){
-          // Minimal translation axis push-out
           const dxLeft = Math.abs(tr.x2 - u.x1);
           const dxRight = Math.abs(u.x2 - tr.x1);
           const dyTop = Math.abs(tr.y2 - u.y1);
@@ -384,7 +407,9 @@
   });
 
   // --- Session control ---
-  ui.start.onclick = ()=>{
+  ui.start.onclick = async ()=>{
+    if (!isLandscape()){ checkOrientationGate(); return; }
+    try { await tryFullscreenAndLock(); } catch(_) {}
     if (sessionActive) return;
     sessionActive = true;
     ui.start.disabled = true;
@@ -397,13 +422,10 @@
     maintain();
     draw();
 
-    // timer
     t0 = Date.now();
     const end = t0 + DURATION_MS;
     updateTime(end);
     timerId = setInterval(()=> updateTime(end), 100);
-
-    // animation
     animId = requestAnimationFrame(tick);
   };
 
@@ -414,7 +436,7 @@
     sessionActive = false;
     clearInterval(timerId); timerId = null;
     cancelAnimationFrame(animId); animId = null;
-    ui.start.disabled = false;
+    ui.start.disabled = !isLandscape();  // re-enable start only if landscape
     ui.stop.disabled = true;
     ui.diff.disabled = false;
     ui.conc.disabled = false;
@@ -457,6 +479,8 @@
       ['Total taps', total],
       ['Stimuli spawned L/R', `${stats.spawnedLeft} / ${stats.spawnedRight}`],
       ['Stimulus distribution (R%)', totalSpawned() ? ((stats.spawnedRight/totalSpawned())*100).toFixed(1)+'%' : '—'],
+      ['Screen (px)', `${Math.round(window.innerWidth)} × ${Math.round(window.innerHeight)} @ DPR ${Math.round((window.devicePixelRatio||1)*100)/100}`],
+      ['Orientation', isLandscape() ? 'landscape' : 'portrait'],
     ];
     ui.resultsBody.innerHTML = rows.map(([k,v])=>`<tr><td>${k}</td><td style="text-align:right">${v}</td></tr>`).join('');
     ui.results.style.display = 'flex';
@@ -468,7 +492,11 @@
 
   ui.csvBtn.onclick = ()=>{
     const header = ['time_ms','x','y','side','difficulty'];
-    const lines = [header.join(',')];
+    const lines = [
+      // metadata header row (comment)
+      `# screen_px=${Math.round(window.innerWidth)}x${Math.round(window.innerHeight)}, dpr=${Math.round((window.devicePixelRatio||1)*100)/100}, orientation=${isLandscape()?'landscape':'portrait'}`,
+      header.join(',')
+    ];
     for (const e of stats.events){
       lines.push([e.t, e.x, e.y, e.side, e.difficulty].join(','));
     }
@@ -483,11 +511,31 @@
     setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 100);
   };
 
-  // Keep layout + token safety fresh when UI size changes
-  const ro = new ResizeObserver(() => {
-    layout();
-    if (sessionActive) { draw(); }
-  });
+  // --- Orientation enforcement ---
+  function isLandscape(){ return window.innerWidth >= window.innerHeight; }
+  function checkOrientationGate(){
+    const ok = isLandscape();
+    ui.orientGate.style.display = ok ? 'none' : 'flex';
+    ui.start.disabled = !ok;
+    if (!ok && sessionActive) stopSession();
+    return ok;
+  }
+  async function tryFullscreenAndLock(){
+    // Optional helper: request fullscreen and try locking to landscape (best-effort)
+    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+      try { await document.documentElement.requestFullscreen(); } catch(_) {}
+    }
+    if (screen.orientation && screen.orientation.lock) {
+      try { await screen.orientation.lock('landscape'); } catch(_) {}
+    }
+  }
+  ui.fsBtn.onclick = async ()=> { await tryFullscreenAndLock(); checkOrientationGate(); };
+
+  // Initial gate check
+  checkOrientationGate();
+
+  // Keep layout fresh when UI size changes
+  const ro = new ResizeObserver(() => { layout(); if (sessionActive) draw(); });
   ro.observe(cvs);
 })();
 </script>
