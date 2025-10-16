@@ -11,6 +11,7 @@
     position:absolute; inset:0;
     width:100vw; height:100vh; object-fit: cover;
     transform: translateZ(0);
+    background:#000; /* visible fallback */
   }
   #overlay { position:absolute; inset:0; touch-action:none; z-index:10; }
   .midline { position:absolute; top:0; bottom:0; left:50%; width:0; border-left:1px dashed rgba(255,255,255,.25); pointer-events:none; z-index:9; }
@@ -79,6 +80,17 @@
   }
   #orientGate h3 { margin:0 0 10px; font-size:18px; }
   #orientGate p { margin: 8px 0 0; opacity:.9; }
+
+  /* Camera error overlay */
+  #camError {
+    position: fixed; left: 12px; top: 50%; transform: translateY(-50%);
+    z-index: 50; max-width: 520px;
+    background: rgba(160,20,20,0.88); color:#fff; border:1px solid rgba(255,255,255,.25);
+    border-radius: 14px; padding: 12px;
+    font: 700 13px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial;
+    display:none;
+  }
+  #camError code { font-weight: 700; background: rgba(255,255,255,.15); padding: 2px 6px; border-radius: 6px; }
 </style>
 </head>
 <body>
@@ -141,21 +153,66 @@
     </div>
   </div>
 
+  <!-- Camera error -->
+  <div id="camError"></div>
+
 <script>
 (async function(){
   // --- Camera ---
   const cam = document.getElementById('cam');
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: { ideal: "environment" },
-        width: { ideal: 1280 }, height: { ideal: 720 }, aspectRatio: { ideal: 16/9 }
-      }, audio: false
-    });
-    cam.srcObject = stream;
-  } catch (e) {
-    alert("Camera access failed: " + e.message);
+  cam.setAttribute('playsinline','');
+  cam.setAttribute('muted','');
+  cam.playsInline = true;
+  cam.muted = true;
+
+  const camError = document.getElementById('camError');
+
+  let camReady = false;
+  async function ensureCamera() {
+    if (camReady && cam.srcObject) {
+      try { await cam.play(); } catch(_) {}
+      return true;
+    }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      showError("This browser doesn’t support <code>getUserMedia</code>. Try Chrome on Android or Safari on iOS.");
+      return false;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1280 }, height: { ideal: 720 }, aspectRatio: { ideal: 16/9 }
+        },
+        audio: false
+      });
+      cam.srcObject = stream;
+      // Some mobiles require an explicit play() after attaching the stream:
+      await cam.play();
+      camReady = true;
+      hideError();
+      return true;
+    } catch (e) {
+      const onGithubBlob = /github\.com/.test(location.hostname) && /\/blob\//.test(location.pathname);
+      const insecure = location.protocol !== 'https:' && location.hostname !== 'localhost';
+      let hint = '';
+      if (onGithubBlob) hint = "Open the <b>GitHub Pages</b> URL instead:<br><code>https://brickfielder.github.io/micro-apps-repository/docs/apps/ar-neglect-proto/index.html</code>";
+      else if (insecure) hint = "Camera requires a <b>secure context</b> (HTTPS) or <b>localhost</b>.";
+      showError(`Camera access failed: <code>${e.name}</code> — ${e.message}${hint ? "<br><br>"+hint : ""}`);
+      return false;
+    }
   }
+
+  function showError(html){
+    camError.innerHTML = html;
+    camError.style.display = 'block';
+  }
+  function hideError(){
+    camError.style.display = 'none';
+    camError.textContent = '';
+  }
+
+  // Try to pre-warm camera on load (best effort)
+  ensureCamera();
 
   // --- Canvas setup ---
   const cvs = document.getElementById('overlay');
@@ -271,7 +328,7 @@
     if (sideAtSpawn === 'L') stats.spawnedLeft++;
     else if (sideAtSpawn === 'R') stats.spawnedRight++;
 
-    const hue = Math.floor(Math.random()*360); // ring tint
+    const hue = Math.floor(Math.random()*360); // rim tint
     const animal = ANIMALS[Math.floor(Math.random()*ANIMALS.length)];
     tokens.push({
       x, y, w: spec.w, h: spec.h, r: 0,
@@ -295,6 +352,7 @@
 
   // --- Drawing: ANIMAL tokens (HIGH CONTRAST "sticker") ---
   function drawToken(t){
+    const radius = Math.min(t.w, t.h) * 0.58;
     ctx.save();
     ctx.translate(t.x, t.y);
     ctx.rotate(t.r);
@@ -303,30 +361,25 @@
     ctx.shadowColor = "rgba(0,0,0,0.55)";
     ctx.shadowBlur = 28; ctx.shadowOffsetY = 12;
 
-    const radius = Math.min(t.w, t.h) * 0.58;
-
-    // Base disc with slight radial gradient (near-white for max contrast)
+    // Base disc gradient
     const rg = ctx.createRadialGradient(0, 0, radius*0.15, 0, 0, radius);
     rg.addColorStop(0, "rgba(255,255,255,0.98)");
     rg.addColorStop(1, "rgba(245,245,245,0.98)");
     ctx.beginPath(); ctx.arc(0,0, radius, 0, Math.PI*2); ctx.fillStyle = rg; ctx.fill();
 
-    // Colored rim (tinted) + dark outer stroke
+    // Colored rim + dark outer stroke
     ctx.lineWidth = Math.max(2, radius*0.10);
-    ctx.strokeStyle = `hsl(${t.hue} 80% 45%)`;
-    ctx.stroke();
+    ctx.strokeStyle = `hsl(${t.hue} 80% 45%)`; ctx.stroke();
     ctx.lineWidth = Math.max(1.5, radius*0.05);
-    ctx.strokeStyle = "rgba(0,0,0,0.7)";
-    ctx.stroke();
+    ctx.strokeStyle = "rgba(0,0,0,0.7)"; ctx.stroke();
 
-    // Emoji with subtle inner glow to stand out on bright areas
+    // Emoji with subtle inner glow
     const fontPx = Math.round(radius * 1.6);
     ctx.shadowColor = "rgba(0,0,0,0.35)";
     ctx.shadowBlur = 10; ctx.shadowOffsetY = 4;
     ctx.font = `900 ${fontPx}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji", system-ui, sans-serif`;
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
     ctx.fillText(t.animal, 0, -fontPx*0.03);
-    // reset shadow
     ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
 
     ctx.restore();
@@ -346,7 +399,7 @@
     for (const t of tokens){
       t.x += t.vx; t.y += t.vy; t.r += t.vr;
 
-      // Edge bounce (FIX: use t.h/2 on bottom check)
+      // Edge bounce
       const m = 20;
       if (t.x - t.w/2 < m) { t.x = m + t.w/2; t.vx *= -0.9; }
       if (t.x + t.w/2 > W - m) { t.x = W - m - t.w/2; t.vx *= -0.9; }
@@ -407,12 +460,17 @@
   });
 
   // --- Session control ---
-  ui.start.onclick = async ()=>{
+  const startBtn = document.getElementById('startBtn');
+  startBtn.onclick = async ()=>{
     if (!isLandscape()){ checkOrientationGate(); return; }
+    // Ensure camera on user gesture — improves reliability on Android
+    const ok = await ensureCamera();
+    if (!ok) return;
     try { await tryFullscreenAndLock(); } catch(_) {}
+
     if (sessionActive) return;
     sessionActive = true;
-    ui.start.disabled = true;
+    startBtn.disabled = true;
     ui.stop.disabled = false;
     ui.diff.disabled = true;
     ui.conc.disabled = true;
@@ -429,6 +487,8 @@
     animId = requestAnimationFrame(tick);
   };
 
+  ui.fsBtn.onclick = async ()=> { await tryFullscreenAndLock(); checkOrientationGate(); await ensureCamera(); };
+
   ui.stop.onclick = stopSession;
 
   function stopSession(){
@@ -436,7 +496,7 @@
     sessionActive = false;
     clearInterval(timerId); timerId = null;
     cancelAnimationFrame(animId); animId = null;
-    ui.start.disabled = !isLandscape();
+    startBtn.disabled = !isLandscape();
     ui.stop.disabled = true;
     ui.diff.disabled = false;
     ui.conc.disabled = false;
@@ -527,4 +587,12 @@
       try { await screen.orientation.lock('landscape'); } catch(_) {}
     }
   }
-  ui.fsBtn.onclick = async ()=> { await tryF
+
+  // Initial gate check + ResizeObserver
+  checkOrientationGate();
+  const ro = new ResizeObserver(() => { layout(); if (sessionActive) draw(); });
+  ro.observe(cvs);
+})();
+</script>
+</body>
+</html>
