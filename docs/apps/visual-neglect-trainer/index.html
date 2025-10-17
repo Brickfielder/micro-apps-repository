@@ -357,43 +357,26 @@
 
         if (words.length === 0) return;
 
-        // Measure all words and group them by their visual line.
-        // Sorting by top/left before grouping prevents DOM order quirks
-        // (e.g. floating spans) from colouring too many words per line.
-        const TOL = 4; // px tolerance for the same line
-        const measured = words
-          .map((el) => {
-            const rect = el.getBoundingClientRect();
-            return Number.isFinite(rect.top) && Number.isFinite(rect.left)
-              ? { el, top: rect.top, left: rect.left }
-              : null;
-          })
-          .filter(Boolean)
-          .sort((a, b) => {
-            const topDelta = a.top - b.top;
-            if (Math.abs(topDelta) > TOL) return topDelta;
-            return a.left - b.left;
-          });
+        // Iterate in DOM order and track visual lines via offsetTop.
+        // offsetTop is relative to the nearest block ancestor and is
+        // stable across browsers/orientation changes, avoiding cases
+        // where getBoundingClientRect() rounded the values together.
+        const TOL = 2; // px tolerance for offset differences
+        let currentLineTop = null;
+        let colouredOnLine = 0;
 
-        const lines = [];
-        for (const entry of measured){
-          const currentLine = lines[lines.length - 1];
-          if (currentLine && Math.abs(entry.top - currentLine.top) <= TOL){
-            currentLine.words.push(entry);
-          } else {
-            lines.push({ top: entry.top, words: [entry] });
+        for (const el of words){
+          const top = el.offsetTop;
+          if (!Number.isFinite(top)) continue;
+
+          if (currentLineTop === null || Math.abs(top - currentLineTop) > TOL){
+            currentLineTop = top;
+            colouredOnLine = 0;
           }
-        }
 
-        for (const line of lines){
-          line.words.sort((a, b) => a.left - b.left);
-          let coloured = 0;
-          for (const item of line.words){
-            if (!item.el.classList.contains('lead')){
-              item.el.classList.add('lead');
-              coloured += 1;
-            }
-            if (coloured === 2) break;
+          if (colouredOnLine < 2){
+            el.classList.add('lead');
+            colouredOnLine += 1;
           }
         }
       }
