@@ -6,6 +6,8 @@
 
 (function () {
   let commentEl = null;
+  let countEl = null;
+  const NOTE_CHAR_LIMIT = 600;
   const listeners = new Set();
 
   function getAppMeta() {
@@ -39,6 +41,8 @@
 
     commentEl = document.getElementById("clinician-comment");
     if (commentEl) {
+      enhanceTextarea(commentEl);
+      countEl = findCountElement(commentEl.closest("#clinician-notes"));
       bindCommentListener();
       return commentEl;
     }
@@ -46,24 +50,88 @@
     const section = document.createElement("section");
     section.id = "clinician-notes";
     section.className = "note-card";
+    const limitAttr = NOTE_CHAR_LIMIT ? `maxlength="${NOTE_CHAR_LIMIT}"` : "";
     section.innerHTML = `
-      <label for="clinician-comment">Clinician comments (optional)</label>
-      <textarea id="clinician-comment" rows="4"
-        placeholder="Enter any notes relevant to this session..."></textarea>
-      <p class="helper">
-        This note will be added as <code>clinician_comment</code> in the exported CSV.
-      </p>
+      <header class="note-card__head">
+        <span class="note-card__badge">Clinician</span>
+        <h2 class="note-card__title">Session notes</h2>
+        <p class="note-card__subhead">Document professional observations for the care team.</p>
+      </header>
+      <div class="note-card__body">
+        <label for="clinician-comment">Clinician comments (optional)</label>
+        <textarea id="clinician-comment" rows="4" ${limitAttr} data-note-input
+          placeholder="Enter any notes relevant to this session..."></textarea>
+        <div class="note-card__footer">
+          <p class="helper">
+            This note will be added as <code>clinician_comment</code> in the exported CSV.
+          </p>
+          <span class="note-card__count" data-note-count></span>
+        </div>
+      </div>
     `;
     root.appendChild(section);
     commentEl = section.querySelector("#clinician-comment");
+    countEl = section.querySelector("[data-note-count]");
+    enhanceTextarea(commentEl);
     bindCommentListener();
+    updateNoteCount();
     return commentEl;
+  }
+
+  function enhanceTextarea(el) {
+    if (!el) return;
+    if (NOTE_CHAR_LIMIT && !el.getAttribute("maxlength")) {
+      el.setAttribute("maxlength", NOTE_CHAR_LIMIT);
+    }
+    el.setAttribute("data-note-input", "1");
+  }
+
+  function findCountElement(scope) {
+    if (!scope) return null;
+    let found = scope.querySelector("[data-note-count]");
+    if (found) return found;
+    const footer = scope.querySelector(".note-card__footer");
+    if (footer) {
+      found = document.createElement("span");
+      found.className = "note-card__count";
+      found.setAttribute("data-note-count", "");
+      footer.appendChild(found);
+      return found;
+    }
+    const helper = scope.querySelector(".helper");
+    if (helper && helper.parentElement) {
+      found = document.createElement("span");
+      found.className = "note-card__count";
+      found.setAttribute("data-note-count", "");
+      helper.parentElement.appendChild(found);
+      return found;
+    }
+    return null;
+  }
+
+  function updateNoteCount() {
+    if (!commentEl) return;
+    if (!countEl || !countEl.isConnected) {
+      countEl = findCountElement(commentEl.closest("#clinician-notes"));
+    }
+    if (!countEl) return;
+    const length = commentEl.value ? commentEl.value.length : 0;
+    const maxAttr = parseInt(commentEl.getAttribute("maxlength"), 10);
+    const limit = Number.isFinite(maxAttr) && maxAttr > 0 ? maxAttr : (NOTE_CHAR_LIMIT || null);
+    if (limit) {
+      countEl.textContent = `${length}/${limit}`;
+      countEl.dataset.state = length >= limit * 0.9 ? "warn" : "ok";
+    } else {
+      countEl.textContent = `${length} characters`;
+      countEl.dataset.state = "ok";
+    }
   }
 
   function bindCommentListener() {
     if (!commentEl || commentEl.__clinicianBound) return;
     commentEl.__clinicianBound = true;
     commentEl.addEventListener("input", () => {
+      updateNoteCount();
       notifyListeners();
     });
   }
@@ -77,10 +145,12 @@
     const el = ensureCommentBox();
     if (!el) return;
     el.value = value || "";
+    updateNoteCount();
     notifyListeners();
   }
 
   function notifyListeners() {
+    updateNoteCount();
     const note = getComment();
     listeners.forEach((fn) => {
       try {
@@ -222,5 +292,6 @@
   // Init
   ensureCommentBox();
   bindCommentListener();
+  updateNoteCount();
   notifyListeners();
 })();
