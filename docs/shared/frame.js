@@ -59,6 +59,14 @@
   // --- Helpers
   const getMeta = n => (document.querySelector(`meta[name="${n}"]`) || {}).content || "";
 
+  const escapeHtml = (value) =>
+    String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+
   async function loadMeta() {
     const meta = {
       slug:  getMeta("app-slug"),
@@ -105,12 +113,32 @@
     }
 
     if (!wrap.querySelector(".app-hero")) {
+      const formattedSlug = metaInfo.slug
+        ? escapeHtml(metaInfo.slug.replace(/[\-_]+/g, " "))
+        : "";
+      const titleHtml = metaInfo.title
+        ? `<h1 class="hero-title">${escapeHtml(metaInfo.title)}</h1>`
+        : "";
+      const descHtml = metaInfo.desc
+        ? `<p class="hero-lead">${escapeHtml(metaInfo.desc)}</p>`
+        : "";
+      const badgeHtml = formattedSlug
+        ? `<span class="hero-badge" aria-label="App slug">${formattedSlug}</span>`
+        : "";
       const hero = document.createElement("header");
       hero.className = "app-hero hero-accent app-hero--frame";
       hero.innerHTML = `
-        <div class="hero-text" style="text-align:center;padding:10px 14px;">
-          ${metaInfo.title ? `<h1 style="margin:0;font-weight:700;">${metaInfo.title}</h1>` : ""}
-          ${metaInfo.desc  ? `<p class="lead" style="margin:.4rem 0 0;opacity:.85;">${metaInfo.desc}</p>` : ""}
+        <div class="hero-inner">
+          <div class="hero-copy">
+            ${badgeHtml}
+            ${titleHtml}
+            ${descHtml}
+          </div>
+          <div class="hero-visual" aria-hidden="true">
+            <span class="hero-orbit hero-orbit--lg"></span>
+            <span class="hero-orbit hero-orbit--md"></span>
+            <span class="hero-orbit hero-orbit--sm"></span>
+          </div>
         </div>
       `;
       wrap.insertBefore(hero, root);
