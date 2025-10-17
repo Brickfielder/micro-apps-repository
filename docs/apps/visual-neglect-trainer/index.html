@@ -353,38 +353,27 @@
         ensureWrapped(page);
         clearLeadWords();
 
-        // Only consider visible page
         const words = Array.from(page.querySelectorAll('.wd'));
+        if (!words.length) return;
 
-        if (words.length === 0) return;
+        // Group words by their visual line using a stable top-coordinate key.
+        // Multiplying by devicePixelRatio avoids collisions caused by sub-pixel
+        // differences between lines (e.g. fractional layout rounding).
+        const precision = Math.max(1, Math.round(window.devicePixelRatio || 1));
+        const lineMap = new Map();
 
-        // Group by visual line using top coordinate with tolerance
-        const groups = [];
-        const TOL = 4; // px tolerance for the same line
-        let current = [];
-
-        for (const w of words){
-          const r = w.getBoundingClientRect();
-          const top = Math.round(r.top);
-          if (!current.length){
-            current.push({ el: w, top, left: r.left });
-          } else {
-            const prevTop = current[current.length - 1].top;
-            if (Math.abs(top - prevTop) <= TOL){
-              current.push({ el: w, top, left: r.left });
-            } else {
-              groups.push(current);
-              current = [{ el: w, top, left: r.left }];
-            }
-          }
+        for (const word of words){
+          const rect = word.getBoundingClientRect();
+          const topKey = Math.round(rect.top * precision);
+          if (!lineMap.has(topKey)) lineMap.set(topKey, []);
+          lineMap.get(topKey).push({ el: word, left: rect.left });
         }
-        if (current.length) groups.push(current);
 
-        // In each line group, sort by left and mark first two
-        for (const g of groups){
-          g.sort((a,b)=>a.left - b.left);
-          for (let i=0;i<Math.min(2, g.length);i++){
-            g[i].el.classList.add('lead');
+        // Highlight only the first two words (by left-to-right order) per line.
+        for (const group of lineMap.values()){
+          group.sort((a,b)=>a.left - b.left);
+          for (let i = 0; i < Math.min(2, group.length); i++){
+            group[i].el.classList.add('lead');
           }
         }
       }
