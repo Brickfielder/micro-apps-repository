@@ -358,33 +358,43 @@
 
         if (words.length === 0) return;
 
-        // Group by visual line using top coordinate with tolerance
-        const groups = [];
+        // Measure all words and group them by their visual line.
+        // Sorting by top/left before grouping prevents DOM order quirks
+        // (e.g. floating spans) from colouring too many words per line.
         const TOL = 4; // px tolerance for the same line
-        let current = [];
+        const measured = words
+          .map((el) => {
+            const rect = el.getBoundingClientRect();
+            return Number.isFinite(rect.top) && Number.isFinite(rect.left)
+              ? { el, top: rect.top, left: rect.left }
+              : null;
+          })
+          .filter(Boolean)
+          .sort((a, b) => {
+            const topDelta = a.top - b.top;
+            if (Math.abs(topDelta) > TOL) return topDelta;
+            return a.left - b.left;
+          });
 
-        for (const w of words){
-          const r = w.getBoundingClientRect();
-          const top = Math.round(r.top);
-          if (!current.length){
-            current.push({ el: w, top, left: r.left });
+        const lines = [];
+        for (const entry of measured){
+          const currentLine = lines[lines.length - 1];
+          if (currentLine && Math.abs(entry.top - currentLine.top) <= TOL){
+            currentLine.words.push(entry);
           } else {
-            const prevTop = current[current.length - 1].top;
-            if (Math.abs(top - prevTop) <= TOL){
-              current.push({ el: w, top, left: r.left });
-            } else {
-              groups.push(current);
-              current = [{ el: w, top, left: r.left }];
-            }
+            lines.push({ top: entry.top, words: [entry] });
           }
         }
-        if (current.length) groups.push(current);
 
-        // In each line group, sort by left and mark first two
-        for (const g of groups){
-          g.sort((a,b)=>a.left - b.left);
-          for (let i=0;i<Math.min(2, g.length);i++){
-            g[i].el.classList.add('lead');
+        for (const line of lines){
+          line.words.sort((a, b) => a.left - b.left);
+          let coloured = 0;
+          for (const item of line.words){
+            if (!item.el.classList.contains('lead')){
+              item.el.classList.add('lead');
+              coloured += 1;
+            }
+            if (coloured === 2) break;
           }
         }
       }
