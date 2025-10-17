@@ -358,33 +358,26 @@
 
         if (words.length === 0) return;
 
-        // Group by visual line using top coordinate with tolerance
-        const groups = [];
-        const TOL = 4; // px tolerance for the same line
-        let current = [];
+        // Iterate in DOM order and track visual lines via offsetTop.
+        // offsetTop is relative to the nearest block ancestor and is
+        // stable across browsers/orientation changes, avoiding cases
+        // where getBoundingClientRect() rounded the values together.
+        const TOL = 2; // px tolerance for offset differences
+        let currentLineTop = null;
+        let colouredOnLine = 0;
 
-        for (const w of words){
-          const r = w.getBoundingClientRect();
-          const top = Math.round(r.top);
-          if (!current.length){
-            current.push({ el: w, top, left: r.left });
-          } else {
-            const prevTop = current[current.length - 1].top;
-            if (Math.abs(top - prevTop) <= TOL){
-              current.push({ el: w, top, left: r.left });
-            } else {
-              groups.push(current);
-              current = [{ el: w, top, left: r.left }];
-            }
+        for (const el of words){
+          const top = el.offsetTop;
+          if (!Number.isFinite(top)) continue;
+
+          if (currentLineTop === null || Math.abs(top - currentLineTop) > TOL){
+            currentLineTop = top;
+            colouredOnLine = 0;
           }
-        }
-        if (current.length) groups.push(current);
 
-        // In each line group, sort by left and mark first two
-        for (const g of groups){
-          g.sort((a,b)=>a.left - b.left);
-          for (let i=0;i<Math.min(2, g.length);i++){
-            g[i].el.classList.add('lead');
+          if (colouredOnLine < 2){
+            el.classList.add('lead');
+            colouredOnLine += 1;
           }
         }
       }
