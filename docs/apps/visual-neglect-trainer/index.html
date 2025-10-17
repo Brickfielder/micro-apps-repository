@@ -354,26 +354,46 @@
         clearLeadWords();
 
         const words = Array.from(page.querySelectorAll('.wd'));
-        if (!words.length) return;
 
-        // Group words by their visual line using a stable top-coordinate key.
-        // Multiplying by devicePixelRatio avoids collisions caused by sub-pixel
-        // differences between lines (e.g. fractional layout rounding).
-        const precision = Math.max(1, Math.round(window.devicePixelRatio || 1));
-        const lineMap = new Map();
+        if (words.length === 0) return;
 
-        for (const word of words){
-          const rect = word.getBoundingClientRect();
-          const topKey = Math.round(rect.top * precision);
-          if (!lineMap.has(topKey)) lineMap.set(topKey, []);
-          lineMap.get(topKey).push({ el: word, left: rect.left });
+        // Measure all words and group them by their visual line.
+        // Sorting by top/left before grouping prevents DOM order quirks
+        // (e.g. floating spans) from colouring too many words per line.
+        const TOL = 4; // px tolerance for the same line
+        const measured = words
+          .map((el) => {
+            const rect = el.getBoundingClientRect();
+            return Number.isFinite(rect.top) && Number.isFinite(rect.left)
+              ? { el, top: rect.top, left: rect.left }
+              : null;
+          })
+          .filter(Boolean)
+          .sort((a, b) => {
+            const topDelta = a.top - b.top;
+            if (Math.abs(topDelta) > TOL) return topDelta;
+            return a.left - b.left;
+          });
+
+        const lines = [];
+        for (const entry of measured){
+          const currentLine = lines[lines.length - 1];
+          if (currentLine && Math.abs(entry.top - currentLine.top) <= TOL){
+            currentLine.words.push(entry);
+          } else {
+            lines.push({ top: entry.top, words: [entry] });
+          }
         }
 
-        // Highlight only the first two words (by left-to-right order) per line.
-        for (const group of lineMap.values()){
-          group.sort((a,b)=>a.left - b.left);
-          for (let i = 0; i < Math.min(2, group.length); i++){
-            group[i].el.classList.add('lead');
+        for (const line of lines){
+          line.words.sort((a, b) => a.left - b.left);
+          let coloured = 0;
+          for (const item of line.words){
+            if (!item.el.classList.contains('lead')){
+              item.el.classList.add('lead');
+              coloured += 1;
+            }
+            if (coloured === 2) break;
           }
         }
       }
