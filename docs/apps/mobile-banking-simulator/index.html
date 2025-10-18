@@ -5,11 +5,49 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Brightwave Mobile Banking Simulator</title>
 
-  <link rel="stylesheet" href="../shared/theme.css" />
+  <link rel="stylesheet" href="../../shared/theme.css" />
   <meta name="theme" content="bold dense" />
   <meta name="app-slug" content="mobile-banking-simulator" />
-  <script defer src="../shared/frame.js"></script>
-  <script defer src="../shared/clinician_feedback.js"></script>
+  <meta name="app-title" content="Brightwave Mobile Banking Simulator" />
+  <meta
+    name="app-desc"
+    content="Practise real-time mobile banking: balances, transfers, bills, card controls, and statement exports."
+  />
+
+  <script>
+    (function ensureSharedAssets() {
+      const resolve = (path) => new URL(path, window.location.href).toString();
+
+      window.__THEME_URL__ = resolve('../../shared/theme.css');
+      window.__CATALOG_URL__ = resolve('../../catalog.json');
+
+      const ensureStylesheet = (href) => {
+        if (!href) return;
+        if (document.querySelector(`link[href="${href}"]`)) return;
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        document.head.appendChild(link);
+      };
+
+      ensureStylesheet(window.__THEME_URL__);
+
+      const loadScript = (path, globalName) => {
+        const src = resolve(path);
+        if (globalName) {
+          window[globalName] = src;
+        }
+        if (document.querySelector(`script[src="${src}"]`)) return;
+        const script = document.createElement('script');
+        script.defer = true;
+        script.src = src;
+        document.head.appendChild(script);
+      };
+
+      loadScript('../../shared/frame.js', '__FRAME_URL__');
+      loadScript('../../shared/clinician_feedback.js', '__CLINICIAN_FEEDBACK_URL__');
+    })();
+  </script>
 
   <style>
     :root {
