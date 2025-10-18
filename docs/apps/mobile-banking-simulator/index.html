@@ -175,45 +175,6 @@
       box-shadow: 0 4px 12px rgba(37, 99, 235, 0.22);
     }
 
-    .language-toggle {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--surface-soft);
-      border-radius: 999px;
-      border: 1px solid color-mix(in oklab, var(--accent) 28%, white 55%);
-      padding: 4px 10px;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    }
-
-    .language-toggle span {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--muted);
-    }
-
-    .language-toggle button {
-      border: none;
-      background: transparent;
-      color: var(--muted);
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .language-toggle button.active {
-      background: white;
-      color: var(--accent-strong);
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.18);
-    }
-
-    .language-toggle button:focus-visible {
-      outline: 2px solid color-mix(in oklab, var(--accent) 55%, white 35%);
-      outline-offset: 2px;
-    }
-
     .layout {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
@@ -777,11 +738,6 @@
         <button type="button" class="active" data-view="phone" aria-pressed="true">📱 Phone</button>
         <button type="button" data-view="tablet" aria-pressed="false">💻 Tablet</button>
       </div>
-      <div class="language-toggle" role="group" aria-label="Change language">
-        <span id="languageToggleLabel">Language</span>
-        <button type="button" class="active" data-lang="en" aria-pressed="true" id="langEnBtn">English</button>
-        <button type="button" data-lang="it" aria-pressed="false" id="langItBtn">Italiano</button>
-      </div>
       <div class="quick-status" id="availabilityStatus" aria-live="polite">
         Balances refresh instantly — last sync <span id="syncTime">just now</span>
       </div>
@@ -1014,2332 +970,892 @@
   </main>
 
   <script>
-const languagePacks = {
-  en: {
-    locale: 'en-GB',
-    htmlLang: 'en',
-    title: 'Brightwave Mobile Banking Simulator',
-    languages: {
-      label: 'Language',
-      en: 'English',
-      it: 'Italiano'
-    },
-    ui: {
-      instructionsSummary: 'How to use this simulator',
-      instructionsBody:
-        'Practise routine online banking tasks inside a touch-style interface. Select the mobile or tablet frame, then explore the tabs to manage balances, transfers, bills, cards, and security. If a step is missed, the prompt bar will explain what to do next so you can self-correct.',
-      viewToggle: {
-        phone: 'Phone',
-        tablet: 'Tablet'
-      },
-      quickStatus: 'Balances refresh instantly — last sync {time}',
-      quickStatusTime: 'just now',
-      navAria: 'Primary banking sections',
-      tabs: {
-        accounts: {
-          label: 'Accounts',
-          helper: 'Balances & history',
-          aria: 'Accounts and transactions'
+    const state = {
+      viewMode: 'phone',
+      activeTab: 'accounts',
+      selectedAccount: 'current',
+      accounts: [
+        {
+          id: 'current',
+          name: 'Current Account',
+          balance: 2150.42,
+          iban: 'GB33 BWVB 2294 1123 45',
+          type: 'Current',
         },
-        payments: {
-          label: 'Payments',
-          helper: 'Transfers & bills',
-          aria: 'Payments and standing orders'
+        {
+          id: 'savings',
+          name: 'Easy Saver',
+          balance: 6200.15,
+          iban: 'GB33 BWVB 7719 7642 11',
+          type: 'Savings',
         },
-        security: {
-          label: 'Cards & PIN',
-          helper: 'Security tools',
-          aria: 'Card and PIN tools'
+        {
+          id: 'travel',
+          name: 'Travel Wallet (EUR)',
+          balance: 830.5,
+          iban: 'DE12 3704 0044 0532 0130 00',
+          type: 'Linked (EUR)',
+          currency: 'EUR',
         }
-      },
-      accountFilterLabel: 'View transactions for',
-      refreshButton: 'Refresh now',
-      pendingHint: 'Pending items show in amber.',
-      transactionsEmpty: 'No transactions yet — create one via transfers or payments.',
-      spendingHeading: 'Spending by category (30 days)',
-      spendingEmpty: 'No outgoing payments recorded yet.',
-      exportCsv: '⬇️ Export CSV',
-      exportPdf: '⬇️ Export PDF',
-      mandatesEmpty: {
-        directDebits: 'No direct debits yet.',
-        standingOrders: 'No standing orders yet.'
-      },
-      mandateButtons: {
-        cancel: 'Cancel',
-        reinstate: 'Reinstate'
-      },
-      mandateHeadings: {
-        directDebits: 'Direct debits',
-        standingOrders: 'Standing orders'
-      },
-      promptInitial: 'Ready when you are. Choose a task to begin.',
-      taskTitle: "Today's practice",
-      taskHelper:
-        'Work through each activity inside the simulator. Items tick themselves when you complete the matching action.',
-      taskProgress: '{completed} of {total} tasks completed',
-      resetChecklist: 'Reset checklist',
-      sessionTracker: 'Session tracker',
-      downloadSession: '⬇️ Download session CSV',
-      clearTracker: 'Clear tracker',
-      timelineEmpty: 'No actions yet.',
-      clinicianTitle: 'Clinician comments',
-      clinicianHelper:
-        'Use this space to record observations, cueing strategies, or follow-up goals after the session.',
-      clinicianPlaceholder: 'Enter any notes relevant to this session...'
-    },
-    card: {
-      statusUnlocked: 'Card unlocked',
-      statusLocked: 'Card locked',
-      badgeActive: 'Active',
-      badgeLocked: 'Locked',
-      previewBrand: 'Brightwave Debit',
-      previewHolder: 'Account holder',
-      previewHolderName: 'Jordan Rivers',
-      previewExpires: 'Expires',
-      previewExpiry: '07/28',
-      controlsTitle: 'Card controls',
-      lockButton: '🔐 Lock card',
-      unlockButton: '🔓 Unlock card',
-      limitsTitle: 'Set spending limits',
-      limitsHelper: 'Adjust how much can be spent on the card before a manual review is needed.',
-      limitsSummary: 'Daily limit {daily} · Contactless {contactless}',
-      dailyLabel: 'Daily card limit',
-      contactlessLabel: 'Contactless tap limit',
-      limitsSubmit: 'Update limits',
-      pinTitle: 'Change your PIN',
-      pinNew: 'New PIN',
-      pinConfirm: 'Confirm PIN',
-      pinSubmit: 'Update PIN',
-      requestTitle: 'Request a new card',
-      requestReason: 'Reason',
-      requestPlaceholder: '-- Select a reason --',
-      requestOptions: ['Damaged', 'Lost', 'Expired soon', 'Additional cardholder'],
-      requestNotes: 'Delivery notes (optional)',
-      requestNotesPlaceholder: 'e.g. Use secure weekday delivery',
-      requestSubmit: 'Submit request'
-    },
-    forms: {
-      transfer: {
-        title: 'Transfer between your accounts',
-        from: 'From',
-        to: 'To',
-        amount: 'Amount',
-        submit: 'Transfer now'
-      },
-      bill: {
-        title: 'Pay a bill / schedule recurring',
-        account: 'Pay from',
-        payee: 'Payee',
-        placeholder: '-- Choose payee --',
-        options: ['Bright Energy (Utilities)', 'City Water Board', 'Evergreen Rentals', 'Momentum Credit Card'],
-        amount: 'Amount',
-        frequency: 'Frequency',
-        frequencies: {
-          once: 'One-off payment',
-          monthly: 'Monthly recurring',
-          quarterly: 'Quarterly recurring'
+      ],
+      transactions: [
+        {
+          id: 'tx-01', account: 'current', description: 'Payroll', amount: 1850.00, category: 'Income', method: 'BACS', date: '2024-07-24', pending: false
         },
-        submit: 'Confirm payment'
-      },
-      send: {
-        title: 'Send money to someone',
-        from: 'From account',
-        recipient: 'Recipient',
-        recipientPlaceholder: 'Name or company',
-        amount: 'Amount',
-        method: 'Delivery method',
-        methods: {
-          faster: 'Faster Payments (UK)',
-          bacs: 'BACS (2-3 days)',
-          chaps: 'CHAPS (same-day high value)',
-          sepa: 'SEPA (EU)',
-          instant: 'Instant within Brightwave'
+        {
+          id: 'tx-02', account: 'current', description: 'Pending — Electric bill', amount: -84.65, category: 'Utilities', method: 'Direct debit', date: '2024-07-27', pending: true
         },
-        reference: 'Reference (optional)',
-        referencePlaceholder: 'e.g. Birthday gift',
-        submit: 'Send payment'
-      },
-      newDebit: {
-        title: 'Set up a new direct debit / standing order',
-        type: 'Type',
-        types: {
-          directDebit: 'Direct debit',
-          standingOrder: 'Standing order'
+        {
+          id: 'tx-03', account: 'current', description: 'Groceries — Market Square', amount: -62.14, category: 'Food & drink', method: 'Debit card', date: '2024-07-23', pending: false
         },
-        name: 'Name',
-        namePlaceholder: 'Organisation',
-        amount: 'Amount',
-        schedule: 'Schedule',
-        schedulePlaceholder: 'e.g. 15th of each month',
-        submit: 'Add instruction'
+        {
+          id: 'tx-04', account: 'savings', description: 'Auto transfer to current', amount: -200.00, category: 'Transfer out', method: 'Standing order', date: '2024-07-20', pending: false
+        },
+        {
+          id: 'tx-05', account: 'savings', description: 'Interest credit', amount: 6.12, category: 'Interest', method: 'Monthly interest', date: '2024-07-01', pending: false
+        },
+        {
+          id: 'tx-06', account: 'travel', description: 'Hotel booking — Porto', amount: -215.00, category: 'Travel', method: 'SEPA', date: '2024-07-18', pending: false
+        },
+        {
+          id: 'tx-07', account: 'travel', description: 'Top up from current', amount: 250.00, category: 'Transfer in', method: 'Currency wallet', date: '2024-07-15', pending: false
+        }
+      ],
+      directDebits: [
+        { id: 'dd-1', name: 'Bright Energy', amount: 84.65, schedule: '15th monthly', active: true },
+        { id: 'dd-2', name: 'City Water Board', amount: 42.10, schedule: '28th monthly', active: true },
+        { id: 'dd-3', name: 'Momentum Credit Card', amount: 120.00, schedule: 'Due on statement date', active: true }
+      ],
+      standingOrders: [
+        { id: 'so-1', name: 'Savings sweep', amount: 200.00, schedule: 'Every Friday', active: true },
+        { id: 'so-2', name: 'Rent to Evergreen Rentals', amount: 950.00, schedule: '1st monthly', active: true }
+      ],
+      cardLocked: false,
+      pinLastChanged: '2024-05-11',
+      spendingLimits: {
+        daily: 1500,
+        contactless: 100
+      },
+      practiceTasks: [
+        {
+          id: 'check-balances',
+          title: 'Check balances',
+          helper: 'Refresh the Accounts tab to confirm your current, savings, and linked totals.',
+          completed: false
+        },
+        {
+          id: 'recurring-payment',
+          title: 'Set up a recurring payment',
+          helper: 'Use bill payments or mandates to schedule an automatic outgoing payment.',
+          completed: false
+        },
+        {
+          id: 'send-external',
+          title: 'Send money to other people or accounts',
+          helper: 'Complete the send money form with a recipient and delivery method.',
+          completed: false
+        },
+        {
+          id: 'transfer-own',
+          title: 'Transfer money between your own accounts',
+          helper: 'Move funds internally using the transfer form.',
+          completed: false
+        },
+        {
+          id: 'change-pin',
+          title: 'Change your PIN',
+          helper: 'Submit matching four-digit PIN entries in the security tab.',
+          completed: false
+        },
+        {
+          id: 'set-limits',
+          title: 'Set spending limits',
+          helper: 'Adjust the daily and contactless card limits in the security tools.',
+          completed: false
+        }
+      ],
+      timeline: []
+    };
+
+    const promptArea = document.getElementById('promptArea');
+    const accountsGrid = document.getElementById('accountsGrid');
+    const accountFilter = document.getElementById('accountFilter');
+    const transactionList = document.getElementById('transactionList');
+    const spendingSummary = document.getElementById('spendingSummary');
+    const directDebitItems = document.getElementById('directDebitItems');
+    const standingOrderItems = document.getElementById('standingOrderItems');
+    const sessionTimeline = document.getElementById('sessionTimeline');
+    const practiceTasksList = document.getElementById('practiceTasksList');
+    const taskProgress = document.getElementById('taskProgress');
+    const limitSummary = document.getElementById('limitSummary');
+
+    function formatCurrency(value, currency = 'GBP') {
+      return new Intl.NumberFormat('en-GB', { style: 'currency', currency }).format(value);
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      })[char]);
+    }
+
+    function recordTimeline(event) {
+      const now = new Date();
+      state.timeline.unshift({
+        timestamp: now.toISOString(),
+        event,
+      });
+      if (state.timeline.length > 12) state.timeline.length = 12;
+      renderTimeline();
+    }
+
+    function renderTimeline() {
+      if (!sessionTimeline) return;
+      if (!state.timeline.length) {
+        sessionTimeline.innerHTML = '<li class="empty">No actions yet.</li>';
+        return;
       }
-    },
-    statuses: {
-      pending: 'Pending',
-      cleared: 'Cleared',
-      completed: 'Completed',
-      inProgress: 'In progress'
-    },
-    promptPrefixes: {
-      error: '⚠️ Check & retry:',
-      success: '✅ Done:',
-      info: 'ℹ️ Info:'
-    },
-    promptNextLabel: 'Next:',
-    prompts: {
-      checklistReset: {
-        message: 'Task checklist reset.',
-        next: 'Work back through each activity inside the simulator.'
-      },
-      limitDailyRange: {
-        message: 'Set a daily limit between £100 and £5,000.',
-        next: 'Adjust the daily amount, then press “Update limits”.'
-      },
-      limitContactlessRange: {
-        message: 'Contactless limit must be between £10 and £500.',
-        next: 'Amend the contactless amount before saving.'
-      },
-      limitContactlessVsDaily: {
-        message: 'Contactless limit cannot be higher than the daily limit.',
-        next: 'Lower the contactless limit or raise the daily cap first.'
-      },
-      limitUpdated: {
-        message: 'Spending limits updated.',
-        next: 'Changes apply straight away to in-store and contactless transactions.'
-      },
-      balancesRefreshed: {
-        message: 'Balances refreshed. Everything is up to date.',
-        next: 'Continue with your next task.'
-      },
-      transferMissingAccounts: {
-        message: 'Choose both a source and destination account.',
-        next: 'Select different accounts from the dropdowns.'
-      },
-      transferSameAccount: {
-        message: 'You selected the same account for both fields.',
-        next: 'Change one of the dropdowns so the money has somewhere to go.'
-      },
-      transferAmountInvalid: {
-        message: 'Enter a transfer amount greater than zero.',
-        next: 'Type the amount you want to move, then press “Transfer now”.'
-      },
-      transferInsufficientFunds: {
-        message: 'Insufficient funds in the selected source account.',
-        next: 'Reduce the amount or pick an account with enough balance.'
-      },
-      transferComplete: {
-        message: 'Transfer complete.',
-        next: 'Review the transaction history to confirm both entries.'
-      },
-      accountSwitch: {
-        message: 'Switched to {account}.'
-      },
-      accountSwitchNext: {
-        next: 'Scroll down to review the latest transactions.'
-      },
-      billIncomplete: {
-        message: 'Complete all bill payment fields first.',
-        next: 'Pick an account, payee, and amount before confirming.'
-      },
-      billInsufficientFunds: {
-        message: 'The account does not have enough funds for this bill.',
-        next: 'Adjust the amount or transfer funds in before paying.'
-      },
-      billSubmittedOnce: {
-        message: 'Bill payment submitted.',
-        next: 'Check the transactions list to see it marked as paid.'
-      },
-      billSubmittedRecurring: {
-        message: 'Bill payment submitted.',
-        next: 'Review the mandates panel to confirm the new recurring payment.'
-      },
-      sendIncomplete: {
-        message: 'Fill in the account, recipient, and amount fields.',
-        next: 'Complete the missing fields, then try sending again.'
-      },
-      sendInsufficient: {
-        message: 'Insufficient funds for this payment.',
-        next: 'Transfer money in or lower the amount before resubmitting.'
-      },
-      sendComplete: {
-        message: 'Payment sent.'
-      },
-      sendNextInfo: {
-        next: '{message}'
-      },
-      instructionIncomplete: {
-        message: 'All fields are required to set up an instruction.',
-        next: 'Enter the organisation, amount, and schedule before saving.'
-      },
-      instructionCreatedDirectDebit: {
-        message: 'Direct debit created.',
-        next: 'You can manage it from the list to pause or cancel later.'
-      },
-      instructionCreatedStandingOrder: {
-        message: 'Standing order created.',
-        next: 'You can manage it from the list to pause or cancel later.'
-      },
-      viewPhone: {
-        message: 'Switched to mobile phone view.',
-        next: 'Continue practising tasks inside the simulated device.'
-      },
-      viewTablet: {
-        message: 'Switched to tablet view.',
-        next: 'Continue practising tasks inside the simulated device.'
-      },
-      tabAccounts: {
-        message: 'Opened the accounts workspace.',
-        next: 'Review balances or export a statement.'
-      },
-      tabPayments: {
-        message: 'Opened the payments workspace.',
-        next: 'Choose a form to set up transfers or bill payments.'
-      },
-      tabSecurity: {
-        message: 'Opened the security workspace.',
-        next: 'Lock cards or manage security options.'
-      },
-      cardLocked: {
-        message: 'Card locked instantly.',
-        next: 'If the card is found later, return to unlock it before use.'
-      },
-      cardUnlocked: {
-        message: 'Card unlocked instantly.',
-        next: 'You can continue using the card immediately.'
-      },
-      pinFormat: {
-        message: 'PIN must be exactly four digits.',
-        next: 'Enter four numbers (0-9) with no spaces.'
-      },
-      pinMismatch: {
-        message: 'The PIN entries do not match.',
-        next: 'Re-enter the same digits in both boxes.'
-      },
-      pinUpdated: {
-        message: 'PIN updated securely.',
-        next: 'Remember to memorise it and destroy any written notes.'
-      },
-      cardReasonMissing: {
-        message: 'Select a reason for the replacement card.',
-        next: 'Use the dropdown to explain why you need the new card.'
-      },
-      cardRequestSubmitted: {
-        message: 'Replacement card request submitted.',
-        next: 'Watch your messages for confirmation of the delivery date.'
-      },
-      sessionCsvDownloaded: {
-        message: 'Session CSV downloaded.',
-        next: 'Share the log or keep it for your records.'
-      },
-      accountRequired: {
-        message: 'Select an account before exporting.',
-        next: 'Tap a balance card, then try exporting again.'
-      },
-      csvDownloaded: {
-        message: 'CSV statement downloaded.',
-        next: 'Open it in Excel or your spreadsheet tool for review.'
-      },
-      pdfDownloaded: {
-        message: 'PDF statement downloaded.',
-        next: 'Open it to review or share as needed.'
-      },
-      trackerCleared: {
-        message: 'Session tracker cleared.',
-        next: 'Continue practising and new actions will appear here.'
-      },
-      transactionViewUpdated: {
-        message: 'Transaction view updated.',
-        next: 'Scroll to see the selected account history.'
-      },
-      directDebitActive: {
-        message: '{name} is active again.',
-        next: 'Monitor the next collection date in the direct debits list.'
-      },
-      directDebitCancelled: {
-        message: '{name} will no longer collect.',
-        next: 'Confirm with the provider if an alternative payment is needed.'
-      },
-      standingOrderActive: {
-        message: '{name} will run as scheduled.',
-        next: 'Check your calendar reminder to avoid duplicates.'
-      },
-      standingOrderPaused: {
-        message: '{name} is paused.',
-        next: 'Set a manual reminder if you still need to pay this manually.'
-      },
-      sendNext: {
-        faster: 'Expect the funds to clear in 2–3 working days.',
-        bacs: 'Expect the funds to clear in 2–3 working days.',
-        chaps: 'Stay available for the confirmation call before the cut-off time.',
-        default: 'Share the confirmation with the recipient if needed.'
+      sessionTimeline.innerHTML = state.timeline.map(entry => {
+        const label = new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return `<li><time datetime="${entry.timestamp}">${label}</time><span>${escapeHtml(entry.event)}</span></li>`;
+      }).join('');
+    }
+
+    function updateTaskProgress() {
+      if (!taskProgress) return;
+      const total = state.practiceTasks.length;
+      const completed = state.practiceTasks.filter(task => task.completed).length;
+      taskProgress.textContent = `${completed} of ${total} tasks completed`;
+    }
+
+    function renderTasks() {
+      if (!practiceTasksList) return;
+      practiceTasksList.innerHTML = state.practiceTasks.map(task => `
+        <li class="${task.completed ? 'complete' : ''}">
+          <label class="task-item">
+            <input type="checkbox" data-task="${task.id}" ${task.completed ? 'checked' : ''} />
+            <span>
+              <strong>${task.title}</strong>
+              <small>${task.helper}</small>
+            </span>
+          </label>
+        </li>
+      `).join('');
+      updateTaskProgress();
+    }
+
+    function completeTask(id) {
+      const task = state.practiceTasks.find(item => item.id === id);
+      if (!task || task.completed) return;
+      task.completed = true;
+      const checkbox = practiceTasksList?.querySelector(`input[data-task="${id}"]`);
+      if (checkbox) {
+        checkbox.checked = true;
+        checkbox.closest('li')?.classList.add('complete');
       }
-    },
-    timeline: {
-      checklistComplete: 'Checklist: completed task — {task}',
-      checklistReset: 'Checklist reset for another run-through',
-      limitsUpdated: 'Updated spending limits to {daily} daily / {contactless} contactless',
-      checklistManualComplete: 'Checklist: completed task — {task}',
-      checklistManualReopen: 'Checklist: reopened task — {task}',
-      directDebitStatus: '{status} direct debit: {name}',
-      standingOrderStatus: '{status} standing order: {name}',
-      balancesRefresh: 'Manual refresh of balances',
-      transferComplete: 'Transferred {amount} from {from} to {to}',
-      billPaid: 'Paid {payee} ({frequency}) from {account}',
-      paymentSent: 'Sent {amount} to {recipient} via {method}',
-      instructionAdded: 'Added {type}: {name}',
-      cardLockStatus: '{status} debit card',
-      pinChanged: 'Changed debit card PIN',
-      cardRequested: 'Requested new card ({reason})',
-      sessionExport: 'Exported session progress CSV',
-      statementCsv: 'Exported CSV statement for {account}',
-      statementPdf: 'Exported PDF statement for {account}'
-    },
-    timelineStatus: {
-      directDebit: { active: 'Reinstated', inactive: 'Cancelled' },
-      standingOrder: { active: 'Reactivated', inactive: 'Paused' },
-      card: { locked: 'Locked', unlocked: 'Unlocked' }
-    },
-    accounts: {
-      current: { name: 'Current Account', type: 'Current' },
-      savings: { name: 'Easy Saver', type: 'Savings' },
-      travel: { name: 'Travel Wallet (EUR)', type: 'Linked (EUR)' }
-    },
-    transactions: {
-      'tx-01': { description: 'Payroll', category: 'Income', method: 'BACS' },
-      'tx-02': { description: 'Pending — Electric bill', category: 'Utilities', method: 'Direct debit' },
-      'tx-03': { description: 'Groceries — Market Square', category: 'Food & drink', method: 'Debit card' },
-      'tx-04': { description: 'Auto transfer to current', category: 'Transfer out', method: 'Standing order' },
-      'tx-05': { description: 'Interest credit', category: 'Interest', method: 'Monthly interest' },
-      'tx-06': { description: 'Hotel booking — Porto', category: 'Travel', method: 'SEPA' },
-      'tx-07': { description: 'Top up from current', category: 'Transfer in', method: 'Currency wallet' }
-    },
-    directDebits: {
-      'dd-1': { name: 'Bright Energy', schedule: '15th monthly' },
-      'dd-2': { name: 'City Water Board', schedule: '28th monthly' },
-      'dd-3': { name: 'Momentum Credit Card', schedule: 'Due on statement date' }
-    },
-    standingOrders: {
-      'so-1': { name: 'Savings sweep', schedule: 'Every Friday' },
-      'so-2': { name: 'Rent to Evergreen Rentals', schedule: '1st monthly' }
-    },
-    tasks: {
-      'check-balances': {
-        title: 'Check balances',
-        helper: 'Refresh the Accounts tab to confirm your current, savings, and linked totals.'
-      },
-      'recurring-payment': {
-        title: 'Set up a recurring payment',
-        helper: 'Use bill payments or mandates to schedule an automatic outgoing payment.'
-      },
-      'send-external': {
-        title: 'Send money to other people or accounts',
-        helper: 'Complete the send money form with a recipient and delivery method.'
-      },
-      'transfer-own': {
-        title: 'Transfer money between your own accounts',
-        helper: 'Move funds internally using the transfer form.'
-      },
-      'change-pin': {
-        title: 'Change your PIN',
-        helper: 'Submit matching four-digit PIN entries in the security tab.'
-      },
-      'set-limits': {
-        title: 'Set spending limits',
-        helper: 'Adjust the daily and contactless card limits in the security tools.'
+      updateTaskProgress();
+      recordTimeline(`Checklist: completed task — ${task.title}`);
+    }
+
+    function resetPracticeTasks(manual = false) {
+      state.practiceTasks.forEach(task => {
+        task.completed = false;
+      });
+      if (practiceTasksList) {
+        practiceTasksList.querySelectorAll('input[type="checkbox"]').forEach(input => {
+          input.checked = false;
+          input.closest('li')?.classList.remove('complete');
+        });
       }
-    },
-    csv: {
-      exportGenerated: 'Export generated',
-      timeline: 'Timeline',
-      time: 'Time',
-      event: 'Event',
-      noActions: 'No actions recorded',
-      practiceTasks: 'Practice tasks',
-      task: 'Task',
-      status: 'Status',
-      statementHeaders: ['Date', 'Description', 'Amount', 'Category', 'Method', 'Status']
-    },
-    pdf: {
-      statementFor: 'Statement for {account}',
-      generated: 'Generated {timestamp}',
-      balance: 'Balance: {balance}',
-      recentActivity: 'Recent activity:',
-      none: 'No transactions recorded yet.'
-    },
-    transfer: {
-      toDescription: 'Transfer to {account}',
-      fromDescription: 'Transfer from {account}',
-      categoryOut: 'Transfer out',
-      categoryIn: 'Transfer in',
-      method: 'Internal transfer'
-    },
-    bills: {
-      description: '{payee}{recurring}',
-      recurringSuffix: ' (recurring)',
-      category: 'Bills & utilities',
-      methodOnce: 'Bill payment',
-      methodRecurring: 'Direct debit setup',
-      frequencyLabel: {
-        once: 'one-off',
-        monthly: 'monthly',
-        quarterly: 'quarterly'
+      updateTaskProgress();
+      if (manual) {
+        showPrompt('Task checklist reset.', 'info', 'Work back through each activity inside the simulator.');
+        recordTimeline('Checklist reset for another run-through');
       }
-    },
-    send: {
-      description: 'To {recipient}{reference}',
-      referenceSuffix: ' — {reference}',
-      category: 'Payments to others',
-      methodLabels: {
+    }
+
+    function renderLimitSummary() {
+      if (!limitSummary) return;
+      const { daily, contactless } = state.spendingLimits;
+      limitSummary.textContent = `Daily limit ${formatCurrency(daily)} · Contactless ${formatCurrency(contactless)}`;
+    }
+
+    function initLimitForm() {
+      const dailyInput = document.getElementById('limitDaily');
+      const contactlessInput = document.getElementById('limitContactless');
+      if (dailyInput) dailyInput.value = state.spendingLimits.daily;
+      if (contactlessInput) contactlessInput.value = state.spendingLimits.contactless;
+      renderLimitSummary();
+    }
+
+    function handleLimitUpdate(event) {
+      event.preventDefault();
+      const dailyInput = document.getElementById('limitDaily');
+      const contactlessInput = document.getElementById('limitContactless');
+      const daily = parseFloat(dailyInput.value);
+      const contactless = parseFloat(contactlessInput.value);
+
+      if (!Number.isFinite(daily) || daily < 100 || daily > 5000) {
+        showPrompt('Set a daily limit between £100 and £5,000.', 'error', 'Adjust the daily amount, then press “Update limits”.');
+        dailyInput.focus();
+        return;
+      }
+      if (!Number.isFinite(contactless) || contactless < 10 || contactless > 500) {
+        showPrompt('Contactless limit must be between £10 and £500.', 'error', 'Amend the contactless amount before saving.');
+        contactlessInput.focus();
+        return;
+      }
+      if (contactless > daily) {
+        showPrompt('Contactless limit cannot be higher than the daily limit.', 'error', 'Lower the contactless limit or raise the daily cap first.');
+        contactlessInput.focus();
+        return;
+      }
+
+      state.spendingLimits.daily = Math.round(daily);
+      state.spendingLimits.contactless = Math.round(contactless);
+      renderLimitSummary();
+      dailyInput.value = state.spendingLimits.daily;
+      contactlessInput.value = state.spendingLimits.contactless;
+      showPrompt('Spending limits updated.', 'success', 'Changes apply straight away to in-store and contactless transactions.');
+      recordTimeline(`Updated spending limits to ${formatCurrency(state.spendingLimits.daily)} daily / ${formatCurrency(state.spendingLimits.contactless)} contactless`);
+      completeTask('set-limits');
+    }
+
+    function handleTaskToggle(event) {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement) || target.type !== 'checkbox') return;
+      const task = state.practiceTasks.find(item => item.id === target.dataset.task);
+      if (!task) return;
+      task.completed = target.checked;
+      target.closest('li')?.classList.toggle('complete', task.completed);
+      updateTaskProgress();
+      recordTimeline(`Checklist: ${task.completed ? 'completed' : 'reopened'} task — ${task.title}`);
+    }
+
+    function showPrompt(message, type = 'info', nextStep = '') {
+      promptArea.textContent = '';
+      promptArea.classList.remove('error', 'success');
+      if (type === 'error') {
+        promptArea.classList.add('error');
+      } else if (type === 'success') {
+        promptArea.classList.add('success');
+      }
+
+      const strong = document.createElement('strong');
+      strong.textContent = type === 'error' ? '⚠️ Check & retry:' : type === 'success' ? '✅ Done:' : 'ℹ️ Info:';
+      promptArea.append(strong, document.createTextNode(' ' + message));
+
+      if (nextStep) {
+        const span = document.createElement('span');
+        span.className = 'next-step';
+        span.textContent = `Next: ${nextStep}`;
+        promptArea.appendChild(span);
+      }
+    }
+
+    function renderAccounts() {
+      accountsGrid.innerHTML = state.accounts.map(acc => {
+        const currency = acc.currency || 'GBP';
+        return `
+          <article class="account-card ${state.selectedAccount === acc.id ? 'active' : ''}" data-account="${acc.id}" tabindex="0" role="button" aria-pressed="${state.selectedAccount === acc.id}">
+            <h3>${acc.name}</h3>
+            <div class="balance">${formatCurrency(acc.balance, currency)}</div>
+            <div class="meta"><span>${acc.type}</span><span>${acc.iban}</span></div>
+          </article>
+        `;
+      }).join('');
+
+      accountsGrid.querySelectorAll('.account-card').forEach(card => {
+        card.addEventListener('click', () => {
+          state.selectedAccount = card.dataset.account;
+          renderAccounts();
+          renderTransactions();
+          renderSpendingSummary();
+          accountFilter.value = state.selectedAccount;
+          showPrompt(`Switched to ${card.querySelector('h3').textContent}.`, 'info', 'Scroll down to review the latest transactions.');
+        });
+        card.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            card.click();
+          }
+        });
+      });
+    }
+
+    function renderAccountFilter() {
+      accountFilter.innerHTML = state.accounts.map(acc => `<option value="${acc.id}">${acc.name}</option>`).join('');
+      accountFilter.value = state.selectedAccount;
+    }
+
+    function renderTransactions() {
+      const selected = state.selectedAccount;
+      const items = state.transactions.filter(tx => tx.account === selected).sort((a, b) => new Date(b.date) - new Date(a.date));
+      if (!items.length) {
+        transactionList.innerHTML = '<p class="helper">No transactions yet — create one via transfers or payments.</p>';
+        return;
+      }
+
+      transactionList.innerHTML = items.map(tx => {
+        const currency = state.accounts.find(acc => acc.id === tx.account)?.currency || 'GBP';
+        const isDebit = tx.amount < 0;
+        const amount = formatCurrency(Math.abs(tx.amount), currency);
+        return `
+          <article class="transaction-item ${tx.pending ? 'pending' : ''}">
+            <div>
+              <div style="font-weight:600;">${tx.description}</div>
+              <div class="category">${tx.category}</div>
+            </div>
+            <div class="amount ${isDebit ? 'debit' : 'credit'}">${isDebit ? '-' : '+'}${amount}</div>
+            <div class="details">
+              <span>${new Date(tx.date).toLocaleDateString()}</span>
+              <span>${tx.method}</span>
+              ${tx.pending ? '<span style="color:#b45309;">Pending</span>' : '<span>Cleared</span>'}
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function renderSpendingSummary() {
+      const selected = state.selectedAccount;
+      const last30 = state.transactions.filter(tx => tx.account === selected && tx.amount < 0 && (Date.now() - new Date(tx.date).getTime()) <= (1000 * 60 * 60 * 24 * 32));
+      if (!last30.length) {
+        spendingSummary.innerHTML = '<h4>Spending by category (30 days)</h4><p class="helper">No outgoing payments recorded yet.</p>';
+        return;
+      }
+      const totals = {};
+      last30.forEach(tx => {
+        totals[tx.category] = (totals[tx.category] || 0) + Math.abs(tx.amount);
+      });
+      const currency = state.accounts.find(acc => acc.id === selected)?.currency || 'GBP';
+      spendingSummary.innerHTML = `
+        <h4>Spending by category (30 days)</h4>
+        <ul>
+          ${Object.entries(totals).map(([cat, total]) => `<li>${cat}: ${formatCurrency(total, currency)}</li>`).join('')}
+        </ul>
+      `;
+    }
+
+    function renderMandates() {
+      directDebitItems.innerHTML = state.directDebits.map(item => `
+        <div class="list-item" data-id="${item.id}">
+          <div>
+            <div style="font-weight:600;">${item.name}</div>
+            <span class="meta">${formatCurrency(item.amount)} · ${item.schedule}</span>
+          </div>
+          <button type="button" class="button ${item.active ? '' : 'secondary'}" data-action="${item.active ? 'cancel' : 'restore'}">
+            ${item.active ? 'Cancel' : 'Reinstate'}
+          </button>
+        </div>
+      `).join('') || '<p class="helper">No direct debits yet.</p>';
+
+      standingOrderItems.innerHTML = state.standingOrders.map(item => `
+        <div class="list-item" data-id="${item.id}">
+          <div>
+            <div style="font-weight:600;">${item.name}</div>
+            <span class="meta">${formatCurrency(item.amount)} · ${item.schedule}</span>
+          </div>
+          <button type="button" class="button ${item.active ? '' : 'secondary'}" data-action="${item.active ? 'cancel' : 'restore'}">
+            ${item.active ? 'Cancel' : 'Reinstate'}
+          </button>
+        </div>
+      `).join('') || '<p class="helper">No standing orders yet.</p>';
+
+      directDebitItems.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.closest('.list-item').dataset.id;
+          const item = state.directDebits.find(dd => dd.id === id);
+          if (!item) return;
+          item.active = !item.active;
+          renderMandates();
+          recordTimeline(`${item.active ? 'Reinstated' : 'Cancelled'} direct debit: ${item.name}`);
+          showPrompt(`${item.name} ${item.active ? 'is active again.' : 'will no longer collect.'}`, 'success', item.active ? 'Monitor the next collection date in the direct debits list.' : 'Confirm with the provider if an alternative payment is needed.');
+        });
+      });
+
+      standingOrderItems.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.closest('.list-item').dataset.id;
+          const item = state.standingOrders.find(dd => dd.id === id);
+          if (!item) return;
+          item.active = !item.active;
+          renderMandates();
+          recordTimeline(`${item.active ? 'Reactivated' : 'Paused'} standing order: ${item.name}`);
+          showPrompt(`${item.name} ${item.active ? 'will run as scheduled.' : 'is paused.'}`, 'success', item.active ? 'Check your calendar reminder to avoid duplicates.' : 'Set a manual reminder if you still need to pay this manually.');
+        });
+      });
+    }
+
+    function refreshBalances() {
+      document.getElementById('syncTime').textContent = 'just now';
+      showPrompt('Balances refreshed. Everything is up to date.', 'success', 'Continue with your next task.');
+      recordTimeline('Manual refresh of balances');
+      completeTask('check-balances');
+    }
+
+    function updateBalances(accountId, delta) {
+      const account = state.accounts.find(acc => acc.id === accountId);
+      if (account) {
+        account.balance = Math.round((account.balance + delta) * 100) / 100;
+      }
+      renderAccounts();
+    }
+
+    function addTransaction(accountId, data) {
+      const entry = {
+        id: `tx-${Date.now()}`,
+        account: accountId,
+        date: new Date().toISOString().slice(0, 10),
+        pending: false,
+        ...data
+      };
+      state.transactions.unshift(entry);
+      renderTransactions();
+      renderSpendingSummary();
+    }
+
+    function buildAccountSelect(select, excludeId) {
+      select.innerHTML = state.accounts.filter(acc => acc.id !== excludeId).map(acc => `<option value="${acc.id}">${acc.name}</option>`).join('');
+    }
+
+    function handleTransfer(event) {
+      event.preventDefault();
+      const from = document.getElementById('transferFrom').value;
+      const to = document.getElementById('transferTo').value;
+      const amount = parseFloat(document.getElementById('transferAmount').value);
+
+      if (!from || !to) {
+        showPrompt('Choose both a source and destination account.', 'error', 'Select different accounts from the dropdowns.');
+        return;
+      }
+      if (from === to) {
+        showPrompt('You selected the same account for both fields.', 'error', 'Change one of the dropdowns so the money has somewhere to go.');
+        return;
+      }
+      if (!amount || amount <= 0) {
+        showPrompt('Enter a transfer amount greater than zero.', 'error', 'Type the amount you want to move, then press “Transfer now”.');
+        return;
+      }
+      const source = state.accounts.find(acc => acc.id === from);
+      if (!source) return;
+      if (source.balance < amount) {
+        showPrompt('Insufficient funds in the selected source account.', 'error', 'Reduce the amount or pick an account with enough balance.');
+        return;
+      }
+
+      updateBalances(from, -amount);
+      updateBalances(to, amount);
+      addTransaction(from, { description: `Transfer to ${state.accounts.find(a => a.id === to)?.name || to}`, amount: -amount, category: 'Transfer out', method: 'Internal transfer' });
+      addTransaction(to, { description: `Transfer from ${state.accounts.find(a => a.id === from)?.name || from}`, amount: amount, category: 'Transfer in', method: 'Internal transfer' });
+
+      showPrompt('Transfer complete.', 'success', 'Review the transaction history to confirm both entries.');
+      recordTimeline(`Transferred ${formatCurrency(amount)} from ${source.name} to ${state.accounts.find(a => a.id === to)?.name}`);
+      completeTask('transfer-own');
+      event.target.reset();
+      document.getElementById('transferFrom').value = from;
+      buildAccountSelect(document.getElementById('transferTo'), from);
+    }
+
+    function handleBill(event) {
+      event.preventDefault();
+      const payFrom = document.getElementById('billAccount').value;
+      const payee = document.getElementById('billPayee').value;
+      const amount = parseFloat(document.getElementById('billAmount').value);
+      const frequency = document.getElementById('billFrequency').value;
+
+      if (!payFrom || !payee || !amount) {
+        showPrompt('Complete all bill payment fields first.', 'error', 'Pick an account, payee, and amount before confirming.');
+        return;
+      }
+      const account = state.accounts.find(acc => acc.id === payFrom);
+      if (account.balance < amount) {
+        showPrompt('The account does not have enough funds for this bill.', 'error', 'Adjust the amount or transfer funds in before paying.');
+        return;
+      }
+
+      updateBalances(payFrom, -amount);
+      addTransaction(payFrom, { description: `${payee}${frequency !== 'once' ? ' (recurring)' : ''}`, amount: -amount, category: 'Bills & utilities', method: frequency === 'once' ? 'Bill payment' : 'Direct debit setup' });
+
+      if (frequency !== 'once') {
+        const targetList = frequency === 'monthly' ? state.directDebits : state.standingOrders;
+        const newItem = {
+          id: `${frequency}-${Date.now()}`,
+          name: payee,
+          amount,
+          schedule: frequency === 'monthly' ? 'Monthly' : 'Quarterly',
+          active: true
+        };
+        targetList.push(newItem);
+        renderMandates();
+        completeTask('recurring-payment');
+      }
+
+      showPrompt('Bill payment submitted.', 'success', frequency === 'once' ? 'Check the transactions list to see it marked as paid.' : 'Review the mandates panel to confirm the new recurring payment.');
+      recordTimeline(`Paid ${payee} (${frequency}) from ${account.name}`);
+      event.target.reset();
+    }
+
+    function handleSendMoney(event) {
+      event.preventDefault();
+      const from = document.getElementById('sendFrom').value;
+      const recipient = document.getElementById('sendRecipient').value.trim();
+      const amount = parseFloat(document.getElementById('sendAmount').value);
+      const method = document.getElementById('sendMethod').value;
+      const reference = document.getElementById('sendReference').value.trim();
+
+      if (!from || !recipient || !amount) {
+        showPrompt('Fill in the account, recipient, and amount fields.', 'error', 'Complete the missing fields, then try sending again.');
+        return;
+      }
+      const account = state.accounts.find(acc => acc.id === from);
+      if (account.balance < amount) {
+        showPrompt('Insufficient funds for this payment.', 'error', 'Transfer money in or lower the amount before resubmitting.');
+        return;
+      }
+
+      updateBalances(from, -amount);
+      const labels = {
         faster: 'Faster Payments',
         bacs: 'BACS',
         chaps: 'CHAPS',
         sepa: 'SEPA',
-        instant: 'Instant transfer',
-        default: 'Bank transfer'
+        instant: 'Instant transfer'
+      };
+      addTransaction(from, {
+        description: `To ${recipient}${reference ? ' — ' + reference : ''}`,
+        amount: -amount,
+        category: 'Payments to others',
+        method: labels[method] || 'Bank transfer',
+        pending: method === 'bacs'
+      });
+
+      const nextStepMessage = method === 'bacs'
+        ? 'Expect the funds to clear in 2–3 working days.'
+        : method === 'chaps'
+          ? 'Stay available for the confirmation call before the cut-off time.'
+          : 'Share the confirmation with the recipient if needed.';
+      showPrompt('Payment sent.', 'success', nextStepMessage);
+      recordTimeline(`Sent ${formatCurrency(amount)} to ${recipient} via ${labels[method]}`);
+      completeTask('send-external');
+      event.target.reset();
+    }
+
+    function handleNewDebit(event) {
+      event.preventDefault();
+      const type = document.getElementById('debitType').value;
+      const name = document.getElementById('debitName').value.trim();
+      const amount = parseFloat(document.getElementById('debitAmount').value);
+      const schedule = document.getElementById('debitSchedule').value.trim();
+
+      if (!name || !amount || !schedule) {
+        showPrompt('All fields are required to set up an instruction.', 'error', 'Enter the organisation, amount, and schedule before saving.');
+        return;
       }
-    },
-    instruction: {
-      typeLabel: {
-        directDebit: 'direct debit',
-        standingOrder: 'standing order'
+      const targetList = type === 'directDebit' ? state.directDebits : state.standingOrders;
+      const newItem = { id: `${type}-${Date.now()}`, name, amount, schedule, active: true };
+      targetList.push(newItem);
+      renderMandates();
+      showPrompt(`${type === 'directDebit' ? 'Direct debit' : 'Standing order'} created.`, 'success', 'You can manage it from the list to pause or cancel later.');
+      recordTimeline(`Added ${type === 'directDebit' ? 'direct debit' : 'standing order'}: ${name}`);
+      completeTask('recurring-payment');
+      event.target.reset();
+    }
+
+    function toggleViewMode(mode) {
+      state.viewMode = mode;
+      const shell = document.getElementById('deviceShell');
+      shell.classList.toggle('phone', mode === 'phone');
+      shell.classList.toggle('tablet', mode === 'tablet');
+      document.querySelectorAll('.view-toggle button').forEach(btn => {
+        const active = btn.dataset.view === mode;
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-pressed', active);
+      });
+      showPrompt(`Switched to ${mode === 'phone' ? 'mobile phone' : 'tablet'} view.`, 'info', 'Continue practising tasks inside the simulated device.');
+    }
+
+    function switchTab(tab) {
+      state.activeTab = tab;
+      document.querySelectorAll('.tab-nav button').forEach(btn => {
+        const active = btn.dataset.tab === tab;
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-pressed', active);
+      });
+      document.querySelectorAll('.tab-panel').forEach(panel => {
+        panel.classList.toggle('active', panel.id === `tab-${tab}`);
+      });
+      showPrompt(`Opened the ${tab} workspace.`, 'info', tab === 'accounts' ? 'Review balances or export a statement.' : tab === 'payments' ? 'Choose a form to set up transfers or bill payments.' : 'Lock cards or manage security options.');
+    }
+
+    function handleCardLock(lock) {
+      state.cardLocked = lock;
+      document.getElementById('cardStatusLabel').textContent = lock ? 'Card locked' : 'Card unlocked';
+      document.getElementById('cardLockBadge').textContent = lock ? 'Locked' : 'Active';
+      document.getElementById('lockCardBtn').disabled = lock;
+      document.getElementById('unlockCardBtn').disabled = !lock;
+      showPrompt(`Card ${lock ? 'locked' : 'unlocked'} instantly.`, 'success', lock ? 'If the card is found later, return to unlock it before use.' : 'You can continue using the card immediately.');
+      recordTimeline(`${lock ? 'Locked' : 'Unlocked'} debit card`);
+    }
+
+    function handlePinChange(event) {
+      event.preventDefault();
+      const pin = document.getElementById('pinNew').value;
+      const confirm = document.getElementById('pinConfirm').value;
+      if (!/^[0-9]{4}$/.test(pin)) {
+        showPrompt('PIN must be exactly four digits.', 'error', 'Enter four numbers (0-9) with no spaces.');
+        return;
       }
-    }
-  },
-  it: {
-    locale: 'it-IT',
-    htmlLang: 'it',
-    title: 'Simulatore Brightwave di Mobile Banking',
-    languages: {
-      label: 'Lingua',
-      en: 'Inglese',
-      it: 'Italiano'
-    },
-    ui: {
-      instructionsSummary: 'Come usare questo simulatore',
-      instructionsBody:
-        'Esegui operazioni bancarie online di routine in un’interfaccia touch. Scegli la cornice del telefono o del tablet e poi esplora le schede per gestire saldi, trasferimenti, bollette, carte e sicurezza. Se salti un passaggio, la barra dei suggerimenti ti dirà cosa fare per correggerti da solo.',
-      viewToggle: {
-        phone: 'Telefono',
-        tablet: 'Tablet'
-      },
-      quickStatus: 'I saldi si aggiornano all’istante — ultima sincronizzazione {time}',
-      quickStatusTime: 'proprio ora',
-      navAria: 'Sezioni principali di banking',
-      tabs: {
-        accounts: {
-          label: 'Conti',
-          helper: 'Saldi e movimenti',
-          aria: 'Conti e transazioni'
-        },
-        payments: {
-          label: 'Pagamenti',
-          helper: 'Bonifici e bollette',
-          aria: 'Pagamenti e ordini permanenti'
-        },
-        security: {
-          label: 'Carte e PIN',
-          helper: 'Strumenti di sicurezza',
-          aria: 'Strumenti per carta e PIN'
-        }
-      },
-      accountFilterLabel: 'Mostra le transazioni di',
-      refreshButton: 'Aggiorna ora',
-      pendingHint: 'Le operazioni in sospeso sono evidenziate in ambra.',
-      transactionsEmpty: 'Ancora nessuna transazione — crea un movimento tramite trasferimenti o pagamenti.',
-      spendingHeading: 'Spese per categoria (30 giorni)',
-      spendingEmpty: 'Non sono stati registrati pagamenti in uscita.',
-      exportCsv: '⬇️ Esporta CSV',
-      exportPdf: '⬇️ Esporta PDF',
-      mandatesEmpty: {
-        directDebits: 'Nessun addebito diretto al momento.',
-        standingOrders: 'Nessun ordine permanente al momento.'
-      },
-      mandateButtons: {
-        cancel: 'Sospendi',
-        reinstate: 'Riattiva'
-      },
-      mandateHeadings: {
-        directDebits: 'Addebiti diretti',
-        standingOrders: 'Ordini permanenti'
-      },
-      promptInitial: 'Pronto quando lo sei tu. Scegli un’attività per iniziare.',
-      taskTitle: 'Allenamento di oggi',
-      taskHelper:
-        'Completa ogni attività nel simulatore. Gli elementi si spuntano da soli quando porti a termine l’azione corrispondente.',
-      taskProgress: '{completed} di {total} attività completate',
-      resetChecklist: 'Reimposta elenco',
-      sessionTracker: 'Registro della sessione',
-      downloadSession: '⬇️ Scarica CSV della sessione',
-      clearTracker: 'Svuota registro',
-      timelineEmpty: 'Ancora nessuna azione.',
-      clinicianTitle: 'Commenti del clinico',
-      clinicianHelper:
-        'Usa questo spazio per annotare osservazioni, strategie di facilitazione o obiettivi di follow-up dopo la sessione.',
-      clinicianPlaceholder: 'Inserisci eventuali note rilevanti per questa sessione...'
-    },
-    card: {
-      statusUnlocked: 'Carta sbloccata',
-      statusLocked: 'Carta bloccata',
-      badgeActive: 'Attiva',
-      badgeLocked: 'Bloccata',
-      previewBrand: 'Carta Brightwave',
-      previewHolder: 'Titolare',
-      previewHolderName: 'Jordan Rivers',
-      previewExpires: 'Scadenza',
-      previewExpiry: '07/28',
-      controlsTitle: 'Controlli carta',
-      lockButton: '🔐 Blocca carta',
-      unlockButton: '🔓 Sblocca carta',
-      limitsTitle: 'Imposta i limiti di spesa',
-      limitsHelper: 'Definisci quanto può essere speso sulla carta prima che sia necessaria una verifica manuale.',
-      limitsSummary: 'Limite giornaliero {daily} · Contactless {contactless}',
-      dailyLabel: 'Limite carta giornaliero',
-      contactlessLabel: 'Limite tap contactless',
-      limitsSubmit: 'Aggiorna limiti',
-      pinTitle: 'Modifica il PIN',
-      pinNew: 'Nuovo PIN',
-      pinConfirm: 'Conferma PIN',
-      pinSubmit: 'Aggiorna PIN',
-      requestTitle: 'Richiedi una nuova carta',
-      requestReason: 'Motivo',
-      requestPlaceholder: '-- Seleziona un motivo --',
-      requestOptions: ['Danneggiata', 'Persa', 'In scadenza', 'Carta aggiuntiva'],
-      requestNotes: 'Note di consegna (opzionale)',
-      requestNotesPlaceholder: 'es. Consegna sicura nei giorni feriali',
-      requestSubmit: 'Invia richiesta'
-    },
-    forms: {
-      transfer: {
-        title: 'Trasferisci tra i tuoi conti',
-        from: 'Da',
-        to: 'A',
-        amount: 'Importo',
-        submit: 'Trasferisci ora'
-      },
-      bill: {
-        title: 'Paga una bolletta / pianifica ricorrenze',
-        account: 'Paga da',
-        payee: 'Beneficiario',
-        placeholder: '-- Scegli beneficiario --',
-        options: ['Bright Energy (Utenze)', 'City Water Board', 'Evergreen Rentals', 'Momentum Credit Card'],
-        amount: 'Importo',
-        frequency: 'Frequenza',
-        frequencies: {
-          once: 'Pagamento singolo',
-          monthly: 'Ricorrenza mensile',
-          quarterly: 'Ricorrenza trimestrale'
-        },
-        submit: 'Conferma pagamento'
-      },
-      send: {
-        title: 'Invia denaro a qualcuno',
-        from: 'Dal conto',
-        recipient: 'Destinatario',
-        recipientPlaceholder: 'Nome o azienda',
-        amount: 'Importo',
-        method: 'Metodo di invio',
-        methods: {
-          faster: 'Faster Payments (UK)',
-          bacs: 'BACS (2-3 giorni)',
-          chaps: 'CHAPS (valore alto in giornata)',
-          sepa: 'SEPA (UE)',
-          instant: 'Immediato in Brightwave'
-        },
-        reference: 'Causale (opzionale)',
-        referencePlaceholder: 'es. Regalo di compleanno',
-        submit: 'Invia pagamento'
-      },
-      newDebit: {
-        title: 'Crea un nuovo addebito diretto / ordine permanente',
-        type: 'Tipo',
-        types: {
-          directDebit: 'Addebito diretto',
-          standingOrder: 'Ordine permanente'
-        },
-        name: 'Nome',
-        namePlaceholder: 'Organizzazione',
-        amount: 'Importo',
-        schedule: 'Scadenza',
-        schedulePlaceholder: 'es. 15 di ogni mese',
-        submit: 'Aggiungi istruzione'
+      if (pin !== confirm) {
+        showPrompt('The PIN entries do not match.', 'error', 'Re-enter the same digits in both boxes.');
+        return;
       }
-    },
-    statuses: {
-      pending: 'In sospeso',
-      cleared: 'Registrata',
-      completed: 'Completata',
-      inProgress: 'In corso'
-    },
-    promptPrefixes: {
-      error: '⚠️ Controlla e riprova:',
-      success: '✅ Fatto:',
-      info: 'ℹ️ Info:'
-    },
-    promptNextLabel: 'Prossimo passaggio:',
-    prompts: {
-      checklistReset: {
-        message: 'Lista delle attività reimpostata.',
-        next: 'Ripercorri ogni attività all’interno del simulatore.'
-      },
-      limitDailyRange: {
-        message: 'Imposta un limite giornaliero tra £100 e £5.000.',
-        next: 'Modifica l’importo giornaliero e poi premi “Aggiorna limiti”.'
-      },
-      limitContactlessRange: {
-        message: 'Il limite contactless deve essere tra £10 e £500.',
-        next: 'Correggi l’importo contactless prima di salvare.'
-      },
-      limitContactlessVsDaily: {
-        message: 'Il limite contactless non può superare il limite giornaliero.',
-        next: 'Riduci il contactless o aumenta prima il limite giornaliero.'
-      },
-      limitUpdated: {
-        message: 'Limiti di spesa aggiornati.',
-        next: 'Le modifiche si applicano subito agli acquisti in negozio e contactless.'
-      },
-      balancesRefreshed: {
-        message: 'Saldi aggiornati. Tutto è in ordine.',
-        next: 'Continua con la prossima attività.'
-      },
-      transferMissingAccounts: {
-        message: 'Scegli sia il conto di origine sia quello di destinazione.',
-        next: 'Seleziona conti diversi dai menu a tendina.'
-      },
-      transferSameAccount: {
-        message: 'Hai selezionato lo stesso conto per entrambe le voci.',
-        next: 'Cambia uno dei menu in modo che il denaro abbia una destinazione.'
-      },
-      transferAmountInvalid: {
-        message: 'Inserisci un importo di trasferimento maggiore di zero.',
-        next: 'Digita l’importo da spostare e poi premi “Trasferisci ora”.'
-      },
-      transferInsufficientFunds: {
-        message: 'Fondi insufficienti nel conto di origine selezionato.',
-        next: 'Riduci l’importo o scegli un conto con saldo sufficiente.'
-      },
-      transferComplete: {
-        message: 'Trasferimento completato.',
-        next: 'Controlla lo storico per verificare entrambe le registrazioni.'
-      },
-      accountSwitch: {
-        message: 'Passato a {account}.'
-      },
-      accountSwitchNext: {
-        next: 'Scorri in basso per rivedere le ultime transazioni.'
-      },
-      billIncomplete: {
-        message: 'Compila prima tutti i campi del pagamento bollette.',
-        next: 'Scegli conto, beneficiario e importo prima di confermare.'
-      },
-      billInsufficientFunds: {
-        message: 'Il conto non ha fondi sufficienti per questa bolletta.',
-        next: 'Modifica l’importo o trasferisci denaro prima di pagare.'
-      },
-      billSubmittedOnce: {
-        message: 'Pagamento inviato.',
-        next: 'Controlla l’elenco movimenti per vederlo come pagato.'
-      },
-      billSubmittedRecurring: {
-        message: 'Pagamento inviato.',
-        next: 'Verifica nel pannello mandati la nuova istruzione ricorrente.'
-      },
-      sendIncomplete: {
-        message: 'Compila conto, destinatario e importo.',
-        next: 'Completa i campi mancanti e riprova a inviare.'
-      },
-      sendInsufficient: {
-        message: 'Fondi insufficienti per questo pagamento.',
-        next: 'Trasferisci denaro o riduci l’importo prima di riprovare.'
-      },
-      sendComplete: {
-        message: 'Pagamento inviato.'
-      },
-      sendNextInfo: {
-        next: '{message}'
-      },
-      instructionIncomplete: {
-        message: 'Tutti i campi sono obbligatori per creare l’istruzione.',
-        next: 'Inserisci organizzazione, importo e scadenza prima di salvare.'
-      },
-      instructionCreatedDirectDebit: {
-        message: 'Addebito diretto creato.',
-        next: 'Puoi gestirlo dall’elenco per metterlo in pausa o annullarlo.'
-      },
-      instructionCreatedStandingOrder: {
-        message: 'Ordine permanente creato.',
-        next: 'Puoi gestirlo dall’elenco per metterlo in pausa o annullarlo.'
-      },
-      viewPhone: {
-        message: 'Passato alla vista telefono.',
-        next: 'Continua ad allenarti all’interno del dispositivo simulato.'
-      },
-      viewTablet: {
-        message: 'Passato alla vista tablet.',
-        next: 'Continua ad allenarti all’interno del dispositivo simulato.'
-      },
-      tabAccounts: {
-        message: 'Aperta l’area conti.',
-        next: 'Rivedi i saldi o esporta un estratto conto.'
-      },
-      tabPayments: {
-        message: 'Aperta l’area pagamenti.',
-        next: 'Scegli un modulo per impostare trasferimenti o bollette.'
-      },
-      tabSecurity: {
-        message: 'Aperta l’area sicurezza.',
-        next: 'Blocca le carte o gestisci le opzioni di sicurezza.'
-      },
-      cardLocked: {
-        message: 'Carta bloccata all’istante.',
-        next: 'Se ritrovi la carta, torna qui a sbloccarla prima di usarla.'
-      },
-      cardUnlocked: {
-        message: 'Carta sbloccata all’istante.',
-        next: 'Puoi tornare subito a usarla.'
-      },
-      pinFormat: {
-        message: 'Il PIN deve essere esattamente di quattro cifre.',
-        next: 'Inserisci quattro numeri (0-9) senza spazi.'
-      },
-      pinMismatch: {
-        message: 'I PIN inseriti non coincidono.',
-        next: 'Reinserisci le stesse cifre in entrambi i campi.'
-      },
-      pinUpdated: {
-        message: 'PIN aggiornato in sicurezza.',
-        next: 'Ricorda di memorizzarlo e distruggere eventuali appunti.'
-      },
-      cardReasonMissing: {
-        message: 'Seleziona il motivo della sostituzione della carta.',
-        next: 'Usa il menu a tendina per spiegare perché ti serve la nuova carta.'
-      },
-      cardRequestSubmitted: {
-        message: 'Richiesta di nuova carta inviata.',
-        next: 'Controlla i messaggi per la conferma della data di consegna.'
-      },
-      sessionCsvDownloaded: {
-        message: 'CSV della sessione scaricato.',
-        next: 'Condividi il registro o conservalo per i tuoi archivi.'
-      },
-      accountRequired: {
-        message: 'Seleziona un conto prima di esportare.',
-        next: 'Tocca una scheda saldo e poi riprova a esportare.'
-      },
-      csvDownloaded: {
-        message: 'Estratto CSV scaricato.',
-        next: 'Aprilo in Excel o nel tuo foglio di calcolo per la revisione.'
-      },
-      pdfDownloaded: {
-        message: 'Estratto PDF scaricato.',
-        next: 'Aprilo per consultarlo o condividerlo all’occorrenza.'
-      },
-      trackerCleared: {
-        message: 'Registro della sessione azzerato.',
-        next: 'Continua l’allenamento e qui appariranno le nuove azioni.'
-      },
-      transactionViewUpdated: {
-        message: 'Vista transazioni aggiornata.',
-        next: 'Scorri per vedere lo storico del conto selezionato.'
-      },
-      directDebitActive: {
-        message: '{name} è di nuovo attivo.',
-        next: 'Controlla la prossima data di addebito nell’elenco dedicato.'
-      },
-      directDebitCancelled: {
-        message: '{name} non verrà più addebitato.',
-        next: 'Conferma con il fornitore se serve un pagamento alternativo.'
-      },
-      standingOrderActive: {
-        message: '{name} verrà eseguito come programmato.',
-        next: 'Verifica il tuo promemoria in agenda per evitare duplicati.'
-      },
-      standingOrderPaused: {
-        message: '{name} è in pausa.',
-        next: 'Imposta un promemoria manuale se devi ancora pagare in autonomia.'
-      },
-      sendNext: {
-        faster: 'Attendi che i fondi si registrino in 2-3 giorni lavorativi.',
-        bacs: 'Attendi che i fondi si registrino in 2-3 giorni lavorativi.',
-        chaps: 'Resta disponibile per la chiamata di conferma prima dell’orario limite.',
-        default: 'Condividi la conferma con il destinatario se necessario.'
+      state.pinLastChanged = new Date().toISOString().slice(0, 10);
+      showPrompt('PIN updated securely.', 'success', 'Remember to memorise it and destroy any written notes.');
+      recordTimeline('Changed debit card PIN');
+      completeTask('change-pin');
+      event.target.reset();
+    }
+
+    function handleCardRequest(event) {
+      event.preventDefault();
+      const reason = document.getElementById('cardReason').value;
+      if (!reason) {
+        showPrompt('Select a reason for the replacement card.', 'error', 'Use the dropdown to explain why you need the new card.');
+        return;
       }
-    },
-    timeline: {
-      checklistComplete: 'Lista: attività completata — {task}',
-      checklistReset: 'Lista reimpostata per una nuova esecuzione',
-      limitsUpdated: 'Aggiornati i limiti di spesa a {daily} giornaliero / {contactless} contactless',
-      checklistManualComplete: 'Lista: attività completata — {task}',
-      checklistManualReopen: 'Lista: attività riaperta — {task}',
-      directDebitStatus: '{status} addebito diretto: {name}',
-      standingOrderStatus: '{status} ordine permanente: {name}',
-      balancesRefresh: 'Aggiornamento manuale dei saldi',
-      transferComplete: 'Trasferiti {amount} da {from} a {to}',
-      billPaid: 'Pagato {payee} ({frequency}) da {account}',
-      paymentSent: 'Inviati {amount} a {recipient} tramite {method}',
-      instructionAdded: 'Aggiunto {type}: {name}',
-      cardLockStatus: '{status} la carta di debito',
-      pinChanged: 'PIN della carta modificato',
-      cardRequested: 'Richiesta nuova carta ({reason})',
-      sessionExport: 'Esportato il registro della sessione in CSV',
-      statementCsv: 'Esportato estratto CSV per {account}',
-      statementPdf: 'Esportato estratto PDF per {account}'
-    },
-    timelineStatus: {
-      directDebit: { active: 'Riattivato', inactive: 'Annullato' },
-      standingOrder: { active: 'Riattivato', inactive: 'In pausa' },
-      card: { locked: 'Bloccata', unlocked: 'Sbloccata' }
-    },
-    accounts: {
-      current: { name: 'Conto corrente', type: 'Corrente' },
-      savings: { name: 'Risparmio facile', type: 'Risparmio' },
-      travel: { name: 'Portafoglio viaggi (EUR)', type: 'Collegato (EUR)' }
-    },
-    transactions: {
-      'tx-01': { description: 'Stipendio', category: 'Entrate', method: 'BACS' },
-      'tx-02': { description: 'In sospeso — Bolletta elettrica', category: 'Utenze', method: 'Addebito diretto' },
-      'tx-03': { description: 'Spesa — Market Square', category: 'Cibo e bevande', method: 'Carta di debito' },
-      'tx-04': { description: 'Trasferimento automatico al corrente', category: 'Trasferimento in uscita', method: 'Ordine permanente' },
-      'tx-05': { description: 'Interessi accreditati', category: 'Interessi', method: 'Interessi mensili' },
-      'tx-06': { description: 'Prenotazione hotel — Porto', category: 'Viaggi', method: 'SEPA' },
-      'tx-07': { description: 'Ricarica dal conto corrente', category: 'Trasferimento in entrata', method: 'Portafoglio valuta' }
-    },
-    directDebits: {
-      'dd-1': { name: 'Bright Energy', schedule: 'Il 15 di ogni mese' },
-      'dd-2': { name: 'City Water Board', schedule: 'Il 28 di ogni mese' },
-      'dd-3': { name: 'Momentum Credit Card', schedule: 'Alla data dell’estratto conto' }
-    },
-    standingOrders: {
-      'so-1': { name: 'Trasferimento risparmi', schedule: 'Ogni venerdì' },
-      'so-2': { name: 'Affitto a Evergreen Rentals', schedule: 'Il primo di ogni mese' }
-    },
-    tasks: {
-      'check-balances': {
-        title: 'Verifica i saldi',
-        helper: 'Aggiorna la scheda Conti per confermare saldi corrente, risparmio e collegati.'
-      },
-      'recurring-payment': {
-        title: 'Imposta un pagamento ricorrente',
-        helper: 'Usa pagamenti o mandati per programmare un’uscita automatica.'
-      },
-      'send-external': {
-        title: 'Invia denaro ad altri conti o persone',
-        helper: 'Compila il modulo di invio con destinatario e metodo di consegna.'
-      },
-      'transfer-own': {
-        title: 'Trasferisci tra i tuoi conti',
-        helper: 'Sposta fondi interni tramite il modulo di trasferimento.'
-      },
-      'change-pin': {
-        title: 'Modifica il PIN',
-        helper: 'Inserisci due volte lo stesso PIN a quattro cifre nella scheda sicurezza.'
-      },
-      'set-limits': {
-        title: 'Imposta i limiti di spesa',
-        helper: 'Regola i limiti giornalieri e contactless nelle opzioni di sicurezza.'
+      showPrompt('Replacement card request submitted.', 'success', 'Watch your messages for confirmation of the delivery date.');
+      recordTimeline(`Requested new card (${reason.toLowerCase()})`);
+      event.target.reset();
+    }
+
+    function exportSessionCsv() {
+      const now = new Date();
+      const rows = [
+        ['Export generated', now.toLocaleString()],
+        [],
+        ['Timeline'],
+        ['Time', 'Event'],
+      ];
+
+      if (state.timeline.length) {
+        [...state.timeline].reverse().forEach(entry => {
+          const label = new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          rows.push([label, entry.event]);
+        });
+      } else {
+        rows.push(['-', 'No actions recorded']);
       }
-    },
-    csv: {
-      exportGenerated: 'Esportazione generata',
-      timeline: 'Registro',
-      time: 'Orario',
-      event: 'Evento',
-      noActions: 'Nessuna azione registrata',
-      practiceTasks: 'Attività di esercizio',
-      task: 'Attività',
-      status: 'Stato',
-      statementHeaders: ['Data', 'Descrizione', 'Importo', 'Categoria', 'Metodo', 'Stato']
-    },
-    pdf: {
-      statementFor: 'Estratto conto per {account}',
-      generated: 'Generato {timestamp}',
-      balance: 'Saldo: {balance}',
-      recentActivity: 'Attività recente:',
-      none: 'Ancora nessuna transazione registrata.'
-    },
-    transfer: {
-      toDescription: 'Trasferimento verso {account}',
-      fromDescription: 'Trasferimento da {account}',
-      categoryOut: 'Trasferimento in uscita',
-      categoryIn: 'Trasferimento in entrata',
-      method: 'Trasferimento interno'
-    },
-    bills: {
-      description: '{payee}{recurring}',
-      recurringSuffix: ' (ricorrente)',
-      category: 'Bollette e utenze',
-      methodOnce: 'Pagamento bolletta',
-      methodRecurring: 'Attivazione addebito diretto',
-      frequencyLabel: {
-        once: 'singolo',
-        monthly: 'mensile',
-        quarterly: 'trimestrale'
+
+      rows.push([]);
+      rows.push(['Practice tasks']);
+      rows.push(['Task', 'Status']);
+      state.practiceTasks.forEach(task => {
+        rows.push([task.title, task.completed ? 'Completed' : 'In progress']);
+      });
+
+      const csv = rows
+        .map(row => row.map(value => `"${String(value ?? '').replace(/"/g, '""')}"`).join(','))
+        .join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `brightwave-session-${now.toISOString().slice(0, 10)}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      showPrompt('Session CSV downloaded.', 'success', 'Share the log or keep it for your records.');
+      recordTimeline('Exported session progress CSV');
+    }
+
+    function exportCsv() {
+      const account = state.accounts.find(acc => acc.id === state.selectedAccount);
+      if (!account) {
+        showPrompt('Select an account before exporting.', 'error', 'Tap a balance card, then try exporting again.');
+        return;
       }
-    },
-    send: {
-      description: 'A {recipient}{reference}',
-      referenceSuffix: ' — {reference}',
-      category: 'Pagamenti a terzi',
-      methodLabels: {
-        faster: 'Faster Payments',
-        bacs: 'BACS',
-        chaps: 'CHAPS',
-        sepa: 'SEPA',
-        instant: 'Trasferimento immediato',
-        default: 'Bonifico bancario'
+      const rows = [
+        ['Date', 'Description', 'Amount', 'Category', 'Method', 'Status']
+      ];
+      state.transactions.filter(tx => tx.account === account.id).forEach(tx => {
+        rows.push([
+          tx.date,
+          tx.description,
+          tx.amount.toFixed(2),
+          tx.category,
+          tx.method,
+          tx.pending ? 'Pending' : 'Cleared'
+        ]);
+      });
+      const csv = rows.map(r => r.map(value => `"${value}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${account.id}-statement.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+      showPrompt('CSV statement downloaded.', 'success', 'Open it in Excel or your spreadsheet tool for review.');
+      recordTimeline(`Exported CSV statement for ${account.name}`);
+    }
+
+    function escapePdfText(text) {
+      return text.replace(/[\\()]/g, match => ({ '\\': '\\\\', '(': '\\(', ')': '\\)' }[match]));
+    }
+
+    function generatePdfLines() {
+      const account = state.accounts.find(acc => acc.id === state.selectedAccount);
+      if (!account) return [];
+      const lines = [
+        `Statement for ${account.name}`,
+        `Generated ${new Date().toLocaleString()}`,
+        `Balance: ${formatCurrency(account.balance, account.currency || 'GBP')}`,
+        ' ',
+        'Recent activity:'
+      ];
+      state.transactions.filter(tx => tx.account === account.id).slice(0, 12).forEach(tx => {
+        const symbol = tx.amount < 0 ? '-' : '+';
+        lines.push(`${tx.date} ${symbol}${Math.abs(tx.amount).toFixed(2)} — ${tx.description}`);
+      });
+      if (lines.length === 5) lines.push('No transactions recorded yet.');
+      return lines;
+    }
+
+    function buildPdfContent(lines) {
+      const contentLines = lines.map((line, index) => {
+        const safe = escapePdfText(line);
+        const offset = index === 0 ? '' : '\n0 -16 Td\n';
+        return `${index === 0 ? '' : offset}(${safe}) Tj`;
+      }).join('');
+      return `BT\n/F1 12 Tf\n72 720 Td\n${contentLines}\nET`;
+    }
+
+    function pad(num) {
+      return String(num).padStart(10, '0');
+    }
+
+    function exportPdf() {
+      const account = state.accounts.find(acc => acc.id === state.selectedAccount);
+      if (!account) {
+        showPrompt('Select an account before exporting.', 'error', 'Tap a balance card, then try exporting again.');
+        return;
       }
-    },
-    instruction: {
-      typeLabel: {
-        directDebit: 'addebito diretto',
-        standingOrder: 'ordine permanente'
-      }
+      const lines = generatePdfLines();
+      const contentStream = buildPdfContent(lines);
+      const objects = [];
+      const offsets = [];
+      const addObject = (obj) => {
+        offsets.push(objects.join('').length + '%PDF-1.4\n'.length);
+        objects.push(obj);
+      };
+
+      addObject('1 0 obj<< /Type /Catalog /Pages 2 0 R >>endobj\n');
+      addObject('2 0 obj<< /Type /Pages /Kids [3 0 R] /Count 1 >>endobj\n');
+      addObject('3 0 obj<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 5 0 R >>endobj\n');
+      addObject('4 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>endobj\n');
+      addObject(`5 0 obj<< /Length ${contentStream.length} >>stream\n${contentStream}\nendstream\nendobj\n`);
+
+      const body = objects.join('');
+      const header = '%PDF-1.4\n';
+      const xrefStart = header.length + body.length;
+      const xref = ['xref\n0 6\n0000000000 65535 f \n'];
+      offsets.forEach(off => {
+        xref.push(`${pad(off)} 00000 n \n`);
+      });
+      const trailer = `trailer<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
+      const pdf = header + body + xref.join('') + trailer;
+      const blob = new Blob([pdf], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${account.id}-statement.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+      showPrompt('PDF statement downloaded.', 'success', 'Open it to review or share as needed.');
+      recordTimeline(`Exported PDF statement for ${account.name}`);
     }
-  }
-};
 
-const state = {
-  language: 'en',
-  viewMode: 'phone',
-  activeTab: 'accounts',
-  selectedAccount: 'current',
-  accounts: [
-    {
-      id: 'current',
-      name: languagePacks.en.accounts.current.name,
-      type: languagePacks.en.accounts.current.type,
-      balance: 2150.42,
-      iban: 'GB33 BWVB 2294 1123 45',
-      currency: 'GBP'
-    },
-    {
-      id: 'savings',
-      name: languagePacks.en.accounts.savings.name,
-      type: languagePacks.en.accounts.savings.type,
-      balance: 6200.15,
-      iban: 'GB33 BWVB 7719 7642 11',
-      currency: 'GBP'
-    },
-    {
-      id: 'travel',
-      name: languagePacks.en.accounts.travel.name,
-      type: languagePacks.en.accounts.travel.type,
-      balance: 830.5,
-      iban: 'DE12 3704 0044 0532 0130 00',
-      currency: 'EUR'
+    function initTime() {
+      const updateTime = () => {
+        document.getElementById('statusTime').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      };
+      updateTime();
+      setInterval(updateTime, 60000);
     }
-  ],
-  transactions: [
-    { id: 'tx-01', account: 'current', description: languagePacks.en.transactions['tx-01'].description, amount: 1850.0, category: languagePacks.en.transactions['tx-01'].category, method: languagePacks.en.transactions['tx-01'].method, date: '2024-07-24', pending: false, descriptionKey: 'tx-01' },
-    { id: 'tx-02', account: 'current', description: languagePacks.en.transactions['tx-02'].description, amount: -84.65, category: languagePacks.en.transactions['tx-02'].category, method: languagePacks.en.transactions['tx-02'].method, date: '2024-07-27', pending: true, descriptionKey: 'tx-02' },
-    { id: 'tx-03', account: 'current', description: languagePacks.en.transactions['tx-03'].description, amount: -62.14, category: languagePacks.en.transactions['tx-03'].category, method: languagePacks.en.transactions['tx-03'].method, date: '2024-07-23', pending: false, descriptionKey: 'tx-03' },
-    { id: 'tx-04', account: 'savings', description: languagePacks.en.transactions['tx-04'].description, amount: -200.0, category: languagePacks.en.transactions['tx-04'].category, method: languagePacks.en.transactions['tx-04'].method, date: '2024-07-20', pending: false, descriptionKey: 'tx-04' },
-    { id: 'tx-05', account: 'savings', description: languagePacks.en.transactions['tx-05'].description, amount: 6.12, category: languagePacks.en.transactions['tx-05'].category, method: languagePacks.en.transactions['tx-05'].method, date: '2024-07-01', pending: false, descriptionKey: 'tx-05' },
-    { id: 'tx-06', account: 'travel', description: languagePacks.en.transactions['tx-06'].description, amount: -215.0, category: languagePacks.en.transactions['tx-06'].category, method: languagePacks.en.transactions['tx-06'].method, date: '2024-07-18', pending: false, descriptionKey: 'tx-06' },
-    { id: 'tx-07', account: 'travel', description: languagePacks.en.transactions['tx-07'].description, amount: 250.0, category: languagePacks.en.transactions['tx-07'].category, method: languagePacks.en.transactions['tx-07'].method, date: '2024-07-15', pending: false, descriptionKey: 'tx-07' }
-  ],
-  directDebits: [
-    { id: 'dd-1', name: languagePacks.en.directDebits['dd-1'].name, amount: 84.65, schedule: languagePacks.en.directDebits['dd-1'].schedule, active: true, nameKey: 'dd-1' },
-    { id: 'dd-2', name: languagePacks.en.directDebits['dd-2'].name, amount: 42.1, schedule: languagePacks.en.directDebits['dd-2'].schedule, active: true, nameKey: 'dd-2' },
-    { id: 'dd-3', name: languagePacks.en.directDebits['dd-3'].name, amount: 120.0, schedule: languagePacks.en.directDebits['dd-3'].schedule, active: true, nameKey: 'dd-3' }
-  ],
-  standingOrders: [
-    { id: 'so-1', name: languagePacks.en.standingOrders['so-1'].name, amount: 200.0, schedule: languagePacks.en.standingOrders['so-1'].schedule, active: true, nameKey: 'so-1' },
-    { id: 'so-2', name: languagePacks.en.standingOrders['so-2'].name, amount: 950.0, schedule: languagePacks.en.standingOrders['so-2'].schedule, active: true, nameKey: 'so-2' }
-  ],
-  cardLocked: false,
-  pinLastChanged: '2024-05-11',
-  spendingLimits: {
-    daily: 1500,
-    contactless: 100
-  },
-  practiceTasks: [
-    { id: 'check-balances', title: languagePacks.en.tasks['check-balances'].title, helper: languagePacks.en.tasks['check-balances'].helper, completed: false },
-    { id: 'recurring-payment', title: languagePacks.en.tasks['recurring-payment'].title, helper: languagePacks.en.tasks['recurring-payment'].helper, completed: false },
-    { id: 'send-external', title: languagePacks.en.tasks['send-external'].title, helper: languagePacks.en.tasks['send-external'].helper, completed: false },
-    { id: 'transfer-own', title: languagePacks.en.tasks['transfer-own'].title, helper: languagePacks.en.tasks['transfer-own'].helper, completed: false },
-    { id: 'change-pin', title: languagePacks.en.tasks['change-pin'].title, helper: languagePacks.en.tasks['change-pin'].helper, completed: false },
-    { id: 'set-limits', title: languagePacks.en.tasks['set-limits'].title, helper: languagePacks.en.tasks['set-limits'].helper, completed: false }
-  ],
-  timeline: []
-};
 
-const promptArea = document.getElementById('promptArea');
-const accountsGrid = document.getElementById('accountsGrid');
-const accountFilter = document.getElementById('accountFilter');
-const transactionList = document.getElementById('transactionList');
-const spendingSummary = document.getElementById('spendingSummary');
-const directDebitItems = document.getElementById('directDebitItems');
-const standingOrderItems = document.getElementById('standingOrderItems');
-const sessionTimeline = document.getElementById('sessionTimeline');
-const practiceTasksList = document.getElementById('practiceTasksList');
-const taskProgress = document.getElementById('taskProgress');
-const limitSummary = document.getElementById('limitSummary');
-let syncTimeEl = document.getElementById('syncTime');
-const availabilityStatus = document.getElementById('availabilityStatus');
-const languageButtons = [
-  document.getElementById('langEnBtn'),
-  document.getElementById('langItBtn')
-];
-let lastPrompt = null;
+    document.querySelectorAll('.view-toggle button').forEach(btn => {
+      btn.addEventListener('click', () => toggleViewMode(btn.dataset.view));
+    });
 
-function getPack() {
-  return languagePacks[state.language];
-}
+    document.querySelectorAll('.tab-nav button').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
 
-function formatTemplate(template, replacements = {}) {
-  if (!template) return '';
-  return template.replace(/\{(\w+)\}/g, (_, key) => {
-    const value = replacements[key];
-    return value === undefined ? '' : value;
-  });
-}
+    document.getElementById('refreshBtn').addEventListener('click', refreshBalances);
+    document.getElementById('clearTimelineBtn').addEventListener('click', () => {
+      state.timeline = [];
+      renderTimeline();
+      showPrompt('Session tracker cleared.', 'info', 'Continue practising and new actions will appear here.');
+    });
 
-function formatCurrency(value, currency = 'GBP') {
-  const pack = getPack();
-  return new Intl.NumberFormat(pack.locale, { style: 'currency', currency }).format(value);
-}
+    document.getElementById('exportSessionCsvBtn').addEventListener('click', exportSessionCsv);
 
-function applyAccountTranslations(pack) {
-  state.accounts.forEach(account => {
-    const meta = pack.accounts[account.id];
-    if (meta) {
-      account.name = meta.name;
-      account.type = meta.type;
-    }
-  });
-}
-
-function applyTransactionTranslations(pack) {
-  state.transactions.forEach(tx => {
-    if (tx.descriptionKey) {
-      const base = pack.transactions[tx.descriptionKey];
-      if (base) {
-        tx.description = base.description;
-        tx.category = base.category;
-        tx.method = base.method;
-      }
-    }
-    if (tx.categoryKey) {
-      if (tx.categoryKey === 'transferOut') {
-        tx.category = pack.transfer.categoryOut;
-      } else if (tx.categoryKey === 'transferIn') {
-        tx.category = pack.transfer.categoryIn;
-      } else if (tx.categoryKey === 'bills') {
-        tx.category = pack.bills.category;
-      } else if (tx.categoryKey === 'send') {
-        tx.category = pack.send.category;
-      }
-    }
-    if (tx.methodKey) {
-      if (tx.methodKey === 'internalTransfer') {
-        tx.method = pack.transfer.method;
-      } else if (tx.methodKey === 'billOnce') {
-        tx.method = pack.bills.methodOnce;
-      } else if (tx.methodKey === 'billRecurring') {
-        tx.method = pack.bills.methodRecurring;
-      } else if (tx.methodKey === 'send') {
-        const label = pack.send.methodLabels[tx.methodAlias || 'default'] || pack.send.methodLabels.default;
-        tx.method = label;
-      }
-    }
-    if (tx.descriptionKey === 'transferTo' && tx.accountName) {
-      tx.description = formatTemplate(pack.transfer.toDescription, { account: tx.accountName });
-    }
-    if (tx.descriptionKey === 'transferFrom' && tx.accountName) {
-      tx.description = formatTemplate(pack.transfer.fromDescription, { account: tx.accountName });
-    }
-    if (tx.descriptionKey === 'billPayment' && tx.payee) {
-      const suffix = tx.recurring ? pack.bills.recurringSuffix : '';
-      tx.description = formatTemplate(pack.bills.description, { payee: tx.payee, recurring: suffix });
-    }
-    if (tx.descriptionKey === 'sendPayment' && tx.recipient) {
-      const suffix = tx.reference
-        ? formatTemplate(pack.send.referenceSuffix, { reference: tx.reference })
-        : '';
-      tx.description = formatTemplate(pack.send.description, { recipient: tx.recipient, reference: suffix });
-      const label = pack.send.methodLabels[tx.methodAlias || 'default'] || pack.send.methodLabels.default;
-      tx.method = label;
-    }
-  });
-}
-
-function applyMandateTranslations(pack) {
-  state.directDebits.forEach(item => {
-    if (item.nameKey && pack.directDebits[item.nameKey]) {
-      item.name = pack.directDebits[item.nameKey].name;
-      item.schedule = pack.directDebits[item.nameKey].schedule;
-    }
-    if (item.scheduleKey && pack.bills.frequencies && pack.bills.frequencies[item.scheduleKey]) {
-      item.schedule = pack.bills.frequencies[item.scheduleKey];
-    }
-  });
-  state.standingOrders.forEach(item => {
-    if (item.nameKey && pack.standingOrders[item.nameKey]) {
-      item.name = pack.standingOrders[item.nameKey].name;
-      item.schedule = pack.standingOrders[item.nameKey].schedule;
-    }
-    if (item.scheduleKey && pack.bills.frequencies && pack.bills.frequencies[item.scheduleKey]) {
-      item.schedule = pack.bills.frequencies[item.scheduleKey];
-    }
-  });
-}
-
-function applyTaskTranslations(pack) {
-  state.practiceTasks.forEach(task => {
-    const meta = pack.tasks[task.id];
-    if (meta) {
-      task.title = meta.title;
-      task.helper = meta.helper;
-    }
-  });
-}
-
-function updateAccountSelectOptions() {
-  const transferFrom = document.getElementById('transferFrom');
-  const transferTo = document.getElementById('transferTo');
-  if (transferFrom && transferTo) {
-    const previousFrom = transferFrom.value;
-    const previousTo = transferTo.value;
-    transferFrom.innerHTML = state.accounts.map(acc => `<option value="${acc.id}">${acc.name}</option>`).join('');
-    transferFrom.value = previousFrom || 'current';
-    buildAccountSelect(transferTo, transferFrom.value);
-    if (previousTo) {
-      transferTo.value = previousTo;
-    }
-  }
-
-  const billAccount = document.getElementById('billAccount');
-  if (billAccount) {
-    const previousBill = billAccount.value;
-    billAccount.innerHTML = state.accounts.map(acc => `<option value="${acc.id}">${acc.name}</option>`).join('');
-    if (previousBill) {
-      billAccount.value = previousBill;
-    }
-  }
-
-  const sendFrom = document.getElementById('sendFrom');
-  if (sendFrom) {
-    const previousSend = sendFrom.value;
-    sendFrom.innerHTML = state.accounts.map(acc => `<option value="${acc.id}">${acc.name}</option>`).join('');
-    if (previousSend) {
-      sendFrom.value = previousSend;
-    }
-  }
-}
-
-function updateLanguageToggleButtons() {
-  const pack = getPack();
-  document.getElementById('languageToggleLabel').textContent = pack.languages.label;
-  languageButtons.forEach(btn => {
-    const lang = btn.dataset.lang;
-    if (lang === 'en') {
-      btn.textContent = pack.languages.en;
-    } else if (lang === 'it') {
-      btn.textContent = pack.languages.it;
-    }
-    const isActive = state.language === lang;
-    btn.classList.toggle('active', isActive);
-    btn.setAttribute('aria-pressed', String(isActive));
-  });
-}
-
-function updateQuickStatus(timeText) {
-  const pack = getPack();
-  const time = timeText || (syncTimeEl ? syncTimeEl.textContent : '') || pack.ui.quickStatusTime;
-  availabilityStatus.innerHTML = formatTemplate(pack.ui.quickStatus, {
-    time: `<span id="syncTime">${time}</span>`
-  });
-  syncTimeEl = document.getElementById('syncTime');
-}
-
-function updateViewToggle() {
-  const pack = getPack();
-  document.querySelectorAll('.view-toggle button').forEach(btn => {
-    const view = btn.dataset.view;
-    if (view === 'phone') {
-      btn.textContent = `📱 ${pack.ui.viewToggle.phone}`;
-    } else if (view === 'tablet') {
-      btn.textContent = `💻 ${pack.ui.viewToggle.tablet}`;
-    }
-  });
-}
-
-function updateTabs() {
-  const pack = getPack();
-  const nav = document.querySelector('.tab-nav');
-  if (nav) {
-    nav.setAttribute('aria-label', pack.ui.navAria);
-  }
-  const buttons = document.querySelectorAll('.tab-nav button');
-  buttons.forEach(btn => {
-    const tab = btn.dataset.tab;
-    if (tab && pack.ui.tabs[tab]) {
-      btn.innerHTML = `${pack.ui.tabs[tab].label}<span>${pack.ui.tabs[tab].helper}</span>`;
-    }
-  });
-  const accountsPanel = document.getElementById('tab-accounts');
-  if (accountsPanel) {
-    accountsPanel.setAttribute('aria-label', pack.ui.tabs.accounts.aria);
-  }
-  const paymentsPanel = document.getElementById('tab-payments');
-  if (paymentsPanel) {
-    paymentsPanel.setAttribute('aria-label', pack.ui.tabs.payments.aria);
-  }
-  const securityPanel = document.getElementById('tab-security');
-  if (securityPanel) {
-    securityPanel.setAttribute('aria-label', pack.ui.tabs.security.aria);
-  }
-}
-
-function updateInstructions() {
-  const pack = getPack();
-  const summary = document.querySelector('.instructions summary');
-  const body = document.querySelector('.instructions p');
-  if (summary) summary.textContent = pack.ui.instructionsSummary;
-  if (body) body.textContent = pack.ui.instructionsBody;
-}
-
-function updateForms() {
-  const pack = getPack();
-  document.querySelector('label[for="accountFilter"]').textContent = pack.ui.accountFilterLabel;
-  document.getElementById('refreshBtn').textContent = `🔄 ${pack.ui.refreshButton}`;
-  const hint = document.querySelector('.filter-bar div');
-  if (hint) hint.textContent = pack.ui.pendingHint;
-  document.getElementById('exportCsvBtn').textContent = pack.ui.exportCsv;
-  document.getElementById('exportPdfBtn').textContent = pack.ui.exportPdf;
-
-  document.querySelector('#transferForm h3').textContent = pack.forms.transfer.title;
-  document.querySelector('label[for="transferFrom"]').textContent = pack.forms.transfer.from;
-  document.querySelector('label[for="transferTo"]').textContent = pack.forms.transfer.to;
-  document.querySelector('label[for="transferAmount"]').textContent = pack.forms.transfer.amount;
-  document.querySelector('#transferForm button').textContent = pack.forms.transfer.submit;
-
-  document.querySelector('#billForm h3').textContent = pack.forms.bill.title;
-  document.querySelector('label[for="billAccount"]').textContent = pack.forms.bill.account;
-  document.querySelector('label[for="billPayee"]').textContent = pack.forms.bill.payee;
-  const billPayee = document.getElementById('billPayee');
-  const previousPayee = billPayee.value;
-  billPayee.innerHTML = `<option value="">${pack.forms.bill.placeholder}</option>` +
-    pack.forms.bill.options.map(option => `<option>${option}</option>`).join('');
-  if (previousPayee) {
-    billPayee.value = previousPayee;
-  }
-  document.querySelector('label[for="billAmount"]').textContent = pack.forms.bill.amount;
-  document.querySelector('label[for="billFrequency"]').textContent = pack.forms.bill.frequency;
-  const billFrequency = document.getElementById('billFrequency');
-  const previousFrequency = billFrequency.value;
-  billFrequency.innerHTML = Object.entries(pack.forms.bill.frequencies)
-    .map(([value, label]) => `<option value="${value}">${label}</option>`)
-    .join('');
-  if (previousFrequency) {
-    billFrequency.value = previousFrequency;
-  }
-  document.querySelector('#billForm button').textContent = pack.forms.bill.submit;
-
-  document.querySelector('#sendMoneyForm h3').textContent = pack.forms.send.title;
-  document.querySelector('label[for="sendFrom"]').textContent = pack.forms.send.from;
-  document.querySelector('label[for="sendRecipient"]').textContent = pack.forms.send.recipient;
-  document.getElementById('sendRecipient').placeholder = pack.forms.send.recipientPlaceholder;
-  document.querySelector('label[for="sendAmount"]').textContent = pack.forms.send.amount;
-  document.querySelector('label[for="sendMethod"]').textContent = pack.forms.send.method;
-  const sendMethod = document.getElementById('sendMethod');
-  const previousMethod = sendMethod.value;
-  sendMethod.innerHTML = Object.entries(pack.forms.send.methods)
-    .map(([value, label]) => `<option value="${value}">${label}</option>`)
-    .join('');
-  if (previousMethod) {
-    sendMethod.value = previousMethod;
-  }
-  document.querySelector('label[for="sendReference"]').textContent = pack.forms.send.reference;
-  document.getElementById('sendReference').placeholder = pack.forms.send.referencePlaceholder;
-  document.querySelector('#sendMoneyForm button').textContent = pack.forms.send.submit;
-
-  document.querySelector('#newDebitForm h3').textContent = pack.forms.newDebit.title;
-  document.querySelector('label[for="debitType"]').textContent = pack.forms.newDebit.type;
-  const debitType = document.getElementById('debitType');
-  const previousType = debitType.value;
-  debitType.innerHTML = Object.entries(pack.forms.newDebit.types)
-    .map(([value, label]) => `<option value="${value}">${label}</option>`)
-    .join('');
-  if (previousType) {
-    debitType.value = previousType;
-  }
-  document.querySelector('label[for="debitName"]').textContent = pack.forms.newDebit.name;
-  document.getElementById('debitName').placeholder = pack.forms.newDebit.namePlaceholder;
-  document.querySelector('label[for="debitAmount"]').textContent = pack.forms.newDebit.amount;
-  document.querySelector('label[for="debitSchedule"]').textContent = pack.forms.newDebit.schedule;
-  document.getElementById('debitSchedule').placeholder = pack.forms.newDebit.schedulePlaceholder;
-  document.querySelector('#newDebitForm button').textContent = pack.forms.newDebit.submit;
-
-  document.querySelector('#directDebitList h3').textContent = pack.ui.mandateHeadings.directDebits;
-  document.querySelector('#standingOrderList h3').textContent = pack.ui.mandateHeadings.standingOrders;
-
-  document.querySelector('#cardControls h3').textContent = pack.card.controlsTitle;
-  document.getElementById('lockCardBtn').textContent = pack.card.lockButton;
-  document.getElementById('unlockCardBtn').textContent = pack.card.unlockButton;
-
-  document.querySelector('#limitForm h3').textContent = pack.card.limitsTitle;
-  document.querySelector('#limitForm .helper').textContent = pack.card.limitsHelper;
-  document.querySelector('label[for="limitDaily"]').textContent = pack.card.dailyLabel;
-  document.querySelector('label[for="limitContactless"]').textContent = pack.card.contactlessLabel;
-  document.querySelector('#limitForm button').textContent = pack.card.limitsSubmit;
-
-  document.querySelector('#pinForm h3').textContent = pack.card.pinTitle;
-  document.querySelector('label[for="pinNew"]').textContent = pack.card.pinNew;
-  document.querySelector('label[for="pinConfirm"]').textContent = pack.card.pinConfirm;
-  document.querySelector('#pinForm button').textContent = pack.card.pinSubmit;
-
-  document.querySelector('#cardRequestForm h3').textContent = pack.card.requestTitle;
-  document.querySelector('label[for="cardReason"]').textContent = pack.card.requestReason;
-  const cardReason = document.getElementById('cardReason');
-  const previousReason = cardReason.value;
-  cardReason.innerHTML = [''].concat(pack.card.requestOptions).map((label, index) => {
-    if (index === 0) {
-      return `<option value="">${pack.card.requestPlaceholder}</option>`;
-    }
-    return `<option>${label}</option>`;
-  }).join('');
-  if (previousReason) {
-    cardReason.value = previousReason;
-  }
-  document.querySelector('label[for="deliveryNotes"]').textContent = pack.card.requestNotes;
-  document.getElementById('deliveryNotes').placeholder = pack.card.requestNotesPlaceholder;
-  document.querySelector('#cardRequestForm button').textContent = pack.card.requestSubmit;
-}
-
-function updateCardPreview() {
-  const pack = getPack();
-  document.querySelector('.card-preview .line span').textContent = pack.card.previewBrand;
-  document.getElementById('cardLockBadge').textContent = state.cardLocked ? pack.card.badgeLocked : pack.card.badgeActive;
-  const holderLine = document.querySelector('.card-preview .line:nth-of-type(3)');
-  if (holderLine) {
-    const spans = holderLine.querySelectorAll('span');
-    if (spans[0]) spans[0].textContent = pack.card.previewHolder;
-    if (spans[1]) spans[1].textContent = pack.card.previewHolderName;
-  }
-  const expiryLine = document.querySelector('.card-preview .line:nth-of-type(4)');
-  if (expiryLine) {
-    const spans = expiryLine.querySelectorAll('span');
-    if (spans[0]) spans[0].textContent = pack.card.previewExpires;
-    if (spans[1]) spans[1].textContent = pack.card.previewExpiry;
-  }
-  const statusLabel = document.getElementById('cardStatusLabel');
-  if (statusLabel) {
-    statusLabel.textContent = state.cardLocked ? pack.card.statusLocked : pack.card.statusUnlocked;
-  }
-}
-
-function updateTaskSection() {
-  const pack = getPack();
-  const taskCard = document.querySelector('.task-card h2');
-  if (taskCard) taskCard.textContent = pack.ui.taskTitle;
-  const helper = document.querySelector('.task-card .helper');
-  if (helper) helper.textContent = pack.ui.taskHelper;
-  const resetBtn = document.getElementById('resetTasksBtn');
-  if (resetBtn) resetBtn.textContent = pack.ui.resetChecklist;
-}
-
-function updateSessionSection() {
-  const pack = getPack();
-  document.querySelector('#sessionNotes h2').textContent = pack.ui.sessionTracker;
-  document.getElementById('exportSessionCsvBtn').textContent = pack.ui.downloadSession;
-  document.getElementById('clearTimelineBtn').textContent = pack.ui.clearTracker;
-  document.getElementById('clinician-notes').querySelector('h2').textContent = pack.ui.clinicianTitle;
-  document.querySelector('#clinician-notes .helper').textContent = pack.ui.clinicianHelper;
-  document.getElementById('clinician-comment').placeholder = pack.ui.clinicianPlaceholder;
-}
-
-function renderTaskProgress() {
-  if (!taskProgress) return;
-  const pack = getPack();
-  const total = state.practiceTasks.length;
-  const completed = state.practiceTasks.filter(task => task.completed).length;
-  taskProgress.textContent = formatTemplate(pack.ui.taskProgress, { completed, total });
-}
-
-function renderTasks() {
-  if (!practiceTasksList) return;
-  practiceTasksList.innerHTML = state.practiceTasks.map(task => `
-    <li class="${task.completed ? 'complete' : ''}">
-      <label class="task-item">
-        <input type="checkbox" data-task="${task.id}" ${task.completed ? 'checked' : ''} />
-        <span>
-          <strong>${task.title}</strong>
-          <small>${task.helper}</small>
-        </span>
-      </label>
-    </li>
-  `).join('');
-  renderTaskProgress();
-}
-
-function updatePromptDefault() {
-  const pack = getPack();
-  if (!lastPrompt) {
-    promptArea.classList.remove('error', 'success');
-    promptArea.textContent = pack.ui.promptInitial;
-  } else {
-    showPromptMessage(lastPrompt.key, lastPrompt.type, lastPrompt.replacements, lastPrompt.nextKey, lastPrompt.nextReplacements, true);
-  }
-}
-
-function showPromptMessage(key, type = 'info', replacements = {}, nextKey = null, nextReplacements = {}, skipStore = false) {
-  const pack = getPack();
-  const config = pack.prompts[key];
-  if (!config) return;
-  promptArea.textContent = '';
-  promptArea.classList.remove('error', 'success');
-  if (type === 'error') {
-    promptArea.classList.add('error');
-  } else if (type === 'success') {
-    promptArea.classList.add('success');
-  }
-  const prefix = pack.promptPrefixes[type] || pack.promptPrefixes.info;
-  const strong = document.createElement('strong');
-  strong.textContent = prefix;
-  promptArea.append(strong, document.createTextNode(' ' + formatTemplate(config.message, replacements)));
-  const nextMessageKey = nextKey || (config.next ? key : null);
-  const nextMessage = nextKey ? pack.prompts[nextKey]?.next : config.next;
-  if (nextMessageKey && nextMessage) {
-    const span = document.createElement('span');
-    span.className = 'next-step';
-    span.textContent = `${pack.promptNextLabel} ${formatTemplate(nextMessage, nextReplacements || replacements)}`;
-    promptArea.appendChild(span);
-  }
-  if (!skipStore) {
-    lastPrompt = { key, type, replacements, nextKey, nextReplacements };
-  }
-}
-
-function recordTimeline(key, replacements = {}) {
-  const now = new Date();
-  state.timeline.unshift({
-    timestamp: now.toISOString(),
-    key,
-    replacements
-  });
-  if (state.timeline.length > 12) state.timeline.length = 12;
-  renderTimeline();
-}
-
-function renderTimeline() {
-  if (!sessionTimeline) return;
-  const pack = getPack();
-  if (!state.timeline.length) {
-    sessionTimeline.innerHTML = `<li class="empty">${pack.ui.timelineEmpty}</li>`;
-    return;
-  }
-  sessionTimeline.innerHTML = state.timeline.map(entry => {
-    const label = new Date(entry.timestamp).toLocaleTimeString(getPack().locale, { hour: '2-digit', minute: '2-digit' });
-    const template = pack.timeline[entry.key];
-    const text = formatTemplate(template || '', entry.replacements);
-    return `<li><time datetime="${entry.timestamp}">${label}</time><span>${text}</span></li>`;
-  }).join('');
-}
-
-function renderAccounts() {
-  const pack = getPack();
-  accountsGrid.innerHTML = state.accounts.map(acc => {
-    const currency = acc.currency || 'GBP';
-    return `
-      <article class="account-card ${state.selectedAccount === acc.id ? 'active' : ''}" data-account="${acc.id}" tabindex="0" role="button" aria-pressed="${state.selectedAccount === acc.id}">
-        <h3>${acc.name}</h3>
-        <div class="balance">${formatCurrency(acc.balance, currency)}</div>
-        <div class="meta"><span>${acc.type}</span><span>${acc.iban}</span></div>
-      </article>
-    `;
-  }).join('');
-
-  accountsGrid.querySelectorAll('.account-card').forEach(card => {
-    card.addEventListener('click', () => {
-      state.selectedAccount = card.dataset.account;
+    accountFilter.addEventListener('change', (event) => {
+      state.selectedAccount = event.target.value;
       renderAccounts();
       renderTransactions();
       renderSpendingSummary();
-      accountFilter.value = state.selectedAccount;
-      const pack = getPack();
-      showPromptMessage('accountSwitch', 'info', { account: card.querySelector('h3').textContent }, 'accountSwitchNext');
+      showPrompt('Transaction view updated.', 'info', 'Scroll to see the selected account history.');
     });
-    card.addEventListener('keydown', event => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        card.click();
-      }
-    });
-  });
-}
 
-function renderAccountFilter() {
-  accountFilter.innerHTML = state.accounts.map(acc => `<option value="${acc.id}">${acc.name}</option>`).join('');
-  accountFilter.value = state.selectedAccount;
-}
+    document.getElementById('transferForm').addEventListener('submit', handleTransfer);
+    document.getElementById('billForm').addEventListener('submit', handleBill);
+    document.getElementById('sendMoneyForm').addEventListener('submit', handleSendMoney);
+    document.getElementById('newDebitForm').addEventListener('submit', handleNewDebit);
+    document.getElementById('lockCardBtn').addEventListener('click', () => handleCardLock(true));
+    document.getElementById('unlockCardBtn').addEventListener('click', () => handleCardLock(false));
+    document.getElementById('limitForm').addEventListener('submit', handleLimitUpdate);
+    document.getElementById('pinForm').addEventListener('submit', handlePinChange);
+    document.getElementById('cardRequestForm').addEventListener('submit', handleCardRequest);
+    document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
+    document.getElementById('exportPdfBtn').addEventListener('click', exportPdf);
+    document.getElementById('resetTasksBtn').addEventListener('click', () => resetPracticeTasks(true));
+    if (practiceTasksList) {
+      practiceTasksList.addEventListener('change', handleTaskToggle);
+    }
 
-function renderTransactions() {
-  const pack = getPack();
-  const selected = state.selectedAccount;
-  const items = state.transactions
-    .filter(tx => tx.account === selected)
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
-  if (!items.length) {
-    transactionList.innerHTML = `<p class="helper">${pack.ui.transactionsEmpty}</p>`;
-    return;
-  }
+    function initForms() {
+      const fromSelect = document.getElementById('transferFrom');
+      const toSelect = document.getElementById('transferTo');
+      fromSelect.innerHTML = state.accounts.map(acc => `<option value="${acc.id}">${acc.name}</option>`).join('');
+      fromSelect.value = 'current';
+      buildAccountSelect(toSelect, fromSelect.value);
+      fromSelect.addEventListener('change', () => buildAccountSelect(toSelect, fromSelect.value));
 
-  transactionList.innerHTML = items.map(tx => {
-    const currency = state.accounts.find(acc => acc.id === tx.account)?.currency || 'GBP';
-    const isDebit = tx.amount < 0;
-    const amount = formatCurrency(Math.abs(tx.amount), currency);
-    const statusLabel = tx.pending ? pack.statuses.pending : pack.statuses.cleared;
-    return `
-      <article class="transaction-item ${tx.pending ? 'pending' : ''}">
-        <div>
-          <div style="font-weight:600;">${tx.description}</div>
-          <div class="category">${tx.category}</div>
-        </div>
-        <div class="amount ${isDebit ? 'debit' : 'credit'}">${isDebit ? '-' : '+'}${amount}</div>
-        <div class="details">
-          <span>${new Date(tx.date).toLocaleDateString(pack.locale)}</span>
-          <span>${tx.method}</span>
-          <span>${statusLabel}</span>
-        </div>
-      </article>
-    `;
-  }).join('');
-}
+      document.getElementById('billAccount').innerHTML = state.accounts.map(acc => `<option value="${acc.id}">${acc.name}</option>`).join('');
+      document.getElementById('sendFrom').innerHTML = state.accounts.map(acc => `<option value="${acc.id}">${acc.name}</option>`).join('');
+    }
 
-function renderSpendingSummary() {
-  const pack = getPack();
-  const selected = state.selectedAccount;
-  const last30 = state.transactions.filter(tx => tx.account === selected && tx.amount < 0 && (Date.now() - new Date(tx.date).getTime()) <= (1000 * 60 * 60 * 24 * 32));
-  if (!last30.length) {
-    spendingSummary.innerHTML = `<h4>${pack.ui.spendingHeading}</h4><p class="helper">${pack.ui.spendingEmpty}</p>`;
-    return;
-  }
-  const totals = {};
-  last30.forEach(tx => {
-    const key = tx.category;
-    totals[key] = (totals[key] || 0) + Math.abs(tx.amount);
-  });
-  const currency = state.accounts.find(acc => acc.id === selected)?.currency || 'GBP';
-  spendingSummary.innerHTML = `
-    <h4>${pack.ui.spendingHeading}</h4>
-    <ul>
-      ${Object.entries(totals).map(([cat, total]) => `<li>${cat}: ${formatCurrency(total, currency)}</li>`).join('')}
-    </ul>
-  `;
-}
-
-function renderMandates() {
-  const pack = getPack();
-  directDebitItems.innerHTML = state.directDebits.map(item => `
-    <div class="list-item" data-id="${item.id}">
-      <div>
-        <div style="font-weight:600;">${item.name}</div>
-        <span class="meta">${formatCurrency(item.amount)} · ${item.schedule}</span>
-      </div>
-      <button type="button" class="button ${item.active ? '' : 'secondary'}" data-action="${item.active ? 'cancel' : 'restore'}">
-        ${item.active ? pack.ui.mandateButtons.cancel : pack.ui.mandateButtons.reinstate}
-      </button>
-    </div>
-  `).join('') || `<p class="helper">${pack.ui.mandatesEmpty.directDebits}</p>`;
-
-  standingOrderItems.innerHTML = state.standingOrders.map(item => `
-    <div class="list-item" data-id="${item.id}">
-      <div>
-        <div style="font-weight:600;">${item.name}</div>
-        <span class="meta">${formatCurrency(item.amount)} · ${item.schedule}</span>
-      </div>
-      <button type="button" class="button ${item.active ? '' : 'secondary'}" data-action="${item.active ? 'cancel' : 'restore'}">
-        ${item.active ? pack.ui.mandateButtons.cancel : pack.ui.mandateButtons.reinstate}
-      </button>
-    </div>
-  `).join('') || `<p class="helper">${pack.ui.mandatesEmpty.standingOrders}</p>`;
-
-  directDebitItems.querySelectorAll('button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = btn.closest('.list-item').dataset.id;
-      const item = state.directDebits.find(dd => dd.id === id);
-      if (!item) return;
-      item.active = !item.active;
+    function init() {
+      renderAccounts();
+      renderAccountFilter();
+      renderTransactions();
+      renderSpendingSummary();
       renderMandates();
-      const key = item.active ? 'directDebitActive' : 'directDebitCancelled';
-      showPromptMessage(key, 'success', { name: item.name });
-      const statusLabel = item.active ? pack.timelineStatus.directDebit.active : pack.timelineStatus.directDebit.inactive;
-      recordTimeline('directDebitStatus', { status: statusLabel, name: item.name });
-    });
-  });
+      renderTimeline();
+      initForms();
+      initLimitForm();
+      renderTasks();
+      initTime();
+    }
 
-  standingOrderItems.querySelectorAll('button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = btn.closest('.list-item').dataset.id;
-      const item = state.standingOrders.find(dd => dd.id === id);
-      if (!item) return;
-      item.active = !item.active;
-      renderMandates();
-      const key = item.active ? 'standingOrderActive' : 'standingOrderPaused';
-      showPromptMessage(key, 'success', { name: item.name });
-      const statusLabel = item.active ? pack.timelineStatus.standingOrder.active : pack.timelineStatus.standingOrder.inactive;
-      recordTimeline('standingOrderStatus', { status: statusLabel, name: item.name });
-    });
-  });
-}
-
-function renderLimitSummary() {
-  if (!limitSummary) return;
-  const pack = getPack();
-  const { daily, contactless } = state.spendingLimits;
-  limitSummary.textContent = formatTemplate(pack.card.limitsSummary, {
-    daily: formatCurrency(daily),
-    contactless: formatCurrency(contactless)
-  });
-}
-
-function initLimitForm() {
-  const dailyInput = document.getElementById('limitDaily');
-  const contactlessInput = document.getElementById('limitContactless');
-  if (dailyInput) dailyInput.value = state.spendingLimits.daily;
-  if (contactlessInput) contactlessInput.value = state.spendingLimits.contactless;
-  renderLimitSummary();
-}
-
-function handleLimitUpdate(event) {
-  event.preventDefault();
-  const pack = getPack();
-  const dailyInput = document.getElementById('limitDaily');
-  const contactlessInput = document.getElementById('limitContactless');
-  const daily = parseFloat(dailyInput.value);
-  const contactless = parseFloat(contactlessInput.value);
-
-  if (!Number.isFinite(daily) || daily < 100 || daily > 5000) {
-    showPromptMessage('limitDailyRange', 'error');
-    dailyInput.focus();
-    return;
-  }
-  if (!Number.isFinite(contactless) || contactless < 10 || contactless > 500) {
-    showPromptMessage('limitContactlessRange', 'error');
-    contactlessInput.focus();
-    return;
-  }
-  if (contactless > daily) {
-    showPromptMessage('limitContactlessVsDaily', 'error');
-    contactlessInput.focus();
-    return;
-  }
-
-  state.spendingLimits.daily = Math.round(daily);
-  state.spendingLimits.contactless = Math.round(contactless);
-  renderLimitSummary();
-  dailyInput.value = state.spendingLimits.daily;
-  contactlessInput.value = state.spendingLimits.contactless;
-  showPromptMessage('limitUpdated', 'success');
-  recordTimeline('limitsUpdated', {
-    daily: formatCurrency(state.spendingLimits.daily),
-    contactless: formatCurrency(state.spendingLimits.contactless)
-  });
-  completeTask('set-limits');
-}
-
-function updateBalances(accountId, delta) {
-  const account = state.accounts.find(acc => acc.id === accountId);
-  if (account) {
-    account.balance = Math.round((account.balance + delta) * 100) / 100;
-  }
-  renderAccounts();
-}
-
-function addTransaction(accountId, data) {
-  const entry = {
-    id: `tx-${Date.now()}`,
-    account: accountId,
-    date: new Date().toISOString().slice(0, 10),
-    pending: false,
-    ...data
-  };
-  state.transactions.unshift(entry);
-  applyTransactionTranslations(getPack());
-  renderTransactions();
-  renderSpendingSummary();
-}
-
-function completeTask(id) {
-  const task = state.practiceTasks.find(item => item.id === id);
-  if (!task || task.completed) return;
-  task.completed = true;
-  const checkbox = practiceTasksList?.querySelector(`input[data-task="${id}"]`);
-  if (checkbox) {
-    checkbox.checked = true;
-    checkbox.closest('li')?.classList.add('complete');
-  }
-  renderTaskProgress();
-  recordTimeline('checklistComplete', { task: task.title });
-}
-
-function resetPracticeTasks(manual = false) {
-  state.practiceTasks.forEach(task => {
-    task.completed = false;
-  });
-  if (practiceTasksList) {
-    practiceTasksList.querySelectorAll('input[type="checkbox"]').forEach(input => {
-      input.checked = false;
-      input.closest('li')?.classList.remove('complete');
-    });
-  }
-  renderTaskProgress();
-  if (manual) {
-    showPromptMessage('checklistReset', 'info');
-    recordTimeline('checklistReset');
-  }
-}
-
-function handleTaskToggle(event) {
-  const target = event.target;
-  if (!(target instanceof HTMLInputElement) || target.type !== 'checkbox') return;
-  const task = state.practiceTasks.find(item => item.id === target.dataset.task);
-  if (!task) return;
-  task.completed = target.checked;
-  target.closest('li')?.classList.toggle('complete', task.completed);
-  renderTaskProgress();
-  recordTimeline(task.completed ? 'checklistManualComplete' : 'checklistManualReopen', { task: task.title });
-}
-
-function refreshBalances() {
-  const pack = getPack();
-  const timeText = pack.ui.quickStatusTime;
-  syncTimeEl.textContent = timeText;
-  updateQuickStatus(timeText);
-  showPromptMessage('balancesRefreshed', 'success');
-  recordTimeline('balancesRefresh');
-  completeTask('check-balances');
-}
-
-function handleTransfer(event) {
-  event.preventDefault();
-  const from = document.getElementById('transferFrom').value;
-  const to = document.getElementById('transferTo').value;
-  const amount = parseFloat(document.getElementById('transferAmount').value);
-
-  if (!from || !to) {
-    showPromptMessage('transferMissingAccounts', 'error');
-    return;
-  }
-  if (from === to) {
-    showPromptMessage('transferSameAccount', 'error');
-    return;
-  }
-  if (!amount || amount <= 0) {
-    showPromptMessage('transferAmountInvalid', 'error');
-    return;
-  }
-  const source = state.accounts.find(acc => acc.id === from);
-  if (!source) return;
-  if (source.balance < amount) {
-    showPromptMessage('transferInsufficientFunds', 'error');
-    return;
-  }
-
-  updateBalances(from, -amount);
-  updateBalances(to, amount);
-  const destination = state.accounts.find(acc => acc.id === to);
-  const destinationName = destination ? destination.name : to;
-  const sourceName = source.name;
-  addTransaction(from, {
-    descriptionKey: 'transferTo',
-    accountName: destinationName,
-    amount: -amount,
-    categoryKey: 'transferOut',
-    methodKey: 'internalTransfer'
-  });
-  addTransaction(to, {
-    descriptionKey: 'transferFrom',
-    accountName: sourceName,
-    amount: amount,
-    categoryKey: 'transferIn',
-    methodKey: 'internalTransfer'
-  });
-
-  showPromptMessage('transferComplete', 'success');
-  recordTimeline('transferComplete', {
-    amount: formatCurrency(amount),
-    from: sourceName,
-    to: destinationName
-  });
-  completeTask('transfer-own');
-  event.target.reset();
-  document.getElementById('transferFrom').value = from;
-  buildAccountSelect(document.getElementById('transferTo'), from);
-}
-
-function handleBill(event) {
-  event.preventDefault();
-  const pack = getPack();
-  const payFrom = document.getElementById('billAccount').value;
-  const payee = document.getElementById('billPayee').value;
-  const amount = parseFloat(document.getElementById('billAmount').value);
-  const frequency = document.getElementById('billFrequency').value;
-
-  if (!payFrom || !payee || !amount) {
-    showPromptMessage('billIncomplete', 'error');
-    return;
-  }
-  const account = state.accounts.find(acc => acc.id === payFrom);
-  if (account.balance < amount) {
-    showPromptMessage('billInsufficientFunds', 'error');
-    return;
-  }
-
-  updateBalances(payFrom, -amount);
-  addTransaction(payFrom, {
-    descriptionKey: 'billPayment',
-    payee,
-    recurring: frequency !== 'once',
-    amount: -amount,
-    categoryKey: 'bills',
-    methodKey: frequency === 'once' ? 'billOnce' : 'billRecurring'
-  });
-
-  if (frequency !== 'once') {
-    const targetList = frequency === 'monthly' ? state.directDebits : state.standingOrders;
-    const newItem = {
-      id: `${frequency}-${Date.now()}`,
-      name: payee,
-      amount,
-      schedule: pack.forms.bill.frequencies[frequency] || frequency,
-      active: true,
-      scheduleKey: frequency
-    };
-    targetList.push(newItem);
-    applyMandateTranslations(pack);
-    renderMandates();
-    completeTask('recurring-payment');
-  }
-
-  showPromptMessage(frequency === 'once' ? 'billSubmittedOnce' : 'billSubmittedRecurring', 'success');
-  recordTimeline('billPaid', {
-    payee,
-    frequency: pack.bills.frequencyLabel[frequency] || frequency,
-    account: account.name
-  });
-  event.target.reset();
-}
-
-function handleSendMoney(event) {
-  event.preventDefault();
-  const pack = getPack();
-  const from = document.getElementById('sendFrom').value;
-  const recipient = document.getElementById('sendRecipient').value.trim();
-  const amount = parseFloat(document.getElementById('sendAmount').value);
-  const method = document.getElementById('sendMethod').value;
-  const reference = document.getElementById('sendReference').value.trim();
-
-  if (!from || !recipient || !amount) {
-    showPromptMessage('sendIncomplete', 'error');
-    return;
-  }
-  const account = state.accounts.find(acc => acc.id === from);
-  if (account.balance < amount) {
-    showPromptMessage('sendInsufficient', 'error');
-    return;
-  }
-
-  updateBalances(from, -amount);
-  addTransaction(from, {
-    descriptionKey: 'sendPayment',
-    recipient,
-    reference: reference || '',
-    amount: -amount,
-    categoryKey: 'send',
-    methodKey: 'send',
-    methodAlias: method
-  });
-
-  const nextMessage = pack.prompts.sendNext[method] || pack.prompts.sendNext.default;
-  const nextKey = nextMessage ? 'sendNextInfo' : null;
-  const nextReplacements = nextMessage ? { message: nextMessage } : {};
-  showPromptMessage('sendComplete', 'success', { recipient }, nextKey, nextReplacements);
-  recordTimeline('paymentSent', {
-    amount: formatCurrency(amount),
-    recipient,
-    method: pack.send.methodLabels[method] || pack.send.methodLabels.default
-  });
-  completeTask('send-external');
-  event.target.reset();
-}
-
-function handleNewDebit(event) {
-  event.preventDefault();
-  const pack = getPack();
-  const type = document.getElementById('debitType').value;
-  const name = document.getElementById('debitName').value.trim();
-  const amount = parseFloat(document.getElementById('debitAmount').value);
-  const schedule = document.getElementById('debitSchedule').value.trim();
-
-  if (!name || !amount || !schedule) {
-    showPromptMessage('instructionIncomplete', 'error');
-    return;
-  }
-  const targetList = type === 'directDebit' ? state.directDebits : state.standingOrders;
-  const newItem = { id: `${type}-${Date.now()}`, name, amount, schedule, active: true };
-  targetList.push(newItem);
-  renderMandates();
-  const promptKey = type === 'directDebit' ? 'instructionCreatedDirectDebit' : 'instructionCreatedStandingOrder';
-  showPromptMessage(promptKey, 'success');
-  recordTimeline('instructionAdded', { type: pack.instruction.typeLabel[type] || type, name });
-  completeTask('recurring-payment');
-  event.target.reset();
-}
-
-function toggleViewMode(mode) {
-  state.viewMode = mode;
-  const shell = document.getElementById('deviceShell');
-  shell.classList.toggle('phone', mode === 'phone');
-  shell.classList.toggle('tablet', mode === 'tablet');
-  document.querySelectorAll('.view-toggle button').forEach(btn => {
-    const active = btn.dataset.view === mode;
-    btn.classList.toggle('active', active);
-    btn.setAttribute('aria-pressed', String(active));
-  });
-  showPromptMessage(mode === 'phone' ? 'viewPhone' : 'viewTablet', 'info');
-}
-
-function switchTab(tab) {
-  state.activeTab = tab;
-  document.querySelectorAll('.tab-nav button').forEach(btn => {
-    const active = btn.dataset.tab === tab;
-    btn.classList.toggle('active', active);
-    btn.setAttribute('aria-pressed', String(active));
-  });
-  document.querySelectorAll('.tab-panel').forEach(panel => {
-    panel.classList.toggle('active', panel.id === `tab-${tab}`);
-  });
-  const key = tab === 'accounts' ? 'tabAccounts' : tab === 'payments' ? 'tabPayments' : 'tabSecurity';
-  showPromptMessage(key, 'info');
-}
-
-function handleCardLock(lock) {
-  state.cardLocked = lock;
-  const pack = getPack();
-  document.getElementById('cardStatusLabel').textContent = lock ? pack.card.statusLocked : pack.card.statusUnlocked;
-  document.getElementById('cardLockBadge').textContent = lock ? pack.card.badgeLocked : pack.card.badgeActive;
-  document.getElementById('lockCardBtn').disabled = lock;
-  document.getElementById('unlockCardBtn').disabled = !lock;
-  showPromptMessage(lock ? 'cardLocked' : 'cardUnlocked', 'success');
-  const statusLabel = lock ? pack.timelineStatus.card.locked : pack.timelineStatus.card.unlocked;
-  recordTimeline('cardLockStatus', { status: statusLabel });
-}
-
-function handlePinChange(event) {
-  event.preventDefault();
-  const pack = getPack();
-  const pin = document.getElementById('pinNew').value;
-  const confirm = document.getElementById('pinConfirm').value;
-  if (!/^[0-9]{4}$/.test(pin)) {
-    showPromptMessage('pinFormat', 'error');
-    return;
-  }
-  if (pin !== confirm) {
-    showPromptMessage('pinMismatch', 'error');
-    return;
-  }
-  state.pinLastChanged = new Date().toISOString().slice(0, 10);
-  showPromptMessage('pinUpdated', 'success');
-  recordTimeline('pinChanged');
-  completeTask('change-pin');
-  event.target.reset();
-}
-
-function handleCardRequest(event) {
-  event.preventDefault();
-  const pack = getPack();
-  const reasonSelect = document.getElementById('cardReason');
-  if (!reasonSelect.value) {
-    showPromptMessage('cardReasonMissing', 'error');
-    return;
-  }
-  const reasonText = reasonSelect.options[reasonSelect.selectedIndex].textContent;
-  showPromptMessage('cardRequestSubmitted', 'success');
-  recordTimeline('cardRequested', { reason: reasonText });
-  event.target.reset();
-}
-
-function renderTimelineCsvRows(rows) {
-  const pack = getPack();
-  if (state.timeline.length) {
-    [...state.timeline].reverse().forEach(entry => {
-      const label = new Date(entry.timestamp).toLocaleTimeString(pack.locale, { hour: '2-digit', minute: '2-digit' });
-      const text = formatTemplate(pack.timeline[entry.key] || '', entry.replacements);
-      rows.push([label, text]);
-    });
-  } else {
-    rows.push(['-', pack.csv.noActions]);
-  }
-}
-
-function exportSessionCsv() {
-  const pack = getPack();
-  const now = new Date();
-  const rows = [
-    [pack.csv.exportGenerated, now.toLocaleString(pack.locale)],
-    [],
-    [pack.csv.timeline],
-    [pack.csv.time, pack.csv.event]
-  ];
-
-  renderTimelineCsvRows(rows);
-  rows.push([]);
-  rows.push([pack.csv.practiceTasks]);
-  rows.push([pack.csv.task, pack.csv.status]);
-  state.practiceTasks.forEach(task => {
-    rows.push([task.title, task.completed ? pack.statuses.completed : pack.statuses.inProgress]);
-  });
-
-  const csv = rows
-    .map(row => row.map(value => `"${String(value ?? '').replace(/"/g, '""')}"`).join(','))
-    .join('\n');
-
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `brightwave-session-${now.toISOString().slice(0, 10)}.csv`;
-  link.click();
-  URL.revokeObjectURL(url);
-
-  showPromptMessage('sessionCsvDownloaded', 'success');
-  recordTimeline('sessionExport');
-}
-
-function exportCsv() {
-  const pack = getPack();
-  const account = state.accounts.find(acc => acc.id === state.selectedAccount);
-  if (!account) {
-    showPromptMessage('accountRequired', 'error');
-    return;
-  }
-  const rows = [
-    pack.csv.statementHeaders
-  ];
-  state.transactions.filter(tx => tx.account === account.id).forEach(tx => {
-    rows.push([
-      tx.date,
-      tx.description,
-      tx.amount.toFixed(2),
-      tx.category,
-      tx.method,
-      tx.pending ? pack.statuses.pending : pack.statuses.cleared
-    ]);
-  });
-  const csv = rows.map(r => r.map(value => `"${value}"`).join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `${account.id}-statement.csv`;
-  link.click();
-  URL.revokeObjectURL(url);
-  showPromptMessage('csvDownloaded', 'success');
-  recordTimeline('statementCsv', { account: account.name });
-}
-
-function escapePdfText(text) {
-  return text.replace(/[\\()]/g, match => ({ '\\': '\\\\', '(': '\\(', ')': '\\)' }[match]));
-}
-
-function generatePdfLines() {
-  const pack = getPack();
-  const account = state.accounts.find(acc => acc.id === state.selectedAccount);
-  if (!account) return [];
-  const lines = [
-    formatTemplate(pack.pdf.statementFor, { account: account.name }),
-    formatTemplate(pack.pdf.generated, { timestamp: new Date().toLocaleString(pack.locale) }),
-    formatTemplate(pack.pdf.balance, { balance: formatCurrency(account.balance, account.currency || 'GBP') }),
-    ' ',
-    pack.pdf.recentActivity
-  ];
-  state.transactions.filter(tx => tx.account === account.id).slice(0, 12).forEach(tx => {
-    const symbol = tx.amount < 0 ? '-' : '+';
-    lines.push(`${tx.date} ${symbol}${Math.abs(tx.amount).toFixed(2)} — ${tx.description}`);
-  });
-  if (lines.length === 5) lines.push(pack.pdf.none);
-  return lines;
-}
-
-function buildPdfContent(lines) {
-  const contentLines = lines.map((line, index) => {
-    const safe = escapePdfText(line);
-    const offset = index === 0 ? '' : '\n0 -16 Td\n';
-    return `${index === 0 ? '' : offset}(${safe}) Tj`;
-  }).join('');
-  return `BT\n/F1 12 Tf\n72 720 Td\n${contentLines}\nET`;
-}
-
-function pad(num) {
-  return String(num).padStart(10, '0');
-}
-
-function exportPdf() {
-  const pack = getPack();
-  const account = state.accounts.find(acc => acc.id === state.selectedAccount);
-  if (!account) {
-    showPromptMessage('accountRequired', 'error');
-    return;
-  }
-  const lines = generatePdfLines();
-  const contentStream = buildPdfContent(lines);
-  const objects = [];
-  const offsets = [];
-  const addObject = (obj) => {
-    offsets.push(objects.join('').length + '%PDF-1.4\n'.length);
-    objects.push(obj);
-  };
-
-  addObject('1 0 obj<< /Type /Catalog /Pages 2 0 R >>endobj\n');
-  addObject('2 0 obj<< /Type /Pages /Kids [3 0 R] /Count 1 >>endobj\n');
-  addObject('3 0 obj<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 5 0 R >>endobj\n');
-  addObject('4 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>endobj\n');
-  addObject(`5 0 obj<< /Length ${contentStream.length} >>stream\n${contentStream}\nendstream\nendobj\n`);
-
-  const body = objects.join('');
-  const header = '%PDF-1.4\n';
-  const xrefStart = header.length + body.length;
-  const xref = ['xref\n0 6\n0000000000 65535 f \n'];
-  offsets.forEach(off => {
-    xref.push(`${pad(off)} 00000 n \n`);
-  });
-  const trailer = `trailer<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
-  const pdf = header + body + xref.join('') + trailer;
-  const blob = new Blob([pdf], { type: 'application/pdf' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `${account.id}-statement.pdf`;
-  link.click();
-  URL.revokeObjectURL(url);
-  showPromptMessage('pdfDownloaded', 'success');
-  recordTimeline('statementPdf', { account: account.name });
-}
-
-function buildAccountSelect(select, excludeId) {
-  select.innerHTML = state.accounts
-    .filter(acc => acc.id !== excludeId)
-    .map(acc => `<option value="${acc.id}">${acc.name}</option>`)
-    .join('');
-}
-
-function initForms() {
-  const fromSelect = document.getElementById('transferFrom');
-  const toSelect = document.getElementById('transferTo');
-  fromSelect.innerHTML = state.accounts.map(acc => `<option value="${acc.id}">${acc.name}</option>`).join('');
-  fromSelect.value = 'current';
-  buildAccountSelect(toSelect, fromSelect.value);
-  fromSelect.addEventListener('change', () => buildAccountSelect(toSelect, fromSelect.value));
-
-  document.getElementById('billAccount').innerHTML = state.accounts.map(acc => `<option value="${acc.id}">${acc.name}</option>`).join('');
-  document.getElementById('sendFrom').innerHTML = state.accounts.map(acc => `<option value="${acc.id}">${acc.name}</option>`).join('');
-}
-
-function initTime() {
-  const updateTime = () => {
-    document.getElementById('statusTime').textContent = new Date().toLocaleTimeString(getPack().locale, { hour: '2-digit', minute: '2-digit' });
-  };
-  updateTime();
-  setInterval(updateTime, 60000);
-}
-
-function applyLanguage(language) {
-  if (!languagePacks[language]) return;
-  state.language = language;
-  const pack = getPack();
-  document.documentElement.lang = pack.htmlLang;
-  document.title = pack.title;
-  const appSurface = document.querySelector('.app-surface');
-  if (appSurface) {
-    appSurface.setAttribute('aria-label', pack.title);
-  }
-  applyAccountTranslations(pack);
-  applyTransactionTranslations(pack);
-  applyMandateTranslations(pack);
-  applyTaskTranslations(pack);
-  updateAccountSelectOptions();
-  updateLanguageToggleButtons();
-  updateViewToggle();
-  updateTabs();
-  updateInstructions();
-  updateForms();
-  updateCardPreview();
-  updateTaskSection();
-  updateSessionSection();
-  updateQuickStatus(pack.ui.quickStatusTime);
-  renderAccounts();
-  renderAccountFilter();
-  renderTransactions();
-  renderSpendingSummary();
-  renderMandates();
-  renderLimitSummary();
-  renderTasks();
-  renderTimeline();
-  updatePromptDefault();
-}
-
-languageButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const lang = btn.dataset.lang;
-    applyLanguage(lang);
-  });
-});
-
-function initializeEvents() {
-  document.querySelectorAll('.view-toggle button').forEach(btn => {
-    btn.addEventListener('click', () => toggleViewMode(btn.dataset.view));
-  });
-
-  document.querySelectorAll('.tab-nav button').forEach(btn => {
-    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-  });
-
-  document.getElementById('refreshBtn').addEventListener('click', refreshBalances);
-  document.getElementById('clearTimelineBtn').addEventListener('click', () => {
-    state.timeline = [];
-    renderTimeline();
-    showPromptMessage('trackerCleared', 'info');
-  });
-
-  document.getElementById('exportSessionCsvBtn').addEventListener('click', exportSessionCsv);
-
-  accountFilter.addEventListener('change', event => {
-    state.selectedAccount = event.target.value;
-    renderAccounts();
-    renderTransactions();
-    renderSpendingSummary();
-    showPromptMessage('transactionViewUpdated', 'info');
-  });
-
-  document.getElementById('transferForm').addEventListener('submit', handleTransfer);
-  document.getElementById('billForm').addEventListener('submit', handleBill);
-  document.getElementById('sendMoneyForm').addEventListener('submit', handleSendMoney);
-  document.getElementById('newDebitForm').addEventListener('submit', handleNewDebit);
-  document.getElementById('lockCardBtn').addEventListener('click', () => handleCardLock(true));
-  document.getElementById('unlockCardBtn').addEventListener('click', () => handleCardLock(false));
-  document.getElementById('limitForm').addEventListener('submit', handleLimitUpdate);
-  document.getElementById('pinForm').addEventListener('submit', handlePinChange);
-  document.getElementById('cardRequestForm').addEventListener('submit', handleCardRequest);
-  document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
-  document.getElementById('exportPdfBtn').addEventListener('click', exportPdf);
-  document.getElementById('resetTasksBtn').addEventListener('click', () => resetPracticeTasks(true));
-  if (practiceTasksList) {
-    practiceTasksList.addEventListener('change', handleTaskToggle);
-  }
-}
-
-function init() {
-  initForms();
-  initLimitForm();
-  renderTasks();
-  initTime();
-  initializeEvents();
-  applyLanguage(state.language);
-}
-
-init();
-
-  </script></body>
+    init();
+  </script>
+</body>
 </html>
