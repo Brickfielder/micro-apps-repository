@@ -1,0 +1,10 @@
+{ "ui": {
+  "language": "Language",
+  "start": "Start",
+  "next": "Next",
+  "back": "Back",
+  "save": "Save",
+  "export": "Export",
+  "confirm": "Confirm",
+  "cancel": "Cancel"
+}}

@@ -285,6 +285,9 @@
 
   loadMeta().then((meta) => {
     placeHeroAndWrap(meta);
+    if (window.I18N && I18N.apply) {
+      (I18N.ready ? I18N.ready.then(() => I18N.apply()) : Promise.resolve().then(() => I18N.apply()));
+    }
     initNativeShim(meta);
   });
 })();
