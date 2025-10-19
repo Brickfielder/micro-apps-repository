@@ -34,6 +34,25 @@
     return sup.has(cand) ? cand : (sup.has("en") ? "en" : Array.from(sup)[0]);
   }
 
+  function buildPaths(rel){
+    if (!rel) return [];
+    const cleaned = rel.replace(/^\/+/, "");
+    const variants = [];
+    if (!cleaned.startsWith("docs/")) variants.push(`docs/${cleaned}`);
+    variants.push(cleaned);
+    const seen = new Set();
+    const urls = [];
+    for (const variant of variants){
+      const path = variant.startsWith("/") ? variant : `/${variant}`;
+      const url = `${BASE}${path}`;
+      if (!seen.has(url)){
+        seen.add(url);
+        urls.push(url);
+      }
+    }
+    return urls;
+  }
+
   const I18N = {
     lang: pickLang(),
     slug: getSlug(),
@@ -57,21 +76,31 @@
       I18N.apply();
     },
     async load(){
-      const paths = [
-        `${BASE}/docs/shared/i18n/common.en.json`,
-        `${BASE}/docs/shared/i18n/common.${I18N.lang}.json`,
-        // domain packs
-        ...getDomains().flatMap(d => [
-          `${BASE}/docs/domains/${d}/i18n/en.json`,
-          `${BASE}/docs/domains/${d}/i18n/${I18N.lang}.json`,
-        ]),
-        // per-app
-        I18N.slug ? `${BASE}/docs/apps/${I18N.slug}/i18n/en.json` : null,
-        I18N.slug ? `${BASE}/docs/apps/${I18N.slug}/i18n/${I18N.lang}.json` : null,
-        // fallback if the repo hosts shared at /shared
-        `${BASE}/shared/i18n/common.en.json`,
-        `${BASE}/shared/i18n/common.${I18N.lang}.json`,
-      ].filter(Boolean);
+      const uniquePaths = [];
+      const seen = new Set();
+      const addPaths = (candidates=[]) => {
+        for (const p of candidates){
+          if (!seen.has(p)){
+            seen.add(p);
+            uniquePaths.push(p);
+          }
+        }
+      };
+
+      addPaths(buildPaths(`shared/i18n/common.en.json`));
+      addPaths(buildPaths(`shared/i18n/common.${I18N.lang}.json`));
+
+      for (const domain of getDomains()){
+        addPaths(buildPaths(`domains/${domain}/i18n/en.json`));
+        addPaths(buildPaths(`domains/${domain}/i18n/${I18N.lang}.json`));
+      }
+
+      if (I18N.slug){
+        addPaths(buildPaths(`apps/${I18N.slug}/i18n/en.json`));
+        addPaths(buildPaths(`apps/${I18N.slug}/i18n/${I18N.lang}.json`));
+      }
+
+      const paths = uniquePaths;
 
       const bags = [];
       for (const p of paths){
