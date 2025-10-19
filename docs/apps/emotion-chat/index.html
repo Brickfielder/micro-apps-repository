@@ -145,6 +145,33 @@
       const { I18N } = window;
       const t = (key, vars = {}) => I18N.t(key, vars);
 
+      const heroTitleEl = document.querySelector('.hero-title');
+      const heroLeadEl = document.querySelector('.hero-lead');
+      const defaultHeroTitle = heroTitleEl ? heroTitleEl.textContent : '';
+      const defaultHeroDesc = heroLeadEl ? heroLeadEl.textContent : '';
+
+      const renderHero = () => {
+        if (!window.I18N) return;
+        const titleEl = document.querySelector('.hero-title');
+        if (titleEl) {
+          const heroTitleText = I18N.t('hero.title');
+          const fallbackTitle = I18N.t('screen.title');
+          const resolvedTitle = heroTitleText !== 'hero.title'
+            ? heroTitleText
+            : (fallbackTitle !== 'screen.title' ? fallbackTitle : defaultHeroTitle);
+          if (resolvedTitle) titleEl.textContent = resolvedTitle;
+        }
+        const descEl = document.querySelector('.hero-lead');
+        if (descEl) {
+          const heroDesc = I18N.t('hero.description');
+          const resolvedDesc = heroDesc !== 'hero.description' ? heroDesc : defaultHeroDesc;
+          if (resolvedDesc) descEl.textContent = resolvedDesc;
+        }
+      };
+
+      renderHero();
+      window.addEventListener('i18n:applied', renderHero);
+
       const $ = (id) => document.getElementById(id);
 
       const chatEl = $("chat");

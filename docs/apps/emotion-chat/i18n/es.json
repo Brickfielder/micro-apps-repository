@@ -2,6 +2,10 @@
   "screen": {
     "title": "Chat de Emociones — Microapp de Cognición Social"
   },
+  "hero": {
+    "title": "Chat de Emociones",
+    "description": "Reconoce emociones e intenciones en breves viñetas estilo chat."
+  },
   "toolbar": {
     "aria": "Controles",
     "scenario": {

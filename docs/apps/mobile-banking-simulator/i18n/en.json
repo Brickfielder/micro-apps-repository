@@ -3,6 +3,10 @@
     "title": "Brightwave Mobile Banking Simulator",
     "appAria": "Brightwave Bank mobile app"
   },
+  "hero": {
+    "title": "Brightwave Mobile Banking Simulator",
+    "description": "Practise real-time mobile banking: balances, transfers, bills, card controls, and statement exports."
+  },
   "header": {
     "brand": "Brightwave"
   },

@@ -3,6 +3,10 @@
     "title": "Simulatore di Mobile Banking Brightwave",
     "appAria": "App mobile Brightwave Bank"
   },
+  "hero": {
+    "title": "Simulatore di Mobile Banking Brightwave",
+    "description": "Esercitati con il mobile banking in tempo reale: saldi, trasferimenti, pagamenti, controlli carta ed esportazione degli estratti."
+  },
   "header": {
     "brand": "Brightwave"
   },

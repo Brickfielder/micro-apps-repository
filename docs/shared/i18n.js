@@ -110,6 +110,11 @@
         attrs.forEach(a => el.setAttribute(a, val));
       });
       ensureSwitcher();
+      try {
+        window.dispatchEvent(new CustomEvent("i18n:applied", { detail: { lang: I18N.lang } }));
+      } catch (err) {
+        console.warn("i18n event dispatch failed", err);
+      }
     }
   };
   window.I18N = I18N;

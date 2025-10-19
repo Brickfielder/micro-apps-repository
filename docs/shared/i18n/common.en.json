@@ -1,10 +1,20 @@
-{ "ui": {
-  "language": "Language",
-  "start": "Start",
-  "next": "Next",
-  "back": "Back",
-  "save": "Save",
-  "export": "Export",
-  "confirm": "Confirm",
-  "cancel": "Cancel"
-}}
+{
+  "ui": {
+    "language": "Language",
+    "start": "Start",
+    "next": "Next",
+    "back": "Back",
+    "save": "Save",
+    "export": "Export",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  },
+  "clinician": {
+    "badge": "Clinician",
+    "title": "Session notes",
+    "subhead": "Document professional observations for the care team.",
+    "label": "Clinician comments (optional)",
+    "placeholder": "Enter any notes relevant to this session...",
+    "helper": "This note will be added as <code>clinician_comment</code> in the exported CSV."
+  }
+}
