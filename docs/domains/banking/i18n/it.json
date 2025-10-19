@@ -1,0 +1,15 @@
+{ "terms": {
+  "pin": "PIN",
+  "sortCode": "Sort code",
+  "accountNumber": "Numero di conto",
+  "iban": "IBAN",
+  "bic": "BIC/SWIFT",
+  "directDebit": "Addebito diretto",
+  "standingOrder": "Ordine permanente",
+  "bankTransfer": "Bonifico bancario",
+  "cardPayment": "Pagamento con carta",
+  "balance": "Saldo",
+  "availableBalance": "Saldo disponibile",
+  "statement": "Estratto conto",
+  "overdraft": "Scoperto"
+}}

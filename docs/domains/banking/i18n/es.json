@@ -1,0 +1,15 @@
+{ "terms": {
+  "pin": "PIN",
+  "sortCode": "Código de sucursal",
+  "accountNumber": "Número de cuenta",
+  "iban": "IBAN",
+  "bic": "BIC/SWIFT",
+  "directDebit": "Domiciliación bancaria",
+  "standingOrder": "Orden permanente",
+  "bankTransfer": "Transferencia bancaria",
+  "cardPayment": "Pago con tarjeta",
+  "balance": "Saldo",
+  "availableBalance": "Saldo disponible",
+  "statement": "Extracto",
+  "overdraft": "Descubierto"
+}}
