@@ -7,7 +7,10 @@
   // Infer the site base like frame.js does: "/<user>.github.io"
   function basePath(){
     const parts = (location.pathname||"/").split("/").filter(Boolean);
-    return parts.length ? `/${parts[0]}` : "";
+    if (!parts.length) return "";
+    const first = parts[0];
+    if (["apps","shared","domains"].includes(first)) return "";
+    return `/${first}`;
   }
   const BASE = basePath();
 
@@ -34,25 +37,6 @@
     return sup.has(cand) ? cand : (sup.has("en") ? "en" : Array.from(sup)[0]);
   }
 
-  function buildPaths(rel){
-    if (!rel) return [];
-    const cleaned = rel.replace(/^\/+/, "");
-    const variants = [];
-    if (!cleaned.startsWith("docs/")) variants.push(`docs/${cleaned}`);
-    variants.push(cleaned);
-    const seen = new Set();
-    const urls = [];
-    for (const variant of variants){
-      const path = variant.startsWith("/") ? variant : `/${variant}`;
-      const url = `${BASE}${path}`;
-      if (!seen.has(url)){
-        seen.add(url);
-        urls.push(url);
-      }
-    }
-    return urls;
-  }
-
   const I18N = {
     lang: pickLang(),
     slug: getSlug(),
@@ -76,31 +60,18 @@
       I18N.apply();
     },
     async load(){
-      const uniquePaths = [];
-      const seen = new Set();
-      const addPaths = (candidates=[]) => {
-        for (const p of candidates){
-          if (!seen.has(p)){
-            seen.add(p);
-            uniquePaths.push(p);
-          }
-        }
-      };
-
-      addPaths(buildPaths(`shared/i18n/common.en.json`));
-      addPaths(buildPaths(`shared/i18n/common.${I18N.lang}.json`));
-
-      for (const domain of getDomains()){
-        addPaths(buildPaths(`domains/${domain}/i18n/en.json`));
-        addPaths(buildPaths(`domains/${domain}/i18n/${I18N.lang}.json`));
-      }
-
-      if (I18N.slug){
-        addPaths(buildPaths(`apps/${I18N.slug}/i18n/en.json`));
-        addPaths(buildPaths(`apps/${I18N.slug}/i18n/${I18N.lang}.json`));
-      }
-
-      const paths = uniquePaths;
+      const paths = resolvePaths([
+        `shared/i18n/common.en.json`,
+        `shared/i18n/common.${I18N.lang}.json`,
+        // domain packs
+        ...getDomains().flatMap(d => [
+          `domains/${d}/i18n/en.json`,
+          `domains/${d}/i18n/${I18N.lang}.json`,
+        ]),
+        // per-app
+        I18N.slug ? `apps/${I18N.slug}/i18n/en.json` : null,
+        I18N.slug ? `apps/${I18N.slug}/i18n/${I18N.lang}.json` : null,
+      ]);
 
       const bags = [];
       for (const p of paths){
@@ -116,7 +87,20 @@
       $$('[data-i18n]', root).forEach(el => {
         const key = el.getAttribute('data-i18n');
         const vars = readVars(el);
-        el.textContent = I18N.t(key, vars);
+        const val = I18N.t(key, vars);
+        const mode = resolveTextMode(el);
+
+        if (mode !== 'skip' && el.hasAttribute('data-i18n-value')) {
+          el.removeAttribute('data-i18n-value');
+        }
+
+        if (mode === 'html') {
+          el.innerHTML = val;
+        } else if (mode === 'text') {
+          el.textContent = val;
+        } else if (typeof val === 'string') {
+          el.setAttribute('data-i18n-value', val);
+        }
       });
       $$('[data-i18n-attr]', root).forEach(el => {
         const key = el.getAttribute('data-i18n');
@@ -147,6 +131,24 @@
       }
     }
     return vars;
+  }
+
+  function resolveTextMode(el){
+    const target = (el.getAttribute("data-i18n-target") || "").toLowerCase();
+    if (target === "html") return "html";
+    if (target === "text") return "text";
+    if (target === "skip") return "skip";
+    if (el.hasAttribute("data-i18n-html")) return "html";
+    if (el.hasAttribute("data-i18n-force")) return "text";
+
+    if (!el.childElementCount) return "text";
+
+    const onlyTextNodes = Array.from(el.childNodes || []).every(node =>
+      node.nodeType === Node.TEXT_NODE || node.nodeType === Node.COMMENT_NODE
+    );
+    if (onlyTextNodes) return "text";
+
+    return "skip";
   }
 
   function ensureSwitcher(){
@@ -184,6 +186,32 @@
   function applyLangAttrs(){
     document.documentElement.setAttribute("lang", I18N.lang);
     document.documentElement.setAttribute("dir", rtl.has(I18N.lang) ? "rtl" : "ltr");
+  }
+
+  function resolvePaths(list){
+    const seen = new Set();
+    const out = [];
+    for (const raw of list){
+      if (!raw) continue;
+      const trimmed = raw.replace(/^\/+/, "");
+      const variants = new Set();
+      if (trimmed.startsWith("docs/")){
+        const withoutDocs = trimmed.replace(/^docs\//, "");
+        variants.add(`${BASE}/${trimmed}`);
+        variants.add(`${BASE}/${withoutDocs}`);
+      } else {
+        variants.add(`${BASE}/docs/${trimmed}`);
+        variants.add(`${BASE}/${trimmed}`);
+      }
+      for (const candidate of variants){
+        const normalized = candidate.replace(/\/{2,}/g, "/");
+        if (!seen.has(normalized)){
+          seen.add(normalized);
+          out.push(normalized);
+        }
+      }
+    }
+    return out;
   }
 
   applyLangAttrs();

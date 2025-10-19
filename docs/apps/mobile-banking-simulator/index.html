@@ -2030,9 +2030,18 @@ window.addEventListener('DOMContentLoaded', () => {
     init();
 
     const originalApply = I18N.apply.bind(I18N);
+    let rerendering = false;
     I18N.apply = (root = document) => {
       originalApply(root);
-      rerenderAfterLanguageChange();
+      const shouldRerender = !rerendering && (!root || root === document);
+      if (shouldRerender) {
+        rerendering = true;
+        try {
+          rerenderAfterLanguageChange();
+        } finally {
+          rerendering = false;
+        }
+      }
     };
   });
 });
