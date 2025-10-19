@@ -107,8 +107,86 @@
     }
   },
   "scenarios": {
+    "order": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I",
+      "J"
+    ],
     "A": {
       "title": "Progetto di gruppo",
+      "people": {
+        "A": "Alex",
+        "B": "Sam"
+      },
+      "messages": [
+        {
+          "from": "A",
+          "text": "Ehi, hai già aggiunto la tua parte al documento?"
+        },
+        {
+          "from": "B",
+          "text": "Non ancora, giornata piena. Lo faccio più tardi."
+        },
+        {
+          "from": "A",
+          "text": "Ok, è che scade domani 😬"
+        },
+        {
+          "from": "B",
+          "text": "Lo so, rilassati. Lo faccio."
+        },
+        {
+          "from": "A",
+          "text": "Dobbiamo ancora controllare le fonti e sistemare tutto."
+        },
+        {
+          "from": "B",
+          "text": "Ti agiti sempre troppo. Andrà bene."
+        },
+        {
+          "from": "A",
+          "text": "Non mi sto agitando, sto solo evitando di perdere punti."
+        },
+        {
+          "from": "B",
+          "text": "Ho detto che lo faccio dopo. Puoi calmarti?"
+        },
+        {
+          "from": "A",
+          "text": "…"
+        },
+        {
+          "from": "B",
+          "text": "Perché quei puntini? 🙄"
+        },
+        {
+          "from": "A",
+          "text": "Niente. Lo finirò da solo."
+        },
+        {
+          "from": "B",
+          "text": "Come vuoi allora."
+        }
+      ],
+      "correct": {
+        "A": [
+          "frustrated",
+          "disappointed",
+          "sad",
+          "withdrawn"
+        ],
+        "B": [
+          "irritated",
+          "defensive"
+        ]
+      },
       "cues": {
         "A": "Frustrazione (“scade domani 😬”), delusione (“Lo finirò da solo”), chiusura (“…”).",
         "B": "Difensività (“Ti preoccupi sempre troppo”), irritazione (🙄)."
@@ -116,6 +194,76 @@
     },
     "B": {
       "title": "Chiamata persa",
+      "people": {
+        "A": "Maya",
+        "B": "Leo"
+      },
+      "messages": [
+        {
+          "from": "A",
+          "text": "Ho provato a chiamarti 3 volte ieri sera, dove eri? 😕"
+        },
+        {
+          "from": "B",
+          "text": "Scusa, avevo il telefono in silenzioso."
+        },
+        {
+          "from": "A",
+          "text": "Ero preoccupata. Pensavo fosse successo qualcosa."
+        },
+        {
+          "from": "B",
+          "text": "No, avevo solo bisogno di un po' di tranquillità."
+        },
+        {
+          "from": "A",
+          "text": "Senza dirmelo? Dovevamo sentirci."
+        },
+        {
+          "from": "B",
+          "text": "Non pensavo fosse un gran problema."
+        },
+        {
+          "from": "A",
+          "text": "Beh, in realtà lo era… Ti ho aspettato."
+        },
+        {
+          "from": "B",
+          "text": "Esageri sempre con queste cose."
+        },
+        {
+          "from": "A",
+          "text": "Forse. Ma mi ha fatto un po' male."
+        },
+        {
+          "from": "B",
+          "text": "Non volevo. Ero solo stanco."
+        },
+        {
+          "from": "A",
+          "text": "Quindi... ci sentiamo stasera?"
+        },
+        {
+          "from": "B",
+          "text": "Potrei essere di nuovo occupato. Non stare ad aspettare."
+        },
+        {
+          "from": "A",
+          "text": "Oh. Va bene allora."
+        }
+      ],
+      "correct": {
+        "A": [
+          "anxious",
+          "hurt",
+          "disappointed"
+        ],
+        "B": [
+          "distant",
+          "defensive",
+          "irritated"
+        ]
+      },
       "cues": {
         "A": "Ansia (“ero preoccupata”), ferita/delusione (“Ho aspettato”, “Mi ha fatto un po' male”).",
         "B": "Evasività, atteggiamento difensivo (“esageri”), distanza (“Non stare ad aspettare”)."
@@ -123,6 +271,71 @@
     },
     "C": {
       "title": "Favore dimenticato",
+      "people": {
+        "A": "Liam",
+        "B": "Noah"
+      },
+      "messages": [
+        {
+          "from": "A",
+          "text": "Ehi, sei riuscito a ritirare il mio pacco?"
+        },
+        {
+          "from": "B",
+          "text": "Ah, me ne sono completamente dimenticato 😬 scusa."
+        },
+        {
+          "from": "A",
+          "text": "È la terza volta che te ne dimentichi..."
+        },
+        {
+          "from": "B",
+          "text": "Sono stato super impegnato, abbi un po' di pazienza."
+        },
+        {
+          "from": "A",
+          "text": "Sono rimasto a casa tutto il pomeriggio ad aspettare."
+        },
+        {
+          "from": "B",
+          "text": "Ho detto che mi dispiace. Vuoi che ci vada adesso in macchina?"
+        },
+        {
+          "from": "A",
+          "text": "Chiude tra 10 minuti. Lascia stare."
+        },
+        {
+          "from": "B",
+          "text": "Dai, non essere drammatico."
+        },
+        {
+          "from": "A",
+          "text": "Certo."
+        },
+        {
+          "from": "B",
+          "text": "Sul serio, cosa vuoi che faccia?"
+        },
+        {
+          "from": "A",
+          "text": "Niente. Me la caverò da solo."
+        },
+        {
+          "from": "B",
+          "text": "Come vuoi."
+        }
+      ],
+      "correct": {
+        "A": [
+          "frustrated",
+          "resentful",
+          "disappointed"
+        ],
+        "B": [
+          "guilty",
+          "defensive"
+        ]
+      },
       "cues": {
         "A": "“È la terza volta” = risentimento; “Lascia stare” = delusione.",
         "B": "“😬 scusa” = senso di colpa; “Dammi tregua” = difensivo."
@@ -130,6 +343,76 @@
     },
     "D": {
       "title": "Biglietto per il concerto",
+      "people": {
+        "A": "Ella",
+        "B": "Sophie"
+      },
+      "messages": [
+        {
+          "from": "A",
+          "text": "Indovina, ho preso i biglietti per il concerto!! 🎶🔥"
+        },
+        {
+          "from": "B",
+          "text": "Sul serio, che fortuna."
+        },
+        {
+          "from": "A",
+          "text": "Anche i posti in prima fila 😍 non vedo l'ora."
+        },
+        {
+          "from": "B",
+          "text": "Wow. Saranno costati un capitale."
+        },
+        {
+          "from": "A",
+          "text": "Ne valeva ogni centesimo."
+        },
+        {
+          "from": "B",
+          "text": "Ci ho provato ma erano esauriti..."
+        },
+        {
+          "from": "A",
+          "text": "Ero collegata appena sono usciti."
+        },
+        {
+          "from": "B",
+          "text": "Non tutti possono stare a ricaricare la pagina tutto il giorno 🙄."
+        },
+        {
+          "from": "A",
+          "text": "Ehi, scusa. Non volevo vantarmi."
+        },
+        {
+          "from": "B",
+          "text": "No, tranquilla. Divertiti."
+        },
+        {
+          "from": "A",
+          "text": "Vuoi che ti registri qualche clip?"
+        },
+        {
+          "from": "B",
+          "text": "Lascia perdere."
+        },
+        {
+          "from": "A",
+          "text": "…"
+        }
+      ],
+      "correct": {
+        "A": [
+          "excited",
+          "guilty"
+        ],
+        "B": [
+          "jealous",
+          "irritated",
+          "hurt",
+          "envious"
+        ]
+      },
       "cues": {
         "A": "“Posti in prima fila 😍” = entusiasmo; le scuse suggeriscono senso di colpa.",
         "B": "Frasi sprezzanti + 🙄 + “Non importa” = invidia, irritazione, ferita."
@@ -137,6 +420,64 @@
     },
     "E": {
       "title": "Portafoglio smarrito",
+      "people": {
+        "A": "Nina",
+        "B": "Omar"
+      },
+      "messages": [
+        {
+          "from": "A",
+          "text": "Ho appena trovato il tuo portafoglio al bar!"
+        },
+        {
+          "from": "B",
+          "text": "Sul serio? Dici davvero??"
+        },
+        {
+          "from": "A",
+          "text": "Sì. Dentro c'è tutto. Posso portartelo subito."
+        },
+        {
+          "from": "B",
+          "text": "Lo cercavo da un'ora. Pensavo fosse perso per sempre."
+        },
+        {
+          "from": "A",
+          "text": "Sono sotto casa tua tra 5 minuti."
+        },
+        {
+          "from": "B",
+          "text": "Mi hai salvato. Ero in panico."
+        },
+        {
+          "from": "A",
+          "text": "Tutto a posto. Ci vediamo tra poco."
+        },
+        {
+          "from": "B",
+          "text": "Grazie, davvero. Ti devo un favore."
+        },
+        {
+          "from": "A",
+          "text": "Non ti preoccupare 😊"
+        },
+        {
+          "from": "B",
+          "text": "Ora finalmente respiro."
+        }
+      ],
+      "correct": {
+        "A": [
+          "supportive",
+          "calm",
+          "content"
+        ],
+        "B": [
+          "relieved",
+          "grateful",
+          "appreciative"
+        ]
+      },
       "cues": {
         "A": "Rassicurazioni pratiche e tono calmo.",
         "B": "Sollievo (“posso finalmente respirare”), gratitudine (“Ti devo un favore”)."
@@ -144,6 +485,63 @@
     },
     "F": {
       "title": "Complimenti per la presentazione",
+      "people": {
+        "A": "Ava",
+        "B": "Ben"
+      },
+      "messages": [
+        {
+          "from": "A",
+          "text": "La tua presentazione oggi è stata fantastica!"
+        },
+        {
+          "from": "B",
+          "text": "Oh—grazie! Sono felice che sia piaciuta."
+        },
+        {
+          "from": "A",
+          "text": "Il Q&A era tosto ma l'hai gestito bene."
+        },
+        {
+          "from": "B",
+          "text": "Mi ero preparato per quelle domande."
+        },
+        {
+          "from": "A",
+          "text": "Dovresti esserne orgoglioso."
+        },
+        {
+          "from": "B",
+          "text": "Lo sono, in effetti. Ci ho lavorato per settimane."
+        },
+        {
+          "from": "A",
+          "text": "Si vedeva."
+        },
+        {
+          "from": "B",
+          "text": "Grazie per avermelo detto."
+        },
+        {
+          "from": "A",
+          "text": "Dovremmo proporla alla conferenza."
+        },
+        {
+          "from": "B",
+          "text": "Ottima idea!"
+        }
+      ],
+      "correct": {
+        "A": [
+          "supportive",
+          "happy"
+        ],
+        "B": [
+          "proud",
+          "relieved",
+          "happy"
+        ]
+      },
       "cues": {
         "A": "Incoraggiamento caloroso e conferme.",
         "B": "Riconosce l'impegno → orgoglio; dopo l'evento si scioglie → sollievo."
@@ -151,6 +549,64 @@
     },
     "G": {
       "title": "Scherzo imbarazzante",
+      "people": {
+        "A": "Chloe",
+        "B": "Dan"
+      },
+      "messages": [
+        {
+          "from": "A",
+          "text": "A proposito di prima... la mia battuta non era granché."
+        },
+        {
+          "from": "B",
+          "text": "Ha colto tutti di sorpresa."
+        },
+        {
+          "from": "A",
+          "text": "Non volevo dare fastidio a nessuno."
+        },
+        {
+          "from": "B",
+          "text": "Forse solo tempismo sbagliato."
+        },
+        {
+          "from": "A",
+          "text": "Adesso mi sento sciocca."
+        },
+        {
+          "from": "B",
+          "text": "Capita a tutti."
+        },
+        {
+          "from": "A",
+          "text": "Dovrei scusarmi con Mira?"
+        },
+        {
+          "from": "B",
+          "text": "Un messaggio veloce aiuterebbe."
+        },
+        {
+          "from": "A",
+          "text": "Lo mando subito."
+        },
+        {
+          "from": "B",
+          "text": "Ottima idea."
+        }
+      ],
+      "correct": {
+        "A": [
+          "embarrassed",
+          "regretful",
+          "anxious"
+        ],
+        "B": [
+          "supportive",
+          "concerned",
+          "calm"
+        ]
+      },
       "cues": {
         "A": "Ammette l'errore → imbarazzo/rammarico.",
         "B": "Guida delicata; tono stabile."
@@ -158,6 +614,63 @@
     },
     "H": {
       "title": "Gomma a terra",
+      "people": {
+        "A": "Priya",
+        "B": "Tom"
+      },
+      "messages": [
+        {
+          "from": "A",
+          "text": "Sono ferma con una gomma a terra sulla A2."
+        },
+        {
+          "from": "B",
+          "text": "Stai bene? Hai messo le quattro frecce?"
+        },
+        {
+          "from": "A",
+          "text": "Sì, mi sono accostata."
+        },
+        {
+          "from": "B",
+          "text": "Posso venire con il compressore."
+        },
+        {
+          "from": "A",
+          "text": "Sarebbe fantastico."
+        },
+        {
+          "from": "B",
+          "text": "Mandami la posizione."
+        },
+        {
+          "from": "A",
+          "text": "Fatto."
+        },
+        {
+          "from": "B",
+          "text": "Sto arrivando. 15 minuti."
+        },
+        {
+          "from": "A",
+          "text": "Grazie. Ero un po' scossa."
+        },
+        {
+          "from": "B",
+          "text": "Andrà tutto bene. Ci pensiamo noi."
+        }
+      ],
+      "correct": {
+        "A": [
+          "anxious",
+          "relieved"
+        ],
+        "B": [
+          "concerned",
+          "supportive",
+          "calm"
+        ]
+      },
       "cues": {
         "A": "Stress e poi sollievo quando arriva aiuto.",
         "B": "Controlla la sicurezza, offre aiuto concreto."
@@ -165,6 +678,63 @@
     },
     "I": {
       "title": "Invito alla festa",
+      "people": {
+        "A": "Zoe",
+        "B": "Mark"
+      },
+      "messages": [
+        {
+          "from": "A",
+          "text": "Vieni alla festa di Jess stasera?"
+        },
+        {
+          "from": "B",
+          "text": "Forse. Settimana lunga."
+        },
+        {
+          "from": "A",
+          "text": "Sarà divertente—ci saranno un sacco di persone."
+        },
+        {
+          "from": "B",
+          "text": "Mh."
+        },
+        {
+          "from": "A",
+          "text": "Potremmo stare solo un'ora."
+        },
+        {
+          "from": "B",
+          "text": "Credo che salterò questa volta."
+        },
+        {
+          "from": "A",
+          "text": "Ah, ok."
+        },
+        {
+          "from": "B",
+          "text": "Falle gli auguri da parte mia."
+        },
+        {
+          "from": "A",
+          "text": "Lo farò."
+        },
+        {
+          "from": "B",
+          "text": "Ci vediamo un'altra volta?"
+        }
+      ],
+      "correct": {
+        "A": [
+          "disappointed",
+          "hurt"
+        ],
+        "B": [
+          "bored",
+          "apathetic",
+          "distant"
+        ]
+      },
       "cues": {
         "A": "Sconforto dopo i tentativi di convincere.",
         "B": "Bassa energia, risposte vaghe; decide di non venire."
@@ -172,6 +742,63 @@
     },
     "J": {
       "title": "Regalo inaspettato",
+      "people": {
+        "A": "Hana",
+        "B": "Luca"
+      },
+      "messages": [
+        {
+          "from": "A",
+          "text": "Ti ho lasciato qualcosa davanti alla porta 😊"
+        },
+        {
+          "from": "B",
+          "text": "Cosa? Ho appena visto una scatola!"
+        },
+        {
+          "from": "A",
+          "text": "Aprila!"
+        },
+        {
+          "from": "B",
+          "text": "Wow—il mio tè preferito."
+        },
+        {
+          "from": "A",
+          "text": "Ho pensato che ti servisse un po' di carica."
+        },
+        {
+          "from": "B",
+          "text": "Mi ha rallegrato la giornata."
+        },
+        {
+          "from": "A",
+          "text": "Contenta che ti sia servito."
+        },
+        {
+          "from": "B",
+          "text": "Non me lo aspettavo proprio."
+        },
+        {
+          "from": "A",
+          "text": "Hai lavorato così tanto ultimamente."
+        },
+        {
+          "from": "B",
+          "text": "Grazie—davvero."
+        }
+      ],
+      "correct": {
+        "A": [
+          "supportive",
+          "happy"
+        ],
+        "B": [
+          "surprised",
+          "grateful",
+          "appreciative"
+        ]
+      },
       "cues": {
         "A": "Generosità attenta; tono vivace.",
         "B": "“Non me l'aspettavo” + ringraziamenti → sorpresa + gratitudine."
