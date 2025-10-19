@@ -1,0 +1,181 @@
+{
+  "screen": {
+    "title": "Chat de Emociones — Microapp de Cognición Social"
+  },
+  "toolbar": {
+    "aria": "Controles",
+    "scenario": {
+      "label": "Escenario"
+    },
+    "distractors": {
+      "label": "Distractores por persona"
+    },
+    "play": "Reproducir chat",
+    "skip": "Saltar chat",
+    "reset": "Reiniciar",
+    "download": {
+      "label": "Descargar CSV",
+      "title": "Descargar el CSV de tus resultados"
+    },
+    "status": {
+      "ready": "Listo",
+      "playing": "Reproduciendo…",
+      "complete": "Chat completado — ve al Paso 1",
+      "progress": "{current} / {total}",
+      "timer": "Tiempo: {seconds}s"
+    }
+  },
+  "sections": {
+    "chat": {
+      "title": "Chat",
+      "title_with_names": "Chat — {name_a} y {name_b}",
+      "aria": "Transcripción del chat"
+    },
+    "responses": {
+      "title": "Tus respuestas"
+    },
+    "step1": {
+      "title": "Paso 1 — Respuesta libre",
+      "label": "¿Qué emociones estaba sintiendo {name}?",
+      "placeholder": "Escribe una o más emociones…",
+      "hint": {
+        "ready": "Listo.",
+        "fill": "Completa ambas casillas para continuar.",
+        "wait": "Termina el chat y luego completa ambas casillas para continuar."
+      },
+      "continue": "Pasar al Paso 2"
+    },
+    "step2": {
+      "title": "Paso 2 — Selecciona las emociones (elige todas las que correspondan)",
+      "legend": "Selecciona todas las que correspondan para {name}",
+      "submit": "Mostrar comentarios"
+    },
+    "step3": {
+      "title": "Paso 3 — Comentarios",
+      "correct": "Correctas:",
+      "selected": "Seleccionaste:",
+      "hits": "Aciertos",
+      "missed": "Ausentes",
+      "extra": "Extras",
+      "none": "—",
+      "summary": "{name} — {metric} {value}%",
+      "metrics": {
+        "recall": "Recuerdo",
+        "precision": "Precisión"
+      }
+    }
+  },
+  "csv": {
+    "fileName": "resultados_chat_emociones.csv"
+  },
+  "emotions": {
+    "labels": {
+      "happy": "Feliz",
+      "excited": "Emocionado",
+      "frustrated": "Frustrado",
+      "irritated": "Irritado",
+      "calm": "Calmado",
+      "disappointed": "Decepcionado",
+      "guilty": "Culpable",
+      "sad": "Triste",
+      "defensive": "A la defensiva",
+      "anxious": "Ansioso",
+      "embarrassed": "Avergonzado",
+      "angry": "Enojado",
+      "relieved": "Aliviado",
+      "neutral": "Neutral",
+      "confused": "Confundido",
+      "optimistic": "Optimista",
+      "proud": "Orgulloso",
+      "distant": "Distante",
+      "supportive": "Solidario",
+      "jealous": "Celoso",
+      "envious": "Envidioso",
+      "hurt": "Herido",
+      "curious": "Curioso",
+      "content": "Satisfecho",
+      "resentful": "Resentido",
+      "surprised": "Sorprendido",
+      "hopeful": "Esperanzado",
+      "grateful": "Agradecido",
+      "appreciative": "Reconocido",
+      "concerned": "Preocupado",
+      "bored": "Aburrido",
+      "regretful": "Arrepentido",
+      "apathetic": "Apático",
+      "withdrawn": "Retraído"
+    }
+  },
+  "scenarios": {
+    "A": {
+      "title": "Proyecto grupal",
+      "cues": {
+        "A": "Frustración (“entrega mañana 😬”), decepción (“Lo termino yo mismo”), retraimiento (“…”).",
+        "B": "Actitud defensiva (“Siempre te estresas”), irritación (🙄)."
+      }
+    },
+    "B": {
+      "title": "Llamada perdida",
+      "cues": {
+        "A": "Ansiedad (“estaba preocupada”), dolor/decepción (“Esperé”, “Me dolió un poco”).",
+        "B": "Evasión, defensividad (“exageras”), distancia (“No me esperes”)."
+      }
+    },
+    "C": {
+      "title": "Favor olvidado",
+      "cues": {
+        "A": "“Es la tercera vez” = resentimiento; “Olvídalo” = decepción.",
+        "B": "“😬 perdón” = culpa; “Dame un respiro” = defensivo."
+      }
+    },
+    "D": {
+      "title": "Entrada para el concierto",
+      "cues": {
+        "A": "“Entradas en primera fila 😍” = entusiasmo; la disculpa sugiere culpa.",
+        "B": "Comentarios despectivos + 🙄 + “No te molestes” = envidia, irritación, dolor."
+      }
+    },
+    "E": {
+      "title": "Cartera perdida",
+      "cues": {
+        "A": "Tranquiliza con calma y soluciones prácticas.",
+        "B": "Alivio (“por fin puedo respirar”), gratitud (“Te debo una”)."
+      }
+    },
+    "F": {
+      "title": "Elogios a la presentación",
+      "cues": {
+        "A": "Ánimo cálido y reafirmaciones.",
+        "B": "Reconoce el esfuerzo → orgullo; después baja la tensión → alivio."
+      }
+    },
+    "G": {
+      "title": "Broma incómoda",
+      "cues": {
+        "A": "Admite el error → vergüenza/arrepentimiento.",
+        "B": "Orientación suave; tono estable."
+      }
+    },
+    "H": {
+      "title": "Llanta pinchada",
+      "cues": {
+        "A": "Estrés y luego alivio cuando llega ayuda.",
+        "B": "Verifica seguridad y ofrece ayuda concreta."
+      }
+    },
+    "I": {
+      "title": "Invitación a la fiesta",
+      "cues": {
+        "A": "Desánimo tras intentar convencer.",
+        "B": "Energía baja, respuestas evasivas; decide no asistir."
+      }
+    },
+    "J": {
+      "title": "Regalo inesperado",
+      "cues": {
+        "A": "Generosidad atenta; tono animado.",
+        "B": "“No me lo esperaba” + agradecimientos → sorpresa + gratitud."
+      }
+    }
+  }
+}

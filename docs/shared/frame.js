@@ -12,7 +12,10 @@
   // --- Resolve base path (e.g., "/micro-apps-repository")
   const BASE = (() => {
     const parts = (location.pathname || "/").split("/").filter(Boolean);
-    return parts.length ? `/${parts[0]}` : "";
+    if (!parts.length) return "";
+    const first = parts[0];
+    if (["apps", "shared", "domains", "assets"].includes(first)) return "";
+    return `/${first}`;
   })();
 
   const DEBUG = !!window.__FRAME_DEBUG__;

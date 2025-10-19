@@ -1,0 +1,181 @@
+{
+  "screen": {
+    "title": "Chat delle Emozioni — Micro-app di Cognizione Sociale"
+  },
+  "toolbar": {
+    "aria": "Controlli",
+    "scenario": {
+      "label": "Scenario"
+    },
+    "distractors": {
+      "label": "Distrattori per persona"
+    },
+    "play": "Avvia chat",
+    "skip": "Salta chat",
+    "reset": "Reimposta",
+    "download": {
+      "label": "Scarica CSV",
+      "title": "Scarica il CSV dei tuoi risultati"
+    },
+    "status": {
+      "ready": "Pronto",
+      "playing": "Riproduzione…",
+      "complete": "Chat completata — passa al Passo 1",
+      "progress": "{current} / {total}",
+      "timer": "Tempo: {seconds}s"
+    }
+  },
+  "sections": {
+    "chat": {
+      "title": "Chat",
+      "title_with_names": "Chat — {name_a} e {name_b}",
+      "aria": "Trascrizione della chat"
+    },
+    "responses": {
+      "title": "Le tue risposte"
+    },
+    "step1": {
+      "title": "Passo 1 — Risposta libera",
+      "label": "Che emozioni stava provando {name}?",
+      "placeholder": "Scrivi una o più emozioni…",
+      "hint": {
+        "ready": "Pronto.",
+        "fill": "Compila entrambe le caselle per continuare.",
+        "wait": "Termina la chat, poi compila entrambe le caselle per continuare."
+      },
+      "continue": "Passa al Passo 2"
+    },
+    "step2": {
+      "title": "Passo 2 — Seleziona le emozioni (scegli tutte quelle pertinenti)",
+      "legend": "Seleziona tutte quelle pertinenti per {name}",
+      "submit": "Mostra feedback"
+    },
+    "step3": {
+      "title": "Passo 3 — Feedback",
+      "correct": "Corrette:",
+      "selected": "Hai selezionato:",
+      "hits": "Giuste",
+      "missed": "Mancanti",
+      "extra": "Extra",
+      "none": "—",
+      "summary": "{name} — {metric} {value}%",
+      "metrics": {
+        "recall": "Richiamo",
+        "precision": "Precisione"
+      }
+    }
+  },
+  "csv": {
+    "fileName": "risultati_chat_emozioni.csv"
+  },
+  "emotions": {
+    "labels": {
+      "happy": "Felice",
+      "excited": "Eccitato",
+      "frustrated": "Frustrato",
+      "irritated": "Irritato",
+      "calm": "Calmo",
+      "disappointed": "Deluso",
+      "guilty": "Colpevole",
+      "sad": "Triste",
+      "defensive": "Sulla difensiva",
+      "anxious": "Ansioso",
+      "embarrassed": "Imbarazzato",
+      "angry": "Arrabbiato",
+      "relieved": "Sollevato",
+      "neutral": "Neutro",
+      "confused": "Confuso",
+      "optimistic": "Ottimista",
+      "proud": "Orgoglioso",
+      "distant": "Distante",
+      "supportive": "Solidale",
+      "jealous": "Geloso",
+      "envious": "Invidioso",
+      "hurt": "Ferito",
+      "curious": "Curioso",
+      "content": "Soddisfatto",
+      "resentful": "Risentito",
+      "surprised": "Sorpreso",
+      "hopeful": "Speranzoso",
+      "grateful": "Grato",
+      "appreciative": "Riconoscente",
+      "concerned": "Preoccupato",
+      "bored": "Annoiato",
+      "regretful": "Rammaricato",
+      "apathetic": "Apatico",
+      "withdrawn": "Chiuso in sé"
+    }
+  },
+  "scenarios": {
+    "A": {
+      "title": "Progetto di gruppo",
+      "cues": {
+        "A": "Frustrazione (“scade domani 😬”), delusione (“Lo finirò da solo”), chiusura (“…”).",
+        "B": "Difensività (“Ti preoccupi sempre troppo”), irritazione (🙄)."
+      }
+    },
+    "B": {
+      "title": "Chiamata persa",
+      "cues": {
+        "A": "Ansia (“ero preoccupata”), ferita/delusione (“Ho aspettato”, “Mi ha fatto un po' male”).",
+        "B": "Evasività, atteggiamento difensivo (“esageri”), distanza (“Non stare ad aspettare”)."
+      }
+    },
+    "C": {
+      "title": "Favore dimenticato",
+      "cues": {
+        "A": "“È la terza volta” = risentimento; “Lascia stare” = delusione.",
+        "B": "“😬 scusa” = senso di colpa; “Dammi tregua” = difensivo."
+      }
+    },
+    "D": {
+      "title": "Biglietto per il concerto",
+      "cues": {
+        "A": "“Posti in prima fila 😍” = entusiasmo; le scuse suggeriscono senso di colpa.",
+        "B": "Frasi sprezzanti + 🙄 + “Non importa” = invidia, irritazione, ferita."
+      }
+    },
+    "E": {
+      "title": "Portafoglio smarrito",
+      "cues": {
+        "A": "Rassicurazioni pratiche e tono calmo.",
+        "B": "Sollievo (“posso finalmente respirare”), gratitudine (“Ti devo un favore”)."
+      }
+    },
+    "F": {
+      "title": "Complimenti per la presentazione",
+      "cues": {
+        "A": "Incoraggiamento caloroso e conferme.",
+        "B": "Riconosce l'impegno → orgoglio; dopo l'evento si scioglie → sollievo."
+      }
+    },
+    "G": {
+      "title": "Scherzo imbarazzante",
+      "cues": {
+        "A": "Ammette l'errore → imbarazzo/rammarico.",
+        "B": "Guida delicata; tono stabile."
+      }
+    },
+    "H": {
+      "title": "Gomma a terra",
+      "cues": {
+        "A": "Stress e poi sollievo quando arriva aiuto.",
+        "B": "Controlla la sicurezza, offre aiuto concreto."
+      }
+    },
+    "I": {
+      "title": "Invito alla festa",
+      "cues": {
+        "A": "Sconforto dopo i tentativi di convincere.",
+        "B": "Bassa energia, risposte vaghe; decide di non venire."
+      }
+    },
+    "J": {
+      "title": "Regalo inaspettato",
+      "cues": {
+        "A": "Generosità attenta; tono vivace.",
+        "B": "“Non me l'aspettavo” + ringraziamenti → sorpresa + gratitudine."
+      }
+    }
+  }
+}
