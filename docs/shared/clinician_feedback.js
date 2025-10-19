@@ -34,6 +34,19 @@
     };
   }
 
+  function translate(key, fallback) {
+    try {
+      const { I18N } = window || {};
+      if (I18N && typeof I18N.t === "function") {
+        const value = I18N.t(key);
+        if (value && value !== key) return value;
+      }
+    } catch (err) {
+      console.warn("clinician i18n failed", err);
+    }
+    return fallback;
+  }
+
   function ensureCommentBox() {
     if (commentEl && document.body.contains(commentEl)) return commentEl;
     const root = document.getElementById("app-root") || document.body;
@@ -51,20 +64,28 @@
     section.id = "clinician-notes";
     section.className = "note-card";
     const limitAttr = NOTE_CHAR_LIMIT ? `maxlength="${NOTE_CHAR_LIMIT}"` : "";
+    const fallback = {
+      badge: "Clinician",
+      title: "Session notes",
+      subhead: "Document professional observations for the care team.",
+      label: "Clinician comments (optional)",
+      placeholder: "Enter any notes relevant to this session...",
+      helper: "This note will be added as <code>clinician_comment</code> in the exported CSV.",
+    };
+
     section.innerHTML = `
       <header class="note-card__head">
-        <span class="note-card__badge">Clinician</span>
-        <h2 class="note-card__title">Session notes</h2>
-        <p class="note-card__subhead">Document professional observations for the care team.</p>
+        <span class="note-card__badge" data-i18n="clinician.badge">${fallback.badge}</span>
+        <h2 class="note-card__title" data-i18n="clinician.title">${fallback.title}</h2>
+        <p class="note-card__subhead" data-i18n="clinician.subhead" data-i18n-target="text">${fallback.subhead}</p>
       </header>
       <div class="note-card__body">
-        <label for="clinician-comment">Clinician comments (optional)</label>
+        <label for="clinician-comment" data-i18n="clinician.label">${fallback.label}</label>
         <textarea id="clinician-comment" rows="4" ${limitAttr} data-note-input
-          placeholder="Enter any notes relevant to this session..."></textarea>
+          placeholder="${fallback.placeholder}"
+          data-i18n="clinician.placeholder" data-i18n-attr="placeholder"></textarea>
         <div class="note-card__footer">
-          <p class="helper">
-            This note will be added as <code>clinician_comment</code> in the exported CSV.
-          </p>
+          <p class="helper" data-i18n="clinician.helper" data-i18n-target="html">${fallback.helper}</p>
           <span class="note-card__count" data-note-count></span>
         </div>
       </div>
@@ -72,6 +93,23 @@
     root.appendChild(section);
     commentEl = section.querySelector("#clinician-comment");
     countEl = section.querySelector("[data-note-count]");
+    try {
+      const { I18N } = window || {};
+      if (I18N && typeof I18N.apply === "function") {
+        I18N.apply(section);
+      } else {
+        // Apply best-effort translations synchronously
+        section.querySelector(".note-card__badge").textContent = translate("clinician.badge", fallback.badge);
+        section.querySelector(".note-card__title").textContent = translate("clinician.title", fallback.title);
+        section.querySelector(".note-card__subhead").textContent = translate("clinician.subhead", fallback.subhead);
+        section.querySelector("label[for=\"clinician-comment\"]").textContent = translate("clinician.label", fallback.label);
+        commentEl.placeholder = translate("clinician.placeholder", fallback.placeholder);
+        const helper = section.querySelector(".helper");
+        if (helper) helper.innerHTML = translate("clinician.helper", fallback.helper);
+      }
+    } catch (err) {
+      console.warn("clinician translation apply failed", err);
+    }
     enhanceTextarea(commentEl);
     bindCommentListener();
     updateNoteCount();

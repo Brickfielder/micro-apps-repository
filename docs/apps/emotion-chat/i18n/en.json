@@ -2,6 +2,10 @@
   "screen": {
     "title": "Emotion Chat — Social Cognition Micro-App"
   },
+  "hero": {
+    "title": "Emotion Chat",
+    "description": "Recognise emotions and intentions in short chat-style vignettes."
+  },
   "toolbar": {
     "aria": "Controls",
     "scenario": {

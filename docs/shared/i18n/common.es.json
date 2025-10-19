@@ -1,10 +1,20 @@
-{ "ui": {
-  "language": "Idioma",
-  "start": "Empezar",
-  "next": "Siguiente",
-  "back": "Atrás",
-  "save": "Guardar",
-  "export": "Exportar",
-  "confirm": "Confirmar",
-  "cancel": "Cancelar"
-}}
+{
+  "ui": {
+    "language": "Idioma",
+    "start": "Empezar",
+    "next": "Siguiente",
+    "back": "Atrás",
+    "save": "Guardar",
+    "export": "Exportar",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar"
+  },
+  "clinician": {
+    "badge": "Clínico",
+    "title": "Notas de la sesión",
+    "subhead": "Documenta observaciones profesionales para el equipo de atención.",
+    "label": "Comentarios del clínico (opcional)",
+    "placeholder": "Introduce cualquier nota relevante para esta sesión...",
+    "helper": "Esta nota se añadirá como <code>clinician_comment</code> en el CSV exportado."
+  }
+}
