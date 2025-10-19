@@ -1,0 +1,15 @@
+{ "terms": {
+  "pin": "PIN",
+  "sortCode": "Sort code",
+  "accountNumber": "Account number",
+  "iban": "IBAN",
+  "bic": "BIC/SWIFT",
+  "directDebit": "Direct Debit",
+  "standingOrder": "Standing order",
+  "bankTransfer": "Bank transfer",
+  "cardPayment": "Card payment",
+  "balance": "Balance",
+  "availableBalance": "Available balance",
+  "statement": "Statement",
+  "overdraft": "Overdraft"
+}}

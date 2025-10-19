@@ -1,0 +1,531 @@
+{
+  "screen": {
+    "title": "Brightwave Mobile Banking Simulator",
+    "appAria": "Brightwave Bank mobile app"
+  },
+  "header": {
+    "brand": "Brightwave"
+  },
+  "instructions": {
+    "summaryTitle": "How to use this simulator",
+    "summaryBody1": "Practise routine online banking tasks inside a touch-style interface.",
+    "summaryBody2": "Select the mobile or tablet frame, then explore the tabs to manage balances, transfers, bills, cards, and security. If a step is missed, the prompt bar will explain what to do next so you can self-correct."
+  },
+  "toolbar": {
+    "controlBarAria": "View options and status",
+    "viewToggleAria": "Switch device frame",
+    "phone": "📱 Phone",
+    "tablet": "💻 Tablet",
+    "lastSync": "Balances refresh instantly — last sync {time}"
+  },
+  "status": {
+    "cardUnlocked": "Card unlocked",
+    "cardLocked": "Card locked"
+  },
+  "navigation": {
+    "aria": "Primary banking sections",
+    "accounts": {
+      "label": "Accounts",
+      "hint": "Balances & history"
+    },
+    "payments": {
+      "label": "Payments",
+      "hint": "Transfers & bills"
+    },
+    "security": {
+      "label": "Cards & PIN",
+      "hint": "Security tools"
+    }
+  },
+  "panels": {
+    "accounts": "Accounts and transactions",
+    "payments": "Payments and standing orders",
+    "security": "Card and PIN tools"
+  },
+  "accounts": {
+    "filterLabel": "View transactions for",
+    "refresh": "🔄 Refresh now",
+    "pendingHint": "Pending items show in amber.",
+    "exportCsv": "⬇️ Export CSV",
+    "exportPdf": "⬇️ Export PDF",
+    "current": {
+      "name": "Current Account",
+      "type": "Current"
+    },
+    "savings": {
+      "name": "Easy Saver",
+      "type": "Savings"
+    },
+    "travel": {
+      "name": "Travel Wallet (EUR)",
+      "type": "Linked (EUR)"
+    }
+  },
+  "forms": {
+    "transfer": {
+      "title": "Transfer between your accounts",
+      "from": "From",
+      "to": "To",
+      "amount": "Amount",
+      "submit": "Transfer now"
+    },
+    "bill": {
+      "title": "Pay a bill / schedule recurring",
+      "payFrom": "Pay from",
+      "payee": "Payee",
+      "amount": "Amount",
+      "frequency": "Frequency",
+      "submit": "Confirm payment",
+      "options": {
+        "default": "-- Choose payee --",
+        "energy": "Bright Energy (Utilities)",
+        "water": "City Water Board",
+        "rent": "Evergreen Rentals",
+        "card": "Momentum Credit Card"
+      },
+      "frequencyOptions": {
+        "once": "One-off payment",
+        "monthly": "Monthly recurring",
+        "quarterly": "Quarterly recurring"
+      }
+    },
+    "send": {
+      "title": "Send money to someone",
+      "from": "From account",
+      "recipient": "Recipient",
+      "recipientPlaceholder": "Name or company",
+      "amount": "Amount",
+      "method": "Delivery method",
+      "reference": "Reference (optional)",
+      "referencePlaceholder": "e.g. Birthday gift",
+      "submit": "Send payment",
+      "methodOptions": {
+        "faster": "Faster Payments (UK)",
+        "bacs": "BACS (2-3 days)",
+        "chaps": "CHAPS (same-day high value)",
+        "sepa": "SEPA (EU)",
+        "instant": "Instant within Brightwave"
+      }
+    },
+    "debit": {
+      "title": "Set up a new direct debit / standing order",
+      "type": "Type",
+      "typeDirectDebit": "Direct debit",
+      "typeStandingOrder": "Standing order",
+      "name": "Name",
+      "namePlaceholder": "Organisation",
+      "amount": "Amount",
+      "schedule": "Schedule",
+      "schedulePlaceholder": "e.g. 15th of each month",
+      "submit": "Add instruction"
+    }
+  },
+  "mandates": {
+    "directDebits": {
+      "title": "Direct debits",
+      "empty": "No direct debits yet.",
+      "energy": {
+        "name": "Bright Energy",
+        "schedule": "15th monthly"
+      },
+      "water": {
+        "name": "City Water Board",
+        "schedule": "28th monthly"
+      },
+      "card": {
+        "name": "Momentum Credit Card",
+        "schedule": "Due on statement date"
+      }
+    },
+    "standingOrders": {
+      "title": "Standing orders",
+      "empty": "No standing orders yet.",
+      "sweep": {
+        "name": "Savings sweep",
+        "schedule": "Every Friday"
+      },
+      "rent": {
+        "name": "Rent to Evergreen Rentals",
+        "schedule": "1st monthly"
+      }
+    },
+    "frequency": {
+      "monthly": "Monthly",
+      "quarterly": "Quarterly"
+    },
+    "actions": {
+      "cancel": "Cancel",
+      "restore": "Reinstate",
+      "pause": "Pause",
+      "resume": "Resume"
+    }
+  },
+  "card": {
+    "preview": {
+      "name": "Brightwave Debit",
+      "badgeActive": "Active",
+      "badgeLocked": "Locked",
+      "holder": "Account holder",
+      "expires": "Expires"
+    },
+    "controls": {
+      "title": "Card controls",
+      "lock": "🔐 Lock card",
+      "unlock": "🔓 Unlock card"
+    },
+    "request": {
+      "title": "Request a new card",
+      "reason": "Reason",
+      "delivery": "Delivery notes (optional)",
+      "deliveryPlaceholder": "e.g. Use secure weekday delivery",
+      "submit": "Submit request",
+      "optionDefault": "-- Select a reason --",
+      "optionDamaged": "Damaged",
+      "optionLost": "Lost",
+      "optionExpired": "Expired soon",
+      "optionAdditional": "Additional cardholder"
+    }
+  },
+  "limits": {
+    "title": "Set spending limits",
+    "helper": "Adjust how much can be spent on the card before a manual review is needed.",
+    "daily": "Daily card limit",
+    "contactless": "Contactless tap limit",
+    "submit": "Update limits",
+    "summary": "Daily limit {daily} · Contactless {contactless}"
+  },
+  "pin": {
+    "title": "Change your PIN",
+    "new": "New PIN",
+    "confirm": "Confirm PIN",
+    "submit": "Update PIN"
+  },
+  "tasks": {
+    "aria": "Practice task checklist",
+    "title": "Today's practice",
+    "helper": "Work through each activity inside the simulator. Items tick themselves when you complete the matching action.",
+    "reset": "Reset checklist",
+    "progress": "{completed} of {total} tasks completed",
+    "items": {
+      "checkBalances": {
+        "title": "Check balances",
+        "helper": "Refresh the Accounts tab to confirm your current, savings, and linked totals."
+      },
+      "recurringPayment": {
+        "title": "Set up a recurring payment",
+        "helper": "Use bill payments or mandates to schedule an automatic outgoing payment."
+      },
+      "sendExternal": {
+        "title": "Send money to other people or accounts",
+        "helper": "Complete the send money form with a recipient and delivery method."
+      },
+      "transferOwn": {
+        "title": "Transfer money between your own accounts",
+        "helper": "Move funds internally using the transfer form."
+      },
+      "changePin": {
+        "title": "Change your PIN",
+        "helper": "Submit matching four-digit PIN entries in the security tab."
+      },
+      "setLimits": {
+        "title": "Set spending limits",
+        "helper": "Adjust the daily and contactless card limits in the security tools."
+      }
+    }
+  },
+  "sidebar": {
+    "aria": "Prompts and notes"
+  },
+  "session": {
+    "title": "Session tracker",
+    "download": "⬇️ Download session CSV",
+    "clear": "Clear tracker"
+  },
+  "clinician": {
+    "title": "Clinician comments",
+    "helper": "Use this space to record observations, cueing strategies, or follow-up goals after the session.",
+    "placeholder": "Enter any notes relevant to this session..."
+  },
+  "spending": {
+    "title": "Spending by category (30 days)",
+    "empty": "No outgoing payments recorded yet."
+  },
+  "prompts": {
+    "prefix": {
+      "error": "⚠️ Check & retry:",
+      "success": "✅ Done:",
+      "info": "ℹ️ Info:"
+    },
+    "next": "Next: {step}",
+    "ready": "Ready when you are. Choose a task to begin.",
+    "account": {
+      "switched": {
+        "message": "Switched to {account}.",
+        "next": "Scroll down to review the latest transactions."
+      }
+    },
+    "tasks": {
+      "reset": {
+        "message": "Task checklist reset.",
+        "next": "Work back through each activity inside the simulator."
+      }
+    },
+    "directDebit": {
+      "reinstate": {
+        "message": "{name} is active again.",
+        "next": "Monitor the next collection date in the direct debits list."
+      },
+      "cancel": {
+        "message": "{name} will no longer collect.",
+        "next": "Confirm with the provider if an alternative payment is needed."
+      }
+    },
+    "standingOrder": {
+      "resume": {
+        "message": "{name} will run as scheduled.",
+        "next": "Check your calendar reminder to avoid duplicates."
+      },
+      "pause": {
+        "message": "{name} is paused.",
+        "next": "Set a manual reminder if you still need to pay this manually."
+      }
+    }
+  },
+  "notifications": {
+    "limits": {
+      "updated": "Spending limits updated.",
+      "updatedNext": "Changes apply straight away to in-store and contactless transactions."
+    },
+    "refresh": {
+      "success": "Balances refreshed. Everything is up to date.",
+      "next": "Continue with your next task."
+    },
+    "transfer": {
+      "success": "Transfer complete.",
+      "next": "Review the transaction history to confirm both entries."
+    },
+    "bill": {
+      "submitted": "Bill payment submitted.",
+      "onceNext": "Check the transactions list to see it marked as paid.",
+      "recurringNext": "Review the mandates panel to confirm the new recurring payment."
+    },
+    "send": {
+      "success": "Payment sent.",
+      "next": {
+        "bacs": "Expect the funds to clear in 2–3 working days.",
+        "chaps": "Stay available for the confirmation call before the cut-off time.",
+        "standard": "Share the confirmation with the recipient if needed."
+      }
+    },
+    "mandate": {
+      "directDebitCreated": "Direct debit created.",
+      "standingCreated": "Standing order created.",
+      "manageNext": "You can manage it from the list to pause or cancel later."
+    },
+    "view": {
+      "switched": "Switched to the {mode} view.",
+      "next": "Continue practising tasks inside the simulated device."
+    },
+    "tab": {
+      "opened": "Opened the {tab} workspace.",
+      "accountsNext": "Review balances or export a statement.",
+      "paymentsNext": "Choose a form to set up transfers or bill payments.",
+      "securityNext": "Lock cards or manage security options."
+    },
+    "pin": {
+      "updated": "PIN updated securely.",
+      "updatedNext": "Remember to memorise it and destroy any written notes."
+    },
+    "card": {
+      "locked": "Card locked instantly.",
+      "lockedNext": "If the card is found later, return to unlock it before use.",
+      "unlocked": "Card unlocked instantly.",
+      "unlockedNext": "You can continue using the card immediately.",
+      "requested": "Replacement card request submitted.",
+      "requestedNext": "Watch your messages for confirmation of the delivery date."
+    },
+    "export": {
+      "sessionCsv": "Session CSV downloaded.",
+      "sessionCsvNext": "Share the log or keep it for your records.",
+      "csv": "CSV statement downloaded.",
+      "csvNext": "Open it in Excel or your spreadsheet tool for review.",
+      "pdf": "PDF statement downloaded.",
+      "pdfNext": "Open it to review or share as needed."
+    },
+    "timeline": {
+      "cleared": "Session tracker cleared.",
+      "clearedNext": "Continue practising and new actions will appear here."
+    },
+    "transactions": {
+      "updated": "Transaction view updated.",
+      "updatedNext": "Scroll to see the selected account history."
+    }
+  },
+  "errors": {
+    "limits": {
+      "dailyRange": "Set a daily limit between £100 and £5,000.",
+      "dailyRangeNext": "Adjust the daily amount, then press \"Update limits\".",
+      "contactlessRange": "Contactless limit must be between £10 and £500.",
+      "contactlessRangeNext": "Amend the contactless amount before saving.",
+      "order": "Contactless limit cannot be higher than the daily limit.",
+      "orderNext": "Lower the contactless limit or raise the daily cap first."
+    },
+    "transfer": {
+      "missingAccounts": "Choose both a source and destination account.",
+      "missingAccountsNext": "Select different accounts from the dropdowns.",
+      "sameAccount": "You selected the same account for both fields.",
+      "sameAccountNext": "Change one of the dropdowns so the money has somewhere to go.",
+      "amount": "Enter a transfer amount greater than zero.",
+      "amountNext": "Type the amount you want to move, then press \"Transfer now\".",
+      "balance": "Insufficient funds in the selected source account.",
+      "balanceNext": "Reduce the amount or pick an account with enough balance."
+    },
+    "bill": {
+      "incomplete": "Complete all bill payment fields first.",
+      "incompleteNext": "Pick an account, payee, and amount before confirming.",
+      "balance": "The account does not have enough funds for this bill.",
+      "balanceNext": "Adjust the amount or transfer funds in before paying."
+    },
+    "send": {
+      "incomplete": "Fill in the account, recipient, and amount fields.",
+      "incompleteNext": "Complete the missing fields, then try sending again.",
+      "balance": "Insufficient funds for this payment.",
+      "balanceNext": "Transfer money in or lower the amount before resubmitting."
+    },
+    "mandate": {
+      "incomplete": "All fields are required to set up an instruction.",
+      "incompleteNext": "Enter the organisation, amount, and schedule before saving."
+    },
+    "pin": {
+      "format": "PIN must be exactly four digits.",
+      "formatNext": "Enter four numbers (0-9) with no spaces.",
+      "match": "The PIN entries do not match.",
+      "matchNext": "Re-enter the same digits in both boxes."
+    },
+    "card": {
+      "reason": "Select a reason for the replacement card.",
+      "reasonNext": "Use the dropdown to explain why you need the new card."
+    },
+    "export": {
+      "account": "Select an account before exporting.",
+      "accountNext": "Tap a balance card, then try exporting again."
+    }
+  },
+  "timeline": {
+    "empty": "No actions yet.",
+    "accountSwitched": "Switched to {account}.",
+    "directDebit": {
+      "reinstate": "Reinstated direct debit: {name}",
+      "cancel": "Cancelled direct debit: {name}",
+      "created": "Added direct debit: {name}"
+    },
+    "standingOrder": {
+      "resume": "Reactivated standing order: {name}",
+      "pause": "Paused standing order: {name}",
+      "created": "Added standing order: {name}"
+    },
+    "tasks": {
+      "completed": "Checklist: completed task — {task}",
+      "checked": "Checklist: completed task — {task}",
+      "reopened": "Checklist: reopened task — {task}",
+      "reset": "Checklist reset for another run-through"
+    },
+    "limits": {
+      "updated": "Updated spending limits to {daily} daily / {contactless} contactless"
+    },
+    "refresh": "Manual refresh of balances",
+    "transfer": "Transferred {amount} from {from} to {to}",
+    "bill": "Paid {payee} ({frequency}) from {account}",
+    "send": "Sent {amount} to {recipient} via {method}",
+    "card": {
+      "locked": "Locked debit card",
+      "unlocked": "Unlocked debit card",
+      "requested": "Requested new card ({reason})"
+    },
+    "pin": {
+      "changed": "Changed debit card PIN"
+    },
+    "export": {
+      "session": "Exported session progress CSV",
+      "csv": "Exported CSV statement for {account}",
+      "pdf": "Exported PDF statement for {account}"
+    }
+  },
+  "transactions": {
+    "empty": "No transactions yet — create one via transfers or payments.",
+    "categories": {
+      "income": "Income",
+      "utilities": "Utilities",
+      "foodDrink": "Food & drink",
+      "transferOut": "Transfer out",
+      "interest": "Interest",
+      "travel": "Travel",
+      "transferIn": "Transfer in",
+      "paymentsOut": "Payments to others"
+    },
+    "methods": {
+      "bacs": "BACS",
+      "directDebit": "Direct debit",
+      "debitCard": "Debit card",
+      "standingOrder": "Standing order",
+      "monthlyInterest": "Monthly interest",
+      "sepa": "SEPA",
+      "currencyWallet": "Currency wallet",
+      "transfer": "Transfer",
+      "bankTransfer": "Bank transfer"
+    },
+    "status": {
+      "pending": "Pending",
+      "cleared": "Cleared"
+    },
+    "seed": {
+      "payroll": "Payroll",
+      "pendingElectric": "Pending — Electric bill",
+      "groceries": "Groceries — {merchant}",
+      "autoTransfer": "Auto transfer to current",
+      "interest": "Interest credit",
+      "hotel": "Hotel booking — {city}",
+      "topUp": "Top up from current"
+    },
+    "merchants": {
+      "marketSquare": "Market Square"
+    },
+    "destinations": {
+      "porto": "Porto"
+    },
+    "new": {
+      "transferOut": "Transfer to {account}",
+      "transferIn": "Transfer from {account}",
+      "billPayment": "Bill payment to {payee}",
+      "send": "To {recipient}{reference}"
+    }
+  },
+  "exports": {
+    "session": {
+      "generated": "Export generated",
+      "timelineTitle": "Timeline",
+      "timeHeader": "Time",
+      "eventHeader": "Event",
+      "none": "No actions recorded",
+      "tasksTitle": "Practice tasks",
+      "taskHeader": "Task",
+      "statusHeader": "Status",
+      "completed": "Completed",
+      "inProgress": "In progress"
+    },
+    "statement": {
+      "date": "Date",
+      "description": "Description",
+      "amount": "Amount",
+      "category": "Category",
+      "method": "Method",
+      "status": "Status"
+    },
+    "pdf": {
+      "title": "Statement for {account}",
+      "generated": "Generated {time}",
+      "balance": "Balance: {balance}",
+      "headers": "Date — Description — Amount (Method)"
+    }
+  }
+}
