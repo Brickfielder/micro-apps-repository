@@ -1,0 +1,531 @@
+{
+  "screen": {
+    "title": "Simulador de Banca Móvil Brightwave",
+    "appAria": "Aplicación móvil de Brightwave Bank"
+  },
+  "header": {
+    "brand": "Brightwave"
+  },
+  "instructions": {
+    "summaryTitle": "Cómo usar este simulador",
+    "summaryBody1": "Practica tareas bancarias en línea habituales dentro de una interfaz táctil.",
+    "summaryBody2": "Elige el marco móvil o tableta y explora las pestañas para gestionar saldos, transferencias, recibos, tarjetas y seguridad. Si omites un paso, la barra de indicaciones te explicará qué hacer para corregirte por ti mismo."
+  },
+  "toolbar": {
+    "controlBarAria": "Ver opciones y estado",
+    "viewToggleAria": "Cambiar marco del dispositivo",
+    "phone": "📱 Teléfono",
+    "tablet": "💻 Tableta",
+    "lastSync": "Los saldos se actualizan al instante — última sincronización {time}"
+  },
+  "status": {
+    "cardUnlocked": "Tarjeta desbloqueada",
+    "cardLocked": "Tarjeta bloqueada"
+  },
+  "navigation": {
+    "aria": "Secciones bancarias principales",
+    "accounts": {
+      "label": "Cuentas",
+      "hint": "Saldos e historial"
+    },
+    "payments": {
+      "label": "Pagos",
+      "hint": "Transferencias y recibos"
+    },
+    "security": {
+      "label": "Tarjetas y PIN",
+      "hint": "Herramientas de seguridad"
+    }
+  },
+  "panels": {
+    "accounts": "Cuentas y movimientos",
+    "payments": "Pagos y domiciliaciones",
+    "security": "Herramientas de tarjeta y PIN"
+  },
+  "accounts": {
+    "filterLabel": "Ver movimientos de",
+    "refresh": "🔄 Actualizar ahora",
+    "pendingHint": "Los elementos pendientes aparecen en ámbar.",
+    "exportCsv": "⬇️ Exportar CSV",
+    "exportPdf": "⬇️ Exportar PDF",
+    "current": {
+      "name": "Cuenta corriente",
+      "type": "Corriente"
+    },
+    "savings": {
+      "name": "Ahorro fácil",
+      "type": "Ahorro"
+    },
+    "travel": {
+      "name": "Billetera de viaje (EUR)",
+      "type": "Vinculada (EUR)"
+    }
+  },
+  "forms": {
+    "transfer": {
+      "title": "Transferir entre tus cuentas",
+      "from": "Desde",
+      "to": "Hacia",
+      "amount": "Importe",
+      "submit": "Transferir ahora"
+    },
+    "bill": {
+      "title": "Pagar un recibo / programar uno recurrente",
+      "payFrom": "Pagar desde",
+      "payee": "Beneficiario",
+      "amount": "Importe",
+      "frequency": "Frecuencia",
+      "submit": "Confirmar pago",
+      "options": {
+        "default": "-- Elige beneficiario --",
+        "energy": "Bright Energy (Suministros)",
+        "water": "City Water Board",
+        "rent": "Evergreen Rentals",
+        "card": "Tarjeta Momentum Credit"
+      },
+      "frequencyOptions": {
+        "once": "Pago puntual",
+        "monthly": "Mensual recurrente",
+        "quarterly": "Trimestral recurrente"
+      }
+    },
+    "send": {
+      "title": "Enviar dinero a alguien",
+      "from": "Desde la cuenta",
+      "recipient": "Destinatario",
+      "recipientPlaceholder": "Nombre o empresa",
+      "amount": "Importe",
+      "method": "Método de envío",
+      "reference": "Referencia (opcional)",
+      "referencePlaceholder": "p. ej. Regalo de cumpleaños",
+      "submit": "Enviar pago",
+      "methodOptions": {
+        "faster": "Faster Payments (Reino Unido)",
+        "bacs": "BACS (2-3 días)",
+        "chaps": "CHAPS (mismo día, alto valor)",
+        "sepa": "SEPA (UE)",
+        "instant": "Instantáneo dentro de Brightwave"
+      }
+    },
+    "debit": {
+      "title": "Configurar una nueva domiciliación / orden permanente",
+      "type": "Tipo",
+      "typeDirectDebit": "Domiciliación",
+      "typeStandingOrder": "Orden permanente",
+      "name": "Nombre",
+      "namePlaceholder": "Organización",
+      "amount": "Importe",
+      "schedule": "Calendario",
+      "schedulePlaceholder": "p. ej. día 15 de cada mes",
+      "submit": "Añadir instrucción"
+    }
+  },
+  "mandates": {
+    "directDebits": {
+      "title": "Domiciliaciones",
+      "empty": "Aún no hay domiciliaciones.",
+      "energy": {
+        "name": "Bright Energy",
+        "schedule": "Día 15 de cada mes"
+      },
+      "water": {
+        "name": "City Water Board",
+        "schedule": "Día 28 de cada mes"
+      },
+      "card": {
+        "name": "Momentum Credit Card",
+        "schedule": "Se carga en la fecha del extracto"
+      }
+    },
+    "standingOrders": {
+      "title": "Órdenes permanentes",
+      "empty": "Aún no hay órdenes permanentes.",
+      "sweep": {
+        "name": "Traspaso a ahorros",
+        "schedule": "Cada viernes"
+      },
+      "rent": {
+        "name": "Alquiler a Evergreen Rentals",
+        "schedule": "Día 1 de cada mes"
+      }
+    },
+    "frequency": {
+      "monthly": "Mensual",
+      "quarterly": "Trimestral"
+    },
+    "actions": {
+      "cancel": "Cancelar",
+      "restore": "Restablecer",
+      "pause": "Pausar",
+      "resume": "Reanudar"
+    }
+  },
+  "card": {
+    "preview": {
+      "name": "Brightwave Debit",
+      "badgeActive": "Activa",
+      "badgeLocked": "Bloqueada",
+      "holder": "Titular de la cuenta",
+      "expires": "Caduca"
+    },
+    "controls": {
+      "title": "Controles de la tarjeta",
+      "lock": "🔐 Bloquear tarjeta",
+      "unlock": "🔓 Desbloquear tarjeta"
+    },
+    "request": {
+      "title": "Solicitar una nueva tarjeta",
+      "reason": "Motivo",
+      "delivery": "Notas de entrega (opcional)",
+      "deliveryPlaceholder": "p. ej. Usar entrega segura en días laborables",
+      "submit": "Enviar solicitud",
+      "optionDefault": "-- Selecciona un motivo --",
+      "optionDamaged": "Dañada",
+      "optionLost": "Perdida",
+      "optionExpired": "Próxima a caducar",
+      "optionAdditional": "Titular adicional"
+    }
+  },
+  "limits": {
+    "title": "Definir límites de gasto",
+    "helper": "Ajusta cuánto se puede gastar con la tarjeta antes de que se requiera una revisión manual.",
+    "daily": "Límite diario de la tarjeta",
+    "contactless": "Límite de pago sin contacto",
+    "submit": "Actualizar límites",
+    "summary": "Límite diario {daily} · Sin contacto {contactless}"
+  },
+  "pin": {
+    "title": "Cambiar tu PIN",
+    "new": "Nuevo PIN",
+    "confirm": "Confirmar PIN",
+    "submit": "Actualizar PIN"
+  },
+  "tasks": {
+    "aria": "Lista de tareas de práctica",
+    "title": "Práctica de hoy",
+    "helper": "Realiza cada actividad dentro del simulador. Los elementos se marcan solos cuando completas la acción correspondiente.",
+    "reset": "Restablecer lista",
+    "progress": "{completed} de {total} tareas completadas",
+    "items": {
+      "checkBalances": {
+        "title": "Consultar saldos",
+        "helper": "Actualiza la pestaña Cuentas para confirmar tus totales de corriente, ahorro y vinculadas."
+      },
+      "recurringPayment": {
+        "title": "Configurar un pago recurrente",
+        "helper": "Usa pagos de recibos o mandatos para programar un cargo automático."
+      },
+      "sendExternal": {
+        "title": "Enviar dinero a otras personas o cuentas",
+        "helper": "Completa el formulario de envío con un destinatario y método de entrega."
+      },
+      "transferOwn": {
+        "title": "Transferir dinero entre tus cuentas",
+        "helper": "Mueve fondos internamente mediante el formulario de transferencias."
+      },
+      "changePin": {
+        "title": "Cambiar tu PIN",
+        "helper": "Introduce el mismo PIN de cuatro dígitos en la pestaña de seguridad."
+      },
+      "setLimits": {
+        "title": "Definir límites de gasto",
+        "helper": "Ajusta los límites diarios y sin contacto en las herramientas de seguridad."
+      }
+    }
+  },
+  "sidebar": {
+    "aria": "Indicaciones y notas"
+  },
+  "session": {
+    "title": "Seguimiento de la sesión",
+    "download": "⬇️ Descargar CSV de la sesión",
+    "clear": "Limpiar registro"
+  },
+  "clinician": {
+    "title": "Comentarios del profesional",
+    "helper": "Usa este espacio para anotar observaciones, estrategias de apoyo o metas de seguimiento tras la sesión.",
+    "placeholder": "Escribe cualquier nota relevante para esta sesión..."
+  },
+  "spending": {
+    "title": "Gasto por categoría (30 días)",
+    "empty": "Aún no se registran pagos salientes."
+  },
+  "prompts": {
+    "prefix": {
+      "error": "⚠️ Revisa y vuelve a intentar:",
+      "success": "✅ Listo:",
+      "info": "ℹ️ Info:"
+    },
+    "next": "Siguiente: {step}",
+    "ready": "Todo listo. Elige una tarea para empezar.",
+    "account": {
+      "switched": {
+        "message": "Cambiaste a {account}.",
+        "next": "Desplázate hacia abajo para revisar los últimos movimientos."
+      }
+    },
+    "tasks": {
+      "reset": {
+        "message": "Lista de tareas reiniciada.",
+        "next": "Vuelve a realizar cada actividad dentro del simulador."
+      }
+    },
+    "directDebit": {
+      "reinstate": {
+        "message": "{name} vuelve a estar activo.",
+        "next": "Controla la próxima fecha de cobro en la lista de domiciliaciones."
+      },
+      "cancel": {
+        "message": "{name} ya no se cobrará.",
+        "next": "Confirma con el proveedor si necesitas otro método de pago."
+      }
+    },
+    "standingOrder": {
+      "resume": {
+        "message": "{name} se ejecutará según lo programado.",
+        "next": "Revisa tu recordatorio en el calendario para evitar duplicados."
+      },
+      "pause": {
+        "message": "{name} está en pausa.",
+        "next": "Define un recordatorio manual si aún necesitas pagarlo."
+      }
+    }
+  },
+  "notifications": {
+    "limits": {
+      "updated": "Límites de gasto actualizados.",
+      "updatedNext": "Los cambios se aplican de inmediato a compras en tienda y sin contacto."
+    },
+    "refresh": {
+      "success": "Saldos actualizados. Todo está al día.",
+      "next": "Continúa con tu siguiente tarea."
+    },
+    "transfer": {
+      "success": "Transferencia completada.",
+      "next": "Revisa el historial de movimientos para confirmar ambas entradas."
+    },
+    "bill": {
+      "submitted": "Pago de recibo enviado.",
+      "onceNext": "Consulta la lista de movimientos para verlo marcado como pagado.",
+      "recurringNext": "Revisa el panel de mandatos para confirmar el nuevo pago recurrente."
+    },
+    "send": {
+      "success": "Pago enviado.",
+      "next": {
+        "bacs": "Espera que los fondos se liquiden en 2-3 días laborables.",
+        "chaps": "Mantente disponible para la llamada de confirmación antes de la hora límite.",
+        "standard": "Comparte la confirmación con el destinatario si es necesario."
+      }
+    },
+    "mandate": {
+      "directDebitCreated": "Domiciliación creada.",
+      "standingCreated": "Orden permanente creada.",
+      "manageNext": "Podrás gestionarla desde la lista para pausarla o cancelarla más adelante."
+    },
+    "view": {
+      "switched": "Cambiaste a la vista {mode}.",
+      "next": "Sigue practicando dentro del dispositivo simulado."
+    },
+    "tab": {
+      "opened": "Abriste el espacio de trabajo {tab}.",
+      "accountsNext": "Revisa saldos o exporta un extracto.",
+      "paymentsNext": "Elige un formulario para configurar transferencias o pagos de recibos.",
+      "securityNext": "Bloquea tarjetas o gestiona opciones de seguridad."
+    },
+    "pin": {
+      "updated": "PIN actualizado de forma segura.",
+      "updatedNext": "Recuerda memorizarlo y destruir cualquier nota escrita."
+    },
+    "card": {
+      "locked": "Tarjeta bloqueada al instante.",
+      "lockedNext": "Si encuentras la tarjeta después, vuelve a desbloquearla antes de usarla.",
+      "unlocked": "Tarjeta desbloqueada al instante.",
+      "unlockedNext": "Puedes volver a usar la tarjeta de inmediato.",
+      "requested": "Solicitud de tarjeta de reemplazo enviada.",
+      "requestedNext": "Revisa tus mensajes para confirmar la fecha de entrega."
+    },
+    "export": {
+      "sessionCsv": "CSV de la sesión descargado.",
+      "sessionCsvNext": "Compártelo o guárdalo para tus registros.",
+      "csv": "Extracto en CSV descargado.",
+      "csvNext": "Ábrelo en Excel u otra hoja de cálculo para revisarlo.",
+      "pdf": "Extracto en PDF descargado.",
+      "pdfNext": "Ábrelo para revisarlo o compartirlo según necesites."
+    },
+    "timeline": {
+      "cleared": "Seguimiento de la sesión vaciado.",
+      "clearedNext": "Sigue practicando y aquí aparecerán las nuevas acciones."
+    },
+    "transactions": {
+      "updated": "Vista de movimientos actualizada.",
+      "updatedNext": "Desplázate para ver el historial de la cuenta seleccionada."
+    }
+  },
+  "errors": {
+    "limits": {
+      "dailyRange": "Define un límite diario entre £100 y £5.000.",
+      "dailyRangeNext": "Ajusta el importe diario y pulsa \"Actualizar límites\".",
+      "contactlessRange": "El límite sin contacto debe estar entre £10 y £500.",
+      "contactlessRangeNext": "Modifica el importe sin contacto antes de guardar.",
+      "order": "El límite sin contacto no puede superar el límite diario.",
+      "orderNext": "Baja el límite sin contacto o sube primero el máximo diario."
+    },
+    "transfer": {
+      "missingAccounts": "Elige una cuenta de origen y otra de destino.",
+      "missingAccountsNext": "Selecciona cuentas diferentes en los menús desplegables.",
+      "sameAccount": "Seleccionaste la misma cuenta en ambos campos.",
+      "sameAccountNext": "Cambia uno de los menús para que el dinero tenga destino.",
+      "amount": "Introduce un importe mayor que cero.",
+      "amountNext": "Escribe el importe que deseas mover y pulsa \"Transferir ahora\".",
+      "balance": "Fondos insuficientes en la cuenta de origen seleccionada.",
+      "balanceNext": "Reduce el importe o elige una cuenta con saldo suficiente."
+    },
+    "bill": {
+      "incomplete": "Completa todos los campos del pago de recibo.",
+      "incompleteNext": "Elige cuenta, beneficiario e importe antes de confirmar.",
+      "balance": "La cuenta no tiene fondos suficientes para este recibo.",
+      "balanceNext": "Ajusta el importe o transfiere fondos antes de pagar."
+    },
+    "send": {
+      "incomplete": "Rellena los campos de cuenta, destinatario e importe.",
+      "incompleteNext": "Completa los campos pendientes y vuelve a enviar.",
+      "balance": "Fondos insuficientes para este pago.",
+      "balanceNext": "Transfiere dinero o baja el importe antes de reenviar."
+    },
+    "mandate": {
+      "incomplete": "Todos los campos son obligatorios para crear la instrucción.",
+      "incompleteNext": "Introduce organización, importe y calendario antes de guardar."
+    },
+    "pin": {
+      "format": "El PIN debe tener exactamente cuatro dígitos.",
+      "formatNext": "Escribe cuatro números (0-9) sin espacios.",
+      "match": "Los PIN introducidos no coinciden.",
+      "matchNext": "Vuelve a introducir los mismos dígitos en ambos campos."
+    },
+    "card": {
+      "reason": "Selecciona un motivo para la tarjeta de reemplazo.",
+      "reasonNext": "Usa el desplegable para indicar por qué necesitas la nueva tarjeta."
+    },
+    "export": {
+      "account": "Selecciona una cuenta antes de exportar.",
+      "accountNext": "Toca una tarjeta de saldo y vuelve a intentar exportar."
+    }
+  },
+  "timeline": {
+    "empty": "Aún no hay acciones.",
+    "accountSwitched": "Cambiaste a {account}.",
+    "directDebit": {
+      "reinstate": "Domiciliación restablecida: {name}",
+      "cancel": "Domiciliación cancelada: {name}",
+      "created": "Domiciliación añadida: {name}"
+    },
+    "standingOrder": {
+      "resume": "Orden permanente reactivada: {name}",
+      "pause": "Orden permanente en pausa: {name}",
+      "created": "Orden permanente añadida: {name}"
+    },
+    "tasks": {
+      "completed": "Lista: tarea completada — {task}",
+      "checked": "Lista: tarea completada — {task}",
+      "reopened": "Lista: tarea reabierta — {task}",
+      "reset": "Lista reiniciada para otro repaso"
+    },
+    "limits": {
+      "updated": "Límites de gasto actualizados a {daily} diario / {contactless} sin contacto"
+    },
+    "refresh": "Actualización manual de saldos",
+    "transfer": "Transferido {amount} de {from} a {to}",
+    "bill": "Pagado {payee} ({frequency}) desde {account}",
+    "send": "Enviado {amount} a {recipient} vía {method}",
+    "card": {
+      "locked": "Tarjeta de débito bloqueada",
+      "unlocked": "Tarjeta de débito desbloqueada",
+      "requested": "Solicitada tarjeta nueva ({reason})"
+    },
+    "pin": {
+      "changed": "PIN de la tarjeta de débito cambiado"
+    },
+    "export": {
+      "session": "Exportado CSV de progreso de la sesión",
+      "csv": "Exportado extracto CSV para {account}",
+      "pdf": "Exportado extracto PDF para {account}"
+    }
+  },
+  "transactions": {
+    "empty": "Aún no hay movimientos — crea uno mediante transferencias o pagos.",
+    "categories": {
+      "income": "Ingresos",
+      "utilities": "Suministros",
+      "foodDrink": "Comida y bebida",
+      "transferOut": "Transferencia enviada",
+      "interest": "Intereses",
+      "travel": "Viajes",
+      "transferIn": "Transferencia recibida",
+      "paymentsOut": "Pagos a terceros"
+    },
+    "methods": {
+      "bacs": "BACS",
+      "directDebit": "Domiciliación",
+      "debitCard": "Tarjeta de débito",
+      "standingOrder": "Orden permanente",
+      "monthlyInterest": "Interés mensual",
+      "sepa": "SEPA",
+      "currencyWallet": "Billetera de divisas",
+      "transfer": "Transferencia",
+      "bankTransfer": "Transferencia bancaria"
+    },
+    "status": {
+      "pending": "Pendiente",
+      "cleared": "Liquidado"
+    },
+    "seed": {
+      "payroll": "Nómina",
+      "pendingElectric": "Pendiente — Recibo de electricidad",
+      "groceries": "Supermercado — {merchant}",
+      "autoTransfer": "Transferencia automática a corriente",
+      "interest": "Abono de intereses",
+      "hotel": "Reserva de hotel — {city}",
+      "topUp": "Recarga desde corriente"
+    },
+    "merchants": {
+      "marketSquare": "Market Square"
+    },
+    "destinations": {
+      "porto": "Oporto"
+    },
+    "new": {
+      "transferOut": "Transferencia a {account}",
+      "transferIn": "Transferencia de {account}",
+      "billPayment": "Pago de recibo a {payee}",
+      "send": "A {recipient}{reference}"
+    }
+  },
+  "exports": {
+    "session": {
+      "generated": "Exportación generada",
+      "timelineTitle": "Cronología",
+      "timeHeader": "Hora",
+      "eventHeader": "Evento",
+      "none": "No se registraron acciones",
+      "tasksTitle": "Tareas de práctica",
+      "taskHeader": "Tarea",
+      "statusHeader": "Estado",
+      "completed": "Completado",
+      "inProgress": "En curso"
+    },
+    "statement": {
+      "date": "Fecha",
+      "description": "Descripción",
+      "amount": "Importe",
+      "category": "Categoría",
+      "method": "Método",
+      "status": "Estado"
+    },
+    "pdf": {
+      "title": "Extracto de {account}",
+      "generated": "Generado {time}",
+      "balance": "Saldo: {balance}",
+      "headers": "Fecha — Descripción — Importe (Método)"
+    }
+  }
+}
