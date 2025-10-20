@@ -3,19 +3,21 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Signal Master — Mirror Train v1.1 (CSV export)</title>
-  <meta name="description" content="Train routing game: single switch, evolving rules, and a Phase-3 Mirror train that follows the opposite of the previous train’s correct route. Includes CSV export of session stats."/>
+  <title data-i18n="screen.title">Signal Master — Mirror Train v1.1 (CSV export)</title>
+  <meta name="description" content="Train routing game: single switch, evolving rules, and a Phase-3 Mirror train that follows the opposite of the previous train’s correct route. Includes CSV export of session stats." data-i18n="screen.description" data-i18n-attr="content"/>
 
   <!-- Frame meta (used by shared frame.js / theme.css) -->
   <meta name="app-slug" content="signal-master"/>
-  <meta name="app-title" content="Signal Master — Mirror Train"/>
-  <meta name="app-desc" content="Single switch. Route quickly & accurately. Rules evolve. Includes CSV export."/>
+  <meta name="app-title" content="Signal Master — Mirror Train" data-i18n="screen.appTitle" data-i18n-attr="content"/>
+  <meta name="app-desc" content="Single switch. Route quickly & accurately. Rules evolve." data-i18n="screen.appDesc" data-i18n-attr="content"/>
   <meta name="theme" content="bold"/>
+  <meta name="i18n-langs" content="en,it,es"/>
 
   <!-- Shared assets -->
-  <link rel="stylesheet" href="/shared/theme.css"/>
-  <script defer src="/shared/frame.js"></script>
-  <script defer src="/shared/clinician_feedback.js"></script>
+  <link rel="stylesheet" href="../../shared/theme.css"/>
+  <script defer src="../../shared/frame.js"></script>
+  <script defer src="../../shared/clinician_feedback.js"></script>
+  <script defer src="../../shared/i18n.js"></script>
 
   <style>
     :root{
@@ -117,37 +119,37 @@
 </head>
 <body>
   <!-- top bar -->
-  <header class="topbar" aria-label="Top bar">
+  <header class="topbar" data-i18n="screen.topbarAria" data-i18n-attr="aria-label">
     <div class="bar">
-      <div class="brand"><span aria-hidden="true">🚂</span><span>Signal Master</span></div>
+      <div class="brand"><span aria-hidden="true">🚂</span><span data-i18n="topbar.brand">Signal Master</span></div>
       <div class="right">
-        <div class="badge"><strong>Score:</strong>&nbsp;<span id="score">0</span></div>
-        <div class="badge">⏱ <strong>Time:</strong>&nbsp;<span id="time">3:00</span></div>
+        <div class="badge"><strong data-i18n="topbar.score">Score:</strong>&nbsp;<span id="score">0</span></div>
+        <div class="badge">⏱ <strong data-i18n="topbar.time">Time:</strong>&nbsp;<span id="time">3:00</span></div>
       </div>
     </div>
   </header>
 
   <!-- game surface -->
-  <section class="stage" aria-label="Gameplay" role="region">
+  <section class="stage" aria-label="Gameplay" role="region" data-i18n="track.aria" data-i18n-attr="aria-label">
     <div class="hud">
       <div class="left">
-        <span class="pill"><span>Level</span><small>Mirror Train</small></span>
-        <div class="legend" aria-label="Train legend">
-          <span class="swatch"><span class="dot red"></span> Passenger</span>
-          <span class="swatch"><span class="dot blue"></span> Cargo</span>
-          <span class="swatch"><span class="dot yellow"></span> Express</span>
-          <span class="swatch"><span class="dot mirror"></span> Mirror</span>
+        <span class="pill"><span data-i18n="hud.level">Level</span><small data-i18n="hud.levelDetail">Mirror Train</small></span>
+        <div class="legend" aria-label="Train legend" data-i18n="hud.legendAria" data-i18n-attr="aria-label">
+          <span class="swatch"><span class="dot red"></span><span data-i18n="hud.legend.passenger">Passenger</span></span>
+          <span class="swatch"><span class="dot blue"></span><span data-i18n="hud.legend.cargo">Cargo</span></span>
+          <span class="swatch"><span class="dot yellow"></span><span data-i18n="hud.legend.express">Express</span></span>
+          <span class="swatch"><span class="dot mirror"></span><span data-i18n="hud.legend.mirror">Mirror</span></span>
         </div>
       </div>
-      <div class="center" id="ruleHeadline">Rules over speed — route correctly in real time</div>
+      <div class="center" id="ruleHeadline" data-i18n="hud.ruleHeadline.phase1">Rules over speed — route correctly in real time</div>
       <div class="right">
-        <span class="badge" id="prevCorrectBadge" style="display:none">Prev correct: —</span>
-        <span class="pill">Session • 3 min</span>
+        <span class="badge" id="prevCorrectBadge" style="display:none" data-i18n="hud.prevCorrect" data-i18n-value="—">Prev correct: —</span>
+        <span class="pill" data-i18n="hud.sessionLength">Session • 3 min</span>
       </div>
     </div>
 
     <!-- Track View -->
-    <div class="track-wrap" id="track" role="img" aria-label="Track with single junction">
+    <div class="track-wrap" id="track" role="img" aria-label="Track with single junction" data-i18n="track.aria" data-i18n-attr="aria-label">
       <div class="overlay" id="overlay" style="display:none"><div class="banner" id="banner"></div></div>
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 560" aria-hidden="true">
         <defs>
@@ -167,18 +169,18 @@
         </g>
         <circle cx="480" cy="280" r="10" fill="#f24f40"></circle>
         <g fill="#6b7280" font-family="system-ui" font-size="16">
-          <text x="1048" y="212">LEFT</text>
-          <text x="1048" y="352">RIGHT</text>
+          <text x="1048" y="212" data-i18n="track.left">LEFT</text>
+          <text x="1048" y="352" data-i18n="track.right">RIGHT</text>
         </g>
       </svg>
     </div>
 
     <!-- Controls -->
-    <div class="controls" aria-label="Controls and rules">
+    <div class="controls" aria-label="Controls and rules" data-i18n="controls.aria" data-i18n-attr="aria-label">
       <div class="lever">
-        <span aria-hidden="true">🔀</span><strong>Main Switch:</strong>
-        <button id="btnLeft" type="button" aria-label="Set switch LEFT">LEFT</button>
-        <button id="btnRight" type="button" class="alt" aria-label="Set switch RIGHT">RIGHT</button>
+        <span aria-hidden="true">🔀</span><strong data-i18n="controls.mainSwitch">Main Switch:</strong>
+        <button id="btnLeft" type="button" aria-label="Set switch LEFT" data-i18n="controls.buttonLeft">LEFT</button>
+        <button id="btnRight" type="button" class="alt" aria-label="Set switch RIGHT" data-i18n="controls.buttonRight">RIGHT</button>
         <span class="badge" id="switchState" style="margin-left:8px">Current: RIGHT</span>
       </div>
       <div class="rules" aria-live="polite">
@@ -190,12 +192,12 @@
     <!-- Start overlay -->
     <div class="overlay" id="startOverlay">
       <div class="banner">
-        <h3>Signal Master</h3>
-        <p class="big">Single switch. Route quickly &amp; accurately. Rules evolve.</p>
-        <p><strong>Phase 1 (0–60s):</strong> Passenger (👤) → LEFT; Cargo (📦) → RIGHT.</p>
-        <p><strong>Phase 2 (60–120s):</strong> Express (⚡) appears → RIGHT.</p>
-        <p><strong>Phase 3 (120–180s):</strong> Mirror (◼️◻️) must go the <strong>opposite</strong> of the previous train’s <em>correct</em> route.<br/><small>(First Mirror defaults to RIGHT.)</small></p>
-        <button class="btn primary" id="btnStart" type="button">Start</button>
+        <h3 data-i18n="start.title">Signal Master</h3>
+        <p class="big" data-i18n="start.subtitle">Single switch. Route quickly &amp; accurately. Rules evolve.</p>
+        <p data-i18n="start.phase1" data-i18n-target="html"><strong>Phase 1 (0–60s):</strong> Passenger (👤) → LEFT; Cargo (📦) → RIGHT.</p>
+        <p data-i18n="start.phase2" data-i18n-target="html"><strong>Phase 2 (60–120s):</strong> Express (⚡) appears → RIGHT.</p>
+        <p data-i18n="start.phase3" data-i18n-target="html"><strong>Phase 3 (120–180s):</strong> Mirror (◼️◻️) must go the <strong>opposite</strong> of the previous train’s <em>correct</em> route.<br/><small>(First Mirror defaults to RIGHT.)</small></p>
+        <button class="btn primary" id="btnStart" type="button" data-i18n="start.startButton">Start</button>
       </div>
     </div>
   </section>
@@ -203,23 +205,23 @@
   <!-- Summary modal -->
   <dialog id="summary">
     <form method="dialog" class="modal">
-      <header><h2>Session Summary</h2></header>
+      <header><h2 data-i18n="summary.title">Session Summary</h2></header>
       <table>
-        <tr><th>Total trains</th><td id="sumTotal">0</td></tr>
-        <tr><th>Correct routes</th><td id="sumCorrect">0</td></tr>
-        <tr><th>Wrong routes</th><td id="sumWrong">0</td></tr>
-        <tr><th>Accuracy</th><td id="sumAcc">0%</td></tr>
-        <tr><th>Avg reaction time</th><td id="sumRT">–</td></tr>
-        <tr><th>Final score</th><td id="sumScore">0</td></tr>
+        <tr><th data-i18n="summary.total">Total trains</th><td id="sumTotal">0</td></tr>
+        <tr><th data-i18n="summary.correct">Correct routes</th><td id="sumCorrect">0</td></tr>
+        <tr><th data-i18n="summary.wrong">Wrong routes</th><td id="sumWrong">0</td></tr>
+        <tr><th data-i18n="summary.accuracy">Accuracy</th><td id="sumAcc">0%</td></tr>
+        <tr><th data-i18n="summary.avgRT">Avg reaction time</th><td id="sumRT">–</td></tr>
+        <tr><th data-i18n="summary.finalScore">Final score</th><td id="sumScore">0</td></tr>
       </table>
       <div class="end-actions">
         <div>
-          <button class="btn" id="btnCsv" type="button">Download CSV</button>
-          <span class="note">Detailed per-train log</span>
+          <button class="btn" id="btnCsv" type="button" data-i18n="summary.download">Download CSV</button>
+          <span class="note" data-i18n="summary.downloadHint">Detailed per-train log</span>
         </div>
         <div>
-          <button class="btn" value="close">Close</button>
-          <button class="btn primary" type="button" onclick="location.reload()">Play again</button>
+          <button class="btn" value="close" data-i18n="summary.close">Close</button>
+          <button class="btn primary" type="button" onclick="location.reload()" data-i18n="summary.playAgain">Play again</button>
         </div>
       </div>
       <!-- hidden link used for download -->
@@ -229,305 +231,356 @@
 
   <!-- Always-on clinician notes (also exported in CSV) -->
   <section id="clinician-notes" style="max-width:1180px;margin:24px auto 32px;padding:16px;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);background:var(--card)">
-    <label for="clinician-comment" style="display:block;font-weight:600;margin-bottom:8px;">Clinician comments (optional)</label>
-    <textarea id="clinician-comment" rows="4" placeholder="Enter any notes relevant to this session..." style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);font:inherit;resize:vertical"></textarea>
-    <p style="margin:8px 0 0;color:var(--muted);font-size:.9rem">This note will be added as <code>clinician_comment</code> in the exported CSV.</p>
+    <label for="clinician-comment" style="display:block;font-weight:600;margin-bottom:8px;" data-i18n="clinician.title">Clinician comments (optional)</label>
+    <textarea id="clinician-comment" rows="4" placeholder="Enter any notes relevant to this session..." style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);font:inherit;resize:vertical" data-i18n="clinician.placeholder" data-i18n-attr="placeholder"></textarea>
+    <p style="margin:8px 0 0;color:var(--muted);font-size:.9rem" data-i18n="clinician.note" data-i18n-target="html">This note will be added as <code>clinician_comment</code> in the exported CSV.</p>
   </section>
 
   <script>
   (()=>{
-    // ===== Geometry (SVG viewBox units) =====
-    const START = {x:80, y:280};
-    const JUNC  = {x:480, y:280};
-    const LEFT_END   = {x:1040, y:210};
-    const RIGHT_END  = {x:1040, y:350};
+    const whenI18N = window.I18N?.ready || Promise.resolve();
+    whenI18N.then(() => {
+      const { I18N } = window;
+      const t = (key, vars={}) => I18N?.t ? I18N.t(key, vars) : key;
 
-    // ===== State =====
-    let switchDir = 'RIGHT';
-    let score = 0;
-    let total=0, correct=0, wrong=0;
-    let reactionTimes = [];
-    let idCounter = 0;
+      // ===== Geometry (SVG viewBox units) =====
+      const START = {x:80, y:280};
+      const JUNC  = {x:480, y:280};
+      const LEFT_END   = {x:1040, y:210};
+      const RIGHT_END  = {x:1040, y:350};
 
-    let remaining = 180;
-    let elapsedGameplay = 0;
-    let phase = 1;
-    let isPaused = true;
-    let spawnTimer = null, tickTimer = null;
+      // ===== State =====
+      let switchDir = 'RIGHT';
+      let score = 0;
+      let total=0, correct=0, wrong=0;
+      let reactionTimes = [];
+      let idCounter = 0;
 
-    let lastCorrectRoute = null; // 'LEFT' | 'RIGHT' | null
+      let remaining = 180;
+      let elapsedGameplay = 0;
+      let phase = 1;
+      let isPaused = true;
+      let spawnTimer = null, tickTimer = null;
 
-    const events = []; // {seq,t_s,phase,type,player,correct,outcome,score}
+      let lastCorrectRoute = null; // 'LEFT' | 'RIGHT' | null
 
-    // ===== DOM =====
-    const scoreEl = document.getElementById('score');
-    const timeEl  = document.getElementById('time');
-    const switchStateEl = document.getElementById('switchState');
-    const trackEl = document.getElementById('track');
-    const svgEl = trackEl.querySelector('svg');
-    const overlay = document.getElementById('overlay');
-    const banner  = document.getElementById('banner');
-    const startOverlay = document.getElementById('startOverlay');
-    const summaryDlg = document.getElementById('summary');
-    const rule1 = document.getElementById('rule1');
-    const rule2 = document.getElementById('rule2');
-    const ruleHeadline = document.getElementById('ruleHeadline');
-    const prevCorrectBadge = document.getElementById('prevCorrectBadge');
-    const btnCsv = document.getElementById('btnCsv');
-    const csvLink = document.getElementById('csvLink');
-    const clinicianTA = document.getElementById('clinician-comment');
+      const events = []; // {seq,t_s,phase,type,player,correct,outcome,score}
 
-    // ===== Controls =====
-    document.getElementById('btnLeft').addEventListener('click', ()=>{ switchDir = 'LEFT'; switchStateEl.textContent = 'Current: LEFT'; });
-    document.getElementById('btnRight').addEventListener('click', ()=>{ switchDir = 'RIGHT'; switchStateEl.textContent = 'Current: RIGHT'; });
-    document.getElementById('btnStart').addEventListener('click', ()=>{ startOverlay.style.display = 'none'; beginSession(); });
+      // ===== DOM =====
+      const scoreEl = document.getElementById('score');
+      const timeEl  = document.getElementById('time');
+      const switchStateEl = document.getElementById('switchState');
+      const trackEl = document.getElementById('track');
+      const svgEl = trackEl.querySelector('svg');
+      const overlay = document.getElementById('overlay');
+      const banner  = document.getElementById('banner');
+      const startOverlay = document.getElementById('startOverlay');
+      const summaryDlg = document.getElementById('summary');
+      const rule1 = document.getElementById('rule1');
+      const rule2 = document.getElementById('rule2');
+      const ruleHeadline = document.getElementById('ruleHeadline');
+      const prevCorrectBadge = document.getElementById('prevCorrectBadge');
+      const btnCsv = document.getElementById('btnCsv');
+      const csvLink = document.getElementById('csvLink');
+      const clinicianTA = document.getElementById('clinician-comment');
+      const btnLeft = document.getElementById('btnLeft');
+      const btnRight = document.getElementById('btnRight');
 
-    // ===== Utils =====
-    function lerp(a,b,t){ return a + (b-a)*t }
-    function pointOnLine(p1,p2,t){ return {x: lerp(p1.x,p2.x,t), y: lerp(p1.y,p2.y,t)} }
-    function fmtTime(s){ const m = Math.floor(s/60); const r = String(s%60).padStart(2,'0'); return `${m}:${r}` }
-    function flash(color){
-      const el = document.createElement('div');
-      el.style.position='absolute'; el.style.inset='0'; el.style.background=color; el.style.opacity='0.12';
-      el.style.pointerEvents='none'; el.style.transition='opacity .35s ease';
-      trackEl.appendChild(el); requestAnimationFrame(()=>{ el.style.opacity='0' }); setTimeout(()=> el.remove(), 400);
-    }
-    // Map SVG viewBox coordinates -> on-screen CSS pixels
-    function toPx(pt){
-      const vb = svgEl.viewBox.baseVal;
-      const rect = svgEl.getBoundingClientRect();
-      const sx = rect.width  / vb.width;
-      const sy = rect.height / vb.height;
-      return { x: pt.x * sx, y: pt.y * sy };
-    }
-    function setRulesText(){
-      if(phase===1){
-        rule1.textContent = 'Phase 1: Passenger (red 👤) → LEFT';
-        rule2.textContent = 'Phase 1: Cargo (blue 📦) → RIGHT';
-        ruleHeadline.textContent = 'Rules over speed — route correctly in real time';
-        prevCorrectBadge.style.display = 'none';
-      } else if(phase===2){
-        rule1.textContent = 'Phase 2: Passenger (👤) → LEFT; Express (⚡) → RIGHT';
-        rule2.textContent = 'Phase 2: Cargo (📦) → RIGHT';
-        ruleHeadline.textContent = 'Timetable change — Express (yellow ⚡) goes RIGHT';
-        prevCorrectBadge.style.display = 'none';
-      } else {
-        rule1.textContent = 'Phase 3: Mirror (◼️◻️) goes OPPOSITE the previous train’s correct route';
-        rule2.textContent = 'Passenger: LEFT • Express: RIGHT • Cargo: RIGHT • Mirror: opposite of previous correct';
-        ruleHeadline.textContent = 'Two-step routing (in your head) — remember the previous correct and flip it';
-        prevCorrectBadge.style.display = '';
-        prevCorrectBadge.textContent = 'Prev correct: ' + (lastCorrectRoute ?? '—');
-      }
-    }
-
-    // ===== Train factory =====
-    function spawnTrain(){
-      if(isPaused) return;
-
-      let type;
-      if(phase===1){
-        type = Math.random() < 0.5 ? 'Passenger' : 'Cargo';
-      } else if(phase===2){
-        const r = Math.random();
-        type = r < 0.4 ? 'Passenger' : (r < 0.8 ? 'Cargo' : 'Express');
-      } else {
-        const r = Math.random();
-        if(r < 0.30) type = 'Passenger';
-        else if(r < 0.60) type = 'Cargo';
-        else if(r < 0.80) type = 'Express';
-        else type = 'Mirror';
-      }
-
-      const el = document.createElement('div');
-      el.className = 'train';
-      el.dataset.id = (++idCounter).toString();
-      el.dataset.type = type;
-
-      const carClass = type==='Passenger' ? 'passenger' :
-                       type==='Cargo' ? 'cargo' :
-                       type==='Express' ? 'express' : 'mirror';
-
-      el.innerHTML = `<div class="label"><em>${type} ${type==='Passenger'?'👤':type==='Cargo'?'📦':type==='Express'?'⚡':'↔︎'}</em></div>
-                      <div class="car ${carClass}"><span class="chip"></span></div>
-                      <div class="w l"></div><div class="w r"></div>`;
-      const sp = toPx(START);
-      el.style.left = sp.x + 'px';
-      el.style.top  = sp.y + 'px';
-      trackEl.appendChild(el);
-
-      const data = { el, type, t0: performance.now() };
-      animateTrain(data);
-    }
-
-    function correctDirectionFor(type){
-      if(type==='Cargo') return 'RIGHT';
-      if(type==='Passenger') return 'LEFT';
-      if(type==='Express') return (phase>=2) ? 'RIGHT' : 'LEFT';
-      if(type==='Mirror'){
-        const base = lastCorrectRoute ?? 'RIGHT';
-        return base === 'LEFT' ? 'RIGHT' : 'LEFT';
-      }
-      return 'LEFT';
-    }
-
-    function animateTrain(data){
-      const SPEED = 170; // px/s
-      let last = performance.now();
-      let seg = 0; // 0: to main junc, 1: to end
-      let t = 0;
-
-      let choiceMain = null;
-      let target = null;
-
-      const correctDir = correctDirectionFor(data.type);
-      if(phase===3){ prevCorrectBadge.textContent = 'Prev correct: ' + (lastCorrectRoute ?? '—'); }
-
-      function raf(){
-        const now = performance.now();
-        const dt = (now - last)/1000; last = now;
-        if(isPaused){ requestAnimationFrame(raf); return; }
-
-        if(seg===0){
-          const len = Math.hypot(JUNC.x-START.x, JUNC.y-START.y);
-          t += (SPEED*dt)/len;
-          if(t>=1){
-            t = 0; seg = 1;
-
-            choiceMain = switchDir;
-            const ok = (choiceMain === correctDir);
-            total++;
-            if(ok){ correct++; score += 10; flash('#00c853'); }
-            else { wrong++; score -= 20; flash('#ff1744'); }
-            scoreEl.textContent = String(score);
-
-            events.push({
-              seq: total,
-              t_s: elapsedGameplay,
-              phase,
-              type: data.type,
-              player: choiceMain,
-              correct: correctDir,
-              outcome: ok ? 'correct' : 'wrong',
-              score
-            });
-
-            lastCorrectRoute = correctDir;
-            if(phase===3){ prevCorrectBadge.textContent = 'Prev correct: ' + lastCorrectRoute; }
-
-            target = (choiceMain==='LEFT') ? LEFT_END : RIGHT_END;
-          }
-          const p0 = toPx(pointOnLine(START, JUNC, Math.min(t,1)));
-          data.el.style.left = `${p0.x}px`; data.el.style.top  = `${p0.y}px`;
+      // ===== Helpers =====
+      const directionLabel = (dir) => {
+        if(!dir) return t('hud.prevCorrectNone');
+        return t(dir === 'LEFT' ? 'controls.direction.left' : 'controls.direction.right');
+      };
+      const updateSwitchState = () => {
+        switchStateEl.textContent = t('controls.current', { direction: directionLabel(switchDir) });
+      };
+      const updatePrevCorrectBadge = () => {
+        if(phase === 3){
+          const value = lastCorrectRoute ? directionLabel(lastCorrectRoute) : t('hud.prevCorrectNone');
+          prevCorrectBadge.textContent = t('hud.prevCorrect', { value });
+          prevCorrectBadge.style.display = '';
         } else {
-          const from = JUNC;
-          const len = Math.hypot(target.x-from.x, target.y-from.y);
-          t += (SPEED*dt)/len;
-          if(t>=1){ data.el.remove(); return; }
-          const p1 = toPx(pointOnLine(from, target, Math.min(t,1)));
-          data.el.style.left = `${p1.x}px`; data.el.style.top  = `${p1.y}px`;
+          prevCorrectBadge.style.display = 'none';
+        }
+      };
+      const applyButtonLabels = () => {
+        btnLeft.setAttribute('aria-label', t('controls.setLeft'));
+        btnRight.setAttribute('aria-label', t('controls.setRight'));
+      };
+
+      // ===== Controls =====
+      btnLeft.addEventListener('click', ()=>{ switchDir = 'LEFT'; updateSwitchState(); });
+      btnRight.addEventListener('click', ()=>{ switchDir = 'RIGHT'; updateSwitchState(); });
+      document.getElementById('btnStart').addEventListener('click', ()=>{ startOverlay.style.display = 'none'; beginSession(); });
+
+      // ===== Utils =====
+      function lerp(a,b,t){ return a + (b-a)*t }
+      function pointOnLine(p1,p2,t){ return {x: lerp(p1.x,p2.x,t), y: lerp(p1.y,p2.y,t)} }
+      function fmtTime(s){ const m = Math.floor(s/60); const r = String(s%60).padStart(2,'0'); return `${m}:${r}` }
+      function flash(color){
+        const el = document.createElement('div');
+        el.style.position='absolute'; el.style.inset='0'; el.style.background=color; el.style.opacity='0.12';
+        el.style.pointerEvents='none'; el.style.transition='opacity .35s ease';
+        trackEl.appendChild(el); requestAnimationFrame(()=>{ el.style.opacity='0' }); setTimeout(()=> el.remove(), 400);
+      }
+      // Map SVG viewBox coordinates -> on-screen CSS pixels
+      function toPx(pt){
+        const vb = svgEl.viewBox.baseVal;
+        const rect = svgEl.getBoundingClientRect();
+        const sx = rect.width  / vb.width;
+        const sy = rect.height / vb.height;
+        return { x: pt.x * sx, y: pt.y * sy };
+      }
+      function setRulesText(){
+        if(phase===1){
+          rule1.textContent = t('rules.phase1a');
+          rule2.textContent = t('rules.phase1b');
+          ruleHeadline.textContent = t('hud.ruleHeadline.phase1');
+        } else if(phase===2){
+          rule1.textContent = t('rules.phase2a');
+          rule2.textContent = t('rules.phase2b');
+          ruleHeadline.textContent = t('hud.ruleHeadline.phase2');
+        } else {
+          rule1.textContent = t('rules.phase3a');
+          rule2.textContent = t('rules.phase3b');
+          ruleHeadline.textContent = t('hud.ruleHeadline.phase3');
+        }
+        updatePrevCorrectBadge();
+      }
+
+      // ===== Train factory =====
+      function spawnTrain(){
+        if(isPaused) return;
+
+        let type;
+        if(phase===1){
+          type = Math.random() < 0.5 ? 'Passenger' : 'Cargo';
+        } else if(phase===2){
+          const r = Math.random();
+          type = r < 0.4 ? 'Passenger' : (r < 0.8 ? 'Cargo' : 'Express');
+        } else {
+          const r = Math.random();
+          if(r < 0.30) type = 'Passenger';
+          else if(r < 0.60) type = 'Cargo';
+          else if(r < 0.80) type = 'Express';
+          else type = 'Mirror';
         }
 
+        const el = document.createElement('div');
+        el.className = 'train';
+        el.dataset.id = (++idCounter).toString();
+        el.dataset.type = type;
+
+        const carClass = type==='Passenger' ? 'passenger' :
+                         type==='Cargo' ? 'cargo' :
+                         type==='Express' ? 'express' : 'mirror';
+
+        el.innerHTML = `<div class="label"><em>${type} ${type==='Passenger'?'👤':type==='Cargo'?'📦':type==='Express'?'⚡':'↔︎'}</em></div>
+                      <div class="car ${carClass}"><span class="chip"></span></div>
+                      <div class="w l"></div><div class="w r"></div>`;
+        const sp = toPx(START);
+        el.style.left = sp.x + 'px';
+        el.style.top  = sp.y + 'px';
+        trackEl.appendChild(el);
+
+        const data = { el, type, t0: performance.now() };
+        animateTrain(data);
+      }
+
+      function correctDirectionFor(type){
+        if(type==='Cargo') return 'RIGHT';
+        if(type==='Passenger') return 'LEFT';
+        if(type==='Express') return (phase>=2) ? 'RIGHT' : 'LEFT';
+        if(type==='Mirror'){
+          const base = lastCorrectRoute ?? 'RIGHT';
+          return base === 'LEFT' ? 'RIGHT' : 'LEFT';
+        }
+        return 'LEFT';
+      }
+
+      function animateTrain(data){
+        const SPEED = 170; // px/s
+        let last = performance.now();
+        let seg = 0; // 0: to main junc, 1: to end
+        let t = 0;
+
+        let choiceMain = null;
+        let target = null;
+
+        const correctDir = correctDirectionFor(data.type);
+        if(phase===3){ updatePrevCorrectBadge(); }
+
+        function raf(){
+          const now = performance.now();
+          const dt = (now - last)/1000; last = now;
+          if(isPaused){ requestAnimationFrame(raf); return; }
+
+          if(seg===0){
+            const len = Math.hypot(JUNC.x-START.x, JUNC.y-START.y);
+            t += (SPEED*dt)/len;
+            if(t>=1){
+              t = 0; seg = 1;
+
+              choiceMain = switchDir;
+              const ok = (choiceMain === correctDir);
+              total++;
+              if(ok){ correct++; score += 10; flash('#00c853'); }
+              else { wrong++; score -= 20; flash('#ff1744'); }
+              scoreEl.textContent = String(score);
+
+              events.push({
+                seq: total,
+                t_s: elapsedGameplay,
+                phase,
+                type: data.type,
+                player: choiceMain,
+                correct: correctDir,
+                outcome: ok ? 'correct' : 'wrong',
+                score
+              });
+
+              lastCorrectRoute = correctDir;
+              if(phase===3){ updatePrevCorrectBadge(); }
+
+              target = (choiceMain==='LEFT') ? LEFT_END : RIGHT_END;
+            }
+            const p0 = toPx(pointOnLine(START, JUNC, Math.min(t,1)));
+            data.el.style.left = `${p0.x}px`; data.el.style.top  = `${p0.y}px`;
+          } else {
+            const from = JUNC;
+            const len = Math.hypot(target.x-from.x, target.y-from.y);
+            t += (SPEED*dt)/len;
+            if(t>=1){ data.el.remove(); return; }
+            const p1 = toPx(pointOnLine(from, target, Math.min(t,1)));
+            data.el.style.left = `${p1.x}px`; data.el.style.top  = `${p1.y}px`;
+          }
+
+          requestAnimationFrame(raf);
+        }
         requestAnimationFrame(raf);
       }
-      requestAnimationFrame(raf);
-    }
 
-    // ===== Timers & phases =====
-    function beginSession(){
-      setRulesText();
-      timeEl.textContent = fmtTime(remaining);
-      isPaused = false;
-
-      tickTimer = setInterval(()=>{
-        if(isPaused) return;
-        remaining--; elapsedGameplay++;
-        timeEl.textContent = fmtTime(remaining);
-        if(elapsedGameplay===60){ triggerPhaseBreak(2,
-          `<h3>New Timetable</h3>
-           <p class="big">Express (⚡) now spawns and must go <strong>RIGHT</strong>.</p>
-           <p>Passenger (👤) → LEFT • Cargo (📦) → RIGHT</p>`); }
-        if(elapsedGameplay===120){ triggerPhaseBreak(3,
-          `<h3>Mirror Train</h3>
-           <p class="big">Mirror (◼️◻️) must go the <strong>OPPOSITE</strong> of the previous train’s correct route.</p>
-           <p>Passenger: LEFT • Cargo: RIGHT • Express: RIGHT</p>
-           <p><small>First Mirror defaults to RIGHT if there isn’t a previous.</small></p>`); }
-        if(remaining<=0){ endSession(); }
-      }, 1000);
-
-      setTimeout(()=>{
-        clearInterval(spawnTimer);
-        spawnTimer = setInterval(spawnTrain, 2400);
-        spawnTrain();
-      }, 600);
-    }
-
-    function triggerPhaseBreak(nextPhase, html){
-      isPaused = true;
-      banner.innerHTML = html + `<p style="margin-top:8px;color:var(--muted)">Resuming in ~10 seconds…</p>`;
-      overlay.style.display = 'flex';
-      setTimeout(()=>{
-        phase = nextPhase;
+      // ===== Timers & phases =====
+      function beginSession(){
         setRulesText();
-        overlay.style.display = 'none';
+        updateSwitchState();
+        applyButtonLabels();
+        timeEl.textContent = fmtTime(remaining);
         isPaused = false;
-      }, 10000);
-    }
 
-    function endSession(){
-      clearInterval(tickTimer); clearInterval(spawnTimer); isPaused = true;
-      const acc = total>0 ? Math.round((correct/total)*100) : 0;
-      const avgRTms = reactionTimes.length ? Math.round(reactionTimes.reduce((a,b)=>a+b,0)/reactionTimes.length) : null;
-      document.getElementById('sumTotal').textContent = String(total);
-      document.getElementById('sumCorrect').textContent = String(correct);
-      document.getElementById('sumWrong').textContent = String(wrong);
-      document.getElementById('sumAcc').textContent = acc + '%';
-      document.getElementById('sumRT').textContent = avgRTms ? (avgRTms/1000).toFixed(2)+' s' : '–';
-      document.getElementById('sumScore').textContent = String(score);
-      summaryDlg.showModal();
+        tickTimer = setInterval(()=>{
+          if(isPaused) return;
+          remaining--; elapsedGameplay++;
+          timeEl.textContent = fmtTime(remaining);
+          if(elapsedGameplay===60){ triggerPhaseBreak(2); }
+          if(elapsedGameplay===120){ triggerPhaseBreak(3); }
+          if(remaining<=0){ endSession(); }
+        }, 1000);
 
-      btnCsv.onclick = ()=> downloadCsv();
-    }
+        setTimeout(()=>{
+          clearInterval(spawnTimer);
+          spawnTimer = setInterval(spawnTrain, 2400);
+          spawnTrain();
+        }, 600);
+      }
 
-    // ===== CSV Export (adds clinician_comment) =====
-    function csvEscape(val){
-      if(val === null || val === undefined) return '';
-      const s = String(val);
-      return (/[",\n]/.test(s)) ? `"${s.replace(/"/g,'""')}"` : s;
-    }
-    function buildCsv(){
-      const comment = clinicianTA ? clinicianTA.value.trim() : '';
-      const header = [
-        'event','seq','t_game_s','phase','type','player_choice','correct_choice','outcome','score_after','clinician_comment'
-      ];
-      const rows = [header.join(',')];
-      events.forEach(e=>{
+      function triggerPhaseBreak(nextPhase){
+        isPaused = true;
+        const resumeLine = `<p style="margin-top:8px;color:var(--muted)">${t('phases.break.resume')}</p>`;
+        if(nextPhase === 2){
+          banner.innerHTML = `
+            <h3>${t('phases.break.phase2.title')}</h3>
+            <p class="big">${t('phases.break.phase2.big')}</p>
+            <p>${t('phases.break.phase2.line')}</p>
+            ${resumeLine}
+          `;
+        } else {
+          banner.innerHTML = `
+            <h3>${t('phases.break.phase3.title')}</h3>
+            <p class="big">${t('phases.break.phase3.big')}</p>
+            <p>${t('phases.break.phase3.line1')}</p>
+            <p>${t('phases.break.phase3.line2')}</p>
+            ${resumeLine}
+          `;
+        }
+        overlay.style.display = 'flex';
+        setTimeout(()=>{
+          phase = nextPhase;
+          setRulesText();
+          overlay.style.display = 'none';
+          isPaused = false;
+        }, 10000);
+      }
+
+      function endSession(){
+        clearInterval(tickTimer); clearInterval(spawnTimer); isPaused = true;
+        const acc = total>0 ? Math.round((correct/total)*100) : 0;
+        const avgRTms = reactionTimes.length ? Math.round(reactionTimes.reduce((a,b)=>a+b,0)/reactionTimes.length) : null;
+        document.getElementById('sumTotal').textContent = String(total);
+        document.getElementById('sumCorrect').textContent = String(correct);
+        document.getElementById('sumWrong').textContent = String(wrong);
+        document.getElementById('sumAcc').textContent = acc + '%';
+        document.getElementById('sumRT').textContent = avgRTms ? (avgRTms/1000).toFixed(2)+' s' : '–';
+        document.getElementById('sumScore').textContent = String(score);
+        summaryDlg.showModal();
+
+        btnCsv.onclick = ()=> downloadCsv();
+      }
+
+      // ===== CSV Export (adds clinician_comment) =====
+      function csvEscape(val){
+        if(val === null || val === undefined) return '';
+        const s = String(val);
+        return (/[",
+]/.test(s)) ? `"${s.replace(/"/g,'""')}"` : s;
+      }
+      function buildCsv(){
+        const comment = clinicianTA ? clinicianTA.value.trim() : '';
+        const header = [
+          'event','seq','t_game_s','phase','type','player_choice','correct_choice','outcome','score_after','clinician_comment'
+        ];
+        const rows = [header.join(',')];
+        events.forEach(e=>{
+          rows.push([
+            'trial', e.seq, e.t_s, e.phase, e.type, e.player, e.correct, e.outcome, e.score, comment
+          ].map(csvEscape).join(','));
+        });
         rows.push([
-          'trial', e.seq, e.t_s, e.phase, e.type, e.player, e.correct, e.outcome, e.score, comment
+          'summary','',elapsedGameplay,'','','','','',score,comment
         ].map(csvEscape).join(','));
-      });
-      rows.push([
-        'summary','',elapsedGameplay,'','','','','',score,comment
-      ].map(csvEscape).join(','));
-      return rows.join('\n');
-    }
-    function downloadCsv(){
-      const csv = buildCsv();
-      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-      const ts = new Date().toISOString().replace(/[:.]/g,'-');
-      const filename = `signal_master_session_${ts}.csv`;
-      const url = URL.createObjectURL(blob);
-      csvLink.href = url;
-      csvLink.download = filename;
-      csvLink.click();
-      setTimeout(()=> URL.revokeObjectURL(url), 1500);
-    }
+        return rows.join('
+');
+      }
+      function downloadCsv(){
+        const csv = buildCsv();
+        const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+        const ts = new Date().toISOString().replace(/[:.]/g,'-');
+        const filename = `signal_master_session_${ts}.csv`;
+        const url = URL.createObjectURL(blob);
+        csvLink.href = url;
+        csvLink.download = filename;
+        csvLink.click();
+        setTimeout(()=> URL.revokeObjectURL(url), 1500);
+      }
 
-    // Prevent accidental zoom on double-tap for mobile buttons
-    document.addEventListener('touchend', function(e){
-      const now = Date.now();
-      if (this._lastTouch && (now - this._lastTouch) < 300) { e.preventDefault(); }
-      this._lastTouch = now;
-    }, {passive:false});
+      // Prevent accidental zoom on double-tap for mobile buttons
+      document.addEventListener('touchend', function(e){
+        const now = Date.now();
+        if (this._lastTouch && (now - this._lastTouch) < 300) { e.preventDefault(); }
+        this._lastTouch = now;
+      }, {passive:false});
+
+      window.addEventListener('i18n:applied', () => {
+        setRulesText();
+        updateSwitchState();
+        applyButtonLabels();
+      });
+
+      // initial setup once translations are ready
+      setRulesText();
+      updateSwitchState();
+      applyButtonLabels();
+    });
   })();
   </script>
 </body>

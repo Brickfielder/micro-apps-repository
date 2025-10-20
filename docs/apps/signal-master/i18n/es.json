@@ -1,0 +1,101 @@
+{
+  "screen": {
+    "title": "Signal Master — Tren Espejo v1.1 (exportación CSV)",
+    "description": "Juego de encaminamiento de trenes: un solo desvío, reglas que evolucionan y un tren Espejo de la fase 3 que sigue lo opuesto a la ruta correcta del tren anterior. Incluye exportación CSV de las estadísticas de la sesión.",
+    "appTitle": "Signal Master — Tren Espejo",
+    "appDesc": "Un solo desvío. Encamina con rapidez y precisión. Las reglas evolucionan.",
+    "topbarAria": "Barra superior"
+  },
+  "topbar": {
+    "brand": "Signal Master",
+    "score": "Puntuación:",
+    "time": "Tiempo:"
+  },
+  "hud": {
+    "level": "Nivel",
+    "levelDetail": "Tren Espejo",
+    "legendAria": "Leyenda de trenes",
+    "legend": {
+      "passenger": "Pasajeros",
+      "cargo": "Carga",
+      "express": "Expreso",
+      "mirror": "Espejo"
+    },
+    "ruleHeadline": {
+      "phase1": "Prioriza las reglas: encamina correctamente en tiempo real",
+      "phase2": "Cambio de horario: el expreso (⚡ amarillo) va a la DERECHA",
+      "phase3": "Enrutamiento en dos pasos: recuerda el último correcto y inviértelo"
+    },
+    "sessionLength": "Sesión • 3 min",
+    "prevCorrect": "Anterior correcto: {value}",
+    "prevCorrectNone": "—"
+  },
+  "track": {
+    "aria": "Vía con un solo cruce",
+    "left": "IZQUIERDA",
+    "right": "DERECHA"
+  },
+  "controls": {
+    "aria": "Controles y reglas",
+    "mainSwitch": "Cambio principal:",
+    "setLeft": "Poner cambio a IZQUIERDA",
+    "setRight": "Poner cambio a DERECHA",
+    "buttonLeft": "IZQUIERDA",
+    "buttonRight": "DERECHA",
+    "current": "Actual: {direction}",
+    "direction": {
+      "left": "IZQUIERDA",
+      "right": "DERECHA"
+    }
+  },
+  "rules": {
+    "phase1a": "Fase 1: Pasajeros (rojo 👤) → IZQUIERDA",
+    "phase1b": "Fase 1: Carga (azul 📦) → DERECHA",
+    "phase2a": "Fase 2: Pasajeros (👤) → IZQUIERDA; Expreso (⚡) → DERECHA",
+    "phase2b": "Fase 2: Carga (📦) → DERECHA",
+    "phase3a": "Fase 3: Espejo (◼️◻️) va al OPUESTO de la ruta correcta anterior",
+    "phase3b": "Pasajeros: IZQUIERDA • Expreso: DERECHA • Carga: DERECHA • Espejo: opuesto al correcto anterior"
+  },
+  "start": {
+    "title": "Signal Master",
+    "subtitle": "Un solo desvío. Encamina con rapidez y precisión. Las reglas evolucionan.",
+    "phase1": "<strong>Fase 1 (0–60 s):</strong> Pasajeros (👤) → IZQUIERDA; Carga (📦) → DERECHA.",
+    "phase2": "<strong>Fase 2 (60–120 s):</strong> Aparece el Expreso (⚡) → DERECHA.",
+    "phase3": "<strong>Fase 3 (120–180 s):</strong> Espejo (◼️◻️) debe ir al <strong>OPUESTO</strong> de la ruta <em>correcta</em> anterior.<br/><small>El primer Espejo se dirige a la DERECHA por defecto.</small>",
+    "startButton": "Comenzar"
+  },
+  "phases": {
+    "break": {
+      "phase2": {
+        "title": "Nuevo horario",
+        "big": "El Expreso (⚡) aparece y debe ir a la <strong>DERECHA</strong>.",
+        "line": "Pasajeros (👤) → IZQUIERDA • Carga (📦) → DERECHA"
+      },
+      "phase3": {
+        "title": "Tren Espejo",
+        "big": "El Espejo (◼️◻️) debe ir al <strong>OPUESTO</strong> de la ruta correcta anterior.",
+        "line1": "Pasajeros: IZQUIERDA • Carga: DERECHA • Expreso: DERECHA",
+        "line2": "<small>El primer Espejo va a la DERECHA si no hay registro previo.</small>"
+      },
+      "resume": "Reanudando en ~10 segundos…"
+    }
+  },
+  "summary": {
+    "title": "Resumen de la sesión",
+    "total": "Trenes totales",
+    "correct": "Rutas correctas",
+    "wrong": "Rutas incorrectas",
+    "accuracy": "Precisión",
+    "avgRT": "Tiempo de reacción promedio",
+    "finalScore": "Puntuación final",
+    "download": "Descargar CSV",
+    "downloadHint": "Registro detallado por tren",
+    "close": "Cerrar",
+    "playAgain": "Jugar de nuevo"
+  },
+  "clinician": {
+    "title": "Comentarios del profesional (opcional)",
+    "placeholder": "Escribe cualquier nota relevante para esta sesión...",
+    "note": "Esta nota se añadirá como <code>clinician_comment</code> en el CSV exportado."
+  }
+}

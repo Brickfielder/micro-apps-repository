@@ -1,0 +1,101 @@
+{
+  "screen": {
+    "title": "Signal Master — Mirror Train v1.1 (CSV export)",
+    "description": "Train routing game: single switch, evolving rules, and a Phase-3 Mirror train that follows the opposite of the previous train’s correct route. Includes CSV export of session stats.",
+    "appTitle": "Signal Master — Mirror Train",
+    "appDesc": "Single switch. Route quickly & accurately. Rules evolve.",
+    "topbarAria": "Top bar"
+  },
+  "topbar": {
+    "brand": "Signal Master",
+    "score": "Score:",
+    "time": "Time:"
+  },
+  "hud": {
+    "level": "Level",
+    "levelDetail": "Mirror Train",
+    "legendAria": "Train legend",
+    "legend": {
+      "passenger": "Passenger",
+      "cargo": "Cargo",
+      "express": "Express",
+      "mirror": "Mirror"
+    },
+    "ruleHeadline": {
+      "phase1": "Rules over speed — route correctly in real time",
+      "phase2": "Timetable change — Express (yellow ⚡) goes RIGHT",
+      "phase3": "Two-step routing (in your head) — remember the previous correct and flip it"
+    },
+    "sessionLength": "Session • 3 min",
+    "prevCorrect": "Prev correct: {value}",
+    "prevCorrectNone": "—"
+  },
+  "track": {
+    "aria": "Track with single junction",
+    "left": "LEFT",
+    "right": "RIGHT"
+  },
+  "controls": {
+    "aria": "Controls and rules",
+    "mainSwitch": "Main Switch:",
+    "setLeft": "Set switch LEFT",
+    "setRight": "Set switch RIGHT",
+    "buttonLeft": "LEFT",
+    "buttonRight": "RIGHT",
+    "current": "Current: {direction}",
+    "direction": {
+      "left": "LEFT",
+      "right": "RIGHT"
+    }
+  },
+  "rules": {
+    "phase1a": "Phase 1: Passenger (red 👤) → LEFT",
+    "phase1b": "Phase 1: Cargo (blue 📦) → RIGHT",
+    "phase2a": "Phase 2: Passenger (👤) → LEFT; Express (⚡) → RIGHT",
+    "phase2b": "Phase 2: Cargo (📦) → RIGHT",
+    "phase3a": "Phase 3: Mirror (◼️◻️) goes OPPOSITE the previous train’s correct route",
+    "phase3b": "Passenger: LEFT • Express: RIGHT • Cargo: RIGHT • Mirror: opposite of previous correct"
+  },
+  "start": {
+    "title": "Signal Master",
+    "subtitle": "Single switch. Route quickly & accurately. Rules evolve.",
+    "phase1": "<strong>Phase 1 (0–60s):</strong> Passenger (👤) → LEFT; Cargo (📦) → RIGHT.",
+    "phase2": "<strong>Phase 2 (60–120s):</strong> Express (⚡) appears → RIGHT.",
+    "phase3": "<strong>Phase 3 (120–180s):</strong> Mirror (◼️◻️) must go the <strong>opposite</strong> of the previous train’s <em>correct</em> route.<br/><small>(First Mirror defaults to RIGHT.)</small>",
+    "startButton": "Start"
+  },
+  "phases": {
+    "break": {
+      "phase2": {
+        "title": "New Timetable",
+        "big": "Express (⚡) now spawns and must go <strong>RIGHT</strong>.",
+        "line": "Passenger (👤) → LEFT • Cargo (📦) → RIGHT"
+      },
+      "phase3": {
+        "title": "Mirror Train",
+        "big": "Mirror (◼️◻️) must go the <strong>OPPOSITE</strong> of the previous train’s correct route.",
+        "line1": "Passenger: LEFT • Cargo: RIGHT • Express: RIGHT",
+        "line2": "<small>First Mirror defaults to RIGHT if there isn’t a previous.</small>"
+      },
+      "resume": "Resuming in ~10 seconds…"
+    }
+  },
+  "summary": {
+    "title": "Session Summary",
+    "total": "Total trains",
+    "correct": "Correct routes",
+    "wrong": "Wrong routes",
+    "accuracy": "Accuracy",
+    "avgRT": "Avg reaction time",
+    "finalScore": "Final score",
+    "download": "Download CSV",
+    "downloadHint": "Detailed per-train log",
+    "close": "Close",
+    "playAgain": "Play again"
+  },
+  "clinician": {
+    "title": "Clinician comments (optional)",
+    "placeholder": "Enter any notes relevant to this session...",
+    "note": "This note will be added as <code>clinician_comment</code> in the exported CSV."
+  }
+}

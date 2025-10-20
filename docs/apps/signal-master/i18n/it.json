@@ -1,0 +1,101 @@
+{
+  "screen": {
+    "title": "Signal Master — Treno Specchio v1.1 (esportazione CSV)",
+    "description": "Gioco di instradamento dei treni: un solo scambio, regole in evoluzione e un treno Specchio della fase 3 che segue l'opposto del percorso corretto del treno precedente. Include l'esportazione CSV delle statistiche della sessione.",
+    "appTitle": "Signal Master — Treno Specchio",
+    "appDesc": "Un solo scambio. Instrada in modo rapido e preciso. Le regole evolvono.",
+    "topbarAria": "Barra superiore"
+  },
+  "topbar": {
+    "brand": "Signal Master",
+    "score": "Punteggio:",
+    "time": "Tempo:"
+  },
+  "hud": {
+    "level": "Livello",
+    "levelDetail": "Treno Specchio",
+    "legendAria": "Legenda dei treni",
+    "legend": {
+      "passenger": "Passeggeri",
+      "cargo": "Merci",
+      "express": "Espresso",
+      "mirror": "Specchio"
+    },
+    "ruleHeadline": {
+      "phase1": "Regole prima della velocità — instrada correttamente in tempo reale",
+      "phase2": "Cambio orario — l'Espresso (⚡ giallo) va a DESTRA",
+      "phase3": "Instradamento in due tempi — ricorda l'ultima risposta corretta e inverti"
+    },
+    "sessionLength": "Sessione • 3 min",
+    "prevCorrect": "Ultimo corretto: {value}",
+    "prevCorrectNone": "—"
+  },
+  "track": {
+    "aria": "Tracciato con un solo bivio",
+    "left": "SINISTRA",
+    "right": "DESTRA"
+  },
+  "controls": {
+    "aria": "Controlli e regole",
+    "mainSwitch": "Deviatoio principale:",
+    "setLeft": "Imposta il deviatoio a SINISTRA",
+    "setRight": "Imposta il deviatoio a DESTRA",
+    "buttonLeft": "SINISTRA",
+    "buttonRight": "DESTRA",
+    "current": "Attuale: {direction}",
+    "direction": {
+      "left": "SINISTRA",
+      "right": "DESTRA"
+    }
+  },
+  "rules": {
+    "phase1a": "Fase 1: Passeggeri (rosso 👤) → SINISTRA",
+    "phase1b": "Fase 1: Merci (blu 📦) → DESTRA",
+    "phase2a": "Fase 2: Passeggeri (👤) → SINISTRA; Espresso (⚡) → DESTRA",
+    "phase2b": "Fase 2: Merci (📦) → DESTRA",
+    "phase3a": "Fase 3: Specchio (◼️◻️) va all'OPPOSTO del percorso corretto precedente",
+    "phase3b": "Passeggeri: SINISTRA • Espresso: DESTRA • Merci: DESTRA • Specchio: opposto all'ultimo corretto"
+  },
+  "start": {
+    "title": "Signal Master",
+    "subtitle": "Un solo deviatoio. Instrada rapidamente e con precisione. Le regole evolvono.",
+    "phase1": "<strong>Fase 1 (0–60 s):</strong> Passeggeri (👤) → SINISTRA; Merci (📦) → DESTRA.",
+    "phase2": "<strong>Fase 2 (60–120 s):</strong> Arriva l'Espresso (⚡) → DESTRA.",
+    "phase3": "<strong>Fase 3 (120–180 s):</strong> Lo Specchio (◼️◻️) deve andare all'<strong>OPPOSTO</strong> del percorso <em>corretto</em> precedente.<br/><small>Il primo Specchio va a DESTRA per impostazione predefinita.</small>",
+    "startButton": "Avvia"
+  },
+  "phases": {
+    "break": {
+      "phase2": {
+        "title": "Nuovo orario",
+        "big": "L'Espresso (⚡) ora appare e deve andare a <strong>DESTRA</strong>.",
+        "line": "Passeggeri (👤) → SINISTRA • Merci (📦) → DESTRA"
+      },
+      "phase3": {
+        "title": "Treno Specchio",
+        "big": "Lo Specchio (◼️◻️) deve andare all'<strong>OPPOSTO</strong> del percorso corretto precedente.",
+        "line1": "Passeggeri: SINISTRA • Merci: DESTRA • Espresso: DESTRA",
+        "line2": "<small>Il primo Specchio va a DESTRA se non c'è un precedente.</small>"
+      },
+      "resume": "Ripresa tra ~10 secondi…"
+    }
+  },
+  "summary": {
+    "title": "Riepilogo sessione",
+    "total": "Treni totali",
+    "correct": "Instradamenti corretti",
+    "wrong": "Instradamenti errati",
+    "accuracy": "Precisione",
+    "avgRT": "Tempo medio di reazione",
+    "finalScore": "Punteggio finale",
+    "download": "Scarica CSV",
+    "downloadHint": "Registro dettagliato per treno",
+    "close": "Chiudi",
+    "playAgain": "Gioca di nuovo"
+  },
+  "clinician": {
+    "title": "Note del clinico (facoltative)",
+    "placeholder": "Inserisci eventuali note rilevanti per questa sessione...",
+    "note": "Questa nota verrà aggiunta come <code>clinician_comment</code> nel CSV esportato."
+  }
+}
