@@ -295,11 +295,17 @@
         return t(dir === 'LEFT' ? 'controls.direction.left' : 'controls.direction.right');
       };
       const updateSwitchState = () => {
-        switchStateEl.textContent = t('controls.current', { direction: directionLabel(switchDir) });
+        const dirKey = switchDir === 'LEFT' ? 'controls.direction.left' : 'controls.direction.right';
+        const direction = t(dirKey);
+        switchStateEl.setAttribute('data-i18n', 'controls.current');
+        switchStateEl.setAttribute('data-i18n-direction', direction);
+        switchStateEl.textContent = t('controls.current', { direction });
       };
       const updatePrevCorrectBadge = () => {
         if(phase === 3){
           const value = lastCorrectRoute ? directionLabel(lastCorrectRoute) : t('hud.prevCorrectNone');
+          prevCorrectBadge.setAttribute('data-i18n', 'hud.prevCorrect');
+          prevCorrectBadge.setAttribute('data-i18n-value', value);
           prevCorrectBadge.textContent = t('hud.prevCorrect', { value });
           prevCorrectBadge.style.display = '';
         } else {
@@ -334,22 +340,25 @@
         const sy = rect.height / vb.height;
         return { x: pt.x * sx, y: pt.y * sy };
       }
+      const ruleCopy = {
+        1: { main: 'rules.phase1a', aux: 'rules.phase1b', headline: 'hud.ruleHeadline.phase1' },
+        2: { main: 'rules.phase2a', aux: 'rules.phase2b', headline: 'hud.ruleHeadline.phase2' },
+        3: { main: 'rules.phase3a', aux: 'rules.phase3b', headline: 'hud.ruleHeadline.phase3' }
+      };
+      const applyRuleCopy = (el, key) => {
+        el.setAttribute('data-i18n', key);
+        el.textContent = t(key);
+      };
       function setRulesText(){
-        if(phase===1){
-          rule1.textContent = t('rules.phase1a');
-          rule2.textContent = t('rules.phase1b');
-          ruleHeadline.textContent = t('hud.ruleHeadline.phase1');
-        } else if(phase===2){
-          rule1.textContent = t('rules.phase2a');
-          rule2.textContent = t('rules.phase2b');
-          ruleHeadline.textContent = t('hud.ruleHeadline.phase2');
-        } else {
-          rule1.textContent = t('rules.phase3a');
-          rule2.textContent = t('rules.phase3b');
-          ruleHeadline.textContent = t('hud.ruleHeadline.phase3');
-        }
+        const current = ruleCopy[phase];
+        applyRuleCopy(rule1, current.main);
+        applyRuleCopy(rule2, current.aux);
+        applyRuleCopy(ruleHeadline, current.headline);
         updatePrevCorrectBadge();
       }
+      const updateDocumentTitle = () => {
+        document.title = t('screen.title');
+      };
 
       // ===== Train factory =====
       function spawnTrain(){
@@ -534,7 +543,11 @@
       function csvEscape(val){
         if(val === null || val === undefined) return '';
         const s = String(val);
-        return (/[",\n]/.test(s)) ? `"${s.replace(/"/g,'""')}"` : s;
+        if(!(/[",\r\n]/.test(s))) return s;
+        const escaped = s
+          .replace(/"/g,'""')
+          .replace(/\r\n|\r|\n/g,'\\n');
+        return `"${escaped}"`;
       }
       function buildCsv(){
         const comment = clinicianTA ? clinicianTA.value.trim() : '';
@@ -575,12 +588,14 @@
         setRulesText();
         updateSwitchState();
         applyButtonLabels();
+        updateDocumentTitle();
       });
 
       // initial setup once translations are ready
       setRulesText();
       updateSwitchState();
       applyButtonLabels();
+      updateDocumentTitle();
     });
   })();
   </script>
