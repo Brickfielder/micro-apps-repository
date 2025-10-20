@@ -563,7 +563,7 @@
         rows.push([
           'summary','',elapsedGameplay,'','','','','',score,comment
         ].map(csvEscape).join(','));
-        return rows.join('\n');
+        return rows.join('\r\n');
       }
       function downloadCsv(){
         const csv = buildCsv();
