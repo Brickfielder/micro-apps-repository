@@ -141,13 +141,15 @@
   .card-deck-container {
     position: relative;
     min-height: 420px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.75rem;
+    align-items: stretch;
+    justify-items: center;
   }
 
   .app-card {
-    width: min(360px, 90vw);
+    width: min(360px, 100%);
     min-height: 380px;
     border-radius: 28px;
     background: #fff;
@@ -202,6 +204,12 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+  }
+
+  .app-card.secondary {
+    opacity: 0.92;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
+    border: 1px solid #eef2ff;
   }
 
   .app-meta {
@@ -398,10 +406,13 @@
 
     .card-deck-container {
       min-height: auto;
+      grid-template-columns: 1fr;
+      justify-items: stretch;
     }
 
     .app-card {
       min-height: auto;
+      width: 100%;
     }
   }
 </style>
@@ -421,11 +432,13 @@
       <p class="section-subtitle">Swipe through the deck to highlight an app, then launch it directly from the card.</p>
 
       <div class="deck-instructions" id="deckInstructions">
-        <strong>How it works:</strong> Use the navigation dots below or tap the card to open the highlighted experience.
+        <strong>How it works:</strong> Use the navigation dots to change the primary card on the left—the next experience is
+        previewed alongside it.
       </div>
 
-      <div class="card-deck-container">
-        <article class="app-card" id="activeCard" aria-live="polite"></article>
+      <div class="card-deck-container" aria-live="polite">
+        <article class="app-card" id="primaryCard" aria-live="polite"></article>
+        <article class="app-card secondary" id="secondaryCard" aria-label="Next highlighted experience" aria-live="polite"></article>
       </div>
 
       <div class="deck-navigation" id="deckDots" role="tablist" aria-label="Select highlighted micro-app"></div>
@@ -495,7 +508,8 @@
         currentIndex: 0
       };
 
-      const cardEl = document.getElementById('activeCard');
+      const primaryCard = document.getElementById('primaryCard');
+      const secondaryCard = document.getElementById('secondaryCard');
       const dotsEl = document.getElementById('deckDots');
       const featuredGrid = document.getElementById('featuredGrid');
 
@@ -543,35 +557,49 @@
         state.currentIndex = 0;
       };
 
+      const buildCardMarkup = (app) => `
+        <div>
+          <div class="card-icon" aria-hidden="true">${app.emoji}</div>
+          <span class="category">${app.category}</span>
+          <h3>${app.title}</h3>
+          <p>${app.desc}</p>
+        </div>
+        <div class="card-footer">
+          <div class="app-meta">
+            <p>🎯 Focus: ${summarizeTags(app.tags)}</p>
+            <p>🚀 Launch-ready micro-app</p>
+          </div>
+          <a class="launch-link" href="${app.href}">Launch experience →</a>
+        </div>
+      `;
+
       const renderDeck = () => {
-        if (!cardEl) return;
+        if (!primaryCard || !secondaryCard) return;
         if (!state.highlighted.length) {
-          cardEl.innerHTML = '<p style="color:var(--muted)">Loading apps…</p>';
+          const loadingMarkup = '<p style="color:var(--muted)">Loading apps…</p>';
+          primaryCard.innerHTML = loadingMarkup;
+          secondaryCard.innerHTML = loadingMarkup;
           dotsEl.innerHTML = '';
           return;
         }
-        updateCard();
+        updateCards();
         renderDots();
       };
 
-      const updateCard = () => {
-        const app = state.highlighted[state.currentIndex];
-        if (!app) return;
-        cardEl.innerHTML = `
-          <div>
-            <div class="card-icon" aria-hidden="true">${app.emoji}</div>
-            <span class="category">${app.category}</span>
-            <h3>${app.title}</h3>
-            <p>${app.desc}</p>
-          </div>
-          <div class="card-footer">
-            <div class="app-meta">
-              <p>🎯 Focus: ${summarizeTags(app.tags)}</p>
-              <p>🚀 Launch-ready micro-app</p>
-            </div>
-            <a class="launch-link" href="${app.href}">Launch experience →</a>
-          </div>
-        `;
+      const updateCards = () => {
+        const primaryApp = state.highlighted[state.currentIndex];
+        if (!primaryApp) return;
+        primaryCard.innerHTML = buildCardMarkup(primaryApp);
+
+        if (!secondaryCard) return;
+        if (state.highlighted.length === 1) {
+          secondaryCard.innerHTML = '<p style="color:var(--muted)">Add another app to preview what\'s next.</p>';
+          return;
+        }
+
+        const nextIndex = (state.currentIndex + 1) % state.highlighted.length;
+        const secondaryApp = state.highlighted[nextIndex];
+        secondaryCard.innerHTML = buildCardMarkup(secondaryApp);
       };
 
       const renderDots = () => {
@@ -584,7 +612,7 @@
           dot.setAttribute('aria-label', `Show ${app.title}`);
           dot.addEventListener('click', () => {
             state.currentIndex = index;
-            updateCard();
+            updateCards();
             renderDots();
           });
           dotsEl.appendChild(dot);
