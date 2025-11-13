@@ -1,8 +1,9 @@
-<!DOCTYPE html><html lang="en"> 
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Cognitive Rehabilitation Micro-Apps — Interactive Card Deck</title>
+<title>Clinical Micro-Apps for Cognitive Rehabilitation</title>
 <script>
   if (!window.location.search.includes('view=desktop') &&
       typeof window.matchMedia === 'function' &&
@@ -14,555 +15,630 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:linear-gradient(180deg,#f7f4ff 0%,#f1f9ff 42%,#ffffff 100%);
-    --ink:#0f172a; --muted:#475569; --line:#e2e8f0; --surface:#ffffff;
-    --surface-soft:rgba(255,255,255,0.65); --accent:#5136ff; --accent-alt:#ff7262;
-    --radius-lg:28px; --radius-md:18px; --radius-sm:12px;
-    --shadow-sm:0 12px 30px rgba(15,23,42,0.06); --shadow-lg:0 32px 60px rgba(15,23,42,0.12);
-    --max-width:1180px;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;height:100%}
-  body{
-    font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-    background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased;
-    letter-spacing:-0.01em; display:flex; flex-direction:column; min-height:100vh;
-  }
-  a{color:inherit;text-decoration:none}
-  .muted{color:var(--muted)}
-  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-
-  /* Header / hero */
-  .site-header{position:relative;padding:1.75rem 1.5rem 2rem}
-  .site-header::before{content:"";position:absolute;inset:0;background:linear-gradient(140deg,rgba(81,54,255,.16) 0%,rgba(162,89,255,.12) 35%,rgba(242,78,30,.08) 100%);filter:blur(65px);opacity:.8;pointer-events:none}
-  .header-inner{position:relative;max-width:var(--max-width);margin:0 auto;display:flex;flex-direction:column;gap:2rem}
-  .top-nav{display:flex;align-items:center;gap:1.2rem;padding:.85rem 1rem;border-radius:var(--radius-lg);background:rgba(255,255,255,.78);backdrop-filter:blur(14px);border:1px solid rgba(148,163,184,.18);box-shadow:var(--shadow-sm)}
-  .logo{display:flex;align-items:center;gap:.9rem;font-weight:700;font-size:1rem;letter-spacing:-.02em}
-  .logo-mark{width:44px;height:44px;border-radius:16px;background:conic-gradient(from 140deg,#f24e1e 0%,#ff7262 30%,#a259ff 50%,#0acf83 75%,#1abcfe 100%);display:grid;place-items:center;color:#fff;font-weight:800;font-size:1.45rem;box-shadow:0 18px 35px rgba(81,54,255,.22)}
-  .top-links{display:flex;align-items:center;gap:1rem;margin-left:auto;font-size:.95rem;color:var(--muted)}
-  .top-links a{padding:.45rem .9rem;border-radius:999px;transition:background .2s ease,color .2s ease}
-  .top-links a:hover{background:rgba(81,54,255,.1);color:var(--ink)}
-  .top-links .pill{background:var(--ink);color:#fff;font-weight:600;box-shadow:0 18px 32px rgba(15,23,42,.25)}
-
-  .hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(260px,360px);gap:2.25rem;align-items:center}
-  .hero h1{margin:0;font-size:clamp(2.2rem,3vw+1.6rem,3.2rem);line-height:1.08;letter-spacing:-.03em}
-  .hero p{margin:0;font-size:1.05rem;line-height:1.65;color:color-mix(in srgb,var(--muted) 85%,white 15%);max-width:52ch}
-  .hero-actions{display:flex;flex-wrap:wrap;gap:.75rem}
-  .cta-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.55rem;border-radius:999px;font-weight:600;font-size:.98rem;border:none;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease}
-  .cta-btn.primary{background:linear-gradient(135deg,#5136ff 0%,#a259ff 100%);color:#fff;box-shadow:0 22px 40px rgba(81,54,255,.35)}
-  .hero-preview{position:relative;padding:1.6rem;border-radius:var(--radius-lg);background:var(--surface);overflow:hidden;border:1px solid rgba(148,163,184,.22);box-shadow:var(--shadow-lg)}
-  .hero-preview::before{content:"";position:absolute;inset:-40% -20% 30% -40%;background:linear-gradient(135deg,#d8e9ff 0%,#f7e9ff 100%);opacity:.9;filter:blur(16px);z-index:0}
-  .hero-preview-content{position:relative;z-index:1}
-
-  main{flex:1;max-width:var(--max-width);margin:0 auto;padding:0 1.5rem 3rem}
-  .section{margin-top:2.8rem;display:flex;flex-direction:column;gap:1.4rem}
-  .section-heading h2{margin:0;font-size:clamp(1.8rem,2vw+1.2rem,2.3rem);letter-spacing:-.02em}
-  .download-section{margin-top:.5rem;padding:1.5rem 1.8rem;border-radius:var(--radius-lg);background:rgba(255,255,255,.85);border:1px solid rgba(148,163,184,.22);box-shadow:var(--shadow-sm);display:grid;gap:1rem}
-  .download-section h3{margin:0;font-size:1.25rem;letter-spacing:-.01em}
-  .download-section p{margin:0;font-size:.98rem;line-height:1.6;color:var(--muted)}
-  .download-section ul{margin:0;padding-left:1.2rem;display:grid;gap:.6rem;color:var(--muted);font-size:.95rem;line-height:1.55}
-  .download-section li::marker{color:var(--accent,#5136ff)}
-  .download-actions{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center}
-  .download-actions .cta-btn{box-shadow:0 18px 32px rgba(81,54,255,.25)}
-  .download-actions .cta-btn.secondary{background:rgba(81,54,255,.08);color:var(--ink)}
-
-  /* Deck carousel */
-  .carousel{position:relative;display:flex;align-items:center;justify-content:center;gap:1rem;width:100%;margin-top:.5rem;padding:1.2rem 0 3.2rem}
-  .carousel-viewport{position:relative;flex:1 1 auto;max-width:920px;height:420px;display:flex;align-items:center;justify-content:center;touch-action:pan-y;overflow:hidden}
-  .carousel-viewport.is-dragging{cursor:grabbing}
-  .carousel-track{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:auto}
-  .carousel-item{position:absolute;top:50%;left:50%;width:min(340px,74vw);transform:translate(-50%,-50%);transition:transform .45s cubic-bezier(.22,.61,.36,1),opacity .3s ease,filter .3s ease;pointer-events:none;opacity:0;filter:blur(.4px)}
-  .carousel-item.is-active{pointer-events:auto;opacity:1;filter:none}
-  .carousel-item .card{min-height:320px}
-  .carousel-item[data-hidden="true"]{opacity:0;pointer-events:none}
-
-  .card{position:relative;border-radius:var(--radius-lg);padding:1.4rem 1.5rem 1.6rem;border:1px solid rgba(148,163,184,.18);background:var(--surface);overflow:hidden;box-shadow:var(--shadow-sm)}
-  .card::before{content:"";position:absolute;inset:-30% -20% 45% -30%;background:var(--card-gradient,linear-gradient(135deg,#e4f1ff 0%,#f6e8ff 100%));opacity:.9;filter:blur(20px);z-index:0}
-  .card-link{position:relative;z-index:1;display:block;height:100%;-webkit-transform:translateZ(0);transform:translateZ(0)}
-  .card-header{display:flex;align-items:center;gap:.6rem}
-  .card-emoji{font-size:2rem}
-  .chip{display:inline-flex;align-items:center;gap:.25rem;padding:.32rem .65rem;border-radius:999px;font-size:.72rem;font-weight:600;letter-spacing:.02em;background:rgba(15,23,42,.08);color:var(--muted);border:1px solid rgba(148,163,184,.22)}
-  .card h3{margin:0;font-size:1.2rem;letter-spacing:-.01em}
-  .card p{margin:0;font-size:.96rem;line-height:1.55;color:var(--muted)}
-  .tag-list{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:auto}
-  .tag-list span{padding:.38rem .75rem;border-radius:999px;font-size:.78rem;font-weight:600;background:rgba(255,255,255,.75);border:1px solid rgba(148,163,184,.28);color:var(--muted)}
-
-  .featured-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.4rem;margin-top:.5rem}
-  .featured-card{position:relative;display:flex;flex-direction:column;gap:.8rem;padding:1.2rem 1.4rem;border-radius:var(--radius-md);border:1px solid rgba(148,163,184,.2);background:rgba(255,255,255,.9);box-shadow:var(--shadow-sm)}
-  .featured-card h3{margin:0;font-size:1.05rem}
-  .featured-card p{margin:0;font-size:.92rem;line-height:1.55;color:var(--muted)}
-  .featured-card .tag-list{margin-top:0}
-
-  .carousel-nav{flex:0 0 auto;width:46px;height:46px;border-radius:50%;border:1px solid rgba(148,163,184,.35);background:rgba(255,255,255,.85);backdrop-filter:blur(10px);color:var(--ink);display:grid;place-items:center;cursor:pointer;box-shadow:0 18px 32px rgba(15,23,42,.12);transition:transform .2s ease,box-shadow .2s ease,border .2s ease}
-  .carousel-nav:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;transform:none}
-  .carousel-nav svg{width:18px;height:18px}
-
-  .carousel-pagination{position:absolute;bottom:.4rem;left:50%;transform:translateX(-50%);display:flex;gap:.5rem;padding:.35rem .7rem;border-radius:999px;background:rgba(255,255,255,.78);border:1px solid rgba(148,163,184,.18);backdrop-filter:blur(12px);box-shadow:0 12px 28px rgba(15,23,42,.12)}
-  .carousel-dot{width:10px;height:10px;border-radius:999px;border:none;background:rgba(148,163,184,.45);padding:0;cursor:pointer;transition:width .25s ease, background .25s ease}
-  .carousel-dot[data-active="true"]{width:26px;background:linear-gradient(135deg,#5136ff 0%,#a259ff 100%)}
-
-  @media (max-width: 720px){
-    .site-header{padding:1.25rem 1rem 1.6rem}
-    main{padding:0 1rem 2.4rem}
-    .carousel{padding:1rem 0 2.4rem}
-    .carousel-viewport{height:auto;max-width:none;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;padding:0 .5rem 1rem}
-    .carousel-track{position:static;display:flex;gap:1rem;justify-content:flex-start;align-items:stretch;pointer-events:auto}
-    .carousel-item{position:relative;top:auto;left:auto;width:82vw;max-width:320px;transform:none !important;opacity:1 !important;filter:none !important;pointer-events:auto;scroll-snap-align:center}
-    .carousel-item .card{min-height:auto}
-    .carousel-nav{display:none}
-    .carousel-pagination{position:static;transform:none;margin-top:1rem}
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
   }
 
-  @media (prefers-reduced-motion: reduce){
-    .carousel-viewport{overflow-x:auto;overflow-y:hidden}
-    .carousel-track{position:static;display:flex;gap:1rem;overflow-x:auto;padding-bottom:.75rem;margin:0 -0.5rem;scroll-snap-type:x mandatory;transform:none !important}
-    .carousel-item{position:relative;top:auto;left:auto;flex:0 0 85%;max-width:320px;margin:0 auto;opacity:1;filter:none;transform:none !important;scroll-snap-align:center;pointer-events:auto}
-    .carousel-pagination{position:static;transform:none;margin:0 auto}
-    .carousel-nav{display:none}
+  :root {
+    --ink: #1a1f36;
+    --muted: #5f6b7c;
+    --surface: #ffffff;
+    --accent: #667eea;
+    --accent-dark: #764ba2;
+    --card-line: #e2e8f0;
+    --soft-bg: #f8f9fb;
+    --radius-lg: 24px;
+    --radius-md: 16px;
+    --radius-sm: 12px;
+    --shadow-lg: 0 25px 60px rgba(15, 23, 42, 0.12);
+    --shadow-md: 0 18px 40px rgba(15, 23, 42, 0.08);
+    --shadow-sm: 0 10px 25px rgba(15, 23, 42, 0.08);
   }
 
-  @media (max-width: 960px){
-    .hero{grid-template-columns:1fr;gap:1.8rem}
-    .hero-preview{order:-1;max-width:420px;margin:0 auto;width:100%}
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.6;
+    color: var(--ink);
+    background: var(--soft-bg);
   }
 
-  @media (max-width: 640px){
-    .top-nav{flex-wrap:wrap;row-gap:.75rem}
-    .top-links{flex-wrap:wrap;justify-content:flex-start;width:100%}
-    .hero-preview{display:none}
+  a {
+    color: inherit;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 4.5rem 1.5rem 5rem;
+    text-align: center;
+  }
+
+  .hero .container {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.3rem, 4vw, 3.4rem);
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+  }
+
+  .hero p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    opacity: 0.95;
+  }
+
+  .cta-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.95rem 2.8rem;
+    background: #fff;
+    color: #4c51bf;
+    border-radius: 999px;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  }
+
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem 4rem;
+  }
+
+  .section {
+    padding: 4.5rem 0;
+  }
+
+  .section-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 0.5rem;
+    color: var(--ink);
+  }
+
+  .section-subtitle {
+    text-align: center;
+    color: var(--muted);
+    margin-bottom: 2.5rem;
+    font-size: 1.05rem;
+  }
+
+  .card-deck-section {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    margin-top: -3rem;
+    padding: 4rem 2rem 4.5rem;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .deck-instructions {
+    text-align: center;
+    padding: 1.2rem 1.5rem;
+    background: #edf2f7;
+    border-radius: var(--radius-md);
+    margin: 0 auto 2rem;
+    font-size: 0.95rem;
+    color: #4a5568;
+    max-width: 640px;
+  }
+
+  .card-deck-container {
+    position: relative;
+    height: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .app-card {
+    width: min(360px, 90vw);
+    height: 380px;
+    border-radius: 28px;
+    background: #fff;
+    padding: 2.2rem;
+    box-shadow: 0 35px 90px rgba(15, 23, 42, 0.15);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.3s ease;
+  }
+
+  .app-card:hover {
+    transform: translateY(-6px);
+  }
+
+  .app-card .category {
+    display: inline-flex;
+    padding: 0.35rem 1rem;
+    border-radius: 999px;
+    background: #edf2f7;
+    color: #4a5568;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+
+  .card-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #eef2ff 0%, #f6e8ff 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .app-card h3 {
+    font-size: 1.6rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.3;
+  }
+
+  .app-card p {
+    color: var(--muted);
+    font-size: 0.98rem;
+  }
+
+  .app-meta {
+    margin-top: 1.5rem;
+    font-size: 0.95rem;
+    color: #4a5568;
+    line-height: 1.5;
+  }
+
+  .launch-link {
+    margin-top: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .deck-navigation {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+
+  .nav-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    background: #cbd5e0;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .nav-dot.active {
+    width: 32px;
+    background: var(--accent);
+  }
+
+  .stats-section {
+    background: #2d3748;
+    color: #fff;
+    border-radius: var(--radius-lg);
+    padding: 4rem 2rem;
+    margin-top: 3.5rem;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 2.5rem;
+  }
+
+  .stat-item h3 {
+    font-size: 2.6rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .stat-item p {
+    color: #cbd5e0;
+    font-size: 1rem;
+  }
+
+  .download-section {
+    background: linear-gradient(135deg, #f6f8fb 0%, #e9ecef 100%);
+    border-radius: var(--radius-lg);
+    padding: 4rem 2rem;
+    margin-top: 3.5rem;
+  }
+
+  .steps-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+  }
+
+  .step-card {
+    background: #fff;
+    padding: 2rem;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+    transition: transform 0.2s ease;
+  }
+
+  .step-card:hover {
+    transform: translateY(-6px);
+  }
+
+  .step-number {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0 auto 1rem;
+  }
+
+  .featured-section {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 4rem 2rem;
+    margin-top: 3.5rem;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .featured-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+  }
+
+  .featured-card {
+    border: 2px solid #edf2f7;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: #fff;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    min-height: 260px;
+  }
+
+  .featured-card:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .featured-card-header {
+    height: 160px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .featured-card-header span {
+    font-size: 2.5rem;
+  }
+
+  .featured-card-content {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .tag {
+    background: #edf2f7;
+    color: #4a5568;
+    font-size: 0.85rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+  }
+
+  footer {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--muted);
+  }
+
+  footer a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  footer a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 720px) {
+    .card-deck-section {
+      padding: 3rem 1.25rem;
+    }
+
+    .card-deck-container {
+      height: auto;
+    }
+
+    .app-card {
+      height: auto;
+    }
   }
 </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <nav class="top-nav" aria-label="Primary">
-      <a class="logo" href="#grid"><span class="logo-mark" aria-hidden="true">µ</span> Cognitive Rehab Lab</a>
-      <div class="top-links">
-        <a href="#grid">Browse library</a>
-        <a href="#featured">Featured</a>
-        <a href="https://github.com/marcomion/micro-apps" target="_blank" rel="noopener">GitHub</a>
-        <a class="pill" href="mailto:m.mion@nhs.net">Partner with us</a>
+  <header class="hero">
+    <div class="container">
+      <h1>Design-forward clinical tools for cognitive rehabilitation teams</h1>
+      <p>Explore evidence-based micro-experiences that ignite engagement, travel offline, and support your therapeutic outcomes.</p>
+      <a class="cta-button" href="#apps">Explore Micro-Apps</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="card-deck-section" id="apps">
+      <h2 class="section-title">Explore focused experiences</h2>
+      <p class="section-subtitle">Swipe through the deck to highlight an app, then launch it directly from the card.</p>
+
+      <div class="deck-instructions" id="deckInstructions">
+        <strong>How it works:</strong> Use the navigation dots below or tap the card to open the highlighted experience.
       </div>
-    </nav>
-    <div class="hero">
-      <div>
-        <h1>Design-forward clinical tools for cognitive rehabilitation teams.</h1>
-        <p>Explore a vibrant index of lightweight applications inspired by product design. Curated to support assessment, therapy, and research in minutes, not months.</p>
-        <div class="hero-actions">
-          <a class="cta-btn primary" href="#grid">Browse the collection</a>
+
+      <div class="card-deck-container">
+        <article class="app-card" id="activeCard" aria-live="polite"></article>
+      </div>
+
+      <div class="deck-navigation" id="deckDots" role="tablist" aria-label="Select highlighted micro-app"></div>
+    </section>
+
+    <section class="stats-section" aria-label="Micro-app stats">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <h3>50+</h3>
+          <p>Micro-apps available</p>
+        </div>
+        <div class="stat-item">
+          <h3>100%</h3>
+          <p>Offline compatible bundles</p>
+        </div>
+        <div class="stat-item">
+          <h3>12</h3>
+          <p>Therapy categories</p>
+        </div>
+        <div class="stat-item">
+          <h3>∞</h3>
+          <p>Ways to tailor sessions</p>
         </div>
       </div>
-      <aside class="hero-preview" aria-hidden="true">
-        <div class="hero-preview-content">
-          <span style="font-size:2.2rem">✨</span>
-          <h3 style="margin:.2rem 0 0">Loading the lab…</h3>
-          <p class="muted" style="margin:.4rem 0 0">Immersive micro-experiences that feel as polished as your favourite design tools.</p>
-        </div>
-      </aside>
-    </div>
-  </div>
-</header>
+    </section>
 
-<main>
-  <section class="section" id="grid">
-    <div class="section-heading">
-      <div>
-        <h2>Explore focused experiences for cognitive rehabilitation</h2>
-        <p class="muted">Swipe or drag the card deck to spotlight a micro-app. Tap the focused card to launch it.</p>
+    <section class="download-section" id="bundle">
+      <h2 class="section-title">Bundle and download in one click</h2>
+      <p class="section-subtitle">Create custom packages that work offline or on your intranet.</p>
+
+      <div class="steps-container">
+        <article class="step-card">
+          <div class="step-number">1</div>
+          <h3>Select your apps</h3>
+          <p>Hand-pick the sessions you need from the catalog and watch your bundle progress in real time.</p>
+        </article>
+        <article class="step-card">
+          <div class="step-number">2</div>
+          <h3>Add clinician context</h3>
+          <p>Optional notes travel with each micro-app so everyone sees the intent behind the activity.</p>
+        </article>
+        <article class="step-card">
+          <div class="step-number">3</div>
+          <h3>Download & deploy</h3>
+          <p>Receive a single ZIP file. Extract it anywhere and launch sessions immediately—online or offline.</p>
+        </article>
       </div>
-    </div>
+    </section>
 
-    <div class="carousel" id="carousel" tabindex="0" aria-roledescription="carousel" aria-label="Micro-apps carousel">
-      <button class="carousel-nav" type="button" id="carouselPrev" aria-label="Show previous micro-app">
-        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M15.5 5.5 9 12l6.5 6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <div class="carousel-viewport" id="carouselViewport">
-        <div class="carousel-track" id="appCarousel" role="list"></div>
-        <div class="carousel-pagination" id="carouselPagination" role="tablist" aria-label="Select highlighted micro-app"></div>
-      </div>
-      <button class="carousel-nav" type="button" id="carouselNext" aria-label="Show next micro-app">
-        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M8.5 5.5 15 12l-6.5 6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-    </div>
-    <div class="download-section" id="bundle">
-      <div>
-        <h3>Bundle and download micro-apps in one click</h3>
-        <p>The Build-Your-Package downloader lets you hand-pick apps from the catalog and export them as a single ZIP that works offline or on your own intranet.</p>
-      </div>
-      <ul>
-        <li>Select the sessions you need and keep track of your bundle progress in real time.</li>
-        <li>Optional clinician notes are embedded so you can share context with your learners.</li>
-        <li>Download the ZIP, extract it and save it to your desired location. Your apps will be ready to use.</li>
-      </ul>
-      <div class="download-actions">
-        <a class="cta-btn primary" href="./apps/build-your-package/index.html">Launch the Build-Your-Package downloader</a>
-        <a class="cta-btn secondary" href="./apps/build-your-package/index.html#clinician-notes">See where notes are saved</a>
-      </div>
-    </div>
-  </section>
+    <section class="featured-section" id="featured">
+      <h2 class="section-title">Popular experiences</h2>
+      <p class="section-subtitle">Start with these engaging micro-apps used by rehabilitation teams worldwide.</p>
+      <div class="featured-grid" id="featuredGrid"></div>
+    </section>
+  </main>
 
-  <section class="section" id="featured">
-    <div class="section-heading">
-      <div>
-        <h2>Start with popular experiences that spark engagement</h2>
-        <p class="muted">A rotating set of featured micro-apps.</p>
-      </div>
-    </div>
-    <div id="featuredGrid"></div>
-  </section>
-</main>
+  <footer>
+    <p>Open source clinical tools | <a href="https://github.com/brickfielder/micro-apps-repository" target="_blank" rel="noopener">View on GitHub</a></p>
+    <p id="last-updated" style="margin-top:0.5rem; font-size:0.95rem;"></p>
+  </footer>
 
-<footer class="site-footer" style="text-align:center;padding:2rem 1rem;color:var(--muted)">
-  <p>© 2025 Cognitive Rehabilitation Micro-Apps — Apache 2.0</p>
-  <p id="last-updated" class="muted"></p>
-</footer>
+  <script>
+    (() => {
+      const focusLimit = 5;
+      const state = {
+        apps: [],
+        highlighted: [],
+        currentIndex: 0
+      };
 
-<script>
-(() => {
-  const state = {
-    apps: [],
-    currentIndex: 0,
-    pointerActive: false,
-    dragStartX: 0,
-    dragOffset: 0,
-    ignoreClick: false
-  };
+      const cardEl = document.getElementById('activeCard');
+      const dotsEl = document.getElementById('deckDots');
+      const featuredGrid = document.getElementById('featuredGrid');
 
-  const gradientPalette = [
-    'linear-gradient(135deg,#e4f1ff 0%,#f6e8ff 100%)',
-    'linear-gradient(135deg,#ffe6f2 0%,#f9ecff 100%)',
-    'linear-gradient(135deg,#e0fdf4 0%,#e9f4ff 100%)',
-    'linear-gradient(135deg,#fff1e6 0%,#fbe9ff 100%)',
-    'linear-gradient(135deg,#f7f3ff 0%,#e7f4ff 100%)'
-  ];
-
-  const track = document.getElementById('appCarousel');
-  const pagination = document.getElementById('carouselPagination');
-  const viewport = document.getElementById('carouselViewport');
-  const btnPrev = document.getElementById('carouselPrev');
-  const btnNext = document.getElementById('carouselNext');
-  const liveRegion = document.createElement('div');
-  liveRegion.className = 'sr-only';
-  liveRegion.setAttribute('aria-live', 'polite');
-  document.body.appendChild(liveRegion);
-
-  const stackedMedia = window.matchMedia('(max-width: 720px)');
-  const motionMedia = window.matchMedia('(prefers-reduced-motion: reduce)');
-
-  function useDeckLayout(){
-    return !stackedMedia.matches && !motionMedia.matches;
-  }
-
-  function pointerX(evt){
-    if (typeof evt.clientX === 'number') return evt.clientX;
-    if (evt.touches && evt.touches.length) return evt.touches[0].clientX;
-    if (evt.changedTouches && evt.changedTouches.length) return evt.changedTouches[0].clientX;
-    return 0;
-  }
-
-  function render(){
-    track.innerHTML = '';
-    pagination.innerHTML = '';
-
-    if (!state.apps.length){
-      updateButtons();
-      return;
-    }
-
-    state.apps.forEach((app, i) => {
-      const item = document.createElement('div');
-      item.className = 'carousel-item';
-      item.dataset.index = i;
-      item.setAttribute('role', 'listitem');
-      item.innerHTML = `
-        <article class="card" style="--card-gradient:${gradientPalette[i % gradientPalette.length]}">
-          <a class="card-link" href="${app.href}">
-            <header class="card-header">
-              <span class="card-emoji" aria-hidden="true">${app.emoji}</span>
-              <span class="chip">${app.featured ? 'Featured' : 'App'}</span>
-            </header>
-            <h3>${app.title}</h3>
-            <p>${app.desc}</p>
-            <div class="tag-list">${app.tags.map(t => `<span>${t}</span>`).join('')}</div>
-          </a>
-        </article>`;
-      track.appendChild(item);
-
-      const dot = document.createElement('button');
-      dot.className = 'carousel-dot';
-      dot.type = 'button';
-      dot.setAttribute('role', 'tab');
-      dot.setAttribute('aria-label', `Focus ${app.title}`);
-      dot.addEventListener('click', () => goTo(i));
-      pagination.appendChild(dot);
-    });
-
-    state.currentIndex = Math.min(state.currentIndex, state.apps.length - 1);
-    updateDots();
-    positionCards();
-    updateButtons();
-    announceActive();
-  }
-
-  function positionCards(dragOffset = 0){
-    const items = [...track.children];
-    if (!items.length) return;
-
-    if (!useDeckLayout()){
-      items.forEach((el, i) => {
-        el.style.transform = '';
-        el.style.opacity = '';
-        el.style.pointerEvents = 'auto';
-        el.style.filter = '';
-        el.style.zIndex = '';
-        el.removeAttribute('data-hidden');
-        el.removeAttribute('aria-hidden');
-        el.classList.toggle('is-active', i === state.currentIndex);
-        const link = el.querySelector('a');
-        if (link) link.tabIndex = 0;
-      });
-      return;
-    }
-
-    const width = viewport.offsetWidth || 1;
-    const spread = Math.min(width / 3, 140);
-    const drop = Math.min(18, width / 28);
-    const fadeDistance = 2.2;
-
-    items.forEach((el, i) => {
-      const offset = i - state.currentIndex + dragOffset;
-      const absOffset = Math.abs(offset);
-      const clamped = Math.min(absOffset, fadeDistance);
-      const translateX = offset * spread;
-      const translateY = clamped * drop;
-      const scale = Math.max(0.82, 1 - clamped * 0.12);
-      const rotate = offset * -4;
-      const visible = absOffset <= fadeDistance;
-      const active = absOffset < 0.5;
-
-      el.style.transform = `translate(-50%, -50%) translateX(${translateX}px) translateY(${translateY}px) rotate(${rotate}deg) scale(${scale})`;
-      el.style.opacity = visible ? 1 - clamped * 0.18 : 0;
-      el.style.pointerEvents = active ? 'auto' : 'none';
-      el.style.filter = active ? 'none' : 'saturate(.92)';
-      el.style.zIndex = String(100 - Math.round(clamped * 10));
-      el.dataset.hidden = visible ? 'false' : 'true';
-      el.setAttribute('aria-hidden', active ? 'false' : 'true');
-      el.classList.toggle('is-active', active);
-
-      const link = el.querySelector('a');
-      if (link) link.tabIndex = active ? 0 : -1;
-    });
-  }
-
-  function updateDots(){
-    const dots = [...pagination.children];
-    dots.forEach((dot, i) => {
-      const active = i === state.currentIndex;
-      dot.dataset.active = active ? 'true' : 'false';
-      dot.setAttribute('aria-selected', active ? 'true' : 'false');
-      dot.tabIndex = active ? 0 : -1;
-    });
-  }
-
-  function updateButtons(){
-    const disable = !useDeckLayout() || state.apps.length <= 1;
-    btnPrev.disabled = disable;
-    btnNext.disabled = disable;
-    btnPrev.tabIndex = disable ? -1 : 0;
-    btnNext.tabIndex = disable ? -1 : 0;
-    if (disable){
-      btnPrev.setAttribute('aria-hidden','true');
-      btnNext.setAttribute('aria-hidden','true');
-    } else {
-      btnPrev.removeAttribute('aria-hidden');
-      btnNext.removeAttribute('aria-hidden');
-    }
-  }
-
-  function announceActive(){
-    const active = state.apps[state.currentIndex];
-    if (!active) return;
-    const tags = Array.isArray(active.tags) && active.tags.length ? ` • ${active.tags.join(', ')}` : '';
-    liveRegion.textContent = `${active.title}${tags}`;
-  }
-
-  function goTo(index){
-    if (!state.apps.length) return;
-    const n = state.apps.length;
-    state.currentIndex = ((index % n) + n) % n;
-    state.dragOffset = 0;
-    positionCards();
-    updateDots();
-    updateButtons();
-    announceActive();
-  }
-
-  const next = () => goTo(state.currentIndex + 1);
-  const prev = () => goTo(state.currentIndex - 1);
-
-  function onPointerDown(e){
-    if (!useDeckLayout() || state.apps.length <= 1) return;
-    state.pointerActive = true;
-    state.dragStartX = pointerX(e);
-    state.dragOffset = 0;
-    state.ignoreClick = false;
-    viewport.classList.add('is-dragging');
-    if (viewport.setPointerCapture && typeof e.pointerId === 'number' && e.pointerType !== 'mouse'){
-      viewport.setPointerCapture(e.pointerId);
-    }
-  }
-
-  function onPointerMove(e){
-    if (!state.pointerActive) return;
-    const dx = pointerX(e) - state.dragStartX;
-    const width = viewport.offsetWidth || 1;
-    const spread = Math.max(Math.min(width / 3, 140), 60);
-    const dragOffset = dx / spread;
-    if (Math.abs(dx) > 6) state.ignoreClick = true;
-    state.dragOffset = dragOffset;
-    positionCards(dragOffset);
-    if (e.cancelable) e.preventDefault();
-  }
-
-  function onPointerUp(e){
-    if (!state.pointerActive) return;
-    state.pointerActive = false;
-    viewport.classList.remove('is-dragging');
-    if (viewport.releasePointerCapture && typeof e.pointerId === 'number'){
-      viewport.releasePointerCapture(e.pointerId);
-    }
-
-    const dragOffset = state.dragOffset;
-    state.dragOffset = 0;
-    const threshold = 0.35;
-    if (Math.abs(dragOffset) > threshold){
-      goTo(state.currentIndex + (dragOffset < 0 ? 1 : -1));
-    } else {
-      goTo(state.currentIndex);
-    }
-
-    setTimeout(() => { state.ignoreClick = false; }, 80);
-  }
-
-  if ('PointerEvent' in window){
-    viewport.addEventListener('pointerdown', onPointerDown);
-    viewport.addEventListener('pointermove', onPointerMove, { passive:false });
-    viewport.addEventListener('pointerup', onPointerUp);
-    viewport.addEventListener('pointercancel', onPointerUp);
-    viewport.addEventListener('pointerleave', onPointerUp);
-  } else {
-    viewport.addEventListener('touchstart', onPointerDown, { passive:true });
-    viewport.addEventListener('touchmove', onPointerMove, { passive:false });
-    viewport.addEventListener('touchend', onPointerUp);
-    viewport.addEventListener('mousedown', onPointerDown);
-    window.addEventListener('mousemove', onPointerMove);
-    window.addEventListener('mouseup', onPointerUp);
-  }
-
-  viewport.addEventListener('wheel', (event) => {
-    if (!useDeckLayout() || state.apps.length <= 1) return;
-    if (Math.abs(event.deltaX) < Math.abs(event.deltaY)) return;
-    event.preventDefault();
-    if (event.deltaX > 0) next();
-    else if (event.deltaX < 0) prev();
-  }, { passive:false });
-
-  track.addEventListener('click', (e) => {
-    if (!useDeckLayout()) return;
-    if (!state.ignoreClick) return;
-    e.preventDefault();
-    e.stopPropagation();
-    state.ignoreClick = false;
-  }, true);
-
-  document.getElementById('carousel').addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
-    if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
-    if (e.key === 'Home') { e.preventDefault(); goTo(0); }
-    if (e.key === 'End') { e.preventDefault(); goTo(state.apps.length - 1); }
-  });
-
-  btnPrev.addEventListener('click', prev);
-  btnNext.addEventListener('click', next);
-
-  const handleLayoutChange = () => {
-    state.pointerActive = false;
-    state.dragOffset = 0;
-    viewport.classList.remove('is-dragging');
-    positionCards();
-    updateDots();
-    updateButtons();
-  };
-
-  stackedMedia.addEventListener('change', handleLayoutChange);
-  motionMedia.addEventListener('change', handleLayoutChange);
-  window.addEventListener('resize', () => {
-    if (useDeckLayout()) positionCards(state.pointerActive ? state.dragOffset : 0);
-  });
-
-  function renderFeatured(){
-    const container = document.getElementById('featuredGrid');
-    container.innerHTML = '';
-    const featured = state.apps.filter(app => app.featured);
-    if (!featured.length) return;
-    const grid = document.createElement('div');
-    grid.className = 'featured-grid';
-    featured.forEach(app => {
-      const card = document.createElement('a');
-      card.className = 'featured-card';
-      card.href = app.href;
-      card.innerHTML = `
-        <header class="card-header">
-          <span class="card-emoji" aria-hidden="true">${app.emoji}</span>
-          <span class="chip">Featured</span>
-        </header>
-        <h3>${app.title}</h3>
-        <p>${app.desc}</p>
-        <div class="tag-list">${app.tags.map(t => `<span>${t}</span>`).join('')}</div>
-      `;
-      grid.appendChild(card);
-    });
-    container.appendChild(grid);
-  }
-
-  async function loadApps(){
-    try {
-      const res = await fetch('./catalog.json');
-      if (!res.ok) throw new Error('Failed to load catalog');
-      const catalog = await res.json();
-      state.apps = catalog.map(app => ({
-        slug: app.slug,
-        emoji: app.emoji || '🧩',
-        title: app.title,
-        desc: app.description,
-        tags: Array.isArray(app.tags) ? app.tags : [],
-        featured: Boolean(app.featured),
-        href: `apps/${app.slug}/index.html`
-      }));
-    } catch (err){
-      console.error(err);
-      state.apps = [
-        { slug:'market-manager', emoji:'🛒', title:'Market Manager', desc:'Working memory under retail pressure.', href:'apps/market-manager/index.html', tags:['executive','memory'], featured:false },
-        { slug:'cashpoint-coach', emoji:'🏧', title:'CashPoint Coach', desc:'ATM practice with spoken steps.', href:'apps/atm-practice/index.html', tags:['planning','functional'], featured:true },
-        { slug:'task-juggler', emoji:'🧠', title:'Task Juggler', desc:'Multitask with timed interruptions.', href:'apps/task-juggler/index.html', tags:['executive'], featured:false },
-        { slug:'emergency-call-simulator', emoji:'📞', title:'Emergency Call Simulator', desc:'Practise structured calls under stress.', href:'apps/emergency-call-simulator/index.html', tags:['attention'], featured:true },
-        { slug:'fluency-coach', emoji:'💬', title:'Fluency Coach', desc:'Strategy-led verbal fluency.', href:'apps/fluency-coach/index.html', tags:['language'], featured:false },
-        { slug:'barista-chaos', emoji:'☕', title:'Barista Chaos', desc:'Dual-tasking with orders & timing.', href:'apps/barista-chaos/index.html', tags:['dual-task'], featured:false },
-        { slug:'maze-explorer', emoji:'🧭', title:'Maze Explorer', desc:'Visuospatial scanning & planning.', href:'apps/maze-explorer/index.html', tags:['visuospatial'], featured:false },
-        { slug:'plan-with-coco', emoji:'🐦', title:'Plan with Coco', desc:'Prospective memory & routines.', href:'apps/plan-with-coco/index.html', tags:['planning'], featured:true }
+      const fallbackApps = [
+        { slug: 'market-manager', emoji: '🛒', title: 'Market Manager', description: 'Working memory under retail pressure.', href: 'apps/market-manager/index.html', tags: ['executive', 'memory'], featured: false },
+        { slug: 'cashpoint-coach', emoji: '🏧', title: 'CashPoint Coach', description: 'ATM practice with spoken steps.', href: 'apps/atm-practice/index.html', tags: ['planning', 'functional'], featured: true },
+        { slug: 'task-juggler', emoji: '🧠', title: 'Task Juggler', description: 'Multitask with timed interruptions.', href: 'apps/task-juggler/index.html', tags: ['executive'], featured: false },
+        { slug: 'emergency-call-simulator', emoji: '📞', title: 'Emergency Call Simulator', description: 'Practise structured calls under stress.', href: 'apps/emergency-call-simulator/index.html', tags: ['attention'], featured: true },
+        { slug: 'fluency-coach', emoji: '💬', title: 'Fluency Coach', description: 'Strategy-led verbal fluency.', href: 'apps/fluency-coach/index.html', tags: ['language'], featured: false },
+        { slug: 'barista-chaos', emoji: '☕', title: 'Barista Chaos', description: 'Dual-tasking with orders & timing.', href: 'apps/barista-chaos/index.html', tags: ['dual-task'], featured: false },
+        { slug: 'maze-explorer', emoji: '🧭', title: 'Maze Explorer', description: 'Visuospatial scanning & planning.', href: 'apps/maze-explorer/index.html', tags: ['visuospatial'], featured: false },
+        { slug: 'plan-with-coco', emoji: '🐦', title: 'Plan with Coco', description: 'Prospective memory & routines.', href: 'apps/plan-with-coco/index.html', tags: ['planning'], featured: true }
       ];
-    }
-    render();
-    renderFeatured();
-  }
 
-  loadApps();
-  document.getElementById('last-updated').textContent = `Last updated: ${new Date().toLocaleString()}`;
-})();
-</script>
+      const titleCase = (value = '') => {
+        if (!value) return '';
+        return value.charAt(0).toUpperCase() + value.slice(1);
+      };
+
+      const normalizeApp = (app) => {
+        const tags = Array.isArray(app.tags) ? app.tags.filter(Boolean) : [];
+        const category = tags.length ? titleCase(tags[0]) : 'Cognitive';
+        return {
+          slug: app.slug,
+          emoji: app.emoji || '🧩',
+          title: app.title,
+          desc: app.description || app.desc || '',
+          tags,
+          featured: Boolean(app.featured),
+          href: app.href || `apps/${app.slug}/index.html`,
+          category
+        };
+      };
+
+      const summarizeTags = (tags) => {
+        if (!tags.length) return 'Cognitive practice';
+        return tags.slice(0, 2).map(titleCase).join(' • ');
+      };
+
+      const chooseHighlights = () => {
+        const featured = state.apps.filter((app) => app.featured);
+        const remaining = state.apps.filter((app) => !app.featured);
+        const selection = [...featured, ...remaining];
+        state.highlighted = selection.slice(0, focusLimit);
+        state.currentIndex = 0;
+      };
+
+      const renderDeck = () => {
+        if (!cardEl) return;
+        if (!state.highlighted.length) {
+          cardEl.innerHTML = '<p style="color:var(--muted)">Loading apps…</p>';
+          dotsEl.innerHTML = '';
+          return;
+        }
+        updateCard();
+        renderDots();
+      };
+
+      const updateCard = () => {
+        const app = state.highlighted[state.currentIndex];
+        if (!app) return;
+        cardEl.innerHTML = `
+          <div class="card-icon" aria-hidden="true">${app.emoji}</div>
+          <span class="category">${app.category}</span>
+          <h3>${app.title}</h3>
+          <p>${app.desc}</p>
+          <div class="app-meta">
+            <p>🎯 Focus: ${summarizeTags(app.tags)}</p>
+            <p>🚀 Launch-ready micro-app</p>
+          </div>
+          <a class="launch-link" href="${app.href}">Launch experience →</a>
+        `;
+      };
+
+      const renderDots = () => {
+        if (!dotsEl) return;
+        dotsEl.innerHTML = '';
+        state.highlighted.forEach((app, index) => {
+          const dot = document.createElement('button');
+          dot.className = 'nav-dot' + (index === state.currentIndex ? ' active' : '');
+          dot.type = 'button';
+          dot.setAttribute('aria-label', `Show ${app.title}`);
+          dot.addEventListener('click', () => {
+            state.currentIndex = index;
+            updateCard();
+            renderDots();
+          });
+          dotsEl.appendChild(dot);
+        });
+      };
+
+      const renderFeatured = () => {
+        if (!featuredGrid) return;
+        featuredGrid.innerHTML = '';
+        const featuredApps = state.apps.filter((app) => app.featured);
+        if (!featuredApps.length) {
+          featuredGrid.innerHTML = '<p style="color:var(--muted);text-align:center">Featured apps will appear here soon.</p>';
+          return;
+        }
+
+        featuredApps.forEach((app) => {
+          const card = document.createElement('a');
+          card.className = 'featured-card';
+          card.href = app.href;
+          card.innerHTML = `
+            <div class="featured-card-header">
+              <span aria-hidden="true">${app.emoji}</span>
+              <p style="margin:0;font-weight:600">${app.category}</p>
+            </div>
+            <div class="featured-card-content">
+              <h3>${app.title}</h3>
+              <p>${app.desc}</p>
+              <div class="tag-list">${app.tags.map((tag) => `<span class="tag">${titleCase(tag)}</span>`).join('')}</div>
+            </div>
+          `;
+          featuredGrid.appendChild(card);
+        });
+      };
+
+      const loadApps = async () => {
+        try {
+          const res = await fetch('./catalog.json');
+          if (!res.ok) throw new Error('Failed to load catalog');
+          const catalog = await res.json();
+          state.apps = catalog.map((app) => normalizeApp({
+            slug: app.slug,
+            emoji: app.emoji,
+            title: app.title,
+            description: app.description,
+            tags: app.tags,
+            featured: app.featured,
+            href: `apps/${app.slug}/index.html`
+          }));
+        } catch (error) {
+          console.error(error);
+          state.apps = fallbackApps.map(normalizeApp);
+        }
+
+        chooseHighlights();
+        renderDeck();
+        renderFeatured();
+      };
+
+      loadApps();
+      const lastUpdated = document.getElementById('last-updated');
+      if (lastUpdated) {
+        lastUpdated.textContent = `Last updated: ${new Date().toLocaleString()}`;
+      }
+    })();
+  </script>
 </body>
 </html>
