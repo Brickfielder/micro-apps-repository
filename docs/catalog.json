@@ -1,179 +1,278 @@
 [
   {
-  "slug": "audio-errands",
-  "title": "Audio Errand Planner",
-  "description": "Practice auditory attention and sequencing by recalling errands in the correct order.",
-  "emoji": "🎧",
-  "tags": ["attention", "executive"]
+    "slug": "audio-errands",
+    "title": "Audio Errand Planner",
+    "description": "Practice auditory attention and sequencing by recalling errands in the correct order.",
+    "emoji": "\ud83c\udfa7",
+    "tags": [
+      "attention",
+      "executive"
+    ],
+    "domain": "Attention"
   },
   {
-  "slug": "atm-practice",
-  "title": "Cash Point Coach",
-  "description": "Cash Point Coach — Practise ATM skills: insert card, enter PIN, withdraw, check balance, top-up, change PIN.",
-  "emoji": "💳",
-  "tags": ["attention", "executive"]
+    "slug": "atm-practice",
+    "title": "Cash Point Coach",
+    "description": "Cash Point Coach \u2014 Practise ATM skills: insert card, enter PIN, withdraw, check balance, top-up, change PIN.",
+    "emoji": "\ud83d\udcb3",
+    "tags": [
+      "attention",
+      "executive"
+    ],
+    "domain": "Planning & Organisation"
   },
   {
     "slug": "ar-neglect-proto",
     "title": "AR Neglect Scanner Prototype",
     "description": "Marker-based AR session to assess left/right search coverage with CSV export.",
-    "emoji": "⭐️",
-    "tags": ["attention", "perception"]
+    "emoji": "\u2b50\ufe0f",
+    "tags": [
+      "attention",
+      "perception"
+    ],
+    "domain": "Attention"
   },
   {
     "slug": "barista-chaos",
     "title": "Barista Chaos",
     "description": "Prioritise and serve orders amid interruptions and changing rules.",
-    "emoji": "☕️",
-    "tags": ["executive", "attention"]
+    "emoji": "\u2615\ufe0f",
+    "tags": [
+      "executive",
+      "attention"
+    ],
+    "domain": "Navigation & Executive"
   },
   {
     "slug": "emergency-despatch",
     "title": "Emergency Despatch",
     "description": "Route selection and rapid decision-making with time pressure.",
-    "emoji": "🚑",
-    "tags": ["attention", "executive"]
+    "emoji": "\ud83d\ude91",
+    "tags": [
+      "attention",
+      "executive"
+    ],
+    "domain": "Navigation & Executive"
   },
   {
     "slug": "emotion-chat",
     "title": "Emotion Chat",
     "description": "Recognise emotions and intentions in short chat-style vignettes.",
-    "emoji": "💬",
-    "tags": ["social", "language"]
+    "emoji": "\ud83d\udcac",
+    "tags": [
+      "social",
+      "language"
+    ],
+    "domain": "Social & Language"
   },
   {
     "slug": "email-composer-coach",
     "title": "Email Composer Coach",
     "description": "Draft everyday emails and receive structured coaching on clarity and tone.",
-    "emoji": "✉️",
-    "tags": ["language", "functional"]
+    "emoji": "\u2709\ufe0f",
+    "tags": [
+      "language",
+      "functional"
+    ],
+    "domain": "Social & Language"
   },
   {
     "slug": "errands-visual-memory",
-    "title": "Errands — Visual Memory",
+    "title": "Errands \u2014 Visual Memory",
     "description": "Remember locations/objects while completing errands.",
-    "emoji": "🧠",
-    "tags": ["visuospatial", "memory"]
+    "emoji": "\ud83e\udde0",
+    "tags": [
+      "visuospatial",
+      "memory"
+    ],
+    "domain": "Memory & Learning"
   },
-   {
+  {
     "slug": "market-manager",
     "title": "Market Manager",
     "description": "Scan items, process payments, handle interruptions.",
-    "emoji": "📋",
-    "tags": ["attention", "executive", "memory"]
+    "emoji": "\ud83d\udccb",
+    "tags": [
+      "attention",
+      "executive",
+      "memory"
+    ],
+    "domain": "Planning & Organisation"
   },
   {
     "slug": "maze-explorer",
     "title": "Maze Explorer",
     "description": "Spatial planning and working memory in grid-based mazes.",
-    "emoji": "🧭",
-    "tags": ["visuospatial", "executive", "memory"]
+    "emoji": "\ud83e\udded",
+    "tags": [
+      "visuospatial",
+      "executive",
+      "memory"
+    ],
+    "domain": "Navigation & Executive"
   },
   {
     "slug": "mobile-banking-simulator",
     "title": "Brightwave Mobile Banking Simulator",
     "description": "Practise real-time mobile banking: balances, transfers, bills, card controls, and statement exports.",
-    "emoji": "🏦",
-    "tags": ["executive", "attention", "functional"]
+    "emoji": "\ud83c\udfe6",
+    "tags": [
+      "executive",
+      "attention",
+      "functional"
+    ],
+    "domain": "Planning & Organisation"
   },
   {
     "slug": "memory-in-action",
     "title": "Memory in Action",
     "description": "Short-term recall inside simple task sequences.",
-    "emoji": "🧠",
-    "tags": ["memory", "executive"]
+    "emoji": "\ud83e\udde0",
+    "tags": [
+      "memory",
+      "executive"
+    ],
+    "domain": "Memory & Learning"
   },
   {
     "slug": "office-day",
     "title": "Office Day",
     "description": "Everyday multi-tasking across common office-style tasks.",
-    "emoji": "🖥️",
-    "tags": ["executive", "attention"],
-     "featured": true
+    "emoji": "\ud83d\udda5\ufe0f",
+    "tags": [
+      "executive",
+      "attention"
+    ],
+    "featured": true,
+    "domain": "Planning & Organisation"
   },
   {
     "slug": "plan-with-coco",
     "title": "Plan with Coco",
     "description": "Break goals into steps; schedule and reorder flexibly.",
-    "emoji": "🗓️",
-    "tags": ["executive"]
+    "emoji": "\ud83d\uddd3\ufe0f",
+    "tags": [
+      "executive"
+    ],
+    "domain": "Planning & Organisation"
   },
   {
     "slug": "shopping-trip-planner",
     "title": "Shopping Trip Problem Solver",
     "description": "Plan transport, budget, and in-store decisions for a grocery outing.",
-    "emoji": "🛒",
-    "tags": ["executive", "problem-solving"]
+    "emoji": "\ud83d\uded2",
+    "tags": [
+      "executive",
+      "problem-solving"
+    ],
+    "domain": "Planning & Organisation"
   },
   {
     "slug": "signal-master",
     "title": "Signal Master",
     "description": "Rapid signal detection and rule switching.",
-    "emoji": "🚦",
-    "tags": ["attention"],
-     "featured": true
+    "emoji": "\ud83d\udea6",
+    "tags": [
+      "attention"
+    ],
+    "featured": true,
+    "domain": "Attention"
   },
   {
     "slug": "star-hunt",
     "title": "Star Hunt",
-    "description": "Visual search with distractors; speed–accuracy balancing.",
-    "emoji": "⭐️",
-    "tags": ["attention", "visuospatial"]
+    "description": "Visual search with distractors; speed\u2013accuracy balancing.",
+    "emoji": "\u2b50\ufe0f",
+    "tags": [
+      "attention",
+      "visuospatial"
+    ],
+    "domain": "Attention"
   },
   {
     "slug": "taskflow",
     "title": "Taskflow",
     "description": "Manage cooking, texts, and shopping under time pressure.",
-    "emoji": "🔁",
-    "tags": ["executive", "memory"]
+    "emoji": "\ud83d\udd01",
+    "tags": [
+      "executive",
+      "memory"
+    ],
+    "domain": "Planning & Organisation"
   },
-   {
+  {
     "slug": "task-juggler",
     "title": "Task Juggler",
     "description": "Build and follow procedural flows with checkpoints.",
-    "emoji": "⏰",
-    "tags": ["executive", "memory"]
+    "emoji": "\u23f0",
+    "tags": [
+      "executive",
+      "memory"
+    ],
+    "domain": "Navigation & Executive"
   },
   {
     "slug": "emergency-call-simulator",
     "title": "Emergency Call Simulator",
     "description": "Practice dialling 999 and requesting an ambulance during a mock emergency call.",
-    "emoji": "🚑",
-    "tags": ["executive", "language"]
+    "emoji": "\ud83d\ude91",
+    "tags": [
+      "executive",
+      "language"
+    ],
+    "domain": "Social & Language"
   },
   {
     "slug": "tower-control",
     "title": "Tower Control",
     "description": "Stacking/ordering puzzle emphasising planning ahead.",
-    "emoji": "🏗️",
-    "tags": ["executive", "visuospatial"]
+    "emoji": "\ud83c\udfd7\ufe0f",
+    "tags": [
+      "executive",
+      "visuospatial"
+    ],
+    "domain": "Navigation & Executive"
   },
   {
     "slug": "travel-with-coco",
     "title": "Travel with Coco",
     "description": "Plan simple trips; juggle constraints and choices.",
-    "emoji": "✈️",
-    "tags": ["executive"]
+    "emoji": "\u2708\ufe0f",
+    "tags": [
+      "executive"
+    ],
+    "domain": "Navigation & Executive"
   },
   {
     "slug": "fluency-coach",
     "title": "Fluency Coach",
     "description": "Strategy-led verbal fluency with voice capture and grouping support.",
-    "emoji": "🗣️",
-    "tags": ["language", "executive"]
+    "emoji": "\ud83d\udde3\ufe0f",
+    "tags": [
+      "language",
+      "executive"
+    ],
+    "domain": "Social & Language"
   },
   {
     "slug": "visual-neglect-trainer",
     "title": "Left-Anchor Reader",
     "description": "Practice reading while using visual anchors.",
-    "emoji": "📖",
-    "tags": ["visuospatial"]
+    "emoji": "\ud83d\udcd6",
+    "tags": [
+      "visuospatial"
+    ],
+    "domain": "Attention"
   },
   {
     "slug": "word-scavenger",
     "title": "Word Scavenger",
     "description": "Find words under constraints; phonemic/semantic fluency.",
-    "emoji": "🔤",
-    "tags": ["language", "executive"]
+    "emoji": "\ud83d\udd24",
+    "tags": [
+      "language",
+      "executive"
+    ],
+    "domain": "Social & Language"
   }
 ]
