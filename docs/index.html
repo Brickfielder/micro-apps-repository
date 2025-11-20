@@ -138,18 +138,39 @@
     max-width: 640px;
   }
 
-  .card-deck-container {
-    position: relative;
-    min-height: 420px;
+  .apps-root {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .apps-section {
+    margin-top: 3rem;
+  }
+
+  .apps-section-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+
+  .apps-section-subtitle {
+    font-size: 0.95rem;
+    opacity: 0.8;
+    color: var(--muted);
+    max-width: 40rem;
+  }
+
+  .apps-section-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.75rem;
-    align-items: stretch;
-    justify-items: center;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
   }
 
   .app-card {
-    width: min(360px, 100%);
+    width: 100%;
     min-height: 380px;
     border-radius: 28px;
     background: #fff;
@@ -226,29 +247,6 @@
     color: var(--accent);
     font-weight: 600;
     text-decoration: none;
-  }
-
-  .deck-navigation {
-    display: flex;
-    justify-content: center;
-    gap: 0.75rem;
-    margin-top: 2rem;
-    flex-wrap: wrap;
-  }
-
-  .nav-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 999px;
-    background: #cbd5e0;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-
-  .nav-dot.active {
-    width: 32px;
-    background: var(--accent);
   }
 
   .stats-section {
@@ -404,10 +402,8 @@
       padding: 3rem 1.25rem;
     }
 
-    .card-deck-container {
-      min-height: auto;
+    .apps-section-grid {
       grid-template-columns: 1fr;
-      justify-items: stretch;
     }
 
     .app-card {
@@ -429,19 +425,13 @@
   <main>
     <section class="card-deck-section" id="apps">
       <h2 class="section-title">Explore focused experiences</h2>
-      <p class="section-subtitle">Swipe through the deck to highlight an app, then launch it directly from the card.</p>
+      <p class="section-subtitle">Micro-app shelves organised by rehabilitation domain.</p>
 
       <div class="deck-instructions" id="deckInstructions">
-        <strong>How it works:</strong> Use the navigation dots to change the primary card on the left—the next experience is
-        previewed alongside it.
+        <strong>How it works:</strong> Browse by domain to find micro-apps that match your rehab goals. Each app opens in a new tab and is ready to use.
       </div>
 
-      <div class="card-deck-container" aria-live="polite">
-        <article class="app-card" id="primaryCard" aria-live="polite"></article>
-        <article class="app-card secondary" id="secondaryCard" aria-label="Next highlighted experience" aria-live="polite"></article>
-      </div>
-
-      <div class="deck-navigation" id="deckDots" role="tablist" aria-label="Select highlighted micro-app"></div>
+      <div id="appsRoot" class="apps-root" aria-live="polite"></div>
     </section>
 
     <section class="stats-section" aria-label="Micro-app stats">
@@ -503,25 +493,42 @@
   <script>
     (() => {
       const state = {
-        apps: [],
-        highlighted: [],
-        currentIndex: 0
+        apps: []
       };
 
-      const primaryCard = document.getElementById('primaryCard');
-      const secondaryCard = document.getElementById('secondaryCard');
-      const dotsEl = document.getElementById('deckDots');
+      const appsRoot = document.getElementById('appsRoot');
       const featuredGrid = document.getElementById('featuredGrid');
 
+      const domains = [
+        { name: 'Attention', subtitle: 'Tasks that require sustained focus and rapid decision-making.' },
+        { name: 'Social & Language', subtitle: 'Conversations, emotions, and communication skills.' },
+        { name: 'Planning & Organisation', subtitle: 'Everyday planning, sequencing, and juggling tasks.' },
+        { name: 'Memory & Learning', subtitle: 'Remembering, updating, and using information over time.' },
+        { name: 'Navigation & Executive', subtitle: 'Way-finding, rules, strategy, and flexible thinking.' }
+      ];
+
+      const tagDomainMap = {
+        attention: 'Attention',
+        perception: 'Attention',
+        social: 'Social & Language',
+        language: 'Social & Language',
+        executive: 'Navigation & Executive',
+        'problem-solving': 'Navigation & Executive',
+        visuospatial: 'Navigation & Executive',
+        planning: 'Planning & Organisation',
+        functional: 'Planning & Organisation',
+        memory: 'Memory & Learning'
+      };
+
       const fallbackApps = [
-        { slug: 'market-manager', emoji: '🛒', title: 'Market Manager', description: 'Working memory under retail pressure.', href: 'apps/market-manager/index.html', tags: ['executive', 'memory'], featured: false },
-        { slug: 'cashpoint-coach', emoji: '🏧', title: 'CashPoint Coach', description: 'ATM practice with spoken steps.', href: 'apps/atm-practice/index.html', tags: ['planning', 'functional'], featured: true },
-        { slug: 'task-juggler', emoji: '🧠', title: 'Task Juggler', description: 'Multitask with timed interruptions.', href: 'apps/task-juggler/index.html', tags: ['executive'], featured: false },
-        { slug: 'emergency-call-simulator', emoji: '📞', title: 'Emergency Call Simulator', description: 'Practise structured calls under stress.', href: 'apps/emergency-call-simulator/index.html', tags: ['attention'], featured: true },
-        { slug: 'fluency-coach', emoji: '💬', title: 'Fluency Coach', description: 'Strategy-led verbal fluency.', href: 'apps/fluency-coach/index.html', tags: ['language'], featured: false },
-        { slug: 'barista-chaos', emoji: '☕', title: 'Barista Chaos', description: 'Dual-tasking with orders & timing.', href: 'apps/barista-chaos/index.html', tags: ['dual-task'], featured: false },
-        { slug: 'maze-explorer', emoji: '🧭', title: 'Maze Explorer', description: 'Visuospatial scanning & planning.', href: 'apps/maze-explorer/index.html', tags: ['visuospatial'], featured: false },
-        { slug: 'plan-with-coco', emoji: '🐦', title: 'Plan with Coco', description: 'Prospective memory & routines.', href: 'apps/plan-with-coco/index.html', tags: ['planning'], featured: true }
+        { slug: 'market-manager', emoji: '🛒', title: 'Market Manager', description: 'Working memory under retail pressure.', href: 'apps/market-manager/index.html', tags: ['executive', 'memory'], featured: false, domain: 'Planning & Organisation' },
+        { slug: 'cashpoint-coach', emoji: '🏧', title: 'CashPoint Coach', description: 'ATM practice with spoken steps.', href: 'apps/atm-practice/index.html', tags: ['planning', 'functional'], featured: true, domain: 'Planning & Organisation' },
+        { slug: 'task-juggler', emoji: '🧠', title: 'Task Juggler', description: 'Multitask with timed interruptions.', href: 'apps/task-juggler/index.html', tags: ['executive'], featured: false, domain: 'Navigation & Executive' },
+        { slug: 'emergency-call-simulator', emoji: '📞', title: 'Emergency Call Simulator', description: 'Practise structured calls under stress.', href: 'apps/emergency-call-simulator/index.html', tags: ['attention'], featured: true, domain: 'Social & Language' },
+        { slug: 'fluency-coach', emoji: '💬', title: 'Fluency Coach', description: 'Strategy-led verbal fluency.', href: 'apps/fluency-coach/index.html', tags: ['language'], featured: false, domain: 'Social & Language' },
+        { slug: 'barista-chaos', emoji: '☕', title: 'Barista Chaos', description: 'Dual-tasking with orders & timing.', href: 'apps/barista-chaos/index.html', tags: ['dual-task'], featured: false, domain: 'Navigation & Executive' },
+        { slug: 'maze-explorer', emoji: '🧭', title: 'Maze Explorer', description: 'Visuospatial scanning & planning.', href: 'apps/maze-explorer/index.html', tags: ['visuospatial'], featured: false, domain: 'Navigation & Executive' },
+        { slug: 'plan-with-coco', emoji: '🐦', title: 'Plan with Coco', description: 'Prospective memory & routines.', href: 'apps/plan-with-coco/index.html', tags: ['planning'], featured: true, domain: 'Planning & Organisation' }
       ];
 
       const titleCase = (value = '') => {
@@ -529,9 +536,16 @@
         return value.charAt(0).toUpperCase() + value.slice(1);
       };
 
+      const inferDomain = (tags = []) => {
+        for (const tag of tags) {
+          if (tagDomainMap[tag]) return tagDomainMap[tag];
+        }
+        return 'Planning & Organisation';
+      };
+
       const normalizeApp = (app) => {
         const tags = Array.isArray(app.tags) ? app.tags.filter(Boolean) : [];
-        const category = tags.length ? titleCase(tags[0]) : 'Cognitive';
+        const domain = app.domain || inferDomain(tags);
         return {
           slug: app.slug,
           emoji: app.emoji || '🧩',
@@ -540,21 +554,14 @@
           tags,
           featured: Boolean(app.featured),
           href: app.href || `apps/${app.slug}/index.html`,
-          category
+          category: domain,
+          domain
         };
       };
 
       const summarizeTags = (tags) => {
         if (!tags.length) return 'Cognitive practice';
         return tags.slice(0, 2).map(titleCase).join(' • ');
-      };
-
-      const chooseHighlights = () => {
-        const featured = state.apps.filter((app) => app.featured);
-        const remaining = state.apps.filter((app) => !app.featured);
-        const selection = [...featured, ...remaining];
-        state.highlighted = selection.slice();
-        state.currentIndex = 0;
       };
 
       const buildCardMarkup = (app) => `
@@ -573,49 +580,37 @@
         </div>
       `;
 
-      const renderDeck = () => {
-        if (!primaryCard || !secondaryCard) return;
-        if (!state.highlighted.length) {
-          const loadingMarkup = '<p style="color:var(--muted)">Loading apps…</p>';
-          primaryCard.innerHTML = loadingMarkup;
-          secondaryCard.innerHTML = loadingMarkup;
-          dotsEl.innerHTML = '';
-          return;
-        }
-        updateCards();
-        renderDots();
-      };
+      const renderDomainSections = () => {
+        if (!appsRoot) return;
+        appsRoot.innerHTML = '';
 
-      const updateCards = () => {
-        const primaryApp = state.highlighted[state.currentIndex];
-        if (!primaryApp) return;
-        primaryCard.innerHTML = buildCardMarkup(primaryApp);
+        domains.forEach((domain) => {
+          const appsForDomain = state.apps.filter((app) => app.domain === domain.name);
+          if (!appsForDomain.length) return;
 
-        if (!secondaryCard) return;
-        if (state.highlighted.length === 1) {
-          secondaryCard.innerHTML = '<p style="color:var(--muted)">Add another app to preview what\'s next.</p>';
-          return;
-        }
+          const section = document.createElement('section');
+          section.className = 'apps-section';
 
-        const nextIndex = (state.currentIndex + 1) % state.highlighted.length;
-        const secondaryApp = state.highlighted[nextIndex];
-        secondaryCard.innerHTML = buildCardMarkup(secondaryApp);
-      };
+          const header = document.createElement('header');
+          header.className = 'apps-section-header';
+          header.innerHTML = `
+            <h2>${domain.name}</h2>
+            <p class="apps-section-subtitle">${domain.subtitle}</p>
+          `;
 
-      const renderDots = () => {
-        if (!dotsEl) return;
-        dotsEl.innerHTML = '';
-        state.highlighted.forEach((app, index) => {
-          const dot = document.createElement('button');
-          dot.className = 'nav-dot' + (index === state.currentIndex ? ' active' : '');
-          dot.type = 'button';
-          dot.setAttribute('aria-label', `Show ${app.title}`);
-          dot.addEventListener('click', () => {
-            state.currentIndex = index;
-            updateCards();
-            renderDots();
+          const grid = document.createElement('div');
+          grid.className = 'apps-section-grid';
+
+          appsForDomain.forEach((app) => {
+            const card = document.createElement('article');
+            card.className = 'app-card';
+            card.innerHTML = buildCardMarkup(app);
+            grid.appendChild(card);
           });
-          dotsEl.appendChild(dot);
+
+          section.appendChild(header);
+          section.appendChild(grid);
+          appsRoot.appendChild(section);
         });
       };
 
@@ -663,6 +658,7 @@
             description: app.description,
             tags: app.tags,
             featured: app.featured,
+            domain: app.domain,
             href: `apps/${app.slug}/index.html`
           }));
         } catch (error) {
@@ -670,8 +666,7 @@
           state.apps = fallbackApps.map(normalizeApp);
         }
 
-        chooseHighlights();
-        renderDeck();
+        renderDomainSections();
         renderFeatured();
       };
 
