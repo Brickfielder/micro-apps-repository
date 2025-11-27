@@ -76,7 +76,7 @@ def process_file(p: Path, parser="lxml", dry=False):
     app_root, wrapped = ensure_app_root(soup)
 
     # Add shared CSV augmentation script
-    ins_js = insert_once_head(soup, head, "script", {"src": "../shared/js/clinician_feedback.js", "defer": ""})
+    ins_js = insert_once_head(soup, head, "script", {"src": "../shared/clinician_feedback.js", "defer": ""})
 
     # Add comment block
     added_block = ensure_comment_block(app_root)
