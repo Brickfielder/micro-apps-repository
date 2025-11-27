@@ -4,7 +4,7 @@
 
 ## 1) Required imports (top of every app)
 ```html
-<link rel="stylesheet" href="../shared/css/theme.css">
+<link rel="stylesheet" href="../shared/theme.css">
 <meta name="theme" content="bold dense"> <!-- optional toggles -->
-<script defer src="../shared/js/frame.js"></script>
-<script defer src="../shared/js/clinician_feedback.js"></script>
+<script defer src="../shared/frame.js"></script>
+<script defer src="../shared/clinician_feedback.js"></script>
