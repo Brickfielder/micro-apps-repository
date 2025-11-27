@@ -20,7 +20,7 @@
 
   const DEBUG = !!window.__FRAME_DEBUG__;
   const CATALOG_URL = window.__CATALOG_URL__ || `${BASE}/catalog.json`;
-  const THEME_URL   = window.__THEME_URL__   || `${BASE}/shared/theme.css`;
+  const THEME_URL   = window.__THEME_URL__   || `${BASE}/shared/css/theme.css`;
 
   const log = (...a) => DEBUG && console.log("[frame]", ...a);
   const warn = (...a) => DEBUG && console.warn("[frame]", ...a);
