@@ -4,17 +4,17 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Build your package</title>
-  <link rel="stylesheet" href="../../shared/theme.css" />
+  <link rel="stylesheet" href="../shared/css/theme.css" />
   <meta name="theme" content="bold dense" />
   <meta name="app-slug" content="build-your-package" />
   <script>
-    window.__THEME_URL__ = new URL('../../shared/theme.css', location.href).toString();
-    window.__FRAME_URL__ = new URL('../../shared/frame.js', location.href).toString();
-    window.__CLINICIAN_FEEDBACK_URL__ = new URL('../../shared/clinician_feedback.js', location.href).toString();
+    window.__THEME_URL__ = new URL('../shared/css/theme.css', location.href).toString();
+    window.__FRAME_URL__ = new URL('../shared/js/frame.js', location.href).toString();
+    window.__CLINICIAN_FEEDBACK_URL__ = new URL('../shared/js/clinician_feedback.js', location.href).toString();
     window.__CATALOG_URL__ = new URL('../../catalog.json', location.href).toString();
   </script>
-  <script defer src="../../shared/frame.js"></script>
-  <script defer src="../../shared/clinician_feedback.js"></script>
+  <script defer src="../shared/js/frame.js"></script>
+  <script defer src="../shared/js/clinician_feedback.js"></script>
   <style>
     :root {
       --page-gap: clamp(18px, 4vw, 32px);
@@ -352,15 +352,15 @@
       }
 
       const SHARED_ASSETS = [
-        { url: window.__THEME_URL__, destination: 'shared/theme.css', label: 'theme.css' },
-        { url: window.__FRAME_URL__, destination: 'shared/frame.js', label: 'frame.js' },
-        { url: window.__CLINICIAN_FEEDBACK_URL__, destination: 'shared/clinician_feedback.js', label: 'clinician_feedback.js' },
+        { url: window.__THEME_URL__, destination: 'shared/css/theme.css', label: 'theme.css' },
+        { url: window.__FRAME_URL__, destination: 'shared/js/frame.js', label: 'frame.js' },
+        { url: window.__CLINICIAN_FEEDBACK_URL__, destination: 'shared/js/clinician_feedback.js', label: 'clinician_feedback.js' },
       ];
 
       const SHARED_REWRITE_TARGETS = {
-        'theme.css': '../shared/theme.css',
-        'frame.js': '../shared/frame.js',
-        'clinician_feedback.js': '../shared/clinician_feedback.js',
+        'theme.css': '../shared/css/theme.css',
+        'frame.js': '../shared/js/frame.js',
+        'clinician_feedback.js': '../shared/js/clinician_feedback.js',
       };
 
       function serialiseDocument(doc) {

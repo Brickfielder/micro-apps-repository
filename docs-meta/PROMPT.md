@@ -5,7 +5,7 @@
 
 ```md
 You are generating a new “Micro-App” page that MUST:
-- Import ../shared/theme.css and ../shared/frame.js (+ clinician_feedback.js).
+- Import ../shared/css/theme.css and ../shared/js/frame.js (+ clinician_feedback.js).
 - Include <meta name="theme" content="bold dense"> and either <meta name="app-slug"> or explicit app-title/desc.
 - Mount all UI inside <main id="app-root"> only (frame will inject hero + wrapper).
 - Use theme tokens and utilities (buttons, grid, toolbar, pill).

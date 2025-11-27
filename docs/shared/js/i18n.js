@@ -1,4 +1,4 @@
-/* docs/shared/i18n.js — zero-build i18n for Micro Apps (EN/IT/ES ready) */
+/* docs/shared/js/i18n.js — zero-build i18n for Micro Apps (EN/IT/ES ready) */
 (() => {
   const $ = (s, r=document) => r.querySelector(s);
   const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
