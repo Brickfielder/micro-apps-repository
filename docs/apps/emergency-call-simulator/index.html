@@ -21,49 +21,50 @@
       place-items: center;
       margin: 0;
       font-family: "SF Pro Display", "Segoe UI", system-ui, -apple-system, sans-serif;
-      background: radial-gradient(circle at top, #eef3ff 0%, #dde3f7 45%, #c7cbe0 100%);
+      background: radial-gradient(circle at 20% 20%, #1c2337, #0c1527 60%, #050915 100%);
     }
 
     .app-shell {
       width: clamp(280px, 44vw, 360px);
       aspect-ratio: 9 / 19.5;
-      background: linear-gradient(145deg, #0a0a0f, #1b1e2a);
-      padding: 18px;
-      border-radius: 32px;
-      box-shadow: 0 25px 40px rgba(11, 16, 29, 0.4);
+      background: linear-gradient(145deg, #0c101c, #161d33);
+      padding: 16px;
+      border-radius: 30px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.55);
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .app-shell::before {
       content: "";
       position: absolute;
-      inset: 12px;
+      inset: 10px;
       border-radius: 24px;
-      border: 3px solid rgba(255, 255, 255, 0.12);
+      border: 2px solid rgba(255, 255, 255, 0.07);
       pointer-events: none;
     }
 
     .speaker-notch {
       position: absolute;
-      top: 14px;
-      width: 96px;
-      height: 18px;
+      top: 12px;
+      width: 90px;
+      height: 16px;
       background: rgba(0, 0, 0, 0.7);
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
     }
 
     .speaker-dot {
-      width: 36px;
-      height: 6px;
+      width: 32px;
+      height: 5px;
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.15);
     }
@@ -80,10 +81,12 @@
       position: relative;
       flex: 1;
       width: 100%;
-      border-radius: 24px;
+      border-radius: 22px;
       overflow: hidden;
-      background: linear-gradient(170deg, #111827 0%, #020617 60%, #0f172a 100%);
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+      background: radial-gradient(circle at 80% 15%, rgba(119, 179, 255, 0.28), transparent 40%),
+        radial-gradient(circle at 20% 30%, rgba(45, 225, 174, 0.25), transparent 38%),
+        linear-gradient(165deg, #0c1327 0%, #0a0f1e 50%, #080c17 100%);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
       display: grid;
       place-items: stretch;
     }
@@ -103,9 +106,11 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 18px 0;
-      color: rgba(255, 255, 255, 0.8);
+      padding: 10px 16px 0;
+      color: rgba(255, 255, 255, 0.85);
       font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
     .status-icons {
@@ -119,72 +124,141 @@
     .home-grid {
       flex: 1;
       display: grid;
-      grid-template-rows: 1fr auto;
-      padding: 16px 18px 26px;
+      grid-template-rows: auto 1fr auto;
+      padding: 12px 14px 22px;
       color: white;
-    }
-
-    .widgets {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
     }
 
-    .widget-card {
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 18px;
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(6px);
+    .home-hero {
+      display: grid;
+      gap: 6px;
     }
 
-    .widget-title {
-      font-weight: 600;
+    .hero-time {
+      font-size: 2.4rem;
+      font-weight: 700;
       letter-spacing: 0.02em;
+    }
+
+    .hero-date {
+      color: rgba(255, 255, 255, 0.78);
       font-size: 0.95rem;
     }
 
-    .widget-sub {
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 0.75rem;
+    .search-bar {
+      margin-top: 6px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.9);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      padding: 6px 4px;
+    }
+
+    .app-tile {
+      border: none;
+      background: transparent;
+      color: white;
+      display: grid;
+      justify-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      letter-spacing: 0.01em;
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+
+    .app-tile:active {
+      transform: scale(0.96);
+      filter: brightness(1.1);
+    }
+
+    .tile-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      font-size: 1.6rem;
+      box-shadow: 0 10px 18px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+      background: linear-gradient(140deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.02));
+    }
+
+    .tile-icon.phone {
+      background: linear-gradient(145deg, #1cc97a, #0f9a55);
+      box-shadow: 0 12px 20px rgba(12, 152, 94, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+    }
+
+    .tile-icon.assistant {
+      background: linear-gradient(145deg, #7c3aed, #4f46e5);
+      box-shadow: 0 12px 20px rgba(79, 70, 229, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.24);
+    }
+
+    .tile-icon.maps {
+      background: linear-gradient(145deg, #22c55e, #14b8a6);
+    }
+
+    .tile-icon.gallery {
+      background: linear-gradient(145deg, #f472b6, #fb7185);
+    }
+
+    .tile-icon.clock {
+      background: linear-gradient(145deg, #38bdf8, #2563eb);
+    }
+
+    .tile-icon.browser {
+      background: linear-gradient(145deg, #fbbf24, #f59e0b);
+    }
+
+    .tile-icon.settings {
+      background: linear-gradient(145deg, #6b7280, #4b5563);
     }
 
     .dock {
-      margin-top: 18px;
       border-radius: 18px;
-      background: rgba(15, 23, 42, 0.55);
-      backdrop-filter: blur(18px);
+      background: rgba(8, 12, 22, 0.65);
+      backdrop-filter: blur(14px);
       padding: 12px 16px;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
+      gap: 14px;
       align-items: center;
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
     }
 
-    .app-icon {
+    .dock-icon {
       aspect-ratio: 1;
-      border-radius: 22%;
+      border-radius: 16px;
       display: grid;
       place-items: center;
       font-size: 1.6rem;
       color: white;
-      background: linear-gradient(145deg, rgba(255,255,255,0.22), rgba(255,255,255,0));
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
-      position: relative;
+      background: linear-gradient(140deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+      border: none;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 0.15s ease, filter 0.15s ease;
     }
 
-    .app-icon.phone {
-      background: linear-gradient(145deg, #19b663, #0d8043);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25), 0 8px 16px rgba(13, 128, 67, 0.4);
+    .dock-icon.phone {
+      background: linear-gradient(145deg, #1cc97a, #0f9a55);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24), 0 12px 20px rgba(12, 152, 94, 0.35);
     }
 
-    .app-icon:active {
-      transform: scale(0.96);
+    .dock-icon:active {
+      transform: scale(0.95);
+      filter: brightness(1.1);
     }
 
     .dialer {
@@ -397,39 +471,76 @@
       <div class="prompt-banner" id="promptBanner"></div>
       <section class="screen-view active" id="homeScreen" aria-label="Smartphone home screen">
         <div class="status-bar">
-          <span>09:41</span>
+          <span>LTE</span>
           <div class="status-icons">
+            <span>🔔</span>
             <span>📶</span>
-            <span>📡</span>
             <span>🔋 76%</span>
           </div>
         </div>
         <div class="home-grid">
-          <div class="widgets">
-            <article class="widget-card">
-              <span class="widget-title">Calendar</span>
-              <span class="widget-sub">Therapy session at 3 PM</span>
-            </article>
-            <article class="widget-card">
-              <span class="widget-title">Weather</span>
-              <span class="widget-sub">12°C · Light Rain</span>
-            </article>
-            <article class="widget-card">
-              <span class="widget-title">Reminders</span>
-              <span class="widget-sub">Call pharmacy about prescription.</span>
-            </article>
-            <article class="widget-card">
-              <span class="widget-title">Notes</span>
-              <span class="widget-sub">Emergency drill practice</span>
-            </article>
+          <div class="home-hero">
+            <div class="hero-time" aria-hidden="true">09:41</div>
+            <div class="hero-date">Tuesday, April 9</div>
+            <div class="search-bar" role="search" aria-label="Search your phone">
+              🔍 Search phone
+            </div>
+          </div>
+          <div class="app-grid" role="grid" aria-label="Apps">
+            <button class="app-tile" type="button" aria-label="Messages">
+              <span class="tile-icon" aria-hidden="true">💬</span>
+              <span>Messages</span>
+            </button>
+            <button class="app-tile" type="button" aria-label="Camera">
+              <span class="tile-icon" aria-hidden="true">📷</span>
+              <span>Camera</span>
+            </button>
+            <button class="app-tile" type="button" aria-label="Photos">
+              <span class="tile-icon gallery" aria-hidden="true">🖼️</span>
+              <span>Photos</span>
+            </button>
+            <button class="app-tile" type="button" aria-label="Clock">
+              <span class="tile-icon clock" aria-hidden="true">⏰</span>
+              <span>Clock</span>
+            </button>
+            <button class="app-tile" type="button" aria-label="Assistant">
+              <span class="tile-icon assistant" aria-hidden="true">✨</span>
+              <span>Assistant</span>
+            </button>
+            <button class="app-tile" type="button" aria-label="Maps">
+              <span class="tile-icon maps" aria-hidden="true">🗺️</span>
+              <span>Maps</span>
+            </button>
+            <button class="app-tile" type="button" aria-label="Browser">
+              <span class="tile-icon browser" aria-hidden="true">🌐</span>
+              <span>Browser</span>
+            </button>
+            <button class="app-tile" type="button" aria-label="Settings">
+              <span class="tile-icon settings" aria-hidden="true">⚙️</span>
+              <span>Settings</span>
+            </button>
+            <button class="app-tile" id="openDialer" type="button" aria-label="Open Phone">
+              <span class="tile-icon phone" aria-hidden="true">📞</span>
+              <span>Phone</span>
+            </button>
+            <button class="app-tile" type="button" aria-label="Contacts">
+              <span class="tile-icon" aria-hidden="true">👥</span>
+              <span>Contacts</span>
+            </button>
+            <button class="app-tile" type="button" aria-label="Files">
+              <span class="tile-icon" aria-hidden="true">📁</span>
+              <span>Files</span>
+            </button>
+            <button class="app-tile" type="button" aria-label="Health">
+              <span class="tile-icon" aria-hidden="true">❤️</span>
+              <span>Wellness</span>
+            </button>
           </div>
           <div class="dock" role="menubar" aria-label="Docked apps">
-            <div class="app-icon" aria-hidden="true">💬</div>
-            <div class="app-icon" aria-hidden="true">📷</div>
-            <div class="app-icon" aria-hidden="true">📧</div>
-            <button class="app-icon phone" id="openDialer" type="button" aria-label="Open Phone">
-              📞
-            </button>
+            <button class="dock-icon" type="button" aria-label="Messages">💬</button>
+            <button class="dock-icon" type="button" aria-label="Browser">🌐</button>
+            <button class="dock-icon" type="button" aria-label="Camera">📷</button>
+            <button class="dock-icon phone" id="openDialerDock" type="button" aria-label="Open Phone">📞</button>
           </div>
         </div>
       </section>
@@ -486,6 +597,8 @@
 
   <script>
     const openDialerBtn = document.getElementById('openDialer');
+    const openDialerDockBtn = document.getElementById('openDialerDock');
+    const appShell = document.querySelector('.app-shell');
     const homeScreen = document.getElementById('homeScreen');
     const dialerScreen = document.getElementById('dialerScreen');
     const dialedDigitsEl = document.getElementById('dialedDigits');
@@ -841,14 +954,24 @@
       deliverPrompt();
     };
 
-    openDialerBtn.addEventListener('click', () => {
+    const openDialerScreen = () => {
       homeScreen.classList.remove('active');
       dialerScreen.classList.add('active');
-      document.querySelector('.app-shell').dataset.stage = 'dialer';
+      if (appShell) {
+        appShell.dataset.stage = 'dialer';
+      }
       addEvent('dialer_opened', {});
       dialerMessage.textContent = 'Dial 999 to begin.';
       resetInactivityTimer();
-    });
+    };
+
+    if (openDialerBtn) {
+      openDialerBtn.addEventListener('click', openDialerScreen);
+    }
+
+    if (openDialerDockBtn) {
+      openDialerDockBtn.addEventListener('click', openDialerScreen);
+    }
 
     keypad.addEventListener('click', (event) => {
       const button = event.target.closest('button');
