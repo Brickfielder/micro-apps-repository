@@ -761,6 +761,20 @@
       }
     };
 
+    const matchesAmbulance = (input) => {
+      if (!input) return false;
+      const lowered = input.toLowerCase();
+      if (lowered.includes('ambulance')) return true;
+
+      const tokens = lowered
+        .normalize('NFKD')
+        .replace(/[^a-z\s]/g, ' ')
+        .split(/\s+/)
+        .filter(Boolean);
+
+      return tokens.some((token) => token.startsWith('ambulanc'));
+    };
+
     const handleSpeechResult = (text, detail) => {
       if (!recognitionEnabled) return;
       const transcript = (text || '').trim().toLowerCase();
@@ -780,8 +794,7 @@
         .replace(/[^a-z\s]/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
-      const words = sanitized.split(' ').filter(Boolean);
-      const containsAmbulance = words.includes('ambulance');
+      const containsAmbulance = matchesAmbulance(sanitized) || matchesAmbulance(transcript);
       const confidence = detail && typeof detail.confidence === 'number' ? detail.confidence : null;
 
       if (!containsAmbulance) {
@@ -789,7 +802,7 @@
         return;
       }
 
-      if (confidence !== null && confidence < 0.6) {
+      if (confidence !== null && confidence < 0.5) {
         addEvent('speech_rejected_low_confidence', { transcript, confidence });
         return;
       }
