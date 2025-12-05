@@ -1,2 +1,66 @@
 # Micro-Apps-Repository
-Repository for micro apps to support recovery after acquired brain injury
+
+![Micro Apps Banner](docs/assets/Micro_Apps_Banner.png)
+
+Repository for micro apps to support recovery after acquired brain injury.
+
+## Purpose
+
+This repository hosts simple practice tools (“micro-apps”) designed for people living with acquired brain injury. Each app is focused on a single skill or everyday activity (for example, visual scanning, memory cues, or planning steps).
+
+The goals of this repository are to:
+- ➡️ Encourage open development of practical tools.
+- ➡️ Share templates and examples that others can adapt or improve.
+- ➡️ Provide a space for community feedback from survivors, carers, and clinicians.
+
+## Directory Structure
+
+- `docs/apps/`: Contains the source code for all micro-apps. Each app is in its own directory.
+- `docs/shared/`: Shared assets and scripts used by the apps (themes, feedback tools, etc.).
+- `scripts/`: Utility scripts for maintenance and development.
+- `AGENTS.md`: Instructions for AI agents working on this repository.
+
+## What these apps are (and are not)
+
+### ✅ What they are
+- Practice tools to support skills in everyday life.
+- Openly shared code and resources for learning and experimentation.
+- A starting point for developing and testing new ideas.
+
+### ❌ What they are not
+- Not medical devices.
+- Not diagnostic or assessment tools.
+- Not a substitute for therapy, rehabilitation, or professional care.
+- Not validated for clinical decision-making.
+
+## ❗❗ Disclaimers
+
+- ➡️ These apps are research and practice prototypes only.
+- ➡️ They do not diagnose, treat, cure, or prevent any medical condition.
+- ➡️ Use is at your own discretion and risk.
+- ➡️ If you have concerns about your health or recovery, please seek advice from a qualified healthcare professional.
+
+## Validity Checklist
+
+Each app in this repository should be accompanied by a Validity Checklist, covering:
+
+- ❇️ Purpose and scope
+- ❇️ Content validity
+- ❇️ Face validity
+- ❇️ Ecological validity
+- ❇️ Usability and accessibility
+- ❇️ Safety and burden
+- ❇️ Data and privacy
+- ❇️ Claims discipline
+
+The checklist ensures transparency about what has (and has not) been reviewed or tested.
+
+## Contributing
+
+Contributions are welcome! You can:
+
+- Submit new micro-apps (please include a completed validity checklist).
+- Suggest improvements to existing apps.
+- Provide feedback on usability or real-life relevance.
+
+Please follow the repository’s Code of Conduct when engaging with the community.
