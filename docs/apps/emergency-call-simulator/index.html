@@ -779,15 +779,6 @@
       if (!recognitionEnabled) return;
       const transcript = (text || '').trim().toLowerCase();
       if (!transcript) return;
-      const now = Date.now();
-
-      if (lastPromptEndedAt && now - lastPromptEndedAt < 2000) {
-        addEvent('speech_ignored_prompt_overlap', {
-          transcript,
-          deltaMs: now - lastPromptEndedAt,
-        });
-        return;
-      }
 
       const normalized = typeof transcript.normalize === 'function' ? transcript.normalize('NFKD') : transcript;
       const sanitized = normalized
@@ -908,7 +899,7 @@
         addEvent('prompt_spoken', { count: promptCount });
 
         if (recognitionReady && !recognitionSuccess) {
-          const resumeDelay = 'speechSynthesis' in window ? 900 : 0;
+          const resumeDelay = 'speechSynthesis' in window ? 100 : 0;
           setTimeout(() => {
             recognitionEnabled = true;
           }, resumeDelay);
